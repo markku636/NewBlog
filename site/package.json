@@ -12,6 +12,7 @@
 	"dependencies": {
 		"@elegantstack/gatsby-theme-flexiblog-personal": "*",
 		"gatsby": "^4.14.1",
+		"gatsby-source-strapi": "^2.0.0",
 		"react": "^18.1.0",
 		"react-dom": "^18.1.0"
 	},

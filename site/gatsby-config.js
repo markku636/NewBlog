@@ -2,15 +2,29 @@ module.exports = {
   flags: {
     DEV_SSR: false
   },
+
   plugins: [
     {
+      resolve: 'gatsby-source-strapi',
+      options: {
+        apiURL: 'http://localhost:1337',
+        accessToken: '8f76c00b605f741704476b0c9687a634b3595394c6bcd97756e7293e36392d78f383011acb91e14a45049a5b1116894516d609cd3171352bdf2846fc1e0e6e06739d008c143ddf68e23376c9569daae6859f2b1c18c8b748884b9ddd7e3b64d8b3f58406b67f2c898499c4e5b19b1df40a624ee6f2c8b05892ef46b87d6f22fb',
+        collectionTypes: ['article', 'category', 'author'],
+        queryLimit: 1000
+      }
+    },
+    {
+      // ATTENTION: Match the theme name with the theme you're using
       resolve: '@elegantstack/gatsby-theme-flexiblog-personal',
       options: {
-        // Add theme options here. Check documentation for available options.
+        sources: {
+          strapi: true,
+          local: false
+        },
         siteUrl: process.env.URL || process.env.VERCEL_URL
       }
     }
-  ],
+  ],  
   // Customize your site metadata:
   siteMetadata: {
     //General Site Metadata
