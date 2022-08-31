@@ -10,7 +10,7 @@
 
   backend: {
       name: 'github', # Name of your git hosting service (ie. github, gitlab)
-      repo: 'markku636/NewBlog', # Path to your GitHub repository
+      repo: 'markku636/GatsbyBlog', # Path to your GitHub repository
       branch: 'main'
     },
 
@@ -51,13 +51,13 @@
             {
               label: 'Linked to External Sites',
               field: 'link',
-              pattern: '(.|\\s)*\\S(.|\\s)*',
-            },
+              pattern: '(.|\\s)*\\S(.|\\s)*'
+            }
           ],
         view_groups:
           [
             { label: 'Year', field: 'date', pattern: '\\d{4}' },
-            { label: 'Author', field: 'author' },
+            { label: 'Author', field: 'author' }
           ],
         sortable_fields: ['title', 'date'],
         summary: "{{title}} - {{date | date('YYYY-MM-DD')}} - {{author}}",
@@ -69,7 +69,7 @@
               name: 'slug',
               label: 'Slug',
               hint: 'Custom slug',
-              required: false,
+              required: false
             },
             { name: 'date', label: 'Date', widget: 'datetime' },
             {
@@ -77,21 +77,21 @@
               label: 'Featured',
               widget: 'boolean',
               hint: 'Place the post in featured spots of homepage.',
-              required: false,
+              required: false
             },
             {
               name: 'draft',
               label: 'Draft',
               widget: 'boolean',
               hint: 'Draft posts are not published in the site.',
-              required: false,
+              required: false
             },
             {
               name: 'private',
               label: 'Private',
               widget: 'boolean',
               hint: "Private post will not appear in paginated lists but can be accessed via it's URL.",
-              required: false,
+              required: false
             },
             {
               label: 'Author',
@@ -100,7 +100,7 @@
               collection: 'authors',
               search_fields: ['name'],
               value_field: 'name',
-              display_fields: ['name'],
+              display_fields: ['name']
             },
             {
               label: 'Category',
@@ -109,25 +109,25 @@
               collection: 'categories',
               search_fields: ['name'],
               value_field: 'name',
-              display_fields: ['name'],
+              display_fields: ['name']
             },
             {
               name: 'link',
               label: 'Link',
               hint: 'Disable page creation and link the post card to an external Web page.',
-              required: false,
+              required: false
             },
             {
               name: 'thumbnail',
               label: 'Hero image',
               widget: 'image',
-              required: false,
+              required: false
             },
             {
               name: 'thumbnailText',
               label: 'Thumbnail Text',
               hint: "In the absence of image, this text along with article's category will be used as article thumbnail.",
-              required: false,
+              required: false
             },
             { name: 'body', label: 'Body', widget: 'markdown' },
             { name: 'tags', label: 'Tags', widget: 'list', required: false },
@@ -135,9 +135,9 @@
               name: 'keywords',
               label: 'Keywords',
               widget: 'list',
-              required: false,
-            },
-          ],
+              required: false
+            }
+          ]
       },
       ####################################################################
       #   Authors Collection
@@ -162,20 +162,20 @@
               name: 'slug',
               label: 'Slug',
               hint: 'Custom slug',
-              required: false,
+              required: false
             },
             {
               name: 'title',
               label: 'Title',
               hint: 'Role/Occupation',
-              required: false,
+              required: false
             },
             { name: 'description', label: 'Bio', required: false },
             {
               name: 'thumbnail',
               label: 'Photo',
               widget: 'image',
-              required: false,
+              required: false
             },
             {
               name: 'social',
@@ -185,18 +185,18 @@
               fields:
                 [
                   { name: 'name', label: 'Name' },
-                  { name: 'url', label: 'URL' },
+                  { name: 'url', label: 'URL' }
                 ],
-              required: false,
+              required: false
             },
             {
               name: 'skills',
               label: 'Skills',
               widget: 'list',
               hint: 'Comma-separated entries',
-              required: false,
-            },
-          ],
+              required: false
+            }
+          ]
       },
       ####################################################################
       #   Categories Collection
@@ -221,7 +221,7 @@
               name: 'slug',
               label: 'Slug',
               hint: 'Custom slug',
-              required: false,
+              required: false
             },
             { name: 'description', label: 'Description', required: false },
             {
@@ -229,16 +229,16 @@
               label: 'Color',
               widget: 'color',
               allowInput: true,
-              required: false,
+              required: false
             },
             {
               name: 'icon',
               label: 'SVG Icon',
               widget: 'image',
               allow_multiple: false,
-              required: false,
-            },
-          ],
-      },
-    ],
+              required: false
+            }
+          ]
+      }
+    ]
 }
