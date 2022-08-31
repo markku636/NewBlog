@@ -1,0 +1,244 @@
+{
+  #########################################################################
+  #
+  #   For a complete list of available configuration options see:
+  #   https://netlifycms.org/docs/configuration-options/
+  #
+  #   Enter your git repository and site information below:
+  #
+  #########################################################################
+
+  backend: {
+      name: 'github', # Name of your git hosting service (ie. github, gitlab)
+      repo: 'markku636/NewBlog', # Path to your GitHub repository
+      branch: 'main'
+    },
+
+  #########################################################################
+  #
+  #   GatsbyJS prefers relative images to posts but Netlify's media library
+  #   prefers a single folder hosting all the images thus the media library
+  #   currently is not working as intended and it's only showing the images
+  #   used in the site's components.
+  #
+  #   For more information refer to:
+  #   https://netlifycms.org/docs/beta-features/#folder-collections-media-and-public-folder
+  #
+  ########################################################################
+
+  media_folder: 'site/content/assets',
+  public_folder: '/assets',
+
+  collections: [
+      ####################################################################
+      #   Articles Collection
+      ####################################################################
+      {
+        name: 'articles',
+        label: 'Articles',
+        label_singular: 'Article',
+        path: '{{category}}/{{slug}}/index',
+        folder: 'site/content/posts',
+        extension: 'mdx',
+        format: 'frontmatter',
+        nested: { depth: 10 },
+        allow_nesting: true,
+        create: true,
+        view_filters:
+          [
+            { label: 'Featured Articles', field: 'featured', pattern: true },
+            { label: 'Private Articles', field: 'private', pattern: true },
+            {
+              label: 'Linked to External Sites',
+              field: 'link',
+              pattern: '(.|\\s)*\\S(.|\\s)*',
+            },
+          ],
+        view_groups:
+          [
+            { label: 'Year', field: 'date', pattern: '\\d{4}' },
+            { label: 'Author', field: 'author' },
+          ],
+        sortable_fields: ['title', 'date'],
+        summary: "{{title}} - {{date | date('YYYY-MM-DD')}} - {{author}}",
+        editor: { preview: false },
+        fields:
+          [
+            { name: 'title', label: 'Title' },
+            {
+              name: 'slug',
+              label: 'Slug',
+              hint: 'Custom slug',
+              required: false,
+            },
+            { name: 'date', label: 'Date', widget: 'datetime' },
+            {
+              name: 'featured',
+              label: 'Featured',
+              widget: 'boolean',
+              hint: 'Place the post in featured spots of homepage.',
+              required: false,
+            },
+            {
+              name: 'draft',
+              label: 'Draft',
+              widget: 'boolean',
+              hint: 'Draft posts are not published in the site.',
+              required: false,
+            },
+            {
+              name: 'private',
+              label: 'Private',
+              widget: 'boolean',
+              hint: "Private post will not appear in paginated lists but can be accessed via it's URL.",
+              required: false,
+            },
+            {
+              label: 'Author',
+              name: 'author',
+              widget: 'relation',
+              collection: 'authors',
+              search_fields: ['name'],
+              value_field: 'name',
+              display_fields: ['name'],
+            },
+            {
+              label: 'Category',
+              name: 'category',
+              widget: 'relation',
+              collection: 'categories',
+              search_fields: ['name'],
+              value_field: 'name',
+              display_fields: ['name'],
+            },
+            {
+              name: 'link',
+              label: 'Link',
+              hint: 'Disable page creation and link the post card to an external Web page.',
+              required: false,
+            },
+            {
+              name: 'thumbnail',
+              label: 'Hero image',
+              widget: 'image',
+              required: false,
+            },
+            {
+              name: 'thumbnailText',
+              label: 'Thumbnail Text',
+              hint: "In the absence of image, this text along with article's category will be used as article thumbnail.",
+              required: false,
+            },
+            { name: 'body', label: 'Body', widget: 'markdown' },
+            { name: 'tags', label: 'Tags', widget: 'list', required: false },
+            {
+              name: 'keywords',
+              label: 'Keywords',
+              widget: 'list',
+              required: false,
+            },
+          ],
+      },
+      ####################################################################
+      #   Authors Collection
+      ####################################################################
+      {
+        name: 'authors',
+        label: 'Authors',
+        label_singular: 'Author',
+        identifier_field: 'name',
+        media_folder: '',
+        public_folder: '',
+        folder: 'site/content/authors',
+        extension: 'json',
+        format: 'json',
+        create: true,
+        sortable_fields: ['name'],
+        editor: { preview: false },
+        fields:
+          [
+            { name: 'name', label: 'Name' },
+            {
+              name: 'slug',
+              label: 'Slug',
+              hint: 'Custom slug',
+              required: false,
+            },
+            {
+              name: 'title',
+              label: 'Title',
+              hint: 'Role/Occupation',
+              required: false,
+            },
+            { name: 'description', label: 'Bio', required: false },
+            {
+              name: 'thumbnail',
+              label: 'Photo',
+              widget: 'image',
+              required: false,
+            },
+            {
+              name: 'social',
+              label: 'Social Media',
+              widget: 'list',
+              add_to_top: true,
+              fields:
+                [
+                  { name: 'name', label: 'Name' },
+                  { name: 'url', label: 'URL' },
+                ],
+              required: false,
+            },
+            {
+              name: 'skills',
+              label: 'Skills',
+              widget: 'list',
+              hint: 'Comma-separated entries',
+              required: false,
+            },
+          ],
+      },
+      ####################################################################
+      #   Categories Collection
+      ####################################################################
+      {
+        name: 'categories',
+        label: 'Categories',
+        label_singular: 'Category',
+        identifier_field: 'name',
+        media_folder: '',
+        public_folder: '',
+        folder: 'site/content/categories',
+        extension: 'json',
+        format: 'json',
+        create: true,
+        sortable_fields: ['name'],
+        editor: { preview: false },
+        fields:
+          [
+            { name: 'name', label: 'Name' },
+            {
+              name: 'slug',
+              label: 'Slug',
+              hint: 'Custom slug',
+              required: false,
+            },
+            { name: 'description', label: 'Description', required: false },
+            {
+              name: 'color',
+              label: 'Color',
+              widget: 'color',
+              allowInput: true,
+              required: false,
+            },
+            {
+              name: 'icon',
+              label: 'SVG Icon',
+              widget: 'image',
+              allow_multiple: false,
+              required: false,
+            },
+          ],
+      },
+    ],
+}
