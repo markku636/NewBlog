@@ -10,7 +10,7 @@
 
   backend: {
       name: 'github', # Name of your git hosting service (ie. github, gitlab)
-      repo: 'markku636/GatsbyBlog', # Path to your GitHub repository
+      repo: 'markku636/NewBlog', # Path to your GitHub repository
       branch: 'main'
     },
 
