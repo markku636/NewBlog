@@ -10,14 +10,13 @@ module.exports = {
     {
       // ATTENTION: Match the theme name with the theme you're using
       resolve: '@elegantstack/gatsby-theme-flexiblog-personal',
-      options: {
-        siteUrl: process.env.URL || process.env.VERCEL_URL,
+      options: {        
         sources: {
           local: true
         }
       }
     }
-  ],
+  ], 
   // Customize your site metadata:
   siteMetadata: {
     //General Site Metadata
@@ -25,7 +24,7 @@ module.exports = {
     name: 'FlexiBlog',
     description: 'My site description...',
     address: 'New York, NY',
-    email: 'a4756830@gmail.com',
+    email: 'email@example.com',
     phone: '+1 (888) 888-8888',
 
     //Site Social Media Links
