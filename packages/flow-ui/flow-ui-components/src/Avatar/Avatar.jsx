@@ -50,7 +50,7 @@ const styles = {
   imageWrapper: {
     mx: `auto`,
     img: {
-      borderRadius: `0 0 9999px 9999px`
+      borderRadius: `50%`
     }
   }
 }
