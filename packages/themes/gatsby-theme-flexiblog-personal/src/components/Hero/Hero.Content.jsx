@@ -23,20 +23,20 @@ const styles = {
 export default () => (
   <>
     <Heading variant='h1'>
-      Hi, I'm <Text sx={styles.author}>Jane Smith</Text>.
+      Hi, I'm <Text sx={styles.author}>Mark Ku</Text>.
     </Heading>
     <Heading variant='h1' sx={styles.occupation}>
-      UX/UI Designer
+      Software Developer
     </Heading>
     <Heading variant='h3' sx={styles.specialty}>
-      Specialized in Gatsby and React
+    擁有豐富網站開發經驗，直播系統、POS系統、電子商務、平台網站、SEO，專業的網站開發鐵三工程師。
     </Heading>
     <Box variant='buttons.group'>
       <Button as={Link} to='/contact'>
-        Contact Me
+        聯繫我
       </Button>
       <Button variant='white' as={Link} to='/about'>
-        About Me
+        關於我
       </Button>
     </Box>
   </>
