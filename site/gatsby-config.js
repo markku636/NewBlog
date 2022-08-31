@@ -12,7 +12,7 @@ module.exports = {
       resolve: '@elegantstack/gatsby-theme-flexiblog-personal',
       options: {        
         sources: {
-          local: false
+          local: true
         }
       }
     }
