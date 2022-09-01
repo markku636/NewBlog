@@ -36,7 +36,7 @@ export default () => (
         聯繫我
       </Button>
       <Button variant='white' as={Link} to='/about'>
-        關於我
+        About Me
       </Button>
     </Box>
   </>

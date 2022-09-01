@@ -48,7 +48,7 @@ export default props => {
         <Main>
           <PageTitle
             header='About Me'
-            subheader='The future belongs to those who believe in the beauty of their dreams.'
+            subheader='Hi, I’m Mark.Ku. 我是一位網頁軟體工程師，喜歡研究各種技術的解決方案，並用於實踐商業上、興趣是鐵人三項及登山、攝影，這個BLOG主要分享工作及生活的點滴。'
           />
           <Divider />
           <Box sx={styles.imageWrapper}>
