@@ -1,4 +1,3 @@
-const fontFile = require('./src/@elegantstack/flow-ui-theme/theme/typography-fonts.json')
 require('dotenv').config()
 
 module.exports = {
@@ -45,8 +44,7 @@ module.exports = {
     {
       // ATTENTION: Match the theme name with the theme you're using
       resolve: '@elegantstack/gatsby-theme-flexiblog-personal',
-      options: {        
-        fonts: fontFile.fonts,
+      options: {                
         sources: {
           local: true
         },
