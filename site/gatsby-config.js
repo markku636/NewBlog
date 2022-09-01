@@ -1,3 +1,6 @@
+const fontFile = require('./src/@elegantstack/flow-ui-theme/theme/typography-fonts.json')
+const fontFile = require('./src/@elegantstack/flow-ui-theme/theme/typography-fonts.json')
+
 module.exports = {
   flags: {
     DEV_SSR: false
@@ -43,6 +46,7 @@ module.exports = {
       // ATTENTION: Match the theme name with the theme you're using
       resolve: '@elegantstack/gatsby-theme-flexiblog-personal',
       options: {        
+        fonts: fontFile.fonts,
         sources: {
           local: true
         },
