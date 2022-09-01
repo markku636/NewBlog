@@ -1,0 +1,146 @@
+---
+featured: true
+title: Powershell 一鍵遠端部署容器應用 - NET CORE  建置部署至Qnap Docker Container Station
+date:  2021-12-31 01:01:01 +0800
+thumbnail: windows-docker.webp
+category:  PowerShell
+tags: ['qnap','powershell','net core','Container Station deploy','deployed','powershell']
+description : Powershell 一鍵遠端部署容器應用 - NET CORE  建置部署至Qnap Docker Container Station
+author : Mark ku
+---
+# Powershell 一鍵遠端部署容器應用 - NET CORE  建置部署至Qnap Docker Container Station
+
+## 解決問題
+過去在 PC 端開發容器應用程式時，要將容器應用部署到遠端 Nas Docker 主機時，有太多手動繁瑣作業，因此我用 Powershell 寫了一個自動建置部署的腳本工具。
+
+## 開發環境
+Windows 10 X64 Home   
+Visual Studio 2019 Community
+Docker for Windows 17.06.2
+QNAP Nas TS-253d 5.0.0.1891   
+Container Station 2.4.3.208   
+QNAP Docker Version 20.10.8   
+
+## 首先，我們先到 NAS 的後台，下載 Docker 安全憑證到 Windows 用戶端
+
+### 到了 NAS 管理後台 > 打開 Container Station >點擊左選單中的屬性 >  點選 Doocker 憑證 > 下載
+
+![](https://i.imgur.com/2v4Lw0S.png)
+
+將下載後的解壓縮檔，將 Docker 憑證解壓縮到 "%USERPROFILE%/.docker" 目錄
+
+![](https://i.imgur.com/51PWcNa.png)
+
+P.S. "tcp://192.168.50.52:2376" 為 docker 主機位置，(此 IP 及 PORT 號己作廢)
+
+## 開啟 Powershell 測試連線
+```
+docker --tls -H="tcp://192.168.50.52:2376" --version # 查詢遠端 nas docker 版本號
+```
+
+## 撰寫 Powersell 遠端部署腳本
+
+### 建置映像檔
+```
+# 本地建置映像檔
+docker build -t shopcart . -f ./Comma.Web/Dockerfile
+# save 要搭配 load 指令; import 搭配 export 指令
+docker save -o C:\Project\shopcart.tar shopcart 
+
+$containerUrl = "tcp://192.168.50.52:2376" # 將Nas docker 主機位置宣告成變數
+
+# 遠端建置映像檔 (nas 比本機電腦慢，這個就不建議了)
+# docker  --tls -H="$containerUrl" build -t shopcart . -f ./Comma.Web/Dockerfile
+```
+### 停止遠端容器應用
+```
+$containerName = "shopcart-1" # 容應應用名稱
+docker --tls -H="$containerUrl" ps -a -f ancestor=$containerName --no-trunc -q | foreach-object { docker --tls -H="$containerUrl" stop $_ }
+docker --tls -H="$containerUrl" ps -a -f name=$containerName --no-trunc -q | foreach-object { docker --tls -H="$containerUrl" stop $_ }
+```
+
+### 遠端移除指定的容器應用
+
+```
+docker --tls -H="$containerUrl" ps -a -f ancestor=$containerName* --no-trunc -q | foreach-object { docker --tls -H="$containerUrl" rm -f $_ }
+docker --tls -H="$containerUrl" ps -a -f name=$containerName* --no-trunc -q | foreach-object { docker --tls -H="$containerUrl" rm -f $_ }
+```
+
+### 刪除遠端映像檔
+```
+$imageName = "shopcart"
+$existingImages = docker --tls -H="$containerUrl" images $imageName
+If ($existingImages.count -gt 1) {
+write-host "[Removing image]Removing the existing image.."
+docker --tls -H="$containerUrl" rmi -f $imageName
+} else {
+write-host "[Removing image]The image does not exist"
+}
+```
+
+### 將本地的映像檔匯入 Docker 主機
+
+```
+docker --tls -H="$containerUrl" load --input  "C:\Project\shopcart.tar"
+```
+
+### 建立及啟動容器應用
+```
+docker --tls -H="$containerUrl" run -d --name shopcart-1 -p 888:80 shopcart
+```
+
+## 實測
+### 對剛撰寫好的 powershell 點擊兩下
+![](https://i.imgur.com/xtHcrwc.png)
+### 當腳本跑完後，就可以去 Container Station 檢查看容器應用有沒有正常運行
+![](https://i.imgur.com/W9FAEZV.png)
+### 網站服務正常顯示
+![](https://i.imgur.com/zP3kqp4.jpg)
+
+## 完整程式碼
+
+```
+$hostname = "letgoshop"
+$containerName = "shopcart-1"
+$containerUrl = "tcp://192.168.50.52:2376"
+$imageName = "shopcart"
+$containerMacAddress = "00:0C:29:E8:24:F4"
+$containerIpAddress = "192.168.0.142"
+$logsVolumePath = "/share/Container/Logs"
+$dockerfile = "./Comma.Web/Dockerfile"
+
+# 本地建置映像檔
+docker build -t shopcart . -f ./Comma.Web/Dockerfile
+
+docker save -o C:\Project\shopcart.tar shopcart # save 指令要搭配 load 指令; import 指令搭配 export 指令
+
+# 遠端建置映像檔 (nas 比本機電腦慢，這個就不建議了)
+# docker  --tls -H="$containerUrl" build -t shopcart . -f ./Comma.Web/Dockerfile
+
+# 停用容器
+docker --tls -H="$containerUrl" ps -a -f ancestor=$containerName --no-trunc -q | foreach-object { docker --tls -H="$containerUrl" stop $_ }
+docker --tls -H="$containerUrl" ps -a -f name=$containerName --no-trunc -q | foreach-object { docker --tls -H="$containerUrl" stop $_ }
+
+# 移除容器
+docker --tls -H="$containerUrl" ps -a -f ancestor=$containerName* --no-trunc -q | foreach-object { docker --tls -H="$containerUrl" rm -f $_ }
+docker --tls -H="$containerUrl" ps -a -f name=$containerName* --no-trunc -q | foreach-object { docker --tls -H="$containerUrl" rm -f $_ }
+
+# 移除映像檔
+
+$existingImages = docker --tls -H="$containerUrl" images $imageName
+If ($existingImages.count -gt 1) {
+write-host "[Removing image]Removing the existing image.."
+docker --tls -H="$containerUrl" rmi -f $imageName
+} else {
+write-host "[Removing image]The image does not exist"
+}
+
+# 將本地的映像檔匯入 Docker 主機
+docker --tls -H="$containerUrl" load --input  "C:\Project\shopcart.tar"
+				
+# 建立及啟動容器應用
+docker --tls -H="$containerUrl" run -d --name shopcart-1 --restart=always -p 8888:80 shopcart			
+
+pause
+
+```

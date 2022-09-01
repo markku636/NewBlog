@@ -1,0 +1,34 @@
+---
+featured: true
+title: DDOS 防禦筆記
+date:  2022-01-17 01:01:01 +0800
+thumbnail: defense-ddos.webp
+category: Security
+tags: ['ddos','prevent','ddos']
+description : DDOS 防禦筆記
+author : Mark ku
+---
+## 解決問題
+在網站上線後，多多少少都會遇到 DDOS 攻擊，整理了一些常見防範 DDOS 的方式，可以在 PROXY SERVER 或 API Gateway 實作，以下這些防範 DDOS 的邏輯。
+
+## 限區域
+依據 請求 IP 轉 Region ，只允許特定國家訪問。
+
+## 限流
+當有相同 IP 請求一分鐘超過 150 次，只要在請求就延長時間 
+ 
+## 請求加密
+請求時在 Header 中塞入特定的值，僅有指定 Header 才可以訪問，此方法可以避免機械人訪問。
+
+## 黑名單 
+黑名單內的 IP 禁止訪問網站
+
+## 白名單
+避免誤判的白名單機制。
+
+## 屏蔽特定請求字元
+禁止請求一些非法的關鍵。
+
+## 參考資料
+[連結1](https://ldqk.xyz/1769?t=uohqz6y61urk)
+

@@ -1,0 +1,62 @@
+---
+featured: true
+title:  Nuget CLI 常用指令
+date:   2021-04-14 15:01:35 +0800
+thumbnail:  nuget.webp
+category: NETCORE
+tags:   ['nuget']
+description : Nuget CLI 常用指令
+author : Mark ku
+---
+# Nuget CLI 常用指令
+# 自動化更新nuget
+## 將目前專案檔的 nuget 還原
+
+`nuget restore Build.sln`
+
+## 將目 Nuget update 
+到Nuget 網站下載nuget.exe ，並指定 MsBuild 路徑
+
+vs 2017 
+`nuget update .\Test\Test.AP.Site.Test.csproj -msbuildpath "C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin" -Source `
+
+vs 2019
+
+`nuget update .\Test\Test.AP.Site.Test.csproj -msbuildpath "C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin" -Source `
+
+## 限制 nuget 更新版本
+修改package.config，加上allowedVersions，這個屬性就可以限制那些組件無法強制更新。
+
+1. package.config 設定
+
+```
+<package id="Albireo.Base32" version="1.0.1.0" allowedVersions="[1.0.1.0]" targetFramework="net461" />
+```
+
+1. allowedVersions 代表含意
+
+```
+5.2 代表 ≥ 5.2
+(,8.2] 代表 ≤ 8.2
+(7.3,) 代表 > 7.2
+(,6.5) 代表 < 6.5
+指定特定版本 用[]  
+```
+
+P.S.如果同時要改很多套件時，可以透過正則表達式來快速取代  
+version=\"([^"]*)\"
+with
+version="$1" allowedVersions="[$1]"
+## Nuget 來源
+```
+nuget source 
+nuget sources Add -Name "MyServer" -Source \\myserver\packages
+nuget sources Disable -Name "MyServer"
+nuget sources Enable -Name "nuget.org"
+```
+
+## 清除 Local 的 Nuget 快取
+```
+nuget locals list
+nuget locals all -clear
+```

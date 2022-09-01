@@ -1,0 +1,213 @@
+---
+featured: true
+title: 輕量化且免費，適用小團隊的 CICD - 使用 Gitlab Pipeline 及 地端 Gitlab Runner 
+date:  2022-05-23 01:01:01 +0800
+thumbnail: gitlab-runner.webp
+category: DevOps
+tags: ['cicd','gitlab','free','pipeline','gitlab','runner','notify','dotnet','auto build','auto','deploy']
+description : 輕量化且免費，適用小團隊的 CICD - 使用 Gitlab Pipeline 及 地端 Gitlab Runner 
+author : Mark ku
+---
+# 輕量化且免費，適用小團隊的 CICD - 使用 Gitlab Pipeline 及 地端 Gitlab Runner 
+## 痛點 
+一般來說在軟體交付的過程中，開發的環境可能會有  
+1.開發環境( DEV )  
+2.測試環境 ( QAT )  
+3.使用者測試環境( UAT )  
+4.生產環境 ( PROD )   
+
+當專案越來越多時，多個環境，越複雜時，過去的手工佈署應用程式，就可能是件麻煩事，且人工佈署很有可能因不小心，造成環境部署錯誤的問題，那麼為了解決這個問題及節省時間，而需要導入 CICD 工具，達到自動建置及自動佈署
+
+## CICD 解決的問題
+1. 解決現有應用有多個分支或多個環境，導致互相衝突。
+2. 降低手動佈版錯誤及失敗、縮短復原時間。
+3. 讓開發人員專注開發。
+4. 改善團隊溝通與協作效率。
+
+## 何謂 CICD 
+### 在那之前，我們先了解什麼是 CICD
+在軟體工程中，CI/CD或CICD通常指的是持續集成和持續交付或持續部署的組合實踐。CI/CD通過在應用程式的構建、測試和部署中實施自動化，在開發和運營團隊之間架起了橋樑。 現代DevOps實踐涉及軟體應用程式在整個開發生命周期內的持續開發、持續測試、持續集成、持續部署和持續監控。 (維基百科)
+
+## 我的 CICD 架構
+### 1.將配置好 Docker 的NET CORE 專案託管到 Gitlab 
+### 2.在本地端機器，建置 Gitlab Runner，去建置及佈署應用程式
+
+## 預期佈版流程
+![](https://i.imgur.com/yUafnv9.png)
+
+### 1. Build Stage
+Git Commit > Trigger build  stage> Build docker image  using powershell
+
+### 2. Deploy Stage 
+Manual deploy > Trigger deploy stage > Notify User "Deployment Start" >  Deploy docker  image to container server > Notify User "Deploy end”
+
+## 開始動手作
+
+### 1. 首先，必須事先準備
+* 必需要將你的專案託管到 Gitlab ，並設配置好 DockerFile
+* 並將此專案配置 DockerFile ([可參考先前的文章](https://blog.markkulab.net/2021/12/30/qnap-nas-docker-powershell-deployed/))
+
+### 2. 接著我們進入 Gitlab 後台 > Settings > CI/CD 
+![](https://i.imgur.com/Rxw8v9h.png)
+
+### 3. 接著找到 Auto DevOps > Expand > 勾選 Continuous deployment to production > Save changes
+![](https://i.imgur.com/KbYLZKR.png)
+
+### 4. 在下面，我們可以 Runners > Expand > 關閉 Shared Runner，並複製 Gitlab CI url 及 token 起來，給地端的 Runner 註冊。
+![](https://i.imgur.com/62IYFXm.png)
+
+### 5. 安裝 gitlab-runner
+```
+choco install gitlab-runner
+gitlab-runner --version  // 測試版本
+```
+[P.S. choco 使用教學](https://blog.markkulab.net/2021/06/03/powershell-install-docker/)
+![](https://i.imgur.com/QMFseXR.png)
+
+### 6. 註冊 gitlab-runner 
+```
+gitlab-runner register
+```
+![](https://i.imgur.com/hb7Mwfc.png)
+
+### 7. 啟動 runner 
+
+gitlab-runner run
+
+### 8. 當 Runner 起動後，此時 Gitlab 後台設定就會發現多了一個 Active 的 Runner，可以使用
+![](https://i.imgur.com/vqMxYIY.png)
+
+### 9. gitlab-ci.yml 是 gitlab piplines 設定檔，專案根目錄加入 .gitlab-ci.yml 檔案，則符合條件就會執行相關的 stages 的指令。
+
+```
+stages:
+  - build       
+  - deploy
+  
+build:
+  stage: build
+  script:    
+    - ./build.ps1 # build docker image
+  only:
+    - main    
+    
+deploy:
+  stage: deploy
+  script:
+    - ./tg-notify.ps1 "deploy start" # telegram bot 通知部署開始
+    - ./linebot-notify.ps1 "deploy start" # line bot 通知部署開始
+    - ./deploy.ps1 # deploy docker image to container
+    - ./tg-notify.ps1 "deploy end" # telegram bot 通知部署結束
+    - ./linebot-notify.ps1 "deploy end" # line bot 通知部署結束
+  when: manual    
+    
+default: 
+  interruptible: true # 新的流水線工作建立時，目前的這工作是否繼續執行(預設為 false)
+  tags:
+  - test
+```
+
+### 10.在專案根目錄，撰寫相關的 powershell - Telegram 通知( tg-notify.ps1 )
+```
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+$botToken = 'your token'
+$chatID = 'your chatId'
+$messageText = $args[0]
+
+$telegramURI = ("https://api.telegram.org/bot" + $botToken + "/sendMessage")
+$telegramJson = ConvertTo-Json -Compress @{chat_id = $chatID; text=$messageText}
+$telegramResponse = Invoke-RestMethod -Uri $telegramURI -Method Post -ContentType 'application/json;charset=utf-8' -Body $telegramJson
+
+```
+### 11.在專案根目錄，撰寫 powershell - line bot通知( linebot-notify.ps1 )
+
+```
+$token = your token
+$toUserId = linebotUserid
+$Header = @{
+         'Authorization' = 'Bearer $token'
+}
+
+$postParams =  @"
+{
+     "to": "$toUserId",   
+     "messages": [
+         {           
+             "text": "$args",
+             "type": "text"
+         }
+     ]
+    
+}
+"@
+
+Invoke-WebRequest -Uri https://api.line.me/v2/bot/message/push -Method POST -ContentType 'application/json' -Headers $Header -Body $postParams
+```
+
+### 12.在專案根目錄，撰寫 powershell 建置 達成建置 Docker Image ( build.ps1 )
+
+```
+$containerUrl = "tcp://192.168.50.52:2376"
+$imageName = "shopcart"
+$dockerfile = "./Comma.Web/Dockerfile"
+$outputPath = "./"
+$imageFilePath = $outputPath + $imageName
+$port="8888:80"
+
+# 本地建置映像檔
+docker build -t $imageName . -f $dockerfile
+
+docker save -o $imageFilePath  $imageName # save 要搭配 load ; import 搭配 export
+```
+
+### 13.在專案根目錄，撰寫  powershell -  Build Images( deploy.ps1 )
+
+```
+$containerName = "shopcart-1"
+$containerUrl = "tcp://192.168.20.20:2376"
+$imageName = "shopcart"
+$outputPath = "./"
+$imageFilePath = $outputPath + $imageName
+$port="8888:80"
+
+# 停用容器
+docker --tls -H="$containerUrl" ps -a -f ancestor=$containerName --no-trunc -q | foreach-object { docker --tls -H="$containerUrl" stop $_ }
+docker --tls -H="$containerUrl" ps -a -f name=$containerName --no-trunc -q | foreach-object { docker --tls -H="$containerUrl" stop $_ }
+
+# 移除容器
+docker --tls -H="$containerUrl" ps -a -f ancestor=$containerName* --no-trunc -q | foreach-object { docker --tls -H="$containerUrl" rm -f $_ }
+docker --tls -H="$containerUrl" ps -a -f name=$containerName* --no-trunc -q | foreach-object { docker --tls -H="$containerUrl" rm -f $_ }
+
+# 移除映像檔
+
+$existingImages = docker --tls -H="$containerUrl" images $imageName
+If ($existingImages.count -gt 1) {
+write-host "[Removing image]Removing the existing image.."
+docker --tls -H="$containerUrl" rmi -f $imageName
+} else {
+write-host "[Removing image]The image does not exist"
+}
+
+# 將本地的映像檔匯入 Docker 主機
+docker --tls -H="$containerUrl" load --input  $imageFilePath
+				
+# 建立及啟動容器應用
+docker --tls -H="$containerUrl" run -d --name $containerName --restart=always -p $port $imageName				
+```
+
+## 執行畫面
+### 1. 當此專案有任何的 git commit 後，就會觸發 Gitlab 自動會建置
+![](https://i.imgur.com/4gbRIqf.png)
+### 2. 建置完成後，當手動按下佈署時，會透過 Line 及 telegram 通知使用者部署狀態
+![](https://i.imgur.com/7bZQ3UR.png)
+
+## 最後
+Gitlab Pipelines 真是個好東西，且完全免費，我一台伺服器都沒架，雲端Gitlab，搭配地端的 Runner ，就讓我輕易的做到 CICD ，並讓 Line Bot 通知相關人員，應用程式正在部署程式。
+
+## 參考資料
+[參考資料](https://blog.csdn.net/weixin_44723434/article/details/88425094)  
+[參考資料](https://ithelp.ithome.com.tw/articles/1024238)  
+[參考資料](https://dotblogs.com.tw/yc421206/2021/08/31/use_gitlab_runner_and_shell_exec_ci_cd_script_in_windows10#%E5%9C%A8%E6%9C%AC%E5%9C%B0%E7%AB%AF%E5%9F%B7%E8%A1%8C%20CI%20%E8%85%B3%E6%9C%AC)  
+[參考資料](https://cache.one/read/16833817)  
+[參考資料](https://www.cnblogs.com/tianyaguoke/p/11219648.html?fbclid=IwAR2SwAMnB-U44pT3HdThYsBfzzdC3rd35BSeWLI-mML8Fx6w3yILPDRoJFY)  

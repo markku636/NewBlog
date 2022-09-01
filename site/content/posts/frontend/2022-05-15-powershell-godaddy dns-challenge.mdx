@@ -1,0 +1,84 @@
+---
+featured: true
+title: 使用 Powershell 達成 let's encrypt DNS 挑戰，取得 免費 https 憑證
+date:  2022-05-15 01:01:01 +0800
+thumbnail: https.webp
+category:  PowerShell
+tags: ['https','let's encrypt','free','https','challenge','Certificate','Authority','CA','godaddy','cloudflare','powershell']
+description : 使用 Powershell 達成 let's encrypt DNS 挑戰，取得 免費 https 憑證
+author : Mark ku
+---
+
+## 問題
+現今大多數網站基於各種理由都需要支援 https，但剛開始經營網站時，會使用很多免費的 Https 憑證，最有名的是 let's encrypt，但這些憑證通常只有三個月的期效，每三個月過後要延展或手動重新申請，要達成 ACME http challenge和 DNS challenge ( 萬用憑證 ) 或透過 nginx 延長憑證，都是一件很麻煩的事。
+
+倘若想要取得萬用憑證 *.abc.com 都是得達成 DNS challenge，非常的麻煩，因此自己寫一個腳本，快速取得  let's encrypt 免費憑證。
+
+## DNS 驗證流程
+先回顧 DNS Challenge 的流程
+1. 向 let's encrypt 取得驗證內容
+2. 在 DNS 主機加上 Let's encrypt 指定 TXT 記錄
+3. 取得憑證
+4. 移除 主機加上 Let's encrypt 先前指定的 TXT 記錄
+
+## 實作的想法
+像 Godaddy 及 Cloud flare 比較大的域名服務商，都支援 API Token 的方式，透過腳本( script ) 指令，去更新 DNS 值。
+
+## 域名供應商不支援 API 更新 DNS 設定。
+在購買 TW 的相關的域名在 Godaddy 或 Cloudflare 購買域名，比台灣的域名供應商每年貴了快 300 元以上，且台灣的域名供應商，多半不支援透過 API KEY 修改 DNS，因此我將域名免費託管在 Godaddy，方便透過去 API 修改相關的設定值。
+
+##  撰寫 Power shell 腳本
+
+### 調整 Powershell 執行權限
+```
+Set-ExecutionPolicy RemoteSigned
+```
+### 安裝 Posh-ACME 模組
+```
+Install-Module -Name Posh-ACME
+```
+### Godaddy 的腳本 (godaddy-dns-challenge.ps1)
+```
+Set-PAServer "LE_Prod"
+
+$pArgs = @{GDKey="輸入Godaddy API KEY";GDSecret="輸入Godaddy Secret"}         
+
+ New-PACertificate *.letgo.com.tw -FriendlyName *.letgo.com.tw -PfxPass password01 -AcceptTOS -Contact a4756830@gmail.com -DnsPlugin GoDaddy -PluginArgs $pArgs
+ 
+Get-PACertificate | fl *
+```
+### Cloudflare 的腳本 ( cloudflare-dns-challenge.ps1 )
+
+```
+Set-PAServer "LE_Prod"
+$secToken = "輸入你的 Cloud Flare API 金鑰"
+$pArgs = @{ CFToken = $secToken }
+New-PACertificate *.letgo.com.tw -FriendlyName *.letgo.com.tw -PfxPass password01 -AcceptTOS -Contact anthony@sliema.com.au -DnsPlugin CloudFlare -PluginArgs $pArgs
+Get-PACertificate | fl *
+```
+
+## 監測憑證失效的工具
+除了先前[文章](https://blog.markkulab.net/2021/12/11/application-monitor-uptime-kuma/)所提到的 uptime-kuma 可以在憑證失效的 7天、14天、21天憑證過期前會提醒。此外 [LetsMonitor](https://letsmonitor.org/monitors) 也提供免費 SSL 憑證到期提醒與監測，可以當個備案。
+
+![](https://i.imgur.com/HIv97Rq.png)
+
+## 結論
+透過大型域名供應商的 API，透過腳本去達成 let's encrypt Http DNS 驗證，是相當方便的，搭配排程透執行指令的方式，就算是一次管理1000台，我想應該也是沒問題，不花錢又能使用免費的 Https 憑證，想起來就讓人開心。  
+
+執行畫面  
+![](https://i.imgur.com/F1ptFJj.png)
+
+[參考資料1](https://medium.com/@mark86092/%E9%80%8F%E9%81%8E-docker-%E7%B0%A1%E5%8C%96-letsencrypt-%E6%86%91%E8%AD%89%E7%9A%84%E5%8F%96%E5%BE%97-de14ab08fdeb
+)
+
+[參考資料2](
+https://blog.onevinn.com/using-powershell-to-get-wildcard-certificate-from-lets-encrypt
+)
+
+[參考資料3](
+https://israynotarray.com/other/20200510/1067127387/
+)
+
+[參考資料4](
+https://anthonyspiteri.net/powershell-api-lets-encrypt-cloudflare/
+)

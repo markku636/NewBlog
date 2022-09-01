@@ -1,0 +1,109 @@
+---
+featured: true
+title:  透過frp-c 容器應用，簡單建立、高效能的內網穿透服務
+date:   2021-06-01 01:01:01 +0800
+thumbnail:  reverse-proxy.webp
+category: Infra
+tags:   ['frp','frp-c','reverse proxy']
+description : 透過frp-c 容器應用，簡單建立、高效能的內網穿透服務
+author : Mark ku
+---
+# 透過frp-c 容器應用，簡單建立、高效能的內網穿透服務
+
+## 解決問題
+因為是租屋處，想要架站，房東不方便提供給我 IP 分享器的權限，試過第三方主機，都很慢也很貴，且ngrok 又有流量限制，而 ngrok 其實就是一種反向代理的應用。
+
+## 何謂反向代理
+反向代理 - 其實是"代理伺服器"代理了"目標伺服器"，去和"客戶端"進行資料交換。 其目的是
+隱藏伺服器真實IP、負載均衡、提高訪問速度、提供安全保障(防範DoS/DDoS)、同時可以讓你更換更換應用服務主機
+
+![](https://i.imgur.com/EzpTbAS.webp)
+
+## Frp 服務
+Frp 則是一種熱門反向代理服務，可以將內網的服務通過免費的反向代理服務 (Freefrp) 映射出去。
+[freefrp](https://freefrp.net/) 即是一個很有名的 frp 的免費服務
+
+## 環境
+本篇採用 qnap nas ts 253d 來建立容器服務
+
+## 首先登入 NAS 後台，建立 frpc 容器應用服務
+1. 在 dokcer hub 搜尋 oldiy/frpc
+![](https://i.imgur.com/og4FvyA.webp)
+
+2. 建立容器
+/bin/sh -c "/frpc -c Public/frpc.ini"
+![](https://i.imgur.com/dvbzaoz.webp)
+
+3. 掛載本機資料夾，以方便配置設定檔
+![](https://i.imgur.com/5916FxI.webp)
+
+4. 將容器網路模式設定成 Host
+![](https://i.imgur.com/3pcVjya.webp)
+
+5. 設定 frpc 的設定檔 ( \\qnapnas\Container\data\frpc\ 建立 frpc.ini)
+
+```
+[common]
+protocol = tcp
+server_addr = frp1.freefrp.net
+server_port = 7000
+token = freefrp.net
+
+
+[Qnas] 
+
+type = http 
+
+local_ip = 192.168.31.5
+
+local_port = 8080
+
+use_gzip = true
+
+use_encryption = true
+
+pool_count = 20
+
+privilege_mode = true
+
+subdomain = markku666
+
+custom_domains = 
+
+[SQL] 
+type = tcp
+
+local_ip = 127.0.0.1
+
+local_port = 1433
+
+remote_port = 14333
+
+[Redis] 
+type = tcp
+
+local_ip = 127.0.0.1
+
+local_port = 63799
+
+remote_port = 63799
+
+[Jekyll]
+
+local_ip = 127.0.0.1
+
+local_port = 49183
+
+remote_port = 49183
+
+[ShopCart]
+
+local_ip = 127.0.0.1
+
+local_port = 888
+
+remote_port = 48888
+```
+
+6.此時你就能透過此 frpc 映射 nas 上的服務<br/>
+http://markku646.b.freefrp.net:49183/

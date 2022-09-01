@@ -1,0 +1,108 @@
+---
+featured: true
+title: React 學習筆記 - state、props、setState、binding this - Part's 3
+date:  2022-07-24 01:01:01 +0800
+thumbnail: react.webp
+category: Frontend
+tags: ['React','get start']
+description : React 學習筆記 - state、props、setState、binding this - Part's 3
+author : Mark ku
+---
+
+## state 和 props 的區別 
+在 react  中會觸發重新渲染的主要是 props 及 state 
+
+### 1. props
+是元件外部傳入的參數，只讀屬性， 是不可變的 ( Immutable )，一但建立就不可變，只能透過銷毀，重建改變數據，通過判斷記憶體地址是否一致，來確認對象是不是有經修改過。  
+
+### 2.state
+* 元件私有的狀態，主要用元件內部資料傳遞，除了建構函數可以初始化 state，之後要修改要用 setState，否則不會重新渲染(setState 是非同步的，不會立即更新)。  
+* React 狀態變更要觸發渲染，都需要呼叫 setState
+* React機制所呼叫的 setState 都是非同步，透過setState, 第二個參數 call back 可以取得最後的數值
+
+```
+this.setState ({ count: this.state.count + 1 }, () => {
+ console.log(this.state.count);  
+});
+```
+* setState 執行兩次相同的事件，只會執行一次，可以用傳入一個函數取得前一個生命週期的狀態 (preState、preProps)
+
+```
+onClick={() => {
+            this.setState(
+              (preState, preProps) => {
+                return { count: preState.count + 1 };
+              }              
+            );
+
+            this.setState(
+              (preState, preProps) => {
+                return { count: preState.count + 1 };
+              }             
+            );            
+          }}
+```
+
+## react component 分成兩種
+### React Class Component ( 舊 ) 
+![](https://i.imgur.com/lgWfIZe.png)
+
+#### 生命週期一:初始化
+#### componentDidMount() - 組件剛剛掛載後觸發的事件
+#### 生命週期二:更新
+在組件接收到一個新的 prop 或更新後被調用  
+#### static getDerivedStateFromProps(props, state)
+#### componentDidUpdate(prevProps, prevState) 
+P.S.但需要特別注意的是，當該元件中任何state被setState設定時，componentDidUpdate都會被重新呼叫。所以必須特別注意目前的邏輯是否有出現無限遞迴的可能。  
+
+#### shouldComponentUpdate - 元件需不需要 update ，預設值為 true，不需要則不更新。
+```
+shouldComponentUpdate(nextProps, nextState) {
+  return true; // 反回true 更新 false 不更新
+}
+```
+#### 生命週期三: 銷毀 
+
+#### componentWillUnmount() - 用於組件銷毀前調用，避免記憶體洩漏
+
+### function component ( 目前新開的專案 App.tsx 也都是預設都是 function component )
+
+```
+interface RobotProps {
+  id: number;
+  name: string;
+  email: string;
+}
+
+interface RobotState {
+  random:number
+}
+
+const Robot: React.FC<RobotProps,RobotState> = ({ id, name, email }) => {
+const value = useContext(appContext)
+
+  return (        
+          <div className={styles.cardContainer}>
+            <img alt="robot" src={`https://robohash.org/${id}`} />
+            <h2>{name}</h2>
+            <p>{email}</p>
+            <p>{value.username}</p>
+          </div>            
+  );
+};
+
+export default Robot;
+```
+
+## function 取得正確 this  的兩種方法
+
+### 1. bind this 
+```
+onClick={this.handlerClick.bind(this)}>
+```
+### 2. arrow function - 此時 this 就會指向 react 物件本身
+```
+handlerClick = (e) => {
+    this.setState({ isOpen: !this.state.isOpen });
+};
+```

@@ -1,0 +1,57 @@
+---
+featured: true
+title:  前端小遊戲，記憶體洩漏調效筆記
+date:   2022-01-24 01:01:01 +0800
+thumbnail:  animation-2.webp
+category: Frontend
+tags:   ['memory leak','game','animation']
+description : 前端小遊戲，記憶體洩漏調效筆記
+author : Mark ku
+---
+
+## 問題
+在開發一款網頁前端動畫小遊戲時，因為有自動遊玩功能，發現掛了一晚上，就會發現記憶體飆昇到 1GB 問題。  
+![](https://i.imgur.com/0PKf378.png)
+
+## 那麼在查問題前先了解何謂記憶體洩漏 ( memory leak )
+在電腦科學中，內部記憶體泄漏指由於疏忽或錯誤造成程式未能釋放已經不再使用的內部記憶體的情況。 (微基百科)
+
+## 了解瀏覽器記憶體回收機制
+瀏覽器採用的是引用計數，沒有被引用數據，會打出標記，週期性執行，釋放記憶體。
+
+## 並透過 Chrome 兩種工具來分析記憶體洩漏問題
+### 1. Performance Monitor 
+1.打開 chrome > F12 > More Tool > Performance Monitor
+![](https://i.imgur.com/Soh8NgQ.png)
+![](https://i.imgur.com/uYF50DH.png)
+
+### 2. 記憶體快照
+打開 chrome > F12 > 記憶體
+
+![](https://i.imgur.com/ui1UONh.png)
+
+## 測試方法
+1. 重整幾次，觀察記憶體會不會降下來(有沒有被釋放)。
+2. 長時間掛著，看記憶體會不會成長。
+3. Keep alive 和非 keep alive 做對比 
+4. 可過記憶體快照來分析，那些 JS 持續著成長。
+
+## 主要參考這篇常見記憶體洩漏的去做調整
+[連結](https://juejin.cn/post/7003598687851151397)
+
+## 最後我做了兩個調整
+### 1. 自訂元件在掛載 Lottie-web 動畫套件，在消滅前( v-if )，手動執行 destory 
+
+```
+beforeDestroy () {
+this.lottieAnimation.destroy('game-animation')
+this.lottieAnimation = null
+this.lottieApi = null
+}
+```
+
+### 2. 因為 Vue keep-alive 僅能[暴力移除](https://juejin.cn/post/6844903649517240328?fbclid=IwAR3w4SGnitm-uS6G3NK-Bh91KMjuQurFpBomdGtsn5nNxsDlDNEmJAYxt7M)快取，最後決定移除 Vue 的 keep-alive，平均記憶體的就降了30 MB，然後掛著測試一晚上，在也沒有飆昇的問題了。
+
+
+## 最後
+記憶體掛一個晚上終於沒有在飆昇了。

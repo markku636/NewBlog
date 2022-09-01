@@ -1,0 +1,200 @@
+---
+featured: true
+title: 快速建立 Next js 開發環境筆記 ( ESlint + StyleLint + Prettier )
+date:  2022-07-30 01:01:01 +0800
+thumbnail: nextjs.webp
+category: Frontend
+tags: ['React','Next','dev','init','env','enviorment']
+description : 快速建立 Next js 開發環境筆記 ( ESlint + StyleLint + Prettier )
+author : Mark Ku
+---
+## 目的
+ESlint + StyleLint + Prettier 己經現今前端開發協作相當重要的工具，他可以讓團隊有一致的程式碼風格及規範，並透過 Vscode 開發工具，能夠協助修正一些錯誤。
+
+* ESlint : 程式碼撰寫風格校驗，開發階段找到很多潛在問題。
+* StyleLint : CSS 自動校驗是不是符合團隊規範，自動調整成團隊規範的 CSS。
+* Prettier: 讓團隊有一致的，自動整理程式碼格式。
+
+## 建立 next js 應用程式
+```
+npx create-next-app@latest --typescript
+npm run dev
+```
+### 自動化安裝相關的套件( 專在案目錄執行，可以寫成 powershell )
+
+```
+code --install-extension dbaeumer.vscode-eslint 
+code --install-extension stylelint.vscode-stylelint@0.87.6
+code --install-extension esbenp.prettier-vscode
+code --install-extension rvest.vs-code-prettier-eslint
+cd ..
+npm add stylelint-config-standard-scss --save -D
+```
+
+## 建立相關套件的配置檔案
+### .vscode\settings.json 
+
+```
+{  
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+    "source.fixAll.stylelint": true
+  },
+  "[html,javascript,json,xml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.formatOnSave": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "stylelint.validate": ["css", "scss", ".module.scss"],
+  "eslint.alwaysShowStatus": true,
+  "eslint.debug": true,
+  "eslint.format.enable": true,
+  "eslint.validate": ["javascript", "html", "vue", "json", "javascriptreact", "typescript", "typescriptreact"],
+  "eslint.options": {
+    "extensions": [".html", ".js", ".vue", ".jsx", "json", ".tsx"]
+  }
+}
+```
+
+### .eslintrc.json
+```
+{
+  "extends": ["next/core-web-vitals","eslint:recommended"]
+}
+```
+
+### .stylelintrc
+```
+{
+  "extends": "stylelint-config-standard-scss",
+  "rules": {
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": ["tailwind", "apply", "variants", "responsive", "screen"]
+      }
+    ],
+    "declaration-block-trailing-semicolon": null,
+    "no-descending-specificity": null,
+    "color-hex-case": "upper",
+    "block-no-empty": true,
+    "color-hex-length": "long",
+    "selector-type-no-unknown": [
+      true,
+      {
+        "ignoreTypes": []
+      }
+    ],
+    "selector-pseudo-element-no-unknown": [
+      true,
+      {
+        "ignorePseudoElements": []
+      }
+    ],
+    "comment-no-empty": true,
+    "shorthand-property-no-redundant-values": true,
+    "value-no-vendor-prefix": true,
+    "property-no-vendor-prefix": true,
+    "number-leading-zero": "never",
+    "no-empty-first-line": true,
+
+    "order/properties-order": [
+      "position",
+      "top",
+      "right",
+      "bottom",
+      "left",
+      "z-index",
+      "display",
+      "justify-content",
+      "align-items",
+      "float",
+      "clear",
+      "overflow",
+      "overflow-x",
+      "overflow-y",
+      "margin",
+      "margin-top",
+      "margin-right",
+      "margin-bottom",
+      "margin-left",
+      "border",
+      "border-style",
+      "border-width",
+      "border-color",
+      "border-top",
+      "border-top-style",
+      "border-top-width",
+      "border-top-color",
+      "border-right",
+      "border-right-style",
+      "border-right-width",
+      "border-right-color",
+      "border-bottom",
+      "border-bottom-style",
+      "border-bottom-width",
+      "border-bottom-color",
+      "border-left",
+      "border-left-style",
+      "border-left-width",
+      "border-left-color",
+      "border-radius",
+      "padding",
+      "padding-top",
+      "padding-right",
+      "padding-bottom",
+      "padding-left",
+      "width",
+      "min-width",
+      "max-width",
+      "height",
+      "min-height",
+      "max-height",
+      "font-size",
+      "font-family",
+      "font-weight",
+      "text-align",
+      "text-justify",
+      "text-indent",
+      "text-overflow",
+      "text-decoration",
+      "white-space",
+      "color",
+      "background",
+      "background-position",
+      "background-repeat",
+      "background-size",
+      "background-color",
+      "background-clip",
+      "opacity",
+      "filter",
+      "list-style",
+      "outline",
+      "visibility",
+      "box-shadow",
+      "text-shadow",
+      "resize",
+      "transition"
+    ]
+  }
+}
+```
+
+### .prettierrc
+
+```
+{
+  "semi": true,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "useTabs": false,
+  "printWidth": 120
+}
+```
+
+## 完成配置，你己擁有三大功能。

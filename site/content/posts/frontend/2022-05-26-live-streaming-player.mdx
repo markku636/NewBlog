@@ -1,0 +1,163 @@
+---
+featured: true
+title:  直播網站實戰開發筆記 Part's 2 - 打造自己的直播播放器
+date:   2022-05-27 01:01:01 +0800
+thumbnail:  stream.webp
+category: Frontend
+tags:   ['直播 streaming
+description : 直播網站實戰開發筆記 Part's 2 - 打造自己的直播播放器
+author : Mark ku
+---
+# 用 Vue 動手打造個人專屬的前端直播播放器的採用( hls.js )
+## 前言
+[上一篇](https://blog.markkulab.net/2021/07/20/streaming/)，談到用阿里雲來搭建直播伺服器，這篇我要來談前端直播放器，前端直播技術，最常見的有 HLS 、DASH 這兩種直播協定，本篇就主要會以這兩個進行探究
+
+## 科技公司的分庭抗禮
+早期的直播協議會讓人想到 Flash(FLV)協議，蘋果公司為了代替 Flash 與 RTMP與，推出了 HLS 直播協定，且為蘋果公司所私有，並在所有蘋果相關的產品中皆能直接使用。  
+
+DASH 是 MPEG 公司為了和蘋果公司的 HLS 分庭抗禮，所延申的標準協議，比HLS 延遲更低，並將其開源。  
+
+全球因有大量的 iOS 用戶，所以目前仍然有較多的網站傾向採用 HLS 的直播協定，但一些科技巨頭，反而是選擇了開源 DASH 協定。  
+
+採用 HLS 公司有:  
+foxsports、17LIVE、Twitter、球會體育、雷速體育  
+
+採用 DASH 公司有:  
+Netflix、Hulu、YouTube   
+
+## 什麼是HLS
+HTTP Live Streaming，縮寫為HLS，是由蘋果公司提出基於HTTP的串流媒體網路傳輸協定。是蘋果公司QuickTime X和iPhone軟體系統的一部分。它的工作原理是把整個流分成一個個小的基於HTTP的檔案來下載，每次只下載一些。當媒體流正在播放時，客戶端可以選擇從許多不同的備用源中以不同的速率下載同樣的資源，允許串流媒體對談適應不同的資料速率。在開始一個串流媒體對談時，客戶端會下載一個包含元資料的擴充 M3U (m3u8) 播放列表檔案，用於尋找可用的媒體流。 ( 維基 )
+
+## 談到 HTTP Live Streaming (HLS) 的相容性問題
+![](https://i.imgur.com/Nqhf4Uv.png)
+
+先前提到 HTTP Live Streaming 是蘋果所提出，所以在預設瀏覽器 Safari 上，是可以直接播放的， 但 Chrome 等其他瀏覽器是不能播放的。
+
+dailymotion 公司提供了開源套件 Hls.js 的解決跨瀏覽器相容性的問題。
+
+## 專案現況 
+那麼，由前面得知，我們要直接透 HTML VIDEO 播放串流是不可行的，基於用戶端相容性及 Cloud 支援度考量，本篇採用 HLS 協議進行開發。
+
+## 動手作
+### 1.安裝 hls js 
+```
+npm i hls.js --save
+```
+
+### 2. HLS JS 的使用方式
+
+在引入 Hls.js 後，我們可以呼叫Hls.isSupported() 判斷瀏覽器是否支援 Hls，如果支援，我們可以，直接使用 video player 直接播放。
+```
+mounted() {
+	let videoSrc = "https://storage.googleapis.com/shaka-demo-assets/angel-one-widevine-hls/hls.m3u8"
+	
+	const video = document.getElementById('live-player')
+	this.player = video
+
+	if (Hls.isSupported()) {
+	const hls = new Hls()
+	hls.loadSource(videoSrc)
+	hls.attachMedia(video)
+	} else {
+	video.src = videoSrc
+	}
+}
+```
+
+## 3.依據上述兩點，你己經可以播放 HLS 格式直播串流影片但是如果有留意，使用者如果離開此頁面時，在開發者模式中，頁面還是不斷的發出大請求，最後導致記憶體洩漏。
+
+## 4.那麼，為了避免上述問題，我們必須在元件銷毀前，將 hls 停用及銷毀
+```
+  beforeDestroy() {     	  
+      if (Object.keys(this.hls).length > 0) {
+        this.hls.stopLoad()
+        this.hls.destroy()
+        this.hls = null
+      }
+  },
+```
+
+## 5.但是需求往往沒有這麼簡單，使用者會希望調整音量，切換影片解析度、頁面捲動時擁有浮動功能、彈慕、全屏發彈慕等功能。
+
+## 6. 實作音量調整功能
+如果是設計手機版的播放器是不能透過 video 去調整音量，而是要透過手機的硬體調整音量，則桌機版可以透過一些 slider 的套件去控制音量。
+
+```
+handleSound(e) {
+this.player.volume = e / 100
+},
+```
+
+## 7. 頁面載入自動播放限制
+許多瀏覽器為了提昇使用者體驗而限制了 autoplay 的條件，如果你要實作 Auto Player。   
+1. 必須要是靜音。
+`<video controls muted>`
+2. 使用者跟網站有互動後，點擊後才能夠自動播放。
+
+## 8. 浮動播放器
+### 8.1 實作理很簡單，在播放器播放時，去監聽主要的捲軸，當捲軸的捲動超過播放器的高度時，將播放器的 position 改成 fixed
+
+```
+&.floating-video {
+    position: fixed;
+    right: 0;
+    bottom: 240px;
+    z-index: 10;
+    border-radius: 16px 16px ;
+    width: 420px !important;
+    height: 282px !important;
+    animation: popin 0.5s ease-in-out forwards;
+    font-size: 16px
+
+    @keyframes popin {
+      to {
+        bottom: 240px;
+      }
+    }
+```
+
+### 8.2 監聽捲動事件
+
+```
+ document.addEventListener('scroll', function(e) {
+ // 當播放器不是暫停，捲動才作用
+if (!that.player.paused && document.scrollTop > videoHeight) {
+	// 當不是浮動的狀態
+   if (!that.isFloatingVideo) {
+       that.isFloatingVideo = true  // 用來控制 class 是不是浮動的樣式
+   } else {
+     that.isFloatingVideo = false
+     }
+	 }
+ })
+```
+
+## 9. 客製化播放器全屏
+### 9.1 客製化播放器上有很多客製的功能選項，全屏如果PC版，你可以很輕易透過瀏覽器 api ，可以將客製化播放器全屏
+
+```
+handleFull() {
+       const ele = this.player
+       if (ele.requestFullscreen) {
+         ele.requestFullscreen()
+       } else if (ele.mozRequestFullScreen) {
+         ele.mozRequestFullScreen()
+       } else if (ele.webkitRequestFullScreen) {
+         ele.webkitRequestFullScreen()
+       } else if (ele.webkitEnterFullscreen) {
+         ele.webkitEnterFullscreen()
+       } else if (ele.webkitRequestFullscreen) {
+         ele.webkitRequestFullscreen()
+       } else if (ele.msRequestFullscreen) {
+         ele.msRequestFullscreen()
+       }
+},
+```
+
+### 9.2 但是手機版就不行了，你得透過 absolute 去蓋一層 div 在頁面。
+參考 [Bilibili]的客製化播放器(https://www.bilibili.com/) 
+![](https://i.imgur.com/Cqp9Il0.png)  
+![](https://i.imgur.com/sMZBXGK.png)  
+
+## 相關程式碼
+### 待整理...

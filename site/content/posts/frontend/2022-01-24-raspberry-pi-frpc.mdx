@@ -1,0 +1,104 @@
+---
+featured: true
+title:  樹莓派安裝 fprc 內網穿透用戶端 - Linux 筆記
+date:   2022-01-24 01:01:01 +0800
+thumbnail:  raspberry.webp
+category: Infra
+tags:   ['frp','frp-c','reverse proxy','raspberry pi','os','linux']
+description : 樹莓派安裝 fprc 內網穿透用戶端 - Linux 筆記
+author : Mark ku
+---
+## 解決問題
+希望只要外部網路有通，不須做任何的防火牆設定，隨時隨地即可遠端連線到我的樹莓派主機，類似於TeamViewer 的功能。
+
+## 開發環境
+* 樹莓派 4B 8G
+* RASPBERRY PI OS
+![](https://i.imgur.com/U0Pl6Bb.png)
+
+## 安裝 vim 編輯器
+```
+sudo apt-get install vim
+```
+
+## 下載 frpc
+```
+wget https://github.com/fatedier/frp/releases/download/v0.38.0/frp_0.38.0_linux_arm.tar.gz
+```
+
+## 解壓縮
+```
+tar -zxvf frp_0.38.0_linux_arm.tar.gz
+```
+
+
+## 建立資料夾
+```
+sudo mkdir /var/fprc
+```
+
+## 搬移 frpc 到 /var/frpc
+```
+sudo mv ./frp_0.38.0_linux_arm/* /var/frpc/
+```
+
+##  編輯 frpc.ini 設定檔
+```
+sudo vim /var/frpc/frpc.ini
+```
+
+```
+[common]
+server_addr = your frps server domain
+server_port = 7000
+auth_token = 123456
+pool_count = 10000
+
+[pi-ssh]
+type = tcp
+custom_domains = pi-ssh.abc.net
+remote_port = 6667
+local_port = 22
+local_ip = 127.0.0.1
+
+[pi-vnc]
+type = tcp
+custom_domains = pi-vnc.abc.net
+local_port = 5900
+remote_port = 6666
+local_ip = 127.0.0.1
+
+```
+
+## 測試是否可以執行
+sudo ./frpc -c ./frpc.ini
+
+## 將 frpc 註冊成開機自動啟動的服務
+sudo vi /lib/systemd/system/frpc.service
+
+```
+[Unit]
+Description=FRPC
+After=network.target
+Wants=network.target
+
+[Service]
+Restart=on-failure
+RestartSec=5
+
+ExecStart=/var/frpc/frpc -c /var/frpc/frpc.ini
+
+[Install]
+WantedBy=multi-user.target
+
+```
+
+## 啟動服務
+```
+sudo systemctl enable frpc.service //開機時自動啟動 FRPC服務
+sudo systemctl start frpc.service //啟動 FRPC 服務
+sudo systemctl status frpc.service // 檢查狀態
+sudo systemctl is-failed frpc.service // 查看失敗狀態
+sudo systemctl daemon-reload  // reload 
+sudo reboot // 重開機
+```
