@@ -4,6 +4,10 @@ module.exports = {
   },
   plugins: [
     {
+      resolve: 'gatsby-plugin-sitemap',
+      options: {}
+    },
+    {
       resolve: 'gatsby-plugin-netlify-cms',
       options: {}
     },
@@ -13,12 +17,14 @@ module.exports = {
       options: {        
         sources: {
           local: true
-        }
+        },
+		siteUrl: process.env.URL || process.env.VERCEL_URL
       }
     }
   ], 
   // Customize your site metadata:
   siteMetadata: {
+    siteUrl: "https://www.markkulab.net/",
     //General Site Metadata
     title: 'FlexiBlog Theme',
     name: 'FlexiBlog',
