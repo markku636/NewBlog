@@ -4,6 +4,18 @@ module.exports = {
   },
   plugins: [
     {
+      resolve: 'gatsby-plugin-manifest',
+      options: {
+        name: 'Mark Ku Technology Blog',
+        short_name: 'Mark Ku Blog',
+        start_url: '/',
+        background_color: '#ffffff',
+        theme_color: '#5a67d8',
+        display: 'minimal-ui',
+        icon: 'content/assets/favicon.png'
+      }
+    },
+    {
       resolve: 'gatsby-plugin-google-analytics',
       options: {
         // The property ID; the tracking code won't be generated without it
