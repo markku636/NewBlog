@@ -1,5 +1,5 @@
 const fontFile = require('./src/@elegantstack/flow-ui-theme/theme/typography-fonts.json')
-const fontFile = require('./src/@elegantstack/flow-ui-theme/theme/typography-fonts.json')
+require('dotenv').config()
 
 module.exports = {
   flags: {
