@@ -135,11 +135,11 @@ export default props => {
 
 const aboutQuery = graphql`
   query AboutQuery {
-    avatar: file(absolutePath: { regex: "/about.(jpeg|jpg|gif|png)/" }) {
+    avatar: file(absolutePath: { regex: "/about.(jpeg|jpg|gif|png|webp)/" }) {
       childImageSharp {
         gatsbyImageData(
           width: 1140
-          height: 500
+          height: 600
           transformOptions: { cropFocus: NORTH }
         )
       }
