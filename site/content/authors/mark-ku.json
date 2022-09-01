@@ -2,7 +2,7 @@
   "name": "Mark Ku",
   "title": "Creative Designer",
   "description": "Sed commodo, est quis maximus fermentum, massa ipsum euismod neque, in varius risus tellus quis lacus. Sed ac bibendum odio.",
-  "thumbnail": "jane-smith.png",
+  "thumbnail": "mark-ku.png",
   "social": [
     {
       "name": "Github",
@@ -17,5 +17,5 @@
       "url": "https://example.com"
     }
   ],
-  "skills": ["UI/UX", "Javascript", "Graphic Design"]
+  "skills": ["Front", "Javascript", "Graphic Design"]
 }
