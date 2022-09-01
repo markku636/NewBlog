@@ -4,6 +4,15 @@ module.exports = {
   },
   plugins: [
     {
+      resolve: 'gatsby-plugin-algolia',
+      options: {
+        appId: process.env.GATSBY_ALGOLIA_APP_ID,
+        apiKey: process.env.ALGOLIA_ADMIN_KEY,
+        chunkSize: 10000,
+        queries: require('@elegantstack/gatsby-blog-algolia/src/queries')
+      }
+    },
+    {
       resolve: 'gatsby-plugin-manifest',
       options: {
         name: 'Mark Ku Technology Blog',
@@ -37,9 +46,10 @@ module.exports = {
         sources: {
           local: true
         },
-		siteUrl: process.env.URL || process.env.VERCEL_URL,
+		    siteUrl: process.env.URL || process.env.VERCEL_URL,
         services: {
-          facebookComment: true
+          facebookComment: true,
+          algolia: true
         }
       }
     }
