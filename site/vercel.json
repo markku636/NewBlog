@@ -1,0 +1,10 @@
+{
+	"env": {
+		"GATSBY_FACEBOOK_APP_ID": "468925351809896"		
+	},
+	"build": {
+		"env": {
+		"GATSBY_FACEBOOK_APP_ID": "468925351809896"
+		}
+	}
+}

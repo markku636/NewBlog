@@ -4,6 +4,13 @@ module.exports = {
   },
   plugins: [
     {
+      resolve: 'gatsby-plugin-google-analytics',
+      options: {
+        // The property ID; the tracking code won't be generated without it
+        trackingId: 'G-JPN992CSYL'
+      }
+    },
+    {
       resolve: 'gatsby-plugin-sitemap',
       options: {}
     },
@@ -18,7 +25,10 @@ module.exports = {
         sources: {
           local: true
         },
-		siteUrl: process.env.URL || process.env.VERCEL_URL
+		siteUrl: process.env.URL || process.env.VERCEL_URL,
+        services: {
+          facebookComment: true
+        }
       }
     }
   ], 
