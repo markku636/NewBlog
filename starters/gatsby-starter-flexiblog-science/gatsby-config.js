@@ -39,7 +39,7 @@ module.exports = {
     //Header Menu Items
     headerMenu: [
       {
-        name: '關於我',
+        name: '首頁',
         slug: '/'
       },
       {

@@ -1,0 +1,103 @@
+---
+featured: true
+title:  直播網站實戰開發筆記 - 使用阿里雲 - 1
+date:   2021-07-21 01:01:01 +0800
+thumbnail:  stream.webp
+category: Cloud
+tags:   ['直播','streaming']
+description : 直播網站實戰開發筆記 - 使用阿里雲
+author : Mark ku
+---
+# 直播網站實戰開發筆記 - 使用阿里雲
+## 談到直播就必需先了解推流與拉流
+1. 推流 - 其實就是將現場的影片串流傳到 Midia Server 的一個過程
+1. 拉流 - 拉流是指伺服器已有直播內容，根據協議類型（如RTMP、RTP、RTSP、HTTP等），與伺服器建立連接並接收數據，進行拉取的過程。
+![](https://i.imgur.com/17KZnBd.webp)
+
+## 建立阿里雲推流和拉流的伺服器
+1. 登入阿里云後台 > 視頻直播 > 直播控制台 > 域名管理 > 新增域名 ( 選擇海外可以繞過驗證中國網站審核 ) > 輸入公司推流的二級域名 push.xxx.com > 提交
+![](https://i.imgur.com/3FETvsa.webp)
+2. 返回域名列表
+![](https://i.imgur.com/XBklPML.webp)
+3. 再新增 拉流域名 > 返回域名列表 > 輸入公司拉流二級域名 pull.xxx.com
+![](https://i.imgur.com/TOGFyDJ.webp)
+4. 此時可以將阿里云提供的推流與拉流 CName 請 Infra Team 到 DNS 主機 去設定，將我們的域名指向阿里雲的直播主機。
+![](https://i.imgur.com/Powwa1J.webp)
+![](https://i.imgur.com/vN4LSp8.webp)
+![](https://i.imgur.com/7BpmeDP.webp)
+
+5. 回到域名管理列表，等到域名主機狀態從配置中到正常運行時 ，此時要將推流和播流進關聯，對播流域名( pull.xxx.com ) > 點擊域名配置 > 推流訊息 > 添加推流信息 > 輸入推流域名 push.xxx.com
+![](https://i.imgur.com/boqmzJs.webp)
+6. 新增完成時就會取得播流訊息( 框選起來部份，之後要貼到直播軟體中 )
+![](https://i.imgur.com/0PkDZrW.webp)
+7. 配置拉流域名 Http 標頭，否則鑲嵌在網站中會被瀏覽器的 CORS 機制擋下來 => Access-Control-Origin = *
+![](https://i.imgur.com/ZJoOE3b.webp)
+
+## 透過直播軟體，將直播串流推上雲端
+1. 回到阿里雲的域名列表 > 對播流 ( push.xxx.com ) > 域名配置 > 訪問控制 > 取得播流的 RTMP URL  
+![](https://i.imgur.com/49VXPVM.webp)
+2. 安裝 OBS 直播軟體( Open Broadcaster Software ) -  
+[官網下載連接](https://obsproject.com/)
+3. 開啟OBS 軟體 >  設定 > 串流 > 填入阿里雲的直播伺服器及串流金鑰  
+![](https://i.imgur.com/jsGaUL4.webp)
+4. 按下 + 鍵可以選擇直播的內容  
+![](https://i.imgur.com/8HjbyXs.webp)
+5. 按下開始串流，此時直播的串流影片就會推到 阿里雲的推流伺服器  
+![](https://i.imgur.com/dQAwK1s.webp)
+* 此時用手機直就訪問百度 HLS ( m3u8 ) 的直播流，
+* Chrome 則需要安裝 Native HLS Playback 套件或是透過播放器鑲嵌在網站中。  
+
+## 網站鑲嵌直播影片
+1. 到阿里雲的直播控制台，點選『地址生成器』，就會依據各種格式產生播流的 URL  
+![](https://i.imgur.com/R5eh1GT.webp)
+2. 將阿里雲提供的播流 m3u8 Url 填入下方的程式範例中  
+
+```
+<!DOCTYPE html>  
+<html>  
+<head>  
+<meta charset="utf-8">  
+<meta http-equiv="x-ua-compatible" content="IE=edge" >  
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"/>  
+<title>Aliplayer在线配置</title>  
+<link rel="stylesheet" href="https://g.alicdn.com/de/prismplayer/2.8.1/skins/default/aliplayer-min.css" />  
+<script type="text/javascript" charset="utf-8" src="https://g.alicdn.com/de/prismplayer/2.8.1/aliplayer-min.js"></script>  
+</head>  
+<body>  
+<div class="prism-player" id="player-con"></div>  
+<script>  
+var player = new Aliplayer({  
+  "id": "player-con",  
+  "source": "http://ali.v3u.cn/v3u/live.m3u8",  
+  "width": "100%",  
+  "height": "500px",  
+  "autoplay": true,  
+  "isLive": false,  
+  "rePlay": true,  
+  "playsinline": true,  
+  "preload": true,  
+  "controlBarVisibility": "hover",  
+  "useH5Prism": true  
+}, function (player) {  
+    player._switchLevel = 0;  
+    console.log("播放器创建了。");  
+  }  
+);  
+</script>  
+</body>
+```
+
+## 直播畫面
+![](https://i.imgur.com/3OCziNm.webp)
+
+![](https://i.imgur.com/XUM4I1o.webp)
+
+## 手機直連 
+![](https://i.imgur.com/iBNn1WK.webp =250x)
+
+## 實測數據 ( 未優化配置及 CDN 加速)
+* RTMP 影片延遲 3-5s
+* HLS 影片延遲 8-10s
+
+## 補充- 如果出現這個畫面，可能沒有正確推送串流影片或 被 CORS 擋了下來
+![](https://i.imgur.com/82YrJA4.webp)
