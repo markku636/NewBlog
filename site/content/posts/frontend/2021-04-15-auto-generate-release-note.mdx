@@ -1,0 +1,134 @@
+---
+featured: true
+title:  優化開發流程系列，再也不用人工撰寫 Release Notes，本篇用Powershell 搭配 git log
+date:   2021-04-15 15:01:35 +0800
+thumbnail:  release_note.webp
+category:  PowerShell
+tags:   ['release notes powershell']
+description : 優化開發流程系列，再也不用人工撰寫 Release Notes，本篇用Powershell 搭配 git log
+author : Mark ku
+---
+# 優化開發流程系列，再也不用人工撰寫 Release Notes，本篇用Powershell 及 git log
+
+## 問題
+在功能開發完成，要準備部署到下一個環境時，目前都需要『人工記錄』異動了什麼項目，好讓功能在下一個環境發生問題時，可以快速追朔釋出那些功能所造成;為了讓開發人員專注在開發，我這邊用了Power Shell ，做了一個自動化腳本 在產生 Git tag ，並產生Release Note。
+
+## 目前的版號機制
+透過 git tag 去 trigger Cicd 主動去Build <br/>
+b-3.0.1 => b-3.0.2 <br/>
+b為beta 環境，3.0為大版號，最後的數字則是小版號。
+
+## 在撰寫腳本前，得先了解 Git 相關的指令
+
+### 找出這兩個 Tag 間 Commit 了那些 Log
+
+```
+git log --pretty="%s (%h - %an)" "b-0.0.1..b-0.0.2" | grep -i -E '(bug|feature|support|study|task|design) #[0-9]+ '
+```
+P.S.後面可以加篩選條件，去找出相對應的log
+
+
+### 找到我們上一個在 Beta 環境的版號
+
+```
+git describe --tags --abbrev=0 --match  "b-[0-9]*
+```
+
+## 實作中，遇到在power shell 中執行 git log 中文字顯示都是亂碼
+
+1. 因為git 預設編碼是 utf-8，而且們的Commit Message ，需要透過 git 指令設定為big5。
+
+```
+git config --global core.quotepath false 
+git config --global gui.encoding big5
+git config --global i18n.commit.encoding big5
+git config --global i18n.logoutputencoding big5 
+```
+
+2. 如果是英文作業系統，需要到控制台>系統管理>地區設定調整語系編碼。
+![](https://i.imgur.com/Vu3IXL0.webp)
+
+P.S. 也可以透過 chcp 950 指令來測試作業系統，是不是支援 big5 編碼
+
+## 執行畫面
+1. 執行時，顯示上一版的 Beta 版號，並要求輸入此次進 Beta 的版號
+![](https://i.imgur.com/V7efvh1.webp)
+
+2. 執行完成
+![](https://i.imgur.com/KMrK3bT.webp)
+
+3. 成果
+會將 Git log commit message ，自動附加在Release Note 的最上方
+![](https://i.imgur.com/GmQSU5P.webp)
+
+
+## Auto generate release note script
+
+在過程開發過程中，我原先用了 DOS 指令去撰寫，真的寫的有點太痛苦，後來聽同事的建議採用 Power Shell，確實程式碼簡潔的很多，也節省了很多時間及力氣。
+
+```
+git config --global core.quotepath false 
+git config --global gui.encoding big5
+git config --global i18n.commit.encoding big5
+git config --global i18n.logoutputencoding big5 
+$OutputEncoding = New-Object -typename System.Text.UTF8Encoding
+
+$lastVersion = git describe --tags --abbrev=0 --match  "b-[0-9]*"
+Write-Host "Last Version $lastVersion"
+
+$newTag = Read-Host 'Please Enter New Git Tag Name. EX:b-3.0.48  '
+# $lastVersion = Read-Host 'Please Enter lastVersion  '
+
+
+# $newTag= "b-3.0.1"
+# $lastVersion = git describe --tags --abbrev=0 --match  "b-[0-9]*"
+Write-Host "$lastVersion "
+git tag -f $newTag
+$fullVersionNo = $newTag.Split("-")[1]
+$versionCharArray =$fullVersionNo.Split(".")
+
+
+$bigVersion = ($versionCharArray[0],$versionCharArray[1]) -join "."
+Write-Host $bigVersion
+
+[string[]]$lines = git log --pretty="%n|%h|%ai|%s" "$lastVersion..$newTag"
+$datetimeNow = Get-Date -Format "dddd MM/dd/yyyy HH:mm K"
+$owner = git config user.name
+$newReleaseNote = New-Object System.Collections.ArrayList
+
+# $newReleaseNote.Add("$lastVersion - $newTag")
+
+$newReleaseNote.Add("Date: $datetimeNow")
+$newReleaseNote.Add("Version: $fullVersionNo")
+$newReleaseNote.Add("Owner: $owner")
+$newReleaseNote.Add("")
+$newReleaseNote.Add("Feature:")
+foreach ($line in $lines) {
+     $line = $line.Trim()
+	 # $newReleaseNote.Add("$line")
+     if ([String]::IsNullOrEmpty($line)) {
+       continue
+     }
+     else
+	 {
+	 $Matches = $line.Split("|")
+       $hash = $Matches[1]
+       $datetime = $Matches[2]
+       $subject = $Matches[3]
+	   $newReleaseNote.Add("$datetime : $subject")
+	   Write-Host "$hash / $datetime / $subject"
+     }
+     
+ }
+$newReleaseNote.Add("")
+$newReleaseNote.Add("===================================")
+
+@($newReleaseNote) +  (Get-Content -Encoding utf8  "./ReleaseNote/ChangeLog/$bigVersion.txt")  | Set-Content -Encoding utf8  "./ReleaseNote/ChangeLog/$bigVersion.txt"  
+
+Write-Host "ReleaseNote 產生成功"
+
+git config --global gui.encoding utf8
+git config --global i18n.commit.encoding utf8
+git config --global i18n.logoutputencoding utf8
+
+```

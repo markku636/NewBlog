@@ -1,0 +1,226 @@
+---
+featured: true
+title: Vue 透過 include 及 Vuex 解決 keepAlive 難解的記憶體釋放問題
+date:  2022-05-06 01:01:01 +0800
+thumbnail: memory-leak.webp
+category: Frontend
+tags: ['keep alive','clear','dispose','vuex','include']
+description : Vue 透過 include 及 Vuex 解決 keepAlive 難解的記憶體釋放問題
+author : Mark ku
+---
+
+## 問題
+在 Vue 生態中，切換元件時，不希望元件重新渲染，並且記住元件原本的狀態及不希望重新呼叫 api 時，基於上述理由，我們會使用 keepAlive 來保留狀態，但 keepAlive 雙面刃一樣，除了你重新整理頁面前，時間越久，記憶體可能不斷的成長，最後導致記憶體洩漏 ( memory leak )。  
+
+舉一個常見使用者體驗的例子，在分頁清單元件，第 2 頁後，點擊詳情後，在回上一頁，若沒有透過路由記住上頁的頁碼或捲軸位置時，回到上一頁則，又從第一頁開始，這樣使用者體驗就會比較不好，這時就很適合使用 keepAlive。  
+
+## 分析問題
+參考很多資料，Vue 並沒有提供很方便的方式去清除 keepAlive ，有人採用[暴力銷毀](https://juejin.cn/post/6844903649517240328?fbclid=IwAR3w4SGnitm-uS6G3NK-Bh91KMjuQurFpBomdGtsn5nNxsDlDNEmJAYxt7M)的方式，個人覺得不是很優雅，後來看到 [Github issue](https://github.com/vuejs/vue/issues/6509) 網友推薦 include 去清除 keepAlive 快取，並著手改成自己想要的。
+
+## 暴力刪除的原理
+
+## 取得目前元件的 keepAlive 快取
+```
+this.$vnode.parent.componentInstance.cache
+```
+![](https://i.imgur.com/Da45peM.png)
+
+
+## 取得目前元件的所有 keepAlive 快取的 key 
+```
+this.$vnode.parent.componentInstance.keys
+```
+![](https://i.imgur.com/vcqsqWJ.png)  
+當然可以透 foreach keys，這機制去暴力清除快取，但不這麼優雅。
+
+## 最後，我決定透過 include 去清除 keep alive 快取
+
+### 首先在 vuex 建立一個 keep-alive.js 的 store 
+```
+const state = {
+  allModulekeepAlive: [] // {   moduleName: 'expert',   list: ['x'] }
+}
+
+const getters = {
+  getListByModuleName: (state) => (moduleName) => {
+    const module = state.allModulekeepAlive.find(x => x.moduleName === moduleName)
+
+    if (module) {
+      return module.list || []
+    }
+
+    return []
+  }
+}
+
+const actions = {}
+
+const mutations = {
+  add(state, payload) {
+    if (!payload.moduleName || !payload.componentName) {
+      alert('快取參數不完整')
+      return
+    }
+
+    const module = state.allModulekeepAlive.find(x => x.moduleName === payload.moduleName)
+
+    if (module) {
+      if (!module.list.includes(payload.componentName)) {
+        module.list.push(payload.componentName)
+      }
+    } else {
+      const newModule = {
+        moduleName: payload.moduleName,
+        list: [payload.componentName]
+      }
+
+      state.allModulekeepAlive.push(newModule)
+    }
+  },
+  removeByModuleName(state, moduleName) {
+    if (!moduleName) {
+      alert('removeByModuleName快取參數不完整')
+      return
+    }
+
+    const module = state.allModulekeepAlive.find(x => x.moduleName === moduleName)
+
+    if (module) {
+      module.list = []
+    }
+  },
+  removeByComponentName(state, payload) {
+    if (!payload.moduleName || !payload.componentName) {
+      alert('removeByComponentName快取參數不完整')
+      return
+    }
+
+    const module = state.allModulekeepAlive.find(x => x.moduleName === payload.moduleName)
+
+    if (module) {
+      if (module.list.includes(payload.componentName)) {
+        module.list = module.list.filter(x => x !== payload.componentName)
+      }
+    }
+  },
+  cleanAll(state) {
+    state.allModulekeepAlive = []
+  }
+}
+
+export default {
+  namespaced: true,
+  state,
+  actions,
+  getters,
+  mutations
+}
+```
+
+## 此時我們就能透過 mutations 去清除相關的快取
+
+### 新增模組快取清單
+```
+const cacheObj1 = { moduleName: 'message', componentName: 'MessageDetail' }
+
+vm.$store.commit('keep-alive/add', cacheObj1)
+```
+
+### 刪除模組下的所有快取
+```
+vm.$store.commit('keep-alive/removeByModuleName', 'message')
+```
+
+### 刪除 message 模組下的指定快取 ComponentName
+```
+const cacheObj1 = { moduleName: 'message', componentName: 'MessageDetail' }
+
+vm.$store.commit('keep-alive/removeByComponentName', cacheObj1)
+```
+
+### 清除所有的快取
+```
+this.$store.commit('keep-alive/cleanAll')
+
+
+import { mapGetters } from 'vuex'
+
+ ...mapGetters('keep-alive', [
+      'getListByModuleName',      
+    ])
+```
+    
+## 使用情境
+```
+<template>
+  <div>
+    <p>目前 message 模組下的 keep alive 的快取:{{ getListByModuleName('message') }} </p>
+
+    <keep-alive :include="getListByModuleName('message')">
+      <router-view />
+    </keep-alive>
+  </div>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+
+export default {
+  metaInfo: {
+    title: '訊息'
+  },
+  // 進入頁面前
+  beforeRouteEnter(to, from, next) {
+    next(vm => {
+      vm.$store.commit('keep-alive/removeByModuleName', 'message')
+
+      const cacheObj1 = { moduleName: 'message', componentName: 'MessageDetail' }
+
+      vm.$store.commit('keep-alive/add', cacheObj1)
+
+      const cacheObj2 = { moduleName: 'message', componentName: 'MessageList' }
+
+      vm.$store.commit('keep-alive/add', cacheObj2)
+    })
+  },
+  // 離開頁面前
+  beforeRouteLeave(to, from, next) {
+    alert('清除 Message 快取')
+    this.$store.commit('keep-alive/removeByModuleName', 'message')
+    next()
+  },
+  computed: {
+    ...mapGetters({
+      getListByModuleName: 'keep-alive/getListByModuleName'
+    })
+  },
+
+  created() {
+  }
+}
+</script>
+```    
+
+## 透過 Vue Dev Tools 實測
+![](https://i.imgur.com/DCKqurD.png)
+
+### 寫法 1 - 離開路由自己會釋放，但可以提前透過 include 釋放他
+```
+<keep-alive>
+    <router-view>
+        <!-- 所有路徑匹配到的視圖組件都會被緩存！ -->
+    </router-view>
+</keep-alive>
+```
+### 寫法 2 
+```
+<keep-alive exclude="a">
+  <component>
+    <!-- 除了 name 為 a 的組件都將被緩存！ -->
+  </component>
+</keep-alive>可以保留它的狀態或避免重新渲染
+```
+
+## 參考資料
+[參考資料](https://github.com/vuejs/vue/issues/9747)  
+[參考資料](https://gitee.com/wangxiufu/cmtter-vue-cli/blob/master/cli/appTemplates/layout/components/router/keepAlive.jsx)  

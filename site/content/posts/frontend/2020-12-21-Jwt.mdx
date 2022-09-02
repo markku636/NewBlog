@@ -1,0 +1,150 @@
+---
+featured: true
+title:  實作JWT驗證所遇到的問題
+date:   2020-07-24 15:01:35 +0300
+thumbnail:  jwt.webp
+category: Frontend
+tags:   ['Resources']
+description : 實作JWT驗證所遇到的問題
+author : Mark ku
+---
+
+# 實作JWT驗證所遇到的問題
+## 對JWT TOKEN 的理解
+JWT當初的設計是為了確保在跨組織間安全互相傳遞資料所存在。
+但因為JWT無法確保安全性，後來延伸的JWE，但JWE的標準，定義了很多我們不必要的屬性及命名規範，我在想我們應該是可以學精神就好。
+
+## 目的
+1. 開發手機APP 不用有兩套驗證及API。
+1. 無狀態的API,伺服器更容易水平擴展。
+ ex:每增加一台伺服器，系統的效能（performance），也能成比例地增加。
+1. 解決Same Site Cookie(產品端才有這問題，平台沒有)
+
+## 風險
+1. Seucrity control by develoepr。<br/>
+
+## Session 相依性
+1. 登入資訊
+1. 登入失敗次數 
+1. IP Block 
+1. 驗證碼
+
+## Cookie相依性
+1. Sticky Cookie 
+1. Data Cookie
+1. Signal R有用到 Net Forms Authentication (Base on cookie) 
+(Connect 時傳入JWT 就好)
+
+## JWT 驗證機制
+為了避免Token 被偽造，登入時將token寫進Redis，所有Request的驗證都需要經過redis 驗證。
+
+## JWT 要存那裡
+
+| 解決方案 | 遇到的問題 |
+| -------- | -------- |
+| localstorage|XSS安全性、手機無痕不能用、舊版手機不能用  |
+| local storage 轉存session storage | local storage有相容性問題 |
+| redux-state-sync | 要跑EA 技術審核流程，先不考慮 |
+| ★ InMemeory | 跨視窗狀態同步時，流程處理有點複雜，但是相容性最好 |
+
+P.S. Cookie 和local Storage  在用戶端都會產生實體檔案，但現在的瀏覽器會加密，是有機會破解，session storage 確實比local storage更安全 ，最好是不落地比較安全。
+
+## JWT的長度
+過去的在線人數統計，是依賴Login Table  的SessionId欄位所計算
+，長度目前只有100字元，標準的JWT的長度多半超過100 字元，db 相關欄位要跟著調整。
+
+## Refresh Token 跨視窗互搶的問題
+Desktop Web 有一個window open 的功能，用來查詢帳戶歷史，對於Angualr app來說是兩個獨立的app，在更新token 時會互搶。
+
+我的做法是子視窗一律不換Token，用Post Message 通知父視窗更新token
+並將接下來的Request queue住,直到父視窗 token 換完解鎖，再通知子視窗。
+(queue 住後等待超過秒數，透過RX的timeout放掉)
+
+## JWT 踢人的問題
+JWT Token 規範中，並沒有明確定義，踢人的邏輯都需要自己去實作
+1. Idle(閒置未下單)
+1. Token Expired(Token 失效)
+1. Double Login (雙重登入)
+1. Manual Logout(手動登出)
+1. No Logout (未正常登出)
+1. Maintenace Kick out (Bo Site 踢人)
+這邊踢人的做法是透過清除Redis 註銷token，請Log Kick reason以方便日後追蹤。
+
+## 使JWT更安全的方式
+1. 網站必需採HTTPS
+1. 縮短Access Token 時間
+1. Access Token 挷定 瀏覽器指紋(Device Id)
+https://fingerprintjs.com/?fbclid=IwAR1I0nRPyiJJUHosyXa80GwJi45-4tHjxV5uZPnTBks-XT3Kp3-tyi1ln1M
+1. 禁止開F12的功能。(需要留後路)
+1. 會員登入記錄
+1. 挷IP <br/>
+客戶端可能切換網路，手機IP 也會跳動，可以搭配系統訊息ip變更需要重新登入。
+
+## Session Cookie 機制並存
+上線後，如果發生問題如果要處理很久，希望快速切換回來，這邊有保留，Session Cookie並存的機制。
+這邊是透過讀取config ，並由autofac決定要注入Jwt或Session 邏輯。
+
+```
+   if (IsJWTAuthentication)
+   {
+        builder.RegisterType<JWTSessionData>().As<ISessionData>();
+        builder.RegisterType<JWTAuthenticationBLL>().As<IAuthenticationBLL>();
+   }
+   else
+   {
+        builder.RegisterType<SessionData>().As<ISessionData>();
+        builder.RegisterType<AuthenticationBLL>().As<IAuthenticationBLL>();
+   }
+```
+
+## 大概有多少工作
+
+### 己經實作
+1. 處理Session相依性
+1. 處理Cookie 相依性
+1. JWT Token 實作
+1. JWT 登入驗證功能
+1. 踢人功能
+1. Refresh Token
+1. API端 Sesssion / Cookie 機制抽換
+1. JWT參數Config 化
+1. JWT Support Log
+
+
+### 未做的
+1. 前端Session / Cookie 機制抽換
+1. Device Id重新設計(精準度問題、最好導入JWT挷瀏覽器指紋)
+1. DEV測試
+1. QA 完整測試
+
+### 可以做優化的部份
+1. 禁止開F12的功能。 (需留後路)
+1. 登入記錄
+1. 移除其他的cookie data
+
+# 補充
+## Https 一定安全?
+1. 使用太舊的加密演算法 
+1. Library實作加密演算法有bug 
+1. CA憑證單位被收買了
+1. Private Key流出
+1. FBI
+
+## 為何不採RSA 加密
+基於效能考量，因為RSA的演算法雖然比較安全，
+但加密效能不如對稱的演算法，
+而我們jwt 的內容不需要讓Cliet 端解密，
+所有的Request都會進redis 驗證，
+所以不管什麼加密方式，Redis沒有，
+驗證也不會通過。
+
+https://dotblogs.com.tw/yc421206/2012/06/27/73097
+
+## JWT Token 挷定 IP的副作用
+客戶端可能切換網路，手機IP 也會跳動，不適合將Token 綁定IP。
+應該也是可以的，這其實也是一個合理的行為，只要ba要同意，只要ip變更就得就登出, 並顯示登出原因
+
+
+## 額外發現
+1. Redux dev tool production 沒關閉
+

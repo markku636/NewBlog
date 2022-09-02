@@ -1,0 +1,154 @@
+---
+featured: true
+title: Qnap Docker Station 架設 輕量級日誌儲存、查詢、分析 日誌服務(Seq log server) - 本篇以 Net Core + Nlog 為例
+date:  2021-12-24 01:01:01 +0800
+thumbnail: seq.webp
+category: NETCORE
+tags: ['log server','ELK','Exceptionless','Seq','Splunk','qnap','docker','nlog','net core']
+description : Qnap Docker Station 架設 輕量級日誌儲存、查詢、分析 日誌服務(Seq log server) - 本篇以 Net Core + Nlog 為例
+author : Mark ku
+---
+# Qnap Docker Station 架設 輕量級日誌儲存、查詢、分析 日誌服務(Seq log server) - 本篇以 Net Core + Nlog 為例
+
+## 問題
+隨著網站及分散架構服務越來越多，當我們在排查問題時，若日誌分散在各自的伺服器及容器中，變得不好追蹤，更不容易查出關鍵問題，因此導入日誌聚合服務就很重要。
+
+## 評估
+常見日誌聚合的服務有 ELK、Exceptionless、Seq、Splunk，在前公司有用 ELK，ELK 擁有相當豐富的功能，但對於小團隊要維護這個服務，過於龐大，且需要的系統資源更多，而在實際體驗過後，操作查詢界面上，我個人還是偏好 Seq。
+
+## 那麼，我們開始動手架設 Seq Log Server
+
+### 建立 > 搜尋 > seq > 對 "datalust\seq" > 安裝
+![](https://i.imgur.com/vOKFKGb.png)
+
+### 將環境變數改成 ACCEPT_EULA=Y
+![](https://i.imgur.com/4GMQUf2.png)
+
+如果沒有 QNAP 的 NAS，也可以透過 Docker 安裝
+```
+docker run --name seq -e ACCEPT_EULA=Y -p 8900:80 -p 5341:5341 datalust/seq
+```
+
+### 當SEQ 容器應用啟動後，點擊紅框的連結圖示進入後台
+![](https://i.imgur.com/FXjmVRc.png)
+
+## 接著，我們替 Nlog 寫入，建立一組 API KEY
+### 在進入後台後 > 點擊帳號頭像 > API KES   
+![](https://i.imgur.com/jcHdzJT.png)
+
+### ADD API KEY > 輸入 Api key 的名稱
+![](https://i.imgur.com/iljGFAT.png)
+
+### 複製產生的 Api Key 到 nlog 的設定檔中
+![](https://i.imgur.com/HLthY8U.png)  
+(此token 己作廢 )
+
+## 開啟 net core 專案，並安裝 nlog 相關的擴充套件
+```
+NLog.Extensions.Logging // 跳過所有級別的Microsoft組件的日誌記錄
+NLog.Targets.Seq
+```
+
+## nlog.config 配置
+```
+<?xml version="1.0" encoding="utf-8"?>
+
+<nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      autoReload="true"
+      throwConfigExceptions="true"
+      internalLogToConsole="true"
+      internalLogLevel="Info" internalLogFile="D:\temp\nlog-internal.log"
+	  >
+
+  <!--加載ASP.NET Core插件-->
+  <extensions>
+    <add assembly="NLog.Web.AspNetCore" />
+    <add assembly="NLog.Extensions.Logging" />
+    <add assembly="NLog.Targets.Seq" />
+  </extensions>
+
+  <variable name="log-root" value="Log" />
+  <variable name="log-daily" value="${log-root}/${date:format=yyyy-MM}/${shortdate}" />
+  <!-- the targets to write to -->
+  <targets>
+     <target name="seq" xsi:type="BufferingWrapper" bufferSize="1000" flushTimeout="2000">
+      <target xsi:type="Seq" serverUrl="http://{your seq server url}/" apiKey="{api key}">
+        <property name="ThreadId" value="${threadid}" as="number" /> 
+        <property name="MachineName" value="${machinename}" />
+        <property name="Environment" value="${aspnet-environment}" />
+        <property name="Logger" value="${logger}" />
+        <property name="IP" value="${aspnet-request-ip}" />
+        <property name="Url" value="${aspnet-request-url:IncludeHost=true:IncludePort=true:IncludeQueryString=true:IncludeScheme=true}" />
+        <property name="Code" value="${aspnet-response-statuscode}" />
+        <property name="TraceId" value="${aspnet-TraceIdentifier:ignoreActivityId=true}" />
+        <property name="ActivityId" value="${activityid}" />
+        <property name="RequestHeaders" value="${aspnet-request-headers:HeaderNames=Host,Referer,Origin,Authorization}" />
+        <property name="RequestQueryString" value="${aspnet-request-querystring}" />
+        <property name="RequestBody" value="${aspnet-request-posted-body}" />
+        <property name="ClientIP" value="${aspnet-request-ip}" />
+		<property name="Custom" value="${gdc:item=Custom}" />        
+        <property name="CorrelationId" value="${aspnet-TraceIdentifier}" />
+        <property name="AppName" value="Shop" />
+      </target>
+    </target>
+  </targets>
+
+  <!-- rules to map from logger name to target -->
+  <rules>
+    <!--跳過所有級別的Microsoft組件的日誌記錄-->
+    <logger name="Microsoft.*" minlevel="Trace" final="true" />
+	<!--跳过所有级别的CorrelationId组件的Info 層級下的 Log-->
+    <logger name="CorrelationId.*" minlevel="Trace" maxlevel="Info" final="true" />
+    <logger name="*" minlevel="Info" writeTo="seq" />
+  </rules>
+</nlog>
+```
+
+## 此時站台和服務啟動，log server 將會陸續收到 net core 網站透過 nlog 寫入的log
+
+![](https://i.imgur.com/veeXaaX.png)
+
+### 查看錯誤詳細資訊
+![](https://i.imgur.com/6g5ZVQd.png)
+
+### 可以依據錯誤級別來查詢
+
+![](https://i.imgur.com/gPPpqsk.png)
+
+### 關鍵字搜索功能
+![](https://i.imgur.com/wnB6q8d.png)
+
+### 統計報表日誌
+![](https://i.imgur.com/xBzg0p6.png)
+
+### 更酷的是! 你也可以透過 Sql 語法來查詢 log
+![](https://i.imgur.com/anX4XtQ.png)
+
+```
+常見的 seq 查詢語句
+
+like 查询
+@Message like '%notify%'
+
+查詢 Error 級別的 log
+@Level = 'Error'
+
+找 shop 相關的 log
+app = 'shop'
+
+統計各log級別的數量
+select count(1) from stream group by @Level
+
+查詢 notify 相關 log
+select datepart( @Timestamp,'day',8h) as GMT8_Day,datepart( @Timestamp,'hour',8h)  as GMT8_Hour,  datepart( @Timestamp,'minute',8h)  as GMT8_Minute,ToIsoString(@Timestamp) as GMT0,  @Level, ToHexString(@EventType) as EventType,  @Message, @Exception, @Properties
+from stream where @Message like 'notify%' 
+order by GMT0 desc 
+
+```
+
+## 小結
+Seq log server 功能很多，相當的輕巧，配置也很容易，維護的成本也不高，很適合小團隊使用。
+
+##補充 - 前端的 log 也能透過 seq-logging，將 log 傳送到 seq server去。
+[前端套件Gihub](https://github.com/datalust/seq-logging)

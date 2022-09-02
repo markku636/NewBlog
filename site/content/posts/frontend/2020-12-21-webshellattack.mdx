@@ -1,0 +1,112 @@
+---
+featured: true
+title:  防範WebShell Attack
+date:   2020-12-21 15:01:35 +0300
+thumbnail:  webshellattack.webp
+category: Security
+tags:   ['Resources']
+description : 防範WebShell Attack
+author : Mark ku
+---
+
+# 資安問題處理
+在調查某次資安的事件中，發現駭客在伺服器留下了後門腳本，網站的js也被竄改過，導到假的flash 網站，經調查，我懷疑遭到Web shell attack。
+
+## 什麼是Web shell attack
+
+接著參考封面這張圖，這些駭客可能透過，
+
+微軟產品的漏洞(Windows 、IIS 、Net Framework)或是員工電腦中毒被當跳版等等方式，
+
+及Web server 寫入權限過大，
+
+將寫好的後門腳本，
+
+放到我們的網頁服務器中，
+
+因為網頁腳本認得這個腳本，
+
+一旦打開了網站就會被執行了。
+
+## 疑問
+
+站在開發人員角度思考，腦袋跑出很多疑惑 ?
+
+為什麼有程式權限修改我們程式?
+
+為什麼這個腳本為什麼還能伺服器運行?  
+
+現在公司不是都是MVC 怎麼還有aspx 引擎?
+
+## 模擬情境
+接下來參考了很多資料，我做了一個Poc腳本(Aspx)，去模擬當時的情境，
+因為無法模擬怎麼丟進去的，透過手動上傳方式來模擬，發現確實可以用程式任意寫入一個檔案。
+
+```
+<%@ Page Language="C#" %>
+<%@ Import Namespace="System"%>
+<%@ Import Namespace="System.IO"%>
+<%@ Import Namespace="System.Text"%>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<script runat="server">
+
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+			
+			  string currentdir =  HttpContext.Current.Server.MapPath("~")
+              string path = currentdir + "/HackTest.txt";
+
+
+            
+                // Create the file, or overwrite if the file exists.
+                using (FileStream fs = File.Create(path))
+                {
+                    byte[] info = new UTF8Encoding(true).GetBytes("This is some text in the file.");
+                    // Add some information to the file.
+                    fs.Write(info, 0, info.Length);
+                }
+
+                // Open the stream and read it back.
+                using (StreamReader sr = File.OpenText(path))
+                {
+                    string s = "";
+                    while ((s = sr.ReadLine()) != null)
+                    {
+                        Console.WriteLine(s);
+                    }
+                }
+			
+		}
+
+</script>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title></title>
+</head>
+<body>
+
+</body>
+</html>
+```
+
+☆★最後參考保哥 [blog 文章](https://blog.miniasp.com/post/2009/03/16/IIS-6-Identity-and-Windows-Access-Control-is-not-what-you-expected)發現，IIS預設目錄是安全的，但我們移到Ｘ糟，就繼承了Ｘ糟額外的權限，最後我們IIS的目錄發現確實是能夠寫入及修改檔案的。
+
+## 最後我的解決方案
+1. 從Web config 移除不必要的網頁腳本 (ASPX 、ASP .... )
+1. Review IIS目錄權限，並禁止繼承D磁碟糟權限，限制User只有看的權限，不能夠執行腳本及寫入
+1. Review IIS Request Filtering 設定
+1. Windows update 每半年至少做一次更新，有微軟網站公佈的重大資安漏洞，就得提前做。可以由[Windows 更新導覽網站](https://msrc.microsoft.com/update-guide)去查詢有沒有重大資安漏。
+
+## 參考資料 
+[IIS 執行的身份識別與 Windows 權限控管不是你想的那樣](https://blog.miniasp.com/post/2009/03/16/IIS-6-Identity-and-Windows-Access-Control-is-not-what-you-expected)  
+[How to Secure a Site in IIS](https://www.liquidweb.com/kb/how-to-secure-a-site-in-iis/)  
+[政府組態基準(GCB)IIS 8.5](https://download.nccst.nat.gov.tw/attachfilegcb/02.108%E5%B9%B4GCB%E5%AF%A6%E4%BD%9C%E7%A0%94%E7%BF%92%E6%B4%BB%E5%8B%95_Microsoft%20IIS%208.5%E7%B5%84%E6%85%8B%E8%A8%AD%E5%AE%9A%E8%88%87%E5%AF%A6%E4%BD%9C%E7%B7%B4%E7%BF%92v1.0_1081111.pdf)  
+[政府組態基準導入與檢測 工具](https://www.4mosan.com/product/gcb-tw.php)  
+[.NET Security Application/Web Development - Overview](https://www.slideshare.net/chentientsai/net-security-applicationweb-development-overview)  
+[.NET Security Application/Web Development - Overview - 2](https://www.slideshare.net/chentientsai/net-security-applicationweb-development-part-ii)  
+[.NET Security Application/Web Development - Overview - 3](https://www.slideshare.net/chentientsai/net-security-applicationweb-development-part-iii)  
+[.NET Security Application/Web Development - Overview - 3](https://www.slideshare.net/chentientsai/net-security-applicationweb-development-part-iv-129410445)  
+

@@ -1,0 +1,124 @@
+---
+featured: true
+title:  透過 Powershell 部署 SQL 腳本到多個網站的資料庫
+date:   2021-06-05 01:01:01 +0800
+thumbnail:  implementing-a-automated-database-deployment.webp
+category:  PowerShell
+tags:   ['implementing-a-automated-database-deployment','sql','database','multi-site','database-deployment','powershell']
+description : 透過 Powershell 部署 SQL 腳本到多個網站的資料庫
+author : Mark ku
+---
+
+## 問題
+有一套系統，卻克隆 ( Clone )了很多個網站，每個站都是獨立的資料庫，因此部署資料庫時，過去需要人工去每一部部署腳本，此篇則要透過 Powershell 將一個週期開發的 sql 腳本，部署到多個網站的資料庫中。
+
+## 作法
+透過powershell 讀取資料庫設定檔( site.json ) 及 部署的資料庫腳本清單設定的 ( sql.json ) ，並由 sqlcmd 執行資料庫腳本。
+
+## 安裝 sqlcmd 公用工具 ( 可透過 command line 操作 sql server )
+1.至該網站下載
+https://docs.microsoft.com/zh-tw/sql/tools/sqlcmd-utility?view=sql-server-ver15
+
+2.開啟 powershell ，透過 sqlcmd 公用程式 來執行 sql 腳本。
+```
+& sqlcmd -S "(local)\instance1" -U a -P a -i "c:\temp\sql.sql"
+
+# To call a Win32 executable you want to use the call operator & like this:
+```
+## 建立設定檔
+1.建立 database 設定檔 ( site.json )
+
+```
+{
+	"servers": [
+		{
+			"name": "site1",
+			"server": "192.168.1.32",
+			"db": "CMS",
+			"user": "mark",
+			"password": "123",
+			"switch": "on"
+		},
+		{
+			"name": "site2",
+			"server": "192.168.1.31",
+			"db": "CMS2",
+			"user": "mark",
+			"password": "123",
+			"switch": "on"
+		}
+	]
+}
+```
+2.建立 sql 腳本設定檔( sql.json )
+
+```
+{
+	"20210605": [
+		{
+			"filename": "1.sql",
+			"desc": "create customer table"
+		},
+		{
+			"filename": "2.sql",
+			"desc": "create customer2 table"
+		}
+	],
+	"20210608": [
+		{
+			"filename": "3.sql",
+			"desc": "create customer3 table"
+		},
+		{
+			"filename": "4.sql",
+			"desc": "create customer4 table"
+		}
+	]	
+}
+```
+## 撰寫 powershell 腳本
+```
+$sitejson = Get-Content './site.json' | Out-String | ConvertFrom-Json
+$sqljson = Get-Content './sql.json' | Out-String | ConvertFrom-Json
+
+$releaseNo = Read-Host 'Please Enter ReleaseNo'
+Write-Host $sqljson."$releaseNo"
+
+foreach ($site in $sitejson.servers)
+{    
+	$n = $site.name
+	$s = $site.server
+    $d = $site.db
+    $u = $site.user
+    $p = $site.password
+	$switch = $site.switch
+	# Write-Host "$s,$d,$u,$p "
+		
+	if($switch -eq 'on')
+	{	
+	 Write-Host "Start DB deploy - $n($s)"	 
+	foreach ($sql in $sqljson."$releaseNo")
+	{    
+		$filename=$sql.filename;
+		Write-Host "execute $filename"	 
+		
+		& sqlcmd -S "$s" -d "$d" -U $u -P $p -f 950 -i  "./$filename" 	 	 
+	 
+	}	
+	Write-Host "Finish DB deploy - $n($s)"	
+	Write-Host ""
+	}
+}
+
+pause
+```
+## 如何使用
+1.對 RunSql.ps1 右鍵 >　用 powershell 執行
+![](https://i.imgur.com/c5VwuHw.webp)<br/>
+2.依據 sql.json 設定檔，輸入要部署的 Release No<br/>
+![](https://i.imgur.com/8bq8IRc.webp)<br/>
+3.SQL腳本執行成功的畫面
+![](https://i.imgur.com/jFkUDZ1.webp)<br/>
+補充：SQL腳本執行失敗的畫面
+![](https://i.imgur.com/mORBPSy.webp)<br/>
+

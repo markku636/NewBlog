@@ -1,0 +1,40 @@
+---
+featured: true
+title:  Powershell Mongodb 備份及還原筆記
+date:   2022-06-18 10:13:35 +0800
+thumbnail:  mongodb.webp
+category: PowerShell
+tags:   ['mongodb','tools','backup','restore']
+description : Powershell Mongodb 備份及還原筆記
+---
+
+# Mongodb tools backup & restore
+## 解決問題
+因為工作上需要用到改寫一套前端的 CMS系統，資料庫主要是 mongodb ，就記錄了一下如何備份及還原。
+
+## 備份原理
+主要是透過 PowerShell 腳本指令操作 Mongodb tools，達成備份。
+
+## 下載及安裝 mongodb tools
+https://www.mongodb.com/try/download/database-tools
+
+![](https://i.imgur.com/UhVoPfd.png)
+
+
+## Database Tools安裝完成後，按照下面路徑加入系統的環境變數PATH中：C:\Program Files\MongoDB\Tools\100\bin
+```
+C:\Program Files\MongoDB\Tools\100\bin
+```
+![](https://i.imgur.com/Mjk8dxs.png)
+
+
+## 備份指令
+```
+mongodump --host  127.0.0.1 --port 27017 --authenticationDatabase admin --username mark --password pass.1234 --out ./test
+```
+P.S. 如果沒有特別指定驗證資料庫，就預設填 admin
+
+## 還原指令
+```
+mongorestore  --host  127.0.0.1 --port 27017 --authenticationDatabase admin --username mark --password pass.1234 ---directoryperdb ./test
+```

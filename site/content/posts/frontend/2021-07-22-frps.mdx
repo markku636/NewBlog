@@ -1,0 +1,192 @@
+---
+featured: true
+title:  用 Google Cloud Platform 搭建內網穿透伺服器 ( Frp Server ) 
+date:   2021-07-22 01:01:01 +0800
+thumbnail:  reverse-proxy.webp
+category: Cloud
+tags:   ['frp','frp-c','reverse proxy']
+description : 用 Google Cloud Platform 搭建內網穿透伺服器 ( Frp Server ) 
+author : Mark ku
+---
+# 反向代理之 Part2 - 用 Google cloud platform 搭建內網穿透反向代理伺服器 ( Frp Server )
+## 解決問題
+先前一篇文章介紹過如何透過免費的 Frps 反向代理伺服器，將內網網站經過映射出去，但因為免費的真的太不穩定，BLOG 和 DEMO 網站，常常服務會掛掉，後來經網友推薦，Google 有免費體驗90天，並給予 300 美金的體驗費用，這篇就來介紹用 GCP (Google Cloud) 來自己架內網穿透伺服器 ( FRPS )
+
+## 首先，請申請 GCP 帳號及挷定信用卡
+
+## 登入 GCP 的後台 > 虛擬機器 (VM) 執行個體
+![](https://i.imgur.com/LNph6ly.webp)
+
+
+## 選擇地區為台灣，作業系統 Ubuntu ，選擇 f1-micro，預估費用一個月只要約 15X 元台幣，算是蠻實惠的。  
+![](https://i.imgur.com/qtpWIMy.png)
+
+
+## 主機建立好時，在菜單選單中找到 VPC 網路，將主機的ＩＰ改成靜態，這樣就ＩＰ就不會跑掉了。
+![](https://i.imgur.com/PukFeHZ.webp)
+
+![](https://i.imgur.com/TyPfbfU.webp)
+
+## 回到虛擬機器( VM ) 執行個體，對剛建立的主機開啟 SSH
+![](https://i.imgur.com/AuSmzRf.webp)
+
+## 接著會開啟瀏覽器版 SSH 中，依序輸入下面的 Linux 指令
+
+更新系統
+
+```
+sudo apt-get update
+sudo apt-get upgrade
+```
+
+FRP使用Go語言，大部分Linux主機都有預裝了，但如果你的沒有，可以先執行以下指令
+
+```
+sudo apt-get install bison ed gawk gcc libc6-dev make golang-go
+```
+
+接著你必須到FRP的Github上查看最新frps ，並下載他
+
+```
+wget https://github.com/fatedier/frp/releases/download/v0.39.0/frp_0.39.0_linux_amd64.tar.gz
+```
+
+解壓縮檔案並重新命名資料夾為 frp
+
+```
+tar -zxvf frp_0frp_0.39.0_linux_amd64.tar.gz
+mkdir /var/frps
+mv frp_0.36.2_linux_amd64/* /var/frps/
+cd frp
+```
+
+編輯 frps 的設定檔 (sudo vim frps.ini)
+
+```
+# frps.ini
+[common]
+bind_addr = 0.0.0.0
+bind_port = 7000
+vhost_http_port = 80
+vhost_https_port = 443
+dashboard_port = 7500
+dashboard_user = admin
+dashboard_pwd = 你的密碼
+authentication_method = token
+token = frpc 連線的 token 
+```
+
+執行
+```
+sudo ./frps -c ./frps.ini
+```
+
+## 在到 DNS 主機中設定域名
+![](https://i.imgur.com/wxhxp8T.webp)
+
+挷定 DNS 將 proxy.markkulab.net 指向 FRPS 主機
+![](https://i.imgur.com/Br3Kpe1.webp)
+11221
+挷定 CNAME，這樣訪問者訪問 blog.markkulab.net frps 就會指到指定用戶端映射的網站
+![](https://i.imgur.com/WHDoSYy.webp)
+
+![](https://i.imgur.com/7iCNmjK.webp)
+
+## frpc.ini 的設定
+
+```
+[common]
+server_addr = proxy.markkulab.net
+server_port = 7000
+auth_token = 你的密碼
+pool_count = 100
+
+[ShopCartHttps2]
+type = https
+custom_domains = shop.markkulab.net
+local_port = 888
+plugin = https2http
+plugin_local_addr = 127.0.0.1:888
+plugin_crt_path = /Public/shop_certificate.crt
+plugin_key_path = /Public/shop_private.key
+plugin_host_header_rewrite = 127.0.0.1
+plugin_header_X-From-Where = frp
+
+[blog]
+type = https
+local_port = 49183
+custom_domains = blog.markkulab.net
+plugin = https2http
+plugin_local_addr = 127.0.0.1:49183
+# HTTPS 证书相关的配置
+plugin_crt_path = /Public/blog_certificate.crt
+plugin_key_path = /Public/blog_private.key
+plugin_host_header_rewrite = 127.0.0.1
+plugin_header_X-From-Where = frp
+```
+
+## 完工
+訪問 https://shop.markkulab.net/ 聽說台灣 Google 的機房在嘉義，網站變超級快，也不會因為三不時就掛了，如果一個月不用100台幣，我會應該會持續付費下去。
+![](https://i.imgur.com/G28BhNe.webp)
+
+## 費用
+第一個月 300  
+第二個月 200  
+
+## 如果你需要重開機自動啟動，則需要額外註冊成服務
+### 在 /lib/systemd/system/ 增加設定檔
+
+```
+sudo vim /lib/systemd/system/frps.service
+
+````
+
+### 參考下面的設定檔格式修改
+```
+[Unit]
+Description=FRP Server
+After=network.target
+Wants=network.target
+
+[Service]
+Restart=on-failure
+RestartSec=5
+ExecStart=/var/frp/frps -c /var/frp/frps.ini
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### 啟動服務
+
+````
+sudo systemctl start frps.service //啟動 FRP Server 服務
+sudo systemctl stop frps.service //停止 FRP Server 服務
+sudo systemctl restart frps.service //重啟 FRP Server 服務
+sudo systemctl enable frps.service //開機時自動啟動 FRP Server 服務
+sudo systemctl disable frps.service //開機時不要啟動 FRP Server 服務
+sudo systemctl status frps.service //查看FRP Server 狀態
+sudo systemctl daemon-reload  // reload service
+```
+
+## Frps 後台畫面
+![](https://i.imgur.com/1wiQSb8.webp)
+![](https://i.imgur.com/Oh3mysM.webp)
+## 補充
+P.S. 記得 GCP 防火牆輸入要記得開，否則外網連不到。
+![](https://i.imgur.com/SeVXdeZ.webp)
+
+## GCP 免費計劃
+[免費計劃連結](https://cloud.google.com/free/docs/gcp-free-tier/?hl=zh-CN#compute)
+
+在免費試用期結束後，我們還是可以在限制的用量內免費使用特定產品。例如最常見的 Google Compute Engine 就提供了以下免費條件：  
+
+僅限美國地區「us-central1」、「us-east1」和「us-west1」  
+* 每月 1 個 f1-micro 執行個體每月 30 GB 硬碟空間
+* 每月 1 GB 網路輸出量 (從北美輸出至中國和澳洲以外的所有地區)
+
+f1 的方案 就算放在台灣一個月也只要  5.6 *27.82 (美金匯率) = 約 155 台幣左右
+![](https://i.imgur.com/nGMDwz8.png)
+
+
+

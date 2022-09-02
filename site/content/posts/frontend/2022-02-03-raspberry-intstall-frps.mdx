@@ -1,0 +1,128 @@
+---
+featured: true
+title:  樹莓派安裝 FRP SERVER
+date:   2022-02-03 01:01:01 +0800
+thumbnail:  reverse-proxy.webp
+tags:   ['frp','frp-c','reverse proxy']
+category: Infra
+description : 樹莓派安裝 FRP SERVER
+author : Mark ku
+---
+# 樹莓派安裝 FRP SERVER
+## 解決問題
+先前一篇文章介紹過如何透過 Google cloud 架設 Frps 反向代理伺服器，將內網網站經過映射出去，但因為網站越來越多，費用隨著而來也越來越高，一個月200~300，最後透過樹莓派自架 FRP SERVER。
+
+## 首先，下載最新版的 frps
+```
+wget https://github.com/fatedier/frp/releases/download/v0.39.0/frp_0.39.0_linux_arm.tar.gz
+```
+
+解壓縮檔案並重新命名資料夾為 frp
+
+```
+tar -zxvf frp_0.39.0_linux_arm.tar.gz
+mkdir /var/frps
+mv frp_0.39.0_linux_arm/* /var/frps/
+cd frp
+```
+
+編輯 frps 的設定檔 (sudo vim frps.ini)
+
+```
+# frps.ini
+[common]
+bind_addr = 0.0.0.0
+bind_port = 7000
+vhost_http_port = 80
+vhost_https_port = 443
+dashboard_port = 7500
+dashboard_user = admin
+dashboard_pwd = 你的密碼
+authentication_method = token
+token = frpc 連線的 token 
+```
+
+執行
+```
+sudo ./frps -c ./frps.ini
+```
+
+## 在到 DNS 主機中設定域名
+![](https://i.imgur.com/wxhxp8T.webp)
+
+挷定 DNS 將 proxy.markkulab.net 指向 FRPS 主機
+![](https://i.imgur.com/Br3Kpe1.webp)
+11221
+挷定 CNAME，這樣訪問者訪問 blog.markkulab.net frps 就會指到指定用戶端映射的網站
+![](https://i.imgur.com/WHDoSYy.webp)
+
+![](https://i.imgur.com/7iCNmjK.webp)
+
+## frpc.ini 的設定
+
+```
+[common]
+server_addr = proxy.markkulab.net
+server_port = 7000
+auth_token = 你的密碼
+pool_count = 100
+
+[ShopCartHttps2]
+type = https
+custom_domains = shop.markkulab.net
+local_port = 888
+plugin = https2http
+plugin_local_addr = 127.0.0.1:888
+plugin_crt_path = /Public/shop_certificate.crt
+plugin_key_path = /Public/shop_private.key
+plugin_host_header_rewrite = 127.0.0.1
+plugin_header_X-From-Where = frp
+
+[blog]
+type = https
+local_port = 49183
+custom_domains = blog.markkulab.net
+plugin = https2http
+plugin_local_addr = 127.0.0.1:49183
+# HTTPS 证书相关的配置
+plugin_crt_path = /Public/blog_certificate.crt
+plugin_key_path = /Public/blog_private.key
+plugin_host_header_rewrite = 127.0.0.1
+plugin_header_X-From-Where = frp
+```
+
+
+## 設置重開機自動啟動
+### 在 /lib/systemd/system/ 增加設定檔
+
+```
+sudo vim /lib/systemd/system/frps.service
+````
+
+### 參考下面的設定檔格式修改
+```
+[Unit]
+Description=FRP Server
+After=network.target
+Wants=network.target
+
+[Service]
+Restart=on-failure
+RestartSec=5
+ExecStart=/var/frps/frps -c /var/frps/frps.ini
+```
+
+### 啟動服務
+
+````
+sudo systemctl start frps.service //啟動 FRP Server 服務
+sudo systemctl stop frps.service //停止 FRP Server 服務
+sudo systemctl restart frps.service //重啟 FRP Server 服務
+sudo systemctl enable frps.service //開機時自動啟動 FRP Server 服務
+sudo systemctl disable frps.service //開機時不要啟動 FRP Server 服務
+sudo systemctl status frps.service //查看FRP Server 狀態
+sudo systemctl daemon-reload  // reload service
+```
+
+### 最後
+發現網路速度反而比 Google Cloud 快，最後就把 Google Cloud當備援線路。

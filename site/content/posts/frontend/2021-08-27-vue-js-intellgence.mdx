@@ -1,0 +1,83 @@
+---
+featured: true
+title: Vue(Non Type Script) 搭配 VsCode 配置，像 Typescript 般，在專案開發時擁有自動智慧提示
+date:   2021-09-09 01:01:01 +0800
+thumbnail:  vue-intellisense.webp
+category: Frontend
+tags:   ['vue','intellisense']
+description : Vue(Non Type Script) 搭配 VsCode 配置，像 Typescript 般，在專案開發時擁有自動智慧提示
+author : Mark ku
+---
+# Vue(Non Type Script) 搭配 VsCode 配置，像 Typescript 般，在專案開發時擁有自動智慧提示
+## 問題
+使用過 Type script 開發後，都會愛上有自動提示的好處，但 Vue 有些沒有 Type script 舊專案，預設就沒辦法在 VS CODE 中使用自動提示的功能，但其實透過vs code 配置並搭配 Vetur 的套件，也能有自動提示的功能，可以大大提昇前端開發的生產力。
+
+## 功能
+
+Auto Import Method
+![](https://i.imgur.com/hySzthP.png)
+
+Auto Resolve path and file 
+![](https://i.imgur.com/gml6il5.png)
+
+## 在專案目錄下增加  jsconfig.json
+```
+{
+    "compilerOptions": {
+		"module": "commonjs",
+        "target": "es6",
+        "checkJs": true,
+        "baseUrl": ".",
+        "noLib": false,
+        "paths": {
+            "@/*": [
+                "src/*"
+            ],
+            "@components/*": [
+                "src/components/*"
+            ],
+            "@views/*": [
+                "src/views/*"
+            ],
+            "@base/*": [
+                "src/base/*"
+            ],
+            "@utils/*": [
+                "src/utils/*"
+            ]
+        }
+    },
+    "include": [
+        "./src/**/*"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
+```
+## 設定
+1. 檔案喜好設定 > 設定  
+![](https://i.imgur.com/mg4kgQo.png)  
+
+2. 搜尋 check js (要有空格)
+![](https://i.imgur.com/xC22kZj.png)  
+
+3. 並勾選 Check js
+![](https://i.imgur.com/RQc6Io9.png)  
+ 
+4. VS CODE 安裝 Vetur  
+![](https://i.imgur.com/KxCrlNE.png)  
+
+5. 重啟 vs code 專案，載入完成即可以自動引入的功能。
+
+6. 關閉 vuetur 的 Vaildate 驗證功能
+![](https://i.imgur.com/E89L5am.jpg)
+
+
+
+## 補充 (tabnine 其實也不錯，在開發時也會自動完成)
+https://www.tabnine.com/?utm_term=&utm_campaign=&utm_source=adwords&utm_medium=ppc&hsa_acc=4311736126&hsa_cam=14293437790&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3&gclid=Cj0KCQjw4eaJBhDMARIsANhrQADVYEIejSAO4VnG9iBQs4ryKwPZJW4m6lXTt-QNjtJBOUTpJox-AfMaAsyCEALw_wcB
+
+## 參考文件
+https://vuejs.github.io/vetur/guide/setup.html
+

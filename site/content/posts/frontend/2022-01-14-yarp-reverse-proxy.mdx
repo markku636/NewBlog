@@ -1,0 +1,84 @@
+---
+featured: true
+title: 用微軟的開源的 YARP 反向代理打造專屬的負載平衡軟體及多功能網關
+date:  2022-01-14 01:01:01 +0800
+thumbnail: balance.webp
+category: Infra
+tags: ['yarp','reverse proxy','load balance']
+description : 用微軟的開源的 YARP 反向代理打造專屬的負載平衡軟體及多功能網關
+author : Mark ku
+---
+# 用微軟的開源的 YARP 反向代理打造專屬的負載平衡軟體及多功能網關
+## 前言
+有用過負載平衡器，應該多多少少都有聽過業界知名的 F5 Networks 公司的 F5 的負載平衡器，但一台要價將近 20~30萬，對於中小型企業來說，這是不小的費用，如果你想導入負載平衡器，但預算又沒這麼寬裕，可以考慮微軟的開源 YARP 來實作軟體負載平衡。  
+
+## 軟體負載平衡優點有
+*  橫向擴展( Scale Up )伺服器
+*  Api 閘道，動態變換 API 路由
+*  滾動式部署 ( Rolling Deploy )
+*  停機部署時掛上維護頁面 ( Downtime )
+*  條件化擴充防止 DDOS 的攻擊
+*  Search Engine Bot  直接轉發到 SSR 站台
+
+## 何謂負載平衡
+在多台腦間分配所要處理的任務，讓網路連接、CPU、記憶體、磁碟存取IO或其他資源中，最大化吞吐率、最小化回應時間、同時也避免單一伺服器過載，造成用戶端不回應，以達到最佳化資源使用。
+
+且在這雲端時代，透過負載平衡，可以輕易的橫向擴充伺服器( Scale Up )，假設一小電商網站平常的用量，只需要6核 12 緖的 CPU，但遇到雙11 或週年慶活動時，伺服器常常會過載，無法支撐這麼多用戶，這時候可以租用雲端服務主機，如: Azure、GCP AWS ，並把 加入到負載平衡主機中，這時就達到彈性調度伺服器承載更多用戶的功效。
+
+## 我的網路拓樸
+![](https://i.imgur.com/DHlLuaS.png)
+
+# 負載平衡的長連接機制
+大部份的負載平衡都會提供兩種 Sticky Cookie 及 CustomHeader 來保持與用戶端的持續連接，YARP 也支援這兩種機制。
+
+## Sticky Cookie
+在多台網頁伺服器主機的環境下，為了確保一個用戶訪問同一台伺服器，負載平衡器(LTM) 在網頁回傳時，會塞一個Cookie，網頁重新整理後，LTM 就會依據 Cookie 連接到原本的伺服器
+
+## CustomHeader
+在瀏覽器 3rd Cookie 的限制越來越嚴格的情況下，有越來越多的網站因為有機會被鑲嵌，因此不能用 cookie ，而此種方法 LTM 會在 CustomHeader Reponse header 傳遞持續連接的 token ，前端接收到可以將其存起來，下次請求在帶至後端，這樣用戶就能夠持續連在同一台伺服器中。
+
+## 我主要參考了這位大大的文章，並 Fork 他的專案，並修掉了一些bug 
+[文章連結](https://codingnote.cc/zh-tw/p/355452/)  
+[專案連結](https://github.com/fanslead/ReverseProxy.Store/)
+
+## 下載及啟動專案，輸入密碼 password 進入後台 (需要安裝 net core 6 sdk 和 runtime)
+
+## 接下來，介紹幾種常見的規則配置
+
+## 一、整個網站的請求轉發
+### 1、至伺服器群組 > 新增伺服器群組
+![](https://i.imgur.com/J3MY0MJ.png)
+
+### 2、至路由列表 > 新增  
+![](https://i.imgur.com/XYWtpxA.png)
+選取先前建立的伺服器群組，並依據下圖來配置  
+Path = {**catch-all}   
+Transforms 1 PathPattern = {**catch-all}   
+Transforms 2 RequestHeadersCopy = true   
+
+## 二、指定 API 路由轉發
+### 1、至伺服器群組 > 新增伺服器群組
+![](https://i.imgur.com/6rSdzGA.png)
+
+### 2、至路由列表 > 新增  
+選取先前建立的伺服器群組，並依據下圖來配置  
+Path = /api/{**remider}  
+Transforms 1 PathPrefix =  /api/v1/{**remider}  
+![](https://i.imgur.com/EBUTuXd.png)
+
+## 三、SignalR 轉發
+可以參考這篇[文章](https://www.cnblogs.com/fanshaoO/p/15561726.html)配置
+
+## 四、LTM 長連接配置
+### 1.Cookie 長連接配置
+![](https://i.imgur.com/y0UjT5u.png)
+
+### 2.Custom Header 長連接配置
+![](https://i.imgur.com/JmvIQ8L.png)
+
+## 五、 建議要將健康檢查的主動偵測勾選，YARP 主動偵測到一台主機掛了， 就不會派發任務給該台伺服器
+![](https://i.imgur.com/Dr0dcCG.png)
+
+## 官方文件
+前面談到的所有的後台 UI 操作都對應的是 YARP 的設定檔，如果有興趣，可以仔細研讀一下。  
+[官方文件](https://microsoft.github.io/reverse-proxy)

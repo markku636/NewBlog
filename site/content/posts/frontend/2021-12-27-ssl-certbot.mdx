@@ -1,0 +1,71 @@
+---
+featured: true
+title: Windows Certbot 自動申請 Let’s Encrypt 免費的 SSL憑證筆記
+date:  2021-12-27 01:01:01 +0800
+thumbnail: certbot.webp
+category: Infra
+tags: ['ssl','certbot','windows']
+description : Windows Certbot 自動申請 Let’s Encrypt 免費的 SSL憑證筆記
+author : Mark ku
+---
+# Windows Certbot 自動申請 Let’s Encrypt SSL憑證筆記
+
+## 解決問題
+let's encrypt 是一套老牌，免費的 SSL 憑證申請服務，但每一次只能申請三個月，所以每三個月要手動在申請一次憑證，這樣的操作很麻煩，透過 certbot 則可以透過指令化及自動排程去申請 let's encrypt 的 SSL 免費憑證。
+
+## 申請憑證
+### 下載及安裝 Certbot
+[[CertBot 安裝檔下載位置]](https://github.com/certbot/certbot/releases/download/v1.22.0/certbot-beta-installer-win32.exe)
+
+請用系統管理員身份執行開啟命令提示字元（或 PowerShell 命令列視窗）
+切到目錄C:\Program Files (x86)\Certbot\bin ，或將此指令集加到系統環境變數。  
+測試一下 Certbot，執行：
+```
+certbot –-version
+certbot -h
+```
+### 用 power shell 系統管理權限執行
+
+```
+certbot certonly --manual -m a4756830@gmail.com -d *.letgo.com.tw 
+certbot certonly --manual -m a4756830@gmail.com -d *.markkulab.net
+```
+
+### 複製 Certbot 提供的 DNS TXT 記錄
+![](https://i.imgur.com/OdtU1ue.png)
+
+### 至您的 DNS 主機後台，新增一筆 TXT 的記錄，並貼上先前複製的 TXT 記錄
+![](https://i.imgur.com/ImAn2fs.png)
+
+### 按下 Enter 繼續，則會 C:\Certbot\live 路徑下產生憑證
+![](https://i.imgur.com/0q7ll6A.png)
+
+### 此時就可以複製你的憑證到相關的主機
+
+## 更新憑證
+### 更新憑證指令  - 憑證到期前30天才能更新SSL憑證，只要透過一行指令，就可讓 Certbot 幫我們自動更新好憑證，但似乎只有 Nginx 和 Apache 才有辦法自動 Renew 憑證
+
+```
+certbot renew
+```
+
+P.S. 不過由於這邊通常是剛申請的，直接執行這個指令的話，應該都會出現「Cert not yet due for renewal」告訴使用者還不需要更新。
+
+### 測試憑證是否可以更新的指令
+```
+certbot renew --dry-run
+```
+
+## 後來我寫一個腳本，透過腳本手動取得憑證，複製憑證到我的 frp server 中
+```
+certbot certonly --manual -m a4756830@gmail.com -d *.letgo.com.tw 
+certbot certonly --manual -m a4756830@gmail.com -d *.markkulab.net
+NET USE X: \\192.168.50.52\Container\data
+robocopy C:\Certbot\live X:\frpc /E
+NET USE X: /delete
+```
+
+
+## 參考資料
+[參考資料 - 1](http://tech.smallya.net/2021/11/28/certbot-lets-encrypt-ssl%E6%86%91%E8%AD%89-iis-%E5%A4%9A%E5%9F%9F%E5%90%8D/)  
+[參考資料 - 2](https://blog.miniasp.com/post/2021/02/11/Create-SSL-TLS-certificates-from-LetsEncrypt-using-Certbot)

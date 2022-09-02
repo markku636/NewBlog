@@ -1,0 +1,61 @@
+---
+featured: true
+title:  用Qnap Nas 的 Container Station 架設自己的 Jekyll Markdown Blog
+date:   2021-04-14 15:01:35 +0800
+thumbnail:  jekyll.webp
+category: Infra
+tags:   ['Jekyll']
+description : 用Qnap Nas 的 Container Station 架設自己的 Jekyll Markdown Blog
+author : Mark ku
+---
+# 用Qnap Nas Container Station 架設自己的 Jekyll Markdown Blog
+
+## 問題
+
+1. 現行團隊中每個人都有自己的Markdown 文件，久而久之，文件一多時，無法有效管理。
+2. 因為現行的 Hackmd 連結很多，新進同仁，都額外花時整理連結。
+3. 無法對文件的歸類及搜尋。
+
+## 為何要使用 Jekyll ?
+1. 幫助團隊對技術及知識文件的管理
+2. 擁有分頁及搜尋功能
+3. 可以透過Tag 有效歸類
+4. 採用 Markdown 語法
+5. 免費
+6. 穩定且使用者眾多( Github 星星數 42.5k up)
+
+## 缺點
+1. 沒有線上即時編輯器
+
+## 硬體環境
+採用 QNAP TS-253D 的 Container Station
+
+## 安裝方式
+1. 建立 > 搜尋 採用docker hub 上的 "jekyll/jekyll" 映像檔
+
+![](https://i.imgur.com/IPIukyZ.webp)
+
+2. 命令 輸入啟動命令，並設定 Blog 文件 放置位置
+jekyll serve --source /jekyll_data
+![](https://i.imgur.com/gkgDX8d.webp)
+
+3. 掛載本機磁碟映射 Blog 文件存放位置
+![](https://i.imgur.com/GxGj8CM.webp)
+
+4. Docker 啟動後，透過開啟終端機，安裝模板要用到的 tag 套件
+gem install jekyll-tagging
+![](https://i.imgur.com/NioErlz.webp)
+
+5. 接著可以到以下網站找到你
+本案例採用 [zolan](http://jekyllthemes.org/themes/zolan/) 模板，下載後解壓縮，並放進本機磁碟映射的存放位置。
+![](https://i.imgur.com/wmHB3rr.webp)
+
+6. 接著重新啟動你的 Docker ，點選『連結』就能看到你的 Markdown  Blog 了。
+![](https://i.imgur.com/kH1RMX1.webp)
+
+## 模板資源
+1. 免費
+http://jekyllthemes.org/
+2. 付費
+https://jekyllthemes.io/
+
