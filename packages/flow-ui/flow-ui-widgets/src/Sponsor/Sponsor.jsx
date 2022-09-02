@@ -38,7 +38,7 @@ const Sponsor = props => {
 
 const sponsorQuery = graphql`
   query SponsorQuery {
-    banner: file(absolutePath: { regex: "/sponsor.(jpeg|jpg|gif|png)/" }) {
+    banner: file(absolutePath: { regex: "/sponsor.(jpeg|jpg|gif|png|webp)/" }) {
       childImageSharp {
         gatsbyImageData(
           width: 342

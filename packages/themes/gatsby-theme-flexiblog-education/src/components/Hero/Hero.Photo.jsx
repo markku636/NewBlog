@@ -32,7 +32,7 @@ export default () => {
 
 const heroQuery = graphql`
   query HeroQuery {
-    file(absolutePath: { regex: "/hero.(jpeg|jpg|gif|png)/" }) {
+    file(absolutePath: { regex: "/hero.(jpeg|jpg|gif|png|webp)/" }) {
       publicURL
     }
   }

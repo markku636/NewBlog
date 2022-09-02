@@ -28,7 +28,7 @@ export const HeaderLogo = ({ ...props }) => {
 const logoQuery = graphql`
   query LogoQuery {
     logo: file(
-      absolutePath: { regex: "/logo.(jpeg|jpg|gif|png)/" }
+      absolutePath: { regex: "/logo.(jpeg|jpg|gif|png|webp)/" }
       sourceInstanceName: { eq: "asset" }
     ) {
       childImageSharp {
@@ -41,7 +41,7 @@ const logoQuery = graphql`
       }
     }
     logoDark: file(
-      absolutePath: { regex: "/logo-dark.(jpeg|jpg|gif|png)/" }
+      absolutePath: { regex: "/logo-dark.(jpeg|jpg|gif|png|webp)/" }
       sourceInstanceName: { eq: "asset" }
     ) {
       childImageSharp {

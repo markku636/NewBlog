@@ -34,7 +34,7 @@ export default () => {
 
 const heroQuery = graphql`
   query HeroQuery {
-    avatar: file(absolutePath: { regex: "/hero.(jpeg|jpg|gif|png)/" }) {
+    avatar: file(absolutePath: { regex: "/hero.(jpeg|jpg|gif|png|webp)/" }) {
       childImageSharp {
         regular: gatsbyImageData(
           width: 320

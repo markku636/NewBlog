@@ -76,7 +76,7 @@ const BannerWide = () => {
 
 const bannerWideQuery = graphql`
   query BannerWideQuery {
-    file(absolutePath: { regex: "/banner_wide.(jpeg|jpg|gif|png)/" }) {
+    file(absolutePath: { regex: "/banner_wide.(jpeg|jpg|gif|png|webp)/" }) {
       hero: childImageSharp {
         regular: resize(width: 1920, height: 320, cropFocus: CENTER) {
           src

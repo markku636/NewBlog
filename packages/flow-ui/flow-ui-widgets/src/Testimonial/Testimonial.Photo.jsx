@@ -32,7 +32,7 @@ export default () => {
 
 const testimonialQuery = graphql`
   query TestimonialQuery {
-    file(absolutePath: { regex: "/testimonial.(jpeg|jpg|gif|png)/" }) {
+    file(absolutePath: { regex: "/testimonial.(jpeg|jpg|gif|png|webp)/" }) {
       publicURL
     }
   }
