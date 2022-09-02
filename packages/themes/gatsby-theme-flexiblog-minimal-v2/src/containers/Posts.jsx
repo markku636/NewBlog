@@ -12,7 +12,7 @@ const Posts = ({ data: { paginatedPosts = {}, posts }, ...props }) => {
 
   return (
     <Layout {...props}>
-      <Seo title='Home' />
+      <Seo title='關於我' />
       <Hero>
         <HeroComponent {...props} />
       </Hero>

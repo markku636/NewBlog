@@ -40,11 +40,11 @@ module.exports = {
     //Header Menu Items
     headerMenu: [
       {
-        name: 'Home',
+        name: '關於我',
         slug: '/'
       },
       {
-        name: 'Contact',
+        name: '聯繫我',
         slug: '/contact'
       }
     ],

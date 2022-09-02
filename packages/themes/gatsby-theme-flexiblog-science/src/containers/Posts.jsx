@@ -18,7 +18,7 @@ const Posts = ({
 
   return (
     <Layout {...props}>
-      <Seo title='Home' />
+      <Seo title='關於我' />
       <Hero
         pt={4}
         pb={5}

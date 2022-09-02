@@ -14,7 +14,7 @@ const Posts = ({
 
   return (
     <Layout {...props}>
-      <Seo title='Home' />
+      <Seo title='關於我' />
       {props.location.pathname === basePath && (
         <>
           <Divider />
@@ -71,7 +71,7 @@ const Posts = ({
         </>
       )}
       <Divider />
-      <Stack title='Recently Published'>
+      <Stack title='近期文章'>
         <Main>
           <CardList
             nodes={paginatedPosts.nodes}

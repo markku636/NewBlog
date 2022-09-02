@@ -19,7 +19,7 @@ const Posts = ({ data: { paginatedPosts = {} }, ...props }) => {
 
   return (
     <Layout {...props}>
-      <Seo title='Home' />
+      <Seo title='關於我' />
       <Hero sx={{ bg: `contentBg` }}>
         <HeroComponent {...props} />
       </Hero>
@@ -28,7 +28,7 @@ const Posts = ({ data: { paginatedPosts = {} }, ...props }) => {
         <Main>
           <CardList
             variant={['horizontal-md', 'horizontal']}
-            title='Recently Published'
+            title='近期文章'
             nodes={paginatedPosts.nodes}
             columns={[1]}
           />

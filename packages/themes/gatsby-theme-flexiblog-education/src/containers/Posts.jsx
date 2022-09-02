@@ -12,7 +12,7 @@ const Posts = ({ data: { posts = {}, featuredPosts = {} }, ...props }) => {
 
   return (
     <Layout {...props}>
-      <Seo title='Home' />
+      <Seo title='關於我' />
       <Divider />
       <Stack>
         <Main>

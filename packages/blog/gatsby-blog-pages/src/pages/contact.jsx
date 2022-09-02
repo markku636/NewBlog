@@ -9,7 +9,7 @@ import Commitment from '@widgets/Commitment'
 
 const PageContact = props => (
   <Layout {...props}>
-    <Seo title='Contact' />
+    <Seo title='聯繫我' />
     <Divider />
     <Stack>
       <Main>

@@ -33,10 +33,10 @@ export default () => (
     </Heading>
     <Box variant='buttons.group'>
       <Button as={Link} to='/contact'>
-        聯繫我
+        Contact
       </Button>
       <Button variant='white' as={Link} to='/about'>
-        About Me
+        關於我
       </Button>
     </Box>
   </>

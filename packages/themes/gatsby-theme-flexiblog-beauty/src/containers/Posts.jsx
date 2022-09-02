@@ -34,7 +34,7 @@ const Posts = ({
 
   return (
     <Layout {...props}>
-      <Seo title='Home' />
+      <Seo title='關於我' />
       <Hero full sx={{ position: `relative` }}>
         <CardList
           nodes={featuredPosts.nodes}

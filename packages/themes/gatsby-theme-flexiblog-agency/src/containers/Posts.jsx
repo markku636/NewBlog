@@ -18,7 +18,7 @@ const Posts = ({
 
   return (
     <Layout {...props}>
-      <Seo title='Home' />
+      <Seo title='關於我' />
       <Divider />
       <Stack effectProps={{ effect: false }}>
         <Categories categories={categories} variant='horizontal' omitTitle />

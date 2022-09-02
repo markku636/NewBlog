@@ -24,7 +24,7 @@ export const FooterLogo = () => (
       © {new Date().getFullYear()}, All Rights Reserved.
     </Box>
     <Box>
-      <PoweredByGatsby />
+      {/* <PoweredByGatsby /> */}
     </Box>
   </>
 )
