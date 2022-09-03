@@ -5,6 +5,7 @@ import rv from '@components/utils/buildResponsiveVariant'
 
 const CardMediaImage = ({ variant, loading, image, title }) => (
   <Img
+  backgroundColor="#FFFFFF"
     image={image}
     loading={loading}
     alt={title}
