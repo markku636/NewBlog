@@ -20,9 +20,7 @@ const Posts = ({ data: { paginatedPosts = {} }, ...props }) => {
   categories = categories.map(function (category) {       
     category.totalCount = allPost?.filter(z =>  z.category && z.category?.id === category.id).length
     return category
-  })
-
-  debugger
+  })  
 
   return (
     <Layout {...props}>
