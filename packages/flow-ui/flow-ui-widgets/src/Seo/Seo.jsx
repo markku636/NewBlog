@@ -4,6 +4,7 @@ import { helmetJsonLdProp } from 'react-schemaorg'
 import { getSrc } from 'gatsby-plugin-image'
 import useSiteMetadata from '@helpers-blog/useSiteMetadata'
 import getImageVariant from '@components/utils/getImageVariant'
+import { useStaticQuery, graphql } from 'gatsby'
 
 const Seo = ({
   title,
@@ -28,10 +29,19 @@ const Seo = ({
 
   description = excerpt || description || site.description
 
-  const imageSrc = getSrc(getImageVariant(thumbnail, 'hero'))
-  const imageUrl =
-    imageSrc &&
-    (imageSrc.startsWith('//') ? imageSrc : siteUrl && `${siteUrl}${imageSrc}`)
+  let imageSrc = ''
+  let imageUrl = ''
+  if (!thumbnail) {
+    const data = useStaticQuery(heroQuery)
+    imageSrc = data?.file?.publicURL
+    imageUrl = imageSrc
+   
+  } else {
+    imageSrc = getSrc(getImageVariant(thumbnail, 'hero'))
+    imageUrl =
+      imageSrc &&
+      (imageSrc.startsWith('//') ? imageSrc : `${siteUrl}${imageSrc}`)
+  }
 
   /**
    * Meta Tags
@@ -137,3 +147,11 @@ const Seo = ({
 }
 
 export default Seo
+
+const heroQuery = graphql`
+  query HeroQuery1 {
+    file(absolutePath: { regex: "/hero.(jpeg|jpg|gif|png|webp)/" }) {
+      publicURL
+    }
+  }
+`
