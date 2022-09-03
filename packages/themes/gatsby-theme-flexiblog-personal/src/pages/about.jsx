@@ -43,14 +43,14 @@ export default props => {
   return (
     <Layout {...props}>
       <Seo title='About' />
-      <Divider />
+      {/* <Divider /> */}
       <Stack>
         <Main>
           <PageTitle
             header='關於我'
-            subheader='Hi, I’m Mark.Ku. 我是一位網頁軟體工程師，喜歡研究各種技術的解決方案，並用於實踐商業上、興趣是鐵人三項及登山、攝影，這個BLOG主要分享工作及生活的點滴。'
+            subheader=''
           />
-          <Divider />
+          {/* <Divider /> */}
           <Box sx={styles.imageWrapper}>
             <Img image={image} />
             <Button as={GLink} to='/contact' sx={styles.button}>
@@ -58,14 +58,15 @@ export default props => {
             </Button>
           </Box>
           <Divider />
-          <Flex sx={styles.grid}>
+          <Flex sx={styles.grid}>          
             <Box sx={styles.column}>
               <Section title='My Story'>
+              <Card variant='paper'>
                 <Text variant='p'>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam
-                  ac elit nec felis faucibus pellentesque in sit amet neque.
+                Hi, I’m Mark.Ku. 我是一位網頁軟體工程師，喜歡研究各種技術的解決方案，並用於實踐商業上、興趣是鐵人三項及登山、攝影，這個BLOG主要分享工作及生活的點滴。
                 </Text>
-                <Text variant='p'>
+                </Card>
+                {/* <Text variant='p'>
                   Nulla est elit, feugiat et lacinia nec, aliquam sit amet est.
                   Ut in consequat ipsum, in sagittis felis.
                 </Text>
@@ -99,10 +100,10 @@ export default props => {
                 </Text>
                 <Text variant='p'>
                   Eum ludus iudico ne. Vel labitur habemus vituperata vix!
-                </Text>
+                </Text> */}
               </Section>
             </Box>
-            <Box sx={styles.column}>
+            {/* <Box sx={styles.column}>
               <Section title='Art Directing'>
                 <Card variant='paper'>
                   During the brainstorming process, art directors, co-workers,
@@ -125,7 +126,7 @@ export default props => {
                   information in a way that is both accessible and memorable.
                 </Card>
               </Section>
-            </Box>
+            </Box> */}
           </Flex>
         </Main>
       </Stack>
@@ -139,7 +140,7 @@ const aboutQuery = graphql`
       childImageSharp {
         gatsbyImageData(
           width: 1140
-          height: 600
+          height: 800
           transformOptions: { cropFocus: NORTH }
         )
       }
