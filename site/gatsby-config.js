@@ -95,10 +95,10 @@ module.exports = {
         name: '關於我',
         slug: '/about'
       },
-      {
-        name: '聯繫我',
-        slug: '/contact'
-      }
+      // {
+      //   name: '聯繫我',
+      //   slug: '/contact'
+      // }
     ],
 
     //Footer Menu Items (2 Sets)
@@ -114,10 +114,10 @@ module.exports = {
             name: 'About Us',
             slug: '/about'
           },
-          {
-            name: 'Contact Us',
-            slug: '/contact'
-          }
+          // {
+          //   name: 'Contact Us',
+          //   slug: '/contact'
+          // }
         ]
       },
       {
