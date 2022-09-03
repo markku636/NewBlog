@@ -10,12 +10,19 @@ import Tags from '@widgets/Tags'
 import NewsletterCompact from '@widgets/NewsletterCompact'
 import Social from '@widgets/Social'
 import HeroComponent from '../components/Hero/Hero'
-import { useBlogTags, useBlogCategories } from '@helpers-blog'
+import { useBlogTags, useBlogCategories, useAllPosts } from '@helpers-blog'
 
 const Posts = ({ data: { paginatedPosts = {} }, ...props }) => {
   const { pageContext: { services = {}, basePath } = {} } = props
   const tags = useBlogTags()
-  const categories = useBlogCategories()
+  let categories = useBlogCategories()
+  const allPost = useAllPosts()
+  categories = categories.map(function (category) {       
+    category.totalCount = allPost?.filter(z =>  z.category && z.category?.id === category.id).length
+    return category
+  })
+
+  debugger
 
   return (
     <Layout {...props}>

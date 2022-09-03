@@ -90,7 +90,7 @@ export const IconButton = ({
       </Box>
     )}
     <Heading variant='h4' as='span' sx={styles.text}>
-      {name}{number}
+      {name} ({number})
     </Heading>
   </Button>
 )
