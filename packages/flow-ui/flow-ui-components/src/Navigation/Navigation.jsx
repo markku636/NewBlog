@@ -30,7 +30,8 @@ const NavigationItem = ({
   Icon,
   color,
   variant,
-  iconOnly
+  iconOnly,
+  totalCount
 }) => {
   let linkProps = {
     sx: { variant: iconOnly ? 'icon' : variant }
@@ -62,7 +63,7 @@ const NavigationItem = ({
   ) : (
     <NavLink {...linkProps}>
       {Icon && <Icon color={color} />}
-      {name}
+      {name} {totalCount && <>({totalCount})</>}
     </NavLink>
   )
 }
