@@ -34,7 +34,7 @@ const Seo = ({
   if (!thumbnail) {
     const data = useStaticQuery(heroQuery)
     imageSrc = data?.file?.publicURL
-    imageUrl = imageSrc
+    imageUrl = 'https://www.markkulab.net' + imageSrc
    
   } else {
     imageSrc = getSrc(getImageVariant(thumbnail, 'hero'))
