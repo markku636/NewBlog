@@ -46,10 +46,7 @@ export default props => {
       {/* <Divider /> */}
       <Stack>
         <Main>
-          <PageTitle
-            header='關於我'
-            subheader=''
-          />
+          <PageTitle header='關於我' subheader='' />
           {/* <Divider /> */}
           <Box sx={styles.imageWrapper}>
             <Img image={image} />
@@ -58,13 +55,14 @@ export default props => {
             </Button>
           </Box>
           <Divider />
-          <Flex sx={styles.grid}>          
+          <Flex sx={styles.grid}>
             <Box sx={styles.column}>
               <Section title='My Story'>
-              <Card variant='paper'>
-                <Text variant='p'>
-                Hi, I’m Mark.Ku. 我是一位網頁軟體工程師，喜歡研究各種技術的解決方案，並用於實踐商業上、興趣是鐵人三項及登山、攝影，這個BLOG主要分享工作及生活的點滴。
-                </Text>
+                <Card variant='paper'>
+                  <Text variant='p'>
+                    Hi, I’m Mark.Ku.
+                    我是一位網頁軟體工程師，喜歡研究各種技術的解決方案，並用於實踐商業上、興趣是鐵人三項及登山、攝影，這個BLOG主要分享工作及生活的點滴。
+                  </Text>
                 </Card>
                 {/* <Text variant='p'>
                   Nulla est elit, feugiat et lacinia nec, aliquam sit amet est.
@@ -128,6 +126,15 @@ export default props => {
               </Section>
             </Box> */}
           </Flex>
+          {/* <div class='iframe-container'>
+            <iframe
+              style='width:100%;height:500px'
+              src='https://www.youtube.com/embed/QXxuNpwIk4I'
+              frameborder='0'
+              allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture'
+              allowfullscreen
+            ></iframe>
+          </div> */}
         </Main>
       </Stack>
     </Layout>
