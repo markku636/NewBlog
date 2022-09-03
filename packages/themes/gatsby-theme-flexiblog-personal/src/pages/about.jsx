@@ -50,9 +50,9 @@ export default props => {
           {/* <Divider /> */}
           <Box sx={styles.imageWrapper}>
             <Img image={image} />
-            <Button as={GLink} to='/contact' sx={styles.button}>
+            {/* <Button as={GLink} to='/contact' sx={styles.button}>
               Contact Me
-            </Button>
+            </Button> */}
           </Box>
           <Divider />
           <Flex sx={styles.grid}>

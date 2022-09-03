@@ -32,8 +32,6 @@ const Posts = ({ data: { paginatedPosts = {} }, ...props }) => {
             nodes={paginatedPosts.nodes}
             columns={[1]}
           />
-          <Divider />
-          <Pagination {...paginatedPosts.pageInfo} basePath={basePath} />
         </Main>
         <Sidebar>
           <Categories categories={categories} />
@@ -53,7 +51,7 @@ const Posts = ({ data: { paginatedPosts = {} }, ...props }) => {
       </Stack>
       <Divider />
       <PreFooter>
-        
+        <Pagination {...paginatedPosts.pageInfo} basePath={basePath} />
       </PreFooter>
     </Layout>
   )
