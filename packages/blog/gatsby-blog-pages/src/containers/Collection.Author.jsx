@@ -15,7 +15,7 @@ const PageCollectionAuthors = ({
     <Seo title={collectionInfo.name} description={collectionInfo.description} />
     <Divider />
     <Stack effectProps={{ effect: 'fadeInDown' }}>
-      <PageTitle header='Published by Author' totalCount={posts.totalCount} />
+      <PageTitle header='作者' totalCount={posts.totalCount} />
     </Stack>
     <Divider />
     <Stack>
