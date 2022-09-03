@@ -39,12 +39,12 @@ const Post = ({
       <Divider space={3} />
       <Stack effectProps={{ fraction: 0 }}>
         <Main>
-          {post.tableOfContents?.items && (
+          {/* {post.tableOfContents?.items && (
             <>
               <TableOfContentsExpanded {...post} />
               <Divider />
             </>
-          )}
+          )} */}
           <CardComponent variant='paper-lg'>
             <PostBody {...post} />
             <PostTagsShare {...post} location={props.location} />
