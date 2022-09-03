@@ -31,13 +31,13 @@ export default () => (
     <Heading variant='h3' sx={styles.specialty}>
     擁有豐富網站開發經驗，直播系統、POS系統、電子商務、平台網站、SEO，專業的網站開發鐵三工程師。
     </Heading>
-    <Box variant='buttons.group'>
+    {/* <Box variant='buttons.group'>
       <Button as={Link} to='/contact'>
         Contact
       </Button>
       <Button variant='white' as={Link} to='/about'>
         關於我
       </Button>
-    </Box>
+    </Box> */}
   </>
 )
