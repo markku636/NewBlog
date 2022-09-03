@@ -146,9 +146,7 @@ const aboutQuery = graphql`
   query AboutQuery {
     avatar: file(absolutePath: { regex: "/about.(jpeg|jpg|gif|png|webp)/" }) {
       childImageSharp {
-        gatsbyImageData(
-          width: 1140
-          height: 800
+        gatsbyImageData(        
           transformOptions: { cropFocus: NORTH }
         )
       }
