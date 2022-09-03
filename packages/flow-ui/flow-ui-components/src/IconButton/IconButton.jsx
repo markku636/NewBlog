@@ -79,18 +79,26 @@ export const IconButton = ({
   Icon,
   iconPath,
   iconColor,
-  number,  
+  number,
   to
 }) => (
   <Button variant='none' as={to && Link} to={to} sx={styles.button[variant]}>
     {(Icon || iconPath) && (
       <Box sx={styles.icon[variant]}>
-        {iconPath && <SVG src={iconPath} />}
+        {iconPath && (
+          <SVG
+            src={iconPath}
+            preProcessor={code =>
+              code.replace("<svg","<svg fill='currentColor'")              
+            }
+          />
+        )}
         {Icon && <Icon color={iconColor} />}
       </Box>
     )}
     <Heading variant='h4' as='span' sx={styles.text}>
-      {name} ({number})
+      {name}
+      {number}
     </Heading>
   </Button>
 )

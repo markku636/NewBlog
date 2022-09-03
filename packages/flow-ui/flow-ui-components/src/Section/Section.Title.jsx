@@ -16,7 +16,7 @@ const styles = {
     mb: 0,
     '::before': {
       display: [`none`, `block`],
-      bg: `omegaLight`,
+      bg: `omegaLight2`,
       content: `""`,
       borderRadius: `full`,
       position: `absolute`,

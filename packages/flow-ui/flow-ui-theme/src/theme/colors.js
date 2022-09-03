@@ -60,8 +60,9 @@ const psi = {}
 const omega = {
   omegaLighter: gray[200],
   omegaLight: gray[300],
+  omegaLight2: gray[600],
   omega: gray[500],
-  omegaDark: gray[600],
+  omegaDark: gray[800],
   omegaDarker: gray[800]
 }
 
@@ -109,6 +110,7 @@ export default {
       omegaLight: omega.omegaDark,
       omegaDark: omega.omegaLight,
       omegaDarker: omega.omegaLighter,
+      omegaLight2:gray[400],
 
       text: gray[400],
       article: gray[300],
