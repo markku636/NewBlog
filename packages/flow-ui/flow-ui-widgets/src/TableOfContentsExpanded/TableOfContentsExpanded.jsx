@@ -23,7 +23,7 @@ const TableOfContentsExpanded = ({
   columns
 }) =>
   items.length > 1 ? (
-    <Section title='Table Of Contents'>
+    <Section title='大綱'>
       <Card variant='paper'>
         <Grid
           sx={{

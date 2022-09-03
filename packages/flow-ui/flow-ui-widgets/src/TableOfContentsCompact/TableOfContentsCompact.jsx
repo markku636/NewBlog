@@ -27,7 +27,7 @@ const styles = {
 }
 const TableOfContentsCompact = ({ tableOfContents: { items = [] } }) =>
   items.length > 1 ? (
-    <Section aside title='Table Of Contents'>
+    <Section aside title='大綱'>
       <Card variant='paper'>
         {items.map((item, index) => (
           <Link
