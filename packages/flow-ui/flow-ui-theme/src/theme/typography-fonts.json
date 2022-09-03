@@ -5,7 +5,7 @@
     }
   },
   "theme": {
-    "headerFontFamily": ["Inter", "sans-serif"],
-    "bodyFontFamily": ["Inter", "sans-serif"]
+    "headerFontFamily":["Noto Sans TC","Noto Sans SC", "PingFangSC-Regular", "PingFang SC", "Source Han Sans CN", "Helvetica, Arial", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei", "sans-serif"],
+    "bodyFontFamily": ["Noto Sans TC","Noto Sans SC", "PingFangSC-Regular", "PingFang SC", "Source Han Sans CN", "Helvetica, Arial", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei", "sans-serif"]
   }
 }
