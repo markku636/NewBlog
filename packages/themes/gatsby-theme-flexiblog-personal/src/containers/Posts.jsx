@@ -38,7 +38,7 @@ const Posts = ({ data: { paginatedPosts = {} }, ...props }) => {
           <Divider />
           <Tags tags={tags} />
           <Divider />
-          <Social />
+          {/* <Social /> */}
           <Sticky>
             {services.mailchimp && (
               <>
