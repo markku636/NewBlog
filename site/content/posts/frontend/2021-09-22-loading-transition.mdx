@@ -131,7 +131,7 @@ Vue.prototype.$getAxios(`${process.env.VUE_APP_BASE_API}/api/v1/home/query`, nul
 
 ## 為了之後擴充，預留一個彈性，各別元件若需要控制，可以由外面把 request id 傳入，元件在去 watch loading count 物件中  isRemoveByRequestId 屬性的資料
 
-export function get關於我Query(requestId = '') {
+export function getHomeQuery(requestId = '') {
   return Vue.prototype.$getAxios(`${process.env.VUE_APP_BASE_API}/api/v1/home/query`, null, true, requestId)
 }
 
