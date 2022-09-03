@@ -2,10 +2,10 @@ import React from 'react'
 import { GatsbyImage as Img } from 'gatsby-plugin-image'
 import { css } from 'theme-ui'
 import rv from '@components/utils/buildResponsiveVariant'
-
+import { isMobile } from '../../../../utils/index'
 const CardMediaImage = ({ variant, loading, image, title }) => (
   <Img
-  backgroundColor="#FFFFFF"
+    backgroundColor={isMobile ? '#FFFFFF' : ''}
     image={image}
     loading={loading}
     alt={title}
