@@ -21,7 +21,7 @@ module.exports = {
       options: {
         name: 'Mark Ku Technology Blog',
         short_name: 'Mark Ku Blog',
-        start_url: '/',
+        start_url: process.env.SITE_URL,
         background_color: '#ffffff',
         theme_color: '#5a67d8',
         display: 'minimal-ui',
@@ -50,7 +50,7 @@ module.exports = {
         sources: {
           local: true
         },
-		    siteUrl: 'https://www.markkulab.net/',
+		    siteUrl: process.env.SITE_URL,
         services: {
           facebookComment: true,
           algolia: true
@@ -60,7 +60,7 @@ module.exports = {
   ], 
   // Customize your site metadata:
   siteMetadata: {
-    siteUrl: "https://www.markkulab.net/",
+    siteUrl: process.env.SITE_URL,
     //General Site Metadata
     title: 'FlexiBlog Theme',
     name: 'FlexiBlog',
