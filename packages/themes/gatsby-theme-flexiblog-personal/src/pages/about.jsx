@@ -44,6 +44,7 @@ export default props => {
     <Layout {...props}>
       <Seo title='About' />
       {/* <Divider /> */}
+      <Text variant='p'></Text>
       <Stack>
         <Main>
           <PageTitle header='關於我' subheader='' />
