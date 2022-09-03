@@ -50,7 +50,7 @@ module.exports = {
         sources: {
           local: true
         },
-		    // siteUrl: process.env.URL || process.env.VERCEL_URL,
+		    siteUrl: 'https://www.markkulab.net/',
         services: {
           facebookComment: true,
           algolia: true

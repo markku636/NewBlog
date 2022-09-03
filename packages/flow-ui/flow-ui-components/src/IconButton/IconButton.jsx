@@ -79,6 +79,7 @@ export const IconButton = ({
   Icon,
   iconPath,
   iconColor,
+  number,  
   to
 }) => (
   <Button variant='none' as={to && Link} to={to} sx={styles.button[variant]}>
@@ -89,7 +90,7 @@ export const IconButton = ({
       </Box>
     )}
     <Heading variant='h4' as='span' sx={styles.text}>
-      {name}
+      {name}{number}
     </Heading>
   </Button>
 )
