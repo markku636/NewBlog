@@ -8,7 +8,7 @@ const CardMediaImage = ({ variant, loading, image, title }) => (
     backgroundColor={isMobile ? '#FFFFFF' : ''}
     image={image}
     loading={loading}
-    alt={title}
+    alt={title|| 'title'}
     css={css({
       height: `full`,
       verticalAlign: `middle`, //avoid baseline gap

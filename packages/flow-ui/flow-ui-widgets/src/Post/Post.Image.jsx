@@ -50,7 +50,7 @@ export const PostImage = ({
     <>
       <Img
         image={image}
-        alt={title}
+        alt={title|| 'title'}
         css={css({
           ...styles[variant],
           ...(inCard && styles.inCard),

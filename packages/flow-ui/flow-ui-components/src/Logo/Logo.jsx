@@ -32,6 +32,7 @@ const Logo = ({ title, grayscale, image, to, ...props }) => (
       <Img
         image={image}
         loading='eager'
+        alet="logo"
         style={
           grayscale
             ? { ...styles.grayscale, ...styles.image }

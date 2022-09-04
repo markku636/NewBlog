@@ -35,7 +35,7 @@ const AvatarSimple = ({ avatar, size, alt }) => {
 
   return (
     <Box sx={styles.imageWrapperSimple}>
-      <Img image={image} alt={alt} />
+      <Img image={image} alt={alt || 'avatar'} />
     </Box>
   )
 }

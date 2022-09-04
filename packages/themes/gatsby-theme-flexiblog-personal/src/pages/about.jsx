@@ -50,7 +50,7 @@ export default props => {
           <PageTitle header='關於我' subheader='' />
           {/* <Divider /> */}
           <Box sx={styles.imageWrapper}>
-            <Img image={image} />
+            <Img image={image} alt="about" />
             {/* <Button as={GLink} to='/contact' sx={styles.button}>
               Contact Me
             </Button> */}

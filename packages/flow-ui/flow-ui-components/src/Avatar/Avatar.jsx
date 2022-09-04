@@ -80,7 +80,7 @@ const Avatar = ({
         <Box sx={styles.arc({ width })}></Box>
         <Img
           image={image}
-          alt={alt}
+          alt={alt || 'avatar'}
           loading={loading}
           css={css(styles.imageWrapper)}
         />
