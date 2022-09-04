@@ -62,11 +62,11 @@ module.exports = {
   siteMetadata: {
     siteUrl: process.env.SITE_URL,
     //General Site Metadata
-    title: 'FlexiBlog Theme',
-    name: 'FlexiBlog',
-    description: 'My site description...',
+    title: 'Mark Ku\'s Blog',
+    name: 'Mark Ku\'s Blog',
+    description: '擁有豐富網站開發經驗，直播系統、POS系統、電子商務、平台網站、SEO，專業的網站開發鐵三工程師。',
     address: 'New York, NY',
-    email: 'email@example.com',
+    email: 'a4756830@gmail.com',
     phone: '+1 (888) 888-8888',
 
     //Site Social Media Links

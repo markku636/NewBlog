@@ -7,7 +7,9 @@ const styles = {
   logo: {
     pb: 1,
     mb: 2,
-    mt: [4, 0]
+    mt: [50, 0],
+   
+
   },
   copyright: {
     pt: 2,

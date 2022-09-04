@@ -8,7 +8,9 @@ const styles = {
   wrapper: {
     position: `relative`,
     bg: `footerBg`,
-    mt: [5, 6]
+    mt: [5, 6],
+    display:'flex',
+    textAlign: 'center'
   }
 }
 
