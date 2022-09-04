@@ -3,6 +3,7 @@ import { Link } from 'gatsby'
 import { Button, Box, Heading, Text } from 'theme-ui'
 import Photo from './Hero.Photo.Mobile'
 import { useMediaQuery } from 'react-responsive'
+import { isMobile, isTablet } from '../../../../../utils/index'
 
 /**
  * Shadow me to add your own content
@@ -23,11 +24,11 @@ const styles = {
 }
 
 export default () => {
-  const isTabletMid = useMediaQuery({ query: '(max-width: 768px)' })
+  // const isTabletMid = useMediaQuery({ query: '(max-width: 768px)' })
 
   return (
     <>
-      {isTabletMid && <Photo />}
+      {(isMobile || isTablet) && <Photo />}
       <Heading variant='h1'>
         Hi, I'm <Text sx={styles.author}>Mark Ku</Text>.
       </Heading>
