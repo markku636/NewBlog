@@ -28,7 +28,7 @@ export default () => {
 
   return (
     <>
-      {(isMobile || isTablet || isTabletMid) && <Photo />}
+      {isTabletMid && <Photo />}
       <Heading variant='h1'>
         Hi, I'm <Text sx={styles.author}>Mark Ku</Text>.
       </Heading>

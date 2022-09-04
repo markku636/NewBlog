@@ -1,5 +1,6 @@
 import React, { Children } from 'react'
 import { Flex, Box } from 'theme-ui'
+import { isMobile, isTablet } from '../../../../utils/index'
 
 const styles = {
   wrapper: {
@@ -7,8 +8,8 @@ const styles = {
     justifyContent: `space-between`,
     position: `relative`,
     zIndex: 2,
-    pt: 4,
-    pb: 5
+    pt: 2,
+    pb: isMobile || isTablet ? 0 : 4
   },
   leftColumn: {
     flexBasis: `2/3`,
