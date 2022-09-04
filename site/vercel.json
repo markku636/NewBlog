@@ -4,7 +4,8 @@
 		"GATSBY_ALGOLIA_APP_ID": "DXSFYKV63H",
 		"GATSBY_ALGOLIA_SEARCH_KEY": "f47d6ac4861af2e2651ddebd509b2455",
 		"GATSBY_ALGOLIA_INDEX_NAME": "www.markkulab.net",
-		"ALGOLIA_ADMIN_KEY": "d285e4af0027b4c61a104fd879da929c"
+		"ALGOLIA_ADMIN_KEY": "d285e4af0027b4c61a104fd879da929c",
+		"TZ": "Asia/Shanghai"
 	},
 	"build": {
 		"env": {
@@ -12,7 +13,8 @@
 			"GATSBY_ALGOLIA_APP_ID": "DXSFYKV63H",
 			"GATSBY_ALGOLIA_SEARCH_KEY": "f47d6ac4861af2e2651ddebd509b2455",
 			"GATSBY_ALGOLIA_INDEX_NAME": "www.markkulab.net",
-			"ALGOLIA_ADMIN_KEY": "d285e4af0027b4c61a104fd879da929c"
+			"ALGOLIA_ADMIN_KEY": "d285e4af0027b4c61a104fd879da929c",
+			"TZ": "Asia/Shanghai"
 		}
 	}
 }
