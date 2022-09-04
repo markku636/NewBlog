@@ -2,7 +2,6 @@ import React from 'react'
 import { Link } from 'gatsby'
 import { Button, Box, Heading, Text } from 'theme-ui'
 import Photo from './Hero.Photo.Mobile'
-import { isMobile } from '../../../../../utils/index'
 import { useMediaQuery } from 'react-responsive'
 
 /**
