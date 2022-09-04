@@ -72,16 +72,16 @@ module.exports = {
     //Site Social Media Links
     social: [
       {
-        name: 'Github',
-        url: 'https://github.com/gatsbyjs'
+        "name": "Facebook",
+        "url": "https://www.facebook.com/mark.ku.509/"
       },
       {
-        name: 'Twitter',
-        url: 'https://twitter.com/gatsbyjs'
-      },
+        "name": "Github",
+        "url": "https://github.com/markku636"
+      },            
       {
-        name: 'Instagram',
-        url: 'https://github.com/gatsbyjs'
+        "name": "Website",
+        "url": "https://www.letgo.com.tw/"
       }
     ],
 
@@ -106,12 +106,12 @@ module.exports = {
       {
         title: 'Quick Links',
         items: [
+          // {
+          //   name: 'Advertise with us',
+          //   slug: '/contact'
+          // },
           {
-            name: 'Advertise with us',
-            slug: '/contact'
-          },
-          {
-            name: 'About Us',
+            name: '關於我',
             slug: '/about'
           },
           // {
@@ -124,17 +124,17 @@ module.exports = {
         title: 'Legal Stuff',
         items: [
           {
-            name: 'Privacy Notice',
+            name: '隱私權',
             slug: '/'
           },
           {
-            name: 'Cookie Policy',
+            name: 'Cookie策略',
             slug: '/'
           },
-          {
-            name: 'Terms Of Use',
-            slug: '/'
-          }
+          // {
+          //   name: 'Terms Of Use',
+          //   slug: '/'
+          // }
         ]
       }
     ]
