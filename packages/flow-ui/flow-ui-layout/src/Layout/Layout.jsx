@@ -11,7 +11,9 @@ export const Layout = ({ children, pageContext, location }) => {
   pageContext.mobileMenu
 
   const allPost = useAllPosts()
-  pageContext.mobileMenu.items = pageContext.mobileMenu.items.map(function (menu) {
+  pageContext.mobileMenu.items = pageContext.mobileMenu.items.map(function (
+    menu
+  ) {
     menu.totalCount = allPost?.filter(
       z => z.category && z.category?.name === menu.name
     ).length
@@ -19,7 +21,6 @@ export const Layout = ({ children, pageContext, location }) => {
     return menu
   })
 
-  debugger
   return (
     <ThemeProvider theme={theme}>
       <pageContextProvider.Provider value={{ pageContext, location }}>
