@@ -24,11 +24,11 @@ const styles = {
 }
 
 export default () => {
-  // const isTabletMid = useMediaQuery({ query: '(max-width: 768px)' })
+  const isTabletMid = useMediaQuery({ query: '(max-width: 768px)' })
 
   return (
     <>
-      {(isMobile || isTablet) && <Photo />}
+      {(isMobile || isTablet || isTabletMid) && <Photo />}
       <Heading variant='h1'>
         Hi, I'm <Text sx={styles.author}>Mark Ku</Text>.
       </Heading>
