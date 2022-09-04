@@ -19,8 +19,10 @@ const styles = {
     opacity: 0.15
   },
   imageWrapper: {
+    height: '240px',
     mx: `auto`,
     img: {
+      height: '240px',
       borderRadius: `50%`
     }
   }
