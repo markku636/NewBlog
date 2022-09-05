@@ -152,8 +152,8 @@ const aboutQuery = graphql`
       childImageSharp {
         gatsbyImageData(
           transformOptions: { cropFocus: NORTH }
-          width: 700
-          height: 600
+          width: 600
+          height: 570
         )
       }
     }
