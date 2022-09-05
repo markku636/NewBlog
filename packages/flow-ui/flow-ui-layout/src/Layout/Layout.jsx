@@ -25,14 +25,14 @@ export const Layout = ({ children, pageContext, location }) => (
         />
         <script
           async
-          src='https://www.googletagmanager.com/gtag/js?id=G-JPN992CSYL'
+          src='https://www.googletagmanager.com/gtag/js?id=G-LC7HBFQX0R'
         ></script>
 
         <script
           type='application/ld+json'
           id='first-unique-id'
           dangerouslySetInnerHTML={{
-            __html: `   window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-JPN992CSYL');`
+            __html: `   window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-LC7HBFQX0R');`
           }}
         />
 
