@@ -6,14 +6,17 @@ import Avatar from '@components/Avatar/Avatar2'
 
 const styles = {
   wrapper: {
-    display: [`flex`, `flex`, `flex`],
+    display: [`none`, `none`, `none`],
     position: `relative`,
     justifyContent: `center`,
     alignItems: `center`,
     width: `320px`,
     height: `320px`,
     flex: 1,
-    width: `100%`
+    width: `100%`,
+    '@media(max-width: 788px)': {
+      display: [`flex`, `flex`, `flex`],
+    }
   },
   pattern: {
     height: `1/2`,
