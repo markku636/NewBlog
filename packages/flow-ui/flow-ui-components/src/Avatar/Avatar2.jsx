@@ -18,11 +18,9 @@ const styles = {
     backgroundSize: `8rem`,
     opacity: 0.15
   },
-  imageWrapper: {
-    height: '240px',
+  imageWrapper: {    
     mx: `auto`,
-    img: {
-      height: '240px',
+    img: {      
       borderRadius: `50%`
     }
   }

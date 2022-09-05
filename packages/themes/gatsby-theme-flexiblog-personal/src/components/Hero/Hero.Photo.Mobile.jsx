@@ -6,9 +6,14 @@ import Avatar from '@components/Avatar/Avatar2'
 
 const styles = {
   wrapper: {
-    display: [`block`, null, `block`],
+    display: [`flex`, `flex`, `flex`],
     position: `relative`,
-    textAlign: `center`
+    justifyContent: `center`,
+    alignItems: `center`,
+    width: `320px`,
+    height: `320px`,
+    flex: 1,
+    width: `100%`
   },
   pattern: {
     height: `1/2`,
@@ -22,10 +27,7 @@ export default () => {
 
   return (
     <Box sx={styles.wrapper}>
-      <Avatar
-        avatar={image}                
-        loading='eager'
-      />
+      <Avatar avatar={image} loading='eager' />
     </Box>
   )
 }
