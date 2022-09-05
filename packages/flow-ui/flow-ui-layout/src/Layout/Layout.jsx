@@ -27,11 +27,14 @@ export const Layout = ({ children, pageContext, location }) => (
           async
           src='https://www.googletagmanager.com/gtag/js?id=G-JPN992CSYL'
         ></script>
-        <script type='application/ld+json'>{`
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('config', 'G-JPN992CSYL');
-  `}</script>
+
+        <script
+          type='application/ld+json'
+          id='first-unique-id'
+          dangerouslySetInnerHTML={{
+            __html: `   window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-JPN992CSYL');`
+          }}
+        />
 
         <script
           id='first-unique-id'
