@@ -16,7 +16,10 @@ const styles = {
   imageWrapper: {
     borderRadius: `default`,
     overflow: `hidden`,
-    position: `relative`
+    position: `relative`,
+    alignItems: `center`,
+    display: `flex`,
+    justifyContent: `center`
   },
   button: {
     display: [`none`, `block`],
@@ -50,12 +53,13 @@ export default props => {
           <PageTitle header='關於我' subheader='' />
           {/* <Divider /> */}
           <Box sx={styles.imageWrapper}>
-            <Img image={image} alt="about" />
+            <Img image={image} alt='about' />
             {/* <Button as={GLink} to='/contact' sx={styles.button}>
               Contact Me
             </Button> */}
           </Box>
-          <Divider />
+
+          <Divider space={2} />
           <Flex sx={styles.grid}>
             <Box sx={styles.column}>
               <Section title='My Story'>
@@ -146,8 +150,10 @@ const aboutQuery = graphql`
   query AboutQuery {
     avatar: file(absolutePath: { regex: "/about.(jpeg|jpg|gif|png|webp)/" }) {
       childImageSharp {
-        gatsbyImageData(        
+        gatsbyImageData(
           transformOptions: { cropFocus: NORTH }
+          width: 700
+          height: 600
         )
       }
     }

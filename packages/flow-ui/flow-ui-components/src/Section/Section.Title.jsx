@@ -27,7 +27,7 @@ const styles = {
     }
   },
   //Section aside title
-  'section-aside': {
+  '-aside': {
     color: `omegaDark`,
     mx: `auto`,
     mb: 0
@@ -58,7 +58,7 @@ const SectionTitle = ({ title, titleLink, omitTitle, variant }) => {
           </Badge>
         )}
       </Flex>
-      <Divider />
+      <Divider space={2}  />
     </>
   ) : null
 }
