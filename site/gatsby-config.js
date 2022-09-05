@@ -7,6 +7,7 @@ module.exports = {
     DEV_SSR: false
   },
   plugins: [
+    `gatsby-plugin-react-helmet`,
     {
       resolve: 'gatsby-plugin-algolia',
       options: {

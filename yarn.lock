@@ -8069,6 +8069,13 @@ gatsby-plugin-react-helmet@^5.14.0:
   dependencies:
     "@babel/runtime" "^7.15.4"
 
+gatsby-plugin-react-helmet@^5.22.0:
+  version "5.22.0"
+  resolved "https://registry.npmmirror.com/gatsby-plugin-react-helmet/-/gatsby-plugin-react-helmet-5.22.0.tgz#c5e45a1337be271137ad08a9238996146144a75d"
+  integrity sha512-BkOZuITW579ZHb9NtnDc+5b+iNnEY/BdMSgrJ3CJKvRhi5RVTpm+k3yOwSuIevYt/uYosfEEFG4KbCZ76dHC+g==
+  dependencies:
+    "@babel/runtime" "^7.15.4"
+
 gatsby-plugin-sharp@^4.14.1:
   version "4.22.0"
   resolved "https://registry.npmmirror.com/gatsby-plugin-sharp/-/gatsby-plugin-sharp-4.22.0.tgz"
