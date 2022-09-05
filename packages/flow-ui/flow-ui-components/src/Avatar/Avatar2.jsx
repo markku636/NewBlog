@@ -9,14 +9,26 @@ import MemphisPattern from '@components/MemphisPattern'
 const bs = x => `${x * 0.35}rem`
 
 const styles = {
+  wrapperMain: {
+    position: `relative`,
+    zIndex: 2,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: `center`,
+    mb: bs(3),
+    width: `80%`
+  },
   wrapper: {
     position: `relative`,
     zIndex: 2,
     textAlign: `center`,
-    mb: bs(3)
+    mb: bs(3),
+    width: `240px`,
+    height: `240px`
   },
   pattern: {
-    backgroundSize: `20rem`,
+    backgroundSize: `16rem`,
     opacity: 0.15,
     width: `100%`
   },
@@ -64,9 +76,9 @@ const Avatar = ({ avatar, size, width, loading, alt }) => {
   width = width || image.width
 
   return (
-    <Box sx={styles.wrapper}>
-      <Box>
-        <MemphisPattern sx={{ ...styles.pattern }} />
+    <Box sx={styles.wrapperMain}>
+      <MemphisPattern sx={{ ...styles.pattern }} />
+      <Box sx={styles.wrapper}>
         <Box sx={styles.circle({ width })}></Box>
         <Box sx={styles.arc({ width })}></Box>
         <Img

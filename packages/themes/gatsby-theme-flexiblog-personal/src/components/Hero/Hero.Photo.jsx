@@ -11,8 +11,8 @@ const styles = {
     textAlign: `center`
   },
   pattern: {
-    height: `1/2`,
-    transform: `translate(0, 50%)`
+    height: `100%`,
+    transform: `translate(0, 0)`
   }
 }
 

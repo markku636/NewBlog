@@ -16,7 +16,7 @@ const styles = {
     mb: bs(3)
   },
   pattern: {
-    backgroundSize: `8rem`,
+    backgroundSize: `20rem`,
     opacity: 0.15
   },
   circle: ({ width }) => ({
