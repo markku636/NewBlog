@@ -9,9 +9,7 @@ const styles = {
     display: [`none`, `none`, `none`],
     position: `relative`,
     justifyContent: `center`,
-    alignItems: `center`,
-    width: `320px`,
-    height: `320px`,
+    alignItems: `center`,    
     flex: 1,
     width: `100%`,
     '@media(max-width: 788px)': {

@@ -3,8 +3,8 @@ import { Link } from 'gatsby'
 import { Button, Box, Heading, Text } from 'theme-ui'
 import Photo from './Hero.Photo.Mobile'
 import { useMediaQuery } from 'react-responsive'
-import { isMobile, isTablet } from '../../../../../utils/index'
-
+// import { isMobile, isTablet } from '../../../../../utils/index'
+// const isTabletMid = useMediaQuery({ query: '(max-width: 768px)' })
 /**
  * Shadow me to add your own content
  */
@@ -24,7 +24,7 @@ const styles = {
 }
 
 export default () => {
-  const isTabletMid = useMediaQuery({ query: '(max-width: 768px)' })
+  
 
   return (
     <>
