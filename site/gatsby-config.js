@@ -27,14 +27,7 @@ module.exports = {
         display: 'minimal-ui',
         icon: 'content/assets/favicon.png'
       }
-    },
-    {
-      resolve: 'gatsby-plugin-google-analytics',
-      options: {
-        // The property ID; the tracking code won't be generated without it
-        trackingId: 'JPN992CSYL'
-      }
-    },
+    },    
     {
       resolve: 'gatsby-plugin-sitemap',
       options: {}
