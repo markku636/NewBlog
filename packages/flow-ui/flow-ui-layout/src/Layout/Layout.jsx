@@ -23,19 +23,7 @@ export const Layout = ({ children, pageContext, location }) => (
           href='https://cdn.jsdelivr.net/npm/taipei-sans-tc/dist/Bold/TaipeiSansTCBeta-Bold.css'
           rel='stylesheet'
         />
-        <script
-          async
-          src='https://www.googletagmanager.com/gtag/js?id=G-LC7HBFQX0R'
-        ></script>
-
-        <script
-          type='application/ld+json'
-          id='first-unique-id'
-          dangerouslySetInnerHTML={{
-            __html: `   window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-LC7HBFQX0R');`
-          }}
-        />
-
+      
         <script
           id='first-unique-id'
           dangerouslySetInnerHTML={{

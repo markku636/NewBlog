@@ -7939,6 +7939,14 @@ gatsby-plugin-emotion@4.5.0:
     "@babel/runtime" "^7.12.5"
     "@emotion/babel-preset-css-prop" "^10.0.27"
 
+gatsby-plugin-google-gtag@^4.22.0:
+  version "4.22.0"
+  resolved "https://registry.yarnpkg.com/gatsby-plugin-google-gtag/-/gatsby-plugin-google-gtag-4.22.0.tgz#e2b8c063f5994423462b2f6ec1f28c42416e0216"
+  integrity sha512-W34rP+d3YzcHoao3bC1W0m9AYi/KwrEE1HicPbQxFc2MUKx2d7bt/cnlHnDz4Icnlt1rT/8jeVK1NQUuXO6BMQ==
+  dependencies:
+    "@babel/runtime" "^7.15.4"
+    minimatch "^3.1.2"
+
 gatsby-plugin-image@^2.14.1:
   version "2.22.0"
   resolved "https://registry.npmmirror.com/gatsby-plugin-image/-/gatsby-plugin-image-2.22.0.tgz"
@@ -8062,16 +8070,9 @@ gatsby-plugin-preconnect@1.3.0:
   dependencies:
     "@babel/runtime" "^7.4.3"
 
-gatsby-plugin-react-helmet@^5.14.0:
+gatsby-plugin-react-helmet@^5.14.0, gatsby-plugin-react-helmet@^5.22.0:
   version "5.22.0"
   resolved "https://registry.npmmirror.com/gatsby-plugin-react-helmet/-/gatsby-plugin-react-helmet-5.22.0.tgz"
-  integrity sha512-BkOZuITW579ZHb9NtnDc+5b+iNnEY/BdMSgrJ3CJKvRhi5RVTpm+k3yOwSuIevYt/uYosfEEFG4KbCZ76dHC+g==
-  dependencies:
-    "@babel/runtime" "^7.15.4"
-
-gatsby-plugin-react-helmet@^5.22.0:
-  version "5.22.0"
-  resolved "https://registry.npmmirror.com/gatsby-plugin-react-helmet/-/gatsby-plugin-react-helmet-5.22.0.tgz#c5e45a1337be271137ad08a9238996146144a75d"
   integrity sha512-BkOZuITW579ZHb9NtnDc+5b+iNnEY/BdMSgrJ3CJKvRhi5RVTpm+k3yOwSuIevYt/uYosfEEFG4KbCZ76dHC+g==
   dependencies:
     "@babel/runtime" "^7.15.4"
