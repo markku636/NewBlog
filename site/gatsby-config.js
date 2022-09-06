@@ -1,31 +1,46 @@
 require('dotenv').config({
-  path: `.env`,
-});
+  path: `.env`
+})
 
 module.exports = {
   flags: {
     DEV_SSR: false
   },
   plugins: [
+    // 加入下面兩行
+    'gatsby-redirect-from',
+    'gatsby-plugin-meta-redirect', // make sure this is always the last one
+    {
+      resolve: `gatsby-transformer-remark`,
+      options: {
+        // Footnotes mode (default: true)
+        footnotes: true,
+        // GitHub Flavored Markdown mode (default: true)
+        gfm: true,
+        // Plugins configs
+        plugins: []
+      }
+    },
+    // ...
+    
     {
       resolve: `gatsby-plugin-google-gtag`,
       options: {
         // You can add multiple tracking ids and a pageview event will be fired for all of them.
         trackingIds: [
-          "G-JPN992CSYL", // Google Analytics / GA          
+          'G-JPN992CSYL' // Google Analytics / GA
         ],
         // This object gets passed directly to the gtag config command
-        // This config will be shared across all trackingIds        
+        // This config will be shared across all trackingIds
         // This object is used for configuration specific to this plugin
         pluginConfig: {
           // Puts tracking script in the head instead of the body
           head: true,
           // Setting this parameter is also optional
-          respectDNT: true,          
-          
-        },
-      },
-    },  
+          respectDNT: true
+        }
+      }
+    },
     `gatsby-plugin-react-helmet`,
     {
       resolve: 'gatsby-plugin-algolia',
@@ -47,7 +62,7 @@ module.exports = {
         display: 'minimal-ui',
         icon: 'content/assets/favicon.png'
       }
-    },    
+    },
     {
       resolve: 'gatsby-plugin-sitemap',
       options: {}
@@ -59,25 +74,26 @@ module.exports = {
     {
       // ATTENTION: Match the theme name with the theme you're using
       resolve: '@elegantstack/gatsby-theme-flexiblog-personal',
-      options: {                
+      options: {
         sources: {
           local: true
         },
-		    siteUrl: process.env.SITE_URL,
+        siteUrl: process.env.SITE_URL,
         services: {
           facebookComment: true,
           algolia: true
         }
       }
     }
-  ], 
+  ],
   // Customize your site metadata:
   siteMetadata: {
     siteUrl: process.env.SITE_URL,
     //General Site Metadata
-    title: 'Mark Ku\'s Blog',
-    name: 'Mark Ku\'s Blog',
-    description: '擁有豐富網站開發經驗，直播系統、POS系統、電子商務、平台網站、SEO，專業的網站開發鐵三工程師。',
+    title: "Mark Ku's Blog",
+    name: "Mark Ku's Blog",
+    description:
+      '擁有豐富網站開發經驗，直播系統、POS系統、電子商務、平台網站、SEO，專業的網站開發鐵三工程師。',
     address: 'New York, NY',
     email: 'a4756830@gmail.com',
     phone: '+1 (888) 888-8888',
@@ -85,16 +101,16 @@ module.exports = {
     //Site Social Media Links
     social: [
       {
-        "name": "Facebook",
-        "url": "https://www.facebook.com/mark.ku.509/"
+        name: 'Facebook',
+        url: 'https://www.facebook.com/mark.ku.509/'
       },
       {
-        "name": "Github",
-        "url": "https://github.com/markku636"
-      },            
+        name: 'Github',
+        url: 'https://github.com/markku636'
+      },
       {
-        "name": "Website",
-        "url": "https://www.letgo.com.tw/"
+        name: 'Website',
+        url: 'https://www.letgo.com.tw/'
       }
     ],
 
@@ -107,7 +123,7 @@ module.exports = {
       {
         name: '關於我',
         slug: '/about'
-      },
+      }
       // {
       //   name: '聯繫我',
       //   slug: '/contact'
@@ -126,7 +142,7 @@ module.exports = {
           {
             name: '關於我',
             slug: '/about'
-          },
+          }
           // {
           //   name: 'Contact Us',
           //   slug: '/contact'
@@ -143,7 +159,7 @@ module.exports = {
           {
             name: 'Cookie策略',
             slug: '/'
-          },
+          }
           // {
           //   name: 'Terms Of Use',
           //   slug: '/'
