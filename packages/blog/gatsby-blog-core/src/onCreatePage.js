@@ -8,9 +8,20 @@ module.exports = async ({ graphql, page, actions }, pluginOptions) => {
   const { createRedirect } = actions
 
   createRedirect({
-    fromPath: `/test999`,
-    toPath: `/google-tag-manger-google-analysis-ga4/`
+    fromPath: `/2022/01/03/line-messaging-for-uptime-kuma`,
+    toPath: `/line-messaging-api-for-uptime-kuma/`
   })
+
+  createRedirect({
+    fromPath: `/2022/08/10/apple-pay-on-web-cybersource`,
+    toPath: `/apple-pay-on-web-cybersource/`
+  })
+
+  createRedirect({
+    fromPath: `/2022/08/28/google-analysis-collection-user-behavior`,
+    toPath: `/google-analysis-collection-user-behavior/`
+  })
+
 
   pageContextOptions.mobileMenu = await queryMobileMenu({ graphql })
 
