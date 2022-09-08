@@ -8,6 +8,11 @@ module.exports = async ({ graphql, page, actions }, pluginOptions) => {
   const { createRedirect } = actions
 
   createRedirect({
+    fromPath: `/sitemap.xml`,
+    toPath: `/sitemap/sitemap-index.xml`
+  })
+
+  createRedirect({
     fromPath: `/2022/01/03/line-messaging-for-uptime-kuma`,
     toPath: `/line-messaging-api-for-uptime-kuma/`
   })
