@@ -8,9 +8,8 @@ tags: ['headless','cms','strapi','swagger','faq']
 description :  Headless CMS Strapi 筆記
 author : Mark Ku
 ---
-
 ## 解決問題
-老闆請我協助評估 CMS 讓產品部門維護 FAQ 及產品 KB ，因為開發能量有些限、希望能靠友善的 UI 設定，就能快速的創造出後台維護頁面及前台Api，好讓其他前端同仁串接。
+老闆請我協助評估 CMS 讓產品部門維護 FAQ 及產品 Knowledge Base，因為後端開發能量有些限、希望能靠友善的 UI 設定，就能快速的創造出後台維護頁面及前台Api，好讓其他前端同仁串接。
 
 ## 原理
 透過友善的後台 UI 設定，能讓程式產生程式。
@@ -23,7 +22,7 @@ author : Mark Ku
 資料管理、角色權限、流程控制，是其他套達不到的。  
 開發者 - 開源、串接友善，提供 swagger 文件、擴充性( 插件市集 )、提供豐富的接口、本身也是 react 及 node 寫的，對前端開發者相對很友善。  
 
-## 限制
+## 使用及安裝限制
 * node 版本 '>=10.16.0 <=14.x.x' ( 可以透過 nvm 管理多版本 node )
 * 雲端付費，地端開源永久免費
 
@@ -40,14 +39,11 @@ npm run strapi install documentation
 
 ## Api 沒回傳圖片
 API 預設是不回傳圖片的欄位，需要額外 populate 需額外填寫回傳的圖片欄位
-![](https://i.imgur.com/6gfNF29.png)  
-
-![](https://i.imgur.com/eF34HEH.png)  
-
+![](https://i.imgur.com/6gfNF29.png)
+![](https://i.imgur.com/eF34HEH.png)
 ## Api 權限
 預設 api 存取是需要帶 token，如果你不需要驗證則可以，到 Setting > USERS & PERMISSIONS PLUGIN > Role > 找到你的 Collection > 並給與 find 和 findOne 權限。
 ![](https://i.imgur.com/ovdumL9.png)
-
 ## Rich Text 圖片無法預覽
 .env
 ```
@@ -79,28 +75,20 @@ module.exports = ({ env }) => ({
 ## 備份
 * 資料庫 - 預設是 sql-lite ，路徑 .tmp/data.db ( 也支援 mysql 及 mongo db )
 * 靜態檔案 - 拷貝 app/public/uploads
-
 ## 功能頁面展示
 ### 動態產生後台
-
 ![](https://i.imgur.com/0f0BjwY.png)
-
 ### 上傳圖片可以傳多張圖
 ![](https://i.imgur.com/jXmzMbk.png)
 ### 上傳圖片格式限制
 ![](https://i.imgur.com/PunbK7f.png)
-
 ## 輸入畫面
 ![](https://i.imgur.com/lLcJ5rp.png)
-
 ### Layout 動態調整
 ![](https://i.imgur.com/hGjLnld.png)
-
 ### WebHook
 ![](https://i.imgur.com/DAuWE1D.png)
-
 ### 角色
 ![](https://i.imgur.com/i1fy4kz.png)
-
 ## 權限
 ![](https://i.imgur.com/gEvb3eh.png)
