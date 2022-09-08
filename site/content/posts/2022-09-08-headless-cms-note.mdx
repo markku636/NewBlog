@@ -1,6 +1,6 @@
 ---
 featured: true
-title: Headless CMS Strapi 筆記
+title: Headless CMS - Strapi 評估筆記 
 date:  2022-09-08 01:01:01 +0800
 thumbnail: strapi.png
 category: Infra
@@ -13,11 +13,11 @@ author : Mark Ku
 老闆請我協助評估 CMS 讓產品部門維護 FAQ ，因為開發能量有些限、希望能靠友善的 UI 設定，就能快速的創造出後台維護頁面及前台Api。
 
 ## 原理
-透過友善的 UI ，程式產生程式。
-![](https://i.imgur.com/M6RfjZ8.png)
+透過友善的後台 UI 設定，能讓程式產生程式。
+![](https://i.imgur.com/M6RfjZ8.png)  
 
 ## 為何採用 strapi
-![](https://i.imgur.com/ONXbTAJ.jpg)
+![](https://i.imgur.com/ONXbTAJ.jpg)  
 我試用了上面幾套 CMS，基於以下理由，首推 strapi 靈活輕巧，適合企業中長期發展，未來也可以移作他用。   
 使用者 - 界面友善、可以自由調整位置。  
 管理者 - 資料、權限、流程控制。  
@@ -40,9 +40,9 @@ npm run strapi install documentation
 
 ## Api 沒回傳圖片
 API 預設是不回傳圖片的，需要
-![](https://i.imgur.com/6gfNF29.png)
+![](https://i.imgur.com/6gfNF29.png)  
 
-![](https://i.imgur.com/eF34HEH.png)
+![](https://i.imgur.com/eF34HEH.png)  
 
 ## Api 權限
 預設是需要帶 token 存取，如果你不需要驗證則可以，到Setting > USERS & PERMISSIONS PLUGIN > Role > 找到你的 Collection > 並給與 find 和 findOne 權限。
