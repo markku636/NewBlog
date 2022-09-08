@@ -23,8 +23,11 @@ module.exports = async ({ graphql, page, actions }, pluginOptions) => {
     toPath: `/apple-pay-on-web-cybersource/`
   })
 
-
-
+  createRedirect({
+    fromPath: `/2022/08/28/google-analysis-collection-user-behavior`,
+    toPath: `/ga4-collection-user-behavior`
+  })
+  
   pageContextOptions.mobileMenu = await queryMobileMenu({ graphql })
 
   deletePage(page)
