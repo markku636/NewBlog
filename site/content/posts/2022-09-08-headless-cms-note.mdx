@@ -77,7 +77,7 @@ module.exports = ({ env }) => ({
 
 ```
 ## 備份
-* 資料庫 - 預設是 sql-lite ，路徑 .tmp/data.db ( 也支援 mysql 及 mongo )
+* 資料庫 - 預設是 sql-lite ，路徑 .tmp/data.db ( 也支援 mysql 及 mongo db )
 * 靜態檔案 - 拷貝 app/public/uploads
 
 ## 功能頁面展示
@@ -104,38 +104,3 @@ module.exports = ({ env }) => ({
 
 ## 權限
 ![](https://i.imgur.com/gEvb3eh.png)
-
-
-
-
-
-
-
-
-
-
-## [備份](https://github.com/8byr0/strapi-plugin-backup-restore)
-不支援 v3 版
-
-```
-npm i strapi-plugin-backup-restore
-
-```
-
-Create a private/backups folder. This folder will be used to store your backups.
-
-
-```
-// config/server.js
-module.exports = ({ env }) => ({
-  host: env("HOST", "0.0.0.0"),
-  port: env.int("PORT", 1337),
-  admin: {
-    auth: {
-      secret: env("ADMIN_JWT_SECRET", "32a00a220c916908e0efca2b8117262f"),
-    },
-    // Add this line
-    watchIgnoreFiles: ["**/private/**"],
-  },
-});
-```
