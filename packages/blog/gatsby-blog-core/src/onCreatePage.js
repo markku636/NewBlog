@@ -27,6 +27,20 @@ module.exports = async ({ graphql, page, actions }, pluginOptions) => {
     fromPath: `/2022/08/28/google-analysis-collection-user-behavior`,
     toPath: `/ga4-collection-user-behavior`
   })
+
+  createRedirect({
+    fromPath: `2022/03/14/IRonman226/`,
+    toPath: `2022/03/14/ironman226/`
+  })
+
+  createRedirect({
+    fromPath: `2022/04/11/IRonman226-racing-day`,
+    toPath: `2022/04/11/ironman226-racing-day/`
+  })
+
+  
+
+  
   
   pageContextOptions.mobileMenu = await queryMobileMenu({ graphql })
 
