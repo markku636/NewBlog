@@ -13,7 +13,7 @@ author : Mark Ku
 
 ## 為何採用 strapi
 ![](https://i.imgur.com/ONXbTAJ.jpg)  
-我試用了市面上幾套主流 CMS，基於以下理由，首推 strapi 靈活輕巧，適合企業中長期發展，未來也可以移作他用。   
+我試用了市面上幾套主流 CMS，基於以下理由，首推 strapi 靈活輕巧，適合企業中長期發展，豐富的功能，未來也可以移作他用。   
 使用者 - 界面友善、可以自由調整位置。  
 資料管理、角色權限、流程控制，是其他套達不到的。  
 開發者 - 開源、串接友善，提供 swagger 文件、擴充性( 插件市集 )、提供豐富的接口、本身也是 react 及 node 寫的，對前端開發者相對很友善。  
@@ -36,9 +36,9 @@ npx create-strapi-app@latest my-project --quickstart
 cd my-project
 npm run strapi install documentation
 ```
-## 安裝完後即可以登入後台，但會遇到一些小問題，順便記錄了一下
+## 安裝完後，即可以登入後台，但會遇到一些小問題，順便記錄了一下
 ## Api 沒回傳圖片
-API 預設是不回傳圖片的欄位，呼叫 api populate 參數，需額外填寫回傳的圖片欄位
+API 預設是不會傳圖片的欄位，在呼叫 api 的請求參數 populate 參數，額外填寫回傳的圖片欄位
 ![](https://i.imgur.com/6gfNF29.png)
 ![](https://i.imgur.com/eF34HEH.png)
 ## Api 權限
