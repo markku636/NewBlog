@@ -17,7 +17,7 @@ slug: ga4-get-member-search-keyword
 ## 事前準備
 * [參考先前的文章](https://blog.markkulab.net/ga4-collection-user-behavior/)，並設定 GTM 將自訂事件 "searchSubmit" 整合 GA。
 
-## 首先你必須在你網站，透過前端將事件傳遞給 Google Tag Mangaer 
+## 首先，在您的前端網站，搜尋按鈕事件中，執行下面程式碼
 ```
 export const pushSearchDataLayer = (searchString: string) => {
   const dataLayer = window.dataLayer || [];
@@ -30,7 +30,7 @@ export const pushSearchDataLayer = (searchString: string) => {
 };
 
 ```
-## 首先，我們需要建立變數，來接從前端程式傳遞過來的參數，點選 Variables > New 
+## 接著，我們需要建立變數，來接前端程式傳遞過來的參數，點選 Variables > New 
 ![](https://i.imgur.com/SQrBI8r.png)
 
 ## 點選 Choose variable type > 並選擇 DataLayer
