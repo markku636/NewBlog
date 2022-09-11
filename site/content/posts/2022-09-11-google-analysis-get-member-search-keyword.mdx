@@ -1,0 +1,57 @@
+---
+featured: true
+title: 透過 Google Tag Manger 將電子商務平台使用者行為搜集至 Google Analysis - 取得用戶在電子商務網站搜尋了什麼 ( 本篇採用 GA4 ) - Part's 1
+date:  2022-09-11 01:01:01 +0800
+thumbnail: google-analytics.png
+category: Google Analysis
+tags: ['ga4','google','analysis','google','tag','manger','gtm','integration']
+description : 透過 Google Tag manger 將電子商務網站的使用者行為，搜集至 Google Analysis ( 本篇採用 GA4 )
+author : Mark Ku
+slug: ga4-get-member-search-keyword
+---
+## 目的
+
+希望透過 Google analysis 報表，了解會員平在我們電子商務搜尋了些什麼關鍵字。
+
+## 依據[先前的文章](https://blog.markkulab.net/ga4-collection-user-behavior/)得知，我們能透過 Google Tag Mangaer 將事件傳遞給 Google Analysis
+
+## 事前準備
+* [參考先前的文章](https://blog.markkulab.net/ga4-collection-user-behavior/)，並設定 GTM 將自訂事件 "searchSubmit" 整合 GA。
+
+## 首先你必須在你網站，透過前端將事件傳遞給 Google Tag Mangaer 
+```
+export const pushSearchDataLayer = (searchString: string) => {
+  const dataLayer = window.dataLayer || [];
+  const pushData = {
+    event: 'searchSubmit',
+    SearchParam: searchString,
+  };
+
+  dataLayer.push(pushData);
+};
+
+```
+## 首先，我們需要建立變數，來接從前端程式傳遞過來的參數，點選 Variables > New 
+![](https://i.imgur.com/SQrBI8r.png)
+
+## 點選 Choose variable type > 並選擇 DataLayer
+![](https://i.imgur.com/XI8DiGp.png)
+
+## 填寫 Data Layer Variable Name ，可以透過 Chrome Datalayer Checker Plugin，取得Variable Name，並將變數名字改成方便識別的名稱 "DataLayer - searchString"。
+![](https://i.imgur.com/ltZq6n8.png)
+(Chrome Datalayer Checker Plugin > Copy Key)
+![](https://i.imgur.com/50vPhRw.png)  
+
+## 回到 tag > 修改 "GA4 事件 - searchSubmit"
+![](https://i.imgur.com/D14EzjW.png)
+
+## 此時在 Event Parameters 就可以增加先前建立的變數，"DataLayer - searchString"
+![](https://i.imgur.com/PamyR1A.png)
+
+## 最後我們回到 GA 的報表 > 即時 > 事件計數 > 點選 searchString > 此時就能得知用戶搜尋了那些關鍵字的計數。
+![](https://i.imgur.com/udx7NsN.png)
+
+## 參考資料
+### [GTM Data Layer 資料層 基礎介紹
+](https://datasupplied.com/google-tag-manager/data-layer-intro/?fbclid=IwAR0qmir5-hAvWfqiR4kh00vlDPG7Va9aN--v51BBXhqhJmicFXtJEIQrfBg)
+### [GTM進階篇】data layer及JSON是什麼，它們如何與GTM互動](https://papaya116.medium.com/gtm%E9%80%B2%E9%9A%8E%E7%AF%87-data-layer%E5%8F%8Ajson%E6%98%AF%E4%BB%80%E9%BA%BC-%E5%AE%83%E5%80%91%E5%A6%82%E4%BD%95%E8%88%87gtm%E4%BA%92%E5%8B%95-979eae7de2d1)
