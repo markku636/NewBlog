@@ -1,0 +1,138 @@
+---
+title: Headless CMS - Strapi 評估筆記
+date: 2022-09-15T13:31:18.405Z
+featured: true
+author: Mark Ku
+category: Infra
+thumbnail: strapi.png
+tags:
+  - headless
+  - cms
+  - strapi
+  - swagger
+  - faq
+description: Headless CMS Strapi 筆記
+---
+## 解決問題
+
+老闆請我協助評估 CMS 系統，讓產品部門維護 FAQ 及產品 Knowledge Base，因為後端開發能量有些限、希望能靠友善的 UI 設定，就能快速的創造出後台維護頁面及前台Api，好讓其他前端同仁串接。
+
+## 為何採用 strapi
+
+![](https://i.imgur.com/ONXbTAJ.jpg)\
+我試用了幾套主流幾套 CMS，基於以下理由，首推 strapi 靈活輕巧，適合企業中長期發展，未來也可以移作他用。\
+使用者 - 界面友善、可以自由調整位置。\
+管理者 - 資料欄位驗證、權限管理、流程控制。\
+開發者 - 開源、串接友善，提供 swagger 文件、擴充性( 插件市集 )、提供豐富的接口、本身也是 react 及 node 寫的，對前端開發者相對很友善。  
+
+## 原理
+
+strapi 透過友善的後台 UI 設定，能讓程式產生程式。
+![](https://i.imgur.com/M6RfjZ8.png)  
+
+## 使用及安裝限制
+
+* node 版本 '>=10.16.0 <=14.x.x' ( 可以透過 nvm 管理多版本 node )
+* 雲端付費，地端開源永久免費
+
+## [安裝 strapi](https://docs.strapi.io/developer-docs/latest/getting-started/quick-start.html#_1-install-strapi-and-create-a-new-project)
+
+```
+npx create-strapi-app@latest my-project --quickstart
+```
+
+## 安裝 [swagger](https://docs.strapi.io/developer-docs/latest/plugins/documentation.html#installation)
+
+```
+cd my-project
+npm run strapi install documentation
+```
+
+## 安裝完後，即可以登入後台，但會遇到一些小問題，順便記錄了一下
+
+## Api 沒回傳圖片
+
+API 預設是不會傳圖片的欄位，在呼叫 api 的請求參數 populate 參數，額外填寫回傳的圖片欄位
+![](https://i.imgur.com/6gfNF29.png)
+![](https://i.imgur.com/eF34HEH.png)
+
+## Api 權限
+
+預設 api 存取是需要帶 token，如果你不需要驗證則可以，到 Setting > USERS & PERMISSIONS PLUGIN > Role > 找到你的 Collection > 並給與 find 和 findOne 權限。
+![](https://i.imgur.com/ovdumL9.png)
+
+## Rich Text 圖片無法即時預覽圖片
+
+.env
+
+```
+HOST=0.0.0.0
+PORT=1337
+APP_KEYS=p285lmxQN6bZ90Dh870eIg==,twHIadFFnSgVKyGgzcpnIQ==,jgn83CaVHIPPnpSqsZPWGw==,s2lTboydFrhkPRHJp4omQw==
+API_TOKEN_SALT=9LGnsz1zt4UpaKfCCQxEZQ==
+ADMIN_JWT_SECRET=l7gG6CTUeK0502ns9FAKkw==
+JWT_SECRET=mJg/1OqVkOeCiZcxiQfG5w==
+WEBSITE=http://127.0.0.1:1337/
+```
+
+config/server.js
+
+```
+module.exports = ({ env }) => ({
+  host: env('HOST', '0.0.0.0'),
+  port: env.int('PORT', 1337),
+  ------
+  url: env('WEBSITE', 'http://127.0.0.1'), 
+  ------
+  app: {
+    keys: env.array('APP_KEYS'),
+  },  
+});
+```
+
+## 資料備份
+
+* 資料庫 - 預設是 sql-lite ，路徑 .tmp/data.db ( 也支援 mysql 及 mongo db )
+* 靜態檔案 - 靜態檔案上傳後都會在 /public/uploads 目錄
+
+## 功能頁面展示
+
+### 動態產生後台
+
+![](https://i.imgur.com/0f0BjwY.png)
+
+### 上傳圖片可以傳多張圖
+
+![](https://i.imgur.com/jXmzMbk.png)
+
+### 上傳圖片格式限制
+
+![](https://i.imgur.com/PunbK7f.png)
+
+## 輸入畫面
+
+![](https://i.imgur.com/lLcJ5rp.png)
+
+### Layout 動態調整
+
+![](https://i.imgur.com/hGjLnld.png)
+
+### WebHook
+
+![](https://i.imgur.com/DAuWE1D.png)
+
+### 角色
+
+![](https://i.imgur.com/i1fy4kz.png)
+
+## 權限
+
+![](https://i.imgur.com/gEvb3eh.png)
+
+## 參考資料
+[ckeditor](https://market.strapi.io/plugins/@_sh-strapi-plugin-ckeditor)
+[strapi provider upload ftp v2](https://www.npmjs.com/package/strapi-provider-upload-ftp-v2)
+[使用 docker 來輕鬆建構資料庫](https://blog.yiyu0x.org/2019/10/21/)
+
+
+
