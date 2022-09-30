@@ -59,7 +59,11 @@ npm i @google-pay/button-react --save
 
         let param: IPaymentProcessRequest = { PaymentTokenObject: paymentDataBase64 };
         // call 自己的後端，並透過自己後端和金流商交易
-        digitalProcessResult(param).then((res) => {});
+        digitalProcessResult(param).then((res) => {
+		  if(res.IsSuccess === true){
+		    alert('交易成功')
+		  } 		
+		});
       });
   };
 
