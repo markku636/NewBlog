@@ -1,0 +1,114 @@
+---
+featured: true
+title: Google Pay on Web + Cybersource 串接筆記
+date:  2022-08-11 01:01:01 +0800
+thumbnail: googlepay.png
+category: Payment
+tags: ['Google Pay','Cybersource','integrate','Fontend','NET MVC']
+description : Google Pay on Web + Cybersource 串接筆記
+author : Mark Ku
+slug: 2022/09/30/google-pay-on-web-cybersource-integration
+---
+## 時空背景
+因工作需要美國及德國電商網站，需要界接 Google Pay。  
+
+[先前也有介紹 Apple Pay on Web + Cybersource](https://blog.markkulab.net/2022/08/10/apple-pay-on-web-cybersource-integration/)  
+
+## 程式串接前需提前準備的項目
+* 付款頁需要 Https 環境 
+* Google 開發者帳號( 25 美金 / 只需繳交一次 )
+* 符合 [Google Pay UI 規範](https://developers.google.com/pay/api/web/guides/brand-guidelines?hl=zh-tw)
+* 非直接對接需要金流商戶 (  本篇採用 cybersource )
+
+## Google Pay 付款流程
+當使用者按下Google Pay 付款按鈕，前端會從 google 得用戶端 token > 會員可以選擇可付款信用卡 > 前端會在 load 拿到 token ，帶著 token  Call 自己的後端 Api，向金流商請求建立訂單。
+
+## 至 [Google Pay 開發者平台](https://developers.google.com/pay/api)，登入 Google Pay 開發者帳號 > 透過主控台管理整合作業
+![](https://i.imgur.com/8RwFxVW.png)
+
+## 啟用 Google Pay ，填寫商家檔案，右上角為之後的啟動 ID
+![](https://i.imgur.com/npunx0o.png)
+
+## Google Pay API > 開始使用
+![](https://i.imgur.com/NKP3v7V.png)
+
+## 輸入網站域名
+![](https://i.imgur.com/jmXhAIG.png)
+
+## 後面網站實作完成 Google Pay 後，依據審核要求，截圖上傳送審，經 Google 審核通過才能使用 PRODUCTION 環境。 ( 通常一兩天 )
+![](https://i.imgur.com/mC8mbLG.png)
+![](https://i.imgur.com/2OTm5ja.png)
+
+## 接著我們來到前端網站
+
+## 安裝 Google Pay button 套件
+```
+npm i @google-pay/button-react --save
+```
+## 程式碼
+
+```
+  const googlePayProcessResult = (paymentData: any) => {
+    return checkStock()      
+      .then((res) => {
+        const paymentDataString = paymentData.paymentMethodData.tokenizationData.token;
+        const paymentDataBase64 = btoa(paymentDataString);
+
+        let param: IPaymentProcessRequest = { PaymentTokenObject: paymentDataBase64 };
+        // call 自己的後端，並透過後端和金流商交易
+        digitalProcessResult(param).then((res) => {});
+      });
+  };
+
+
+<GooglePayButton
+environment="PRODUCTION" // 審核通過才能使用
+buttonType="short"
+paymentRequest={{
+  apiVersion: 2,
+  apiVersionMinor: 0,
+  allowedPaymentMethods: [
+    {
+      type: 'CARD',
+      parameters: {
+        allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
+        allowedCardNetworks: ['MASTERCARD', 'VISA'],
+      },
+      tokenizationSpecification: {
+        type: 'PAYMENT_GATEWAY',
+        parameters: {
+          gateway: 'cybersource', 
+          gatewayMerchantId: 'letgo_account', // cybersource 後台商戶號 ( 非 android 商戶號 )
+        },
+      },
+    },
+  ],
+  merchantInfo: {
+    merchantId: 'ABB121232', // google pay developer merchantId
+    merchantName: 'LetGo',
+  },
+  transactionInfo: {
+    totalPriceStatus: 'FINAL',
+    totalPriceLabel: 'Total',
+    totalPrice: numberFormat(degitalPayPrice, 2),
+    currencyCode: 'USD',
+    countryCode: 'US',
+  },
+}}
+onLoadPaymentData={googlePayProcessResult}
+/>
+```
+## Google Pay 商戶號 ( merchantInfo.merchantInfo ) 非常隱秘，千萬別填錯了，我因為填錯搞了很久。
+![](https://i.imgur.com/nDZoj9P.png)
+
+## 金流閘道商戶號 ( gatewayMerchantId )
+![](https://i.imgur.com/bcNdo7g.png)
+
+## 全部實作完成後送審，送審完就能收款。
+
+## 參考資料
+[使用 Google Pay 在網路上快速結帳](https://developers.google.cn/codelabs/pay-web-checkout#0
+)  
+[在Web端接入Google Pay](https://www.jianshu.com/p/661098c68762)  
+[Radial Payments & Fraud Documentation - Google Pay Web Integration](https://docs.radial.com/ptf/Content/Topics/payments/google-pay-web-integration.htm)  
+[How to Integrate GooglePay in React](https://www.pluralsight.com/guides/how-to-integrate-googlepay-in-react)  
