@@ -50,7 +50,7 @@ npm i @google-pay/button-react --save
 
 ```
   const googlePayProcessResult = (paymentData: any) => {
-    return checkStock()      
+    return checkStock()  // 檢查庫存     
       .then((res) => {
         const paymentDataString = paymentData.paymentMethodData.tokenizationData.token;
         const paymentDataBase64 = btoa(paymentDataString);
