@@ -16,10 +16,10 @@ slug: 2022/09/30/google-pay-on-web-cybersource-integration
 [先前也有分享 Apple Pay on Web + Cybersource](https://blog.markkulab.net/2022/08/10/apple-pay-on-web-cybersource-integration/)  
 
 ## 程式串接前需提前準備的項目
-* 付款頁需要 Https 環境 
+* 網站需要 Https 環境 
 * Google 開發者帳號( 25 美金 / 只需繳交一次 )
+* 非直接對接Google Pay，則需要金流商戶 ( 本篇採用 cybersource )
 * 符合 [Google Pay UI 規範](https://developers.google.com/pay/api/web/guides/brand-guidelines?hl=zh-tw)
-* 非直接對接需要金流閘道商戶 ( 本篇採用 cybersource )
 
 ## Google Pay 付款流程
 當使用者按下Google Pay 付款按鈕，會員可以選擇可付款信用卡 > 選取完信用卡後，前端會在 onLoadPaymentData 事件 拿到 Google Pay Token，此時帶著 Google Pay Token  Call 自己的後端 API，向金流商請求建立訂單。
