@@ -24,31 +24,32 @@ slug: 2022/09/30/google-pay-on-web-cybersource-integration
 ## Google Pay 付款流程
 當使用者按下Google Pay 付款按鈕，會員可以選擇可付款信用卡 > 選取完信用卡後，前端會在 onLoadPaymentData 事件 拿到 Google Pay Token，此時帶著 Google Pay Token  Call 自己的後端 API，向金流商請求建立訂單。
 
-## 至 [Google Pay 開發者平台](https://developers.google.com/pay/api)，登入 Google Pay 開發者帳號 > 透過主控台管理整合作業
+## Google Pay 設定
+### 首先，至 [Google Pay 開發者平台](https://developers.google.com/pay/api)，登入 Google Pay 開發者帳號 > 透過主控台管理整合作業
 ![](https://i.imgur.com/8RwFxVW.png)
 
-## 啟用 Google Pay 後，填寫『商家檔案』
+### 啟用 Google Pay 後，填寫『商家檔案』
 ![](https://i.imgur.com/YXrohbB.png)
 
-## Google Pay API > 開始使用
+### Google Pay API > 開始使用
 ![](https://i.imgur.com/NKP3v7V.png)
 
-## 填寫欲整合 Google Pay 網站域名，整合類型選擇『閘道』
+### 填寫欲整合 Google Pay 網站域名，整合類型選擇『閘道』
 ![](https://i.imgur.com/jmXhAIG.png)
 
-## 先跳過此步，後面網站若實作完成 Google Pay 頁面後，依據審核要求，截圖上傳送審，經 Google 審核通過後，才能使用 PRODUCTION 環境。 
+### 先跳過此步，後面網站若實作完成 Google Pay 頁面後，依據審核要求，截圖上傳送審，經 Google 審核通過後，才能使用 PRODUCTION 環境。 
 ![](https://i.imgur.com/mC8mbLG.png)
 
-## 送審後會禁止修改，並提示正在審核中
+### 送審後會禁止修改，並提示正在審核中
 ![](https://i.imgur.com/1e2Q13G.png)
 
 ## 接著我們來到前端網站
 
-## 安裝 Google Pay Button 套件
+### 安裝 Google Pay Button 套件
 ```
 npm i @google-pay/button-react --save
 ```
-## 撰寫程式碼
+### 撰寫程式碼
 
 ```
   const googlePayProcessResult = (paymentData) => {
@@ -104,15 +105,16 @@ paymentRequest={{
 onLoadPaymentData={googlePayProcessResult}
 />
 ```
-## Google Pay 商戶號 ( merchantInfo.merchantInfo ) 非常隱秘，千萬別填錯了，我因為填錯搞了很久。
+### Google Pay 商戶號 ( merchantInfo.merchantInfo ) 非常隱秘，千萬別填錯了，我因為填錯搞了很久。
 ![](https://i.imgur.com/nDZoj9P.png)
 
-## 金流閘道商戶號 ( gatewayMerchantId )
+### 金流閘道商戶號 ( gatewayMerchantId )
 ![](https://i.imgur.com/bcNdo7g.png)
 
-## 全部頁面實作完成後送審，送審完就能正常收款。
+### 全部頁面實作完成後送審，送審通過就能正常收款。
+![](https://i.imgur.com/iHkjr0y.png)
 
-## 最後，實作自己的後端交易 API，將前端傳遞 Google Pay Token 傳到，Cybersource REST API 做交易。
+### 最後，實作自己的後端交易 API，將前端傳遞的 Google Pay Token 傳到，Cybersource REST API 做交易。
 
 ## 參考資料
 [使用 Google Pay 在網路上快速結帳](https://developers.google.cn/codelabs/pay-web-checkout#0
