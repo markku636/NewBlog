@@ -56,11 +56,10 @@ npm i @google-pay/button-react --save
         const paymentDataBase64 = btoa(paymentDataString);
 
         let param: IPaymentProcessRequest = { PaymentTokenObject: paymentDataBase64 };
-        // call 自己的後端，並透過後端和金流商交易
+        // call 自己的後端，並透過自己後端和金流商交易
         digitalProcessResult(param).then((res) => {});
       });
   };
-
 
 <GooglePayButton
 environment="PRODUCTION" // 審核通過才能使用
