@@ -51,7 +51,7 @@ npm i @google-pay/button-react --save
 ## 撰寫程式碼
 
 ```
-  const googlePayProcessResult = (paymentData: any) => {
+  const googlePayProcessResult = (paymentData) => {
     return checkStock()  // 檢查庫存     
       .then((res) => {
         const paymentDataString = paymentData.paymentMethodData.tokenizationData.token;
