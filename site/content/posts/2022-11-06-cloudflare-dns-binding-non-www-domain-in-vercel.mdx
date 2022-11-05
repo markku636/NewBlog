@@ -1,0 +1,39 @@
+---
+featured: true
+title: Cloudflare DNS binding non-WWW domain in Vercel
+date:  2022-11-06 01:01:01 +0800
+thumbnail: domain.jpg
+category: Infra
+tags: ['cloudflare','dns','binding','non-www','vercel']
+description : cloudflare-dns-binding-non-www-domain-in-vercel
+author : Mark Ku
+slug: cloudflare-dns-binding-non-www-domain-in-vercel
+---
+
+## Problem
+Recently our campoany another website go live. 
+The old webiste domain is [non-WWW](https://www.searchenginejournal.com/www-vs-non-www-seo/272043/).  
+Consider the original website SEO.  
+We need bind second domain in vercel.  
+but it's not working.  
+```
+https://abc.com 
+```
+## Referring to [vercel offical documentation](https://vercel.com/guides/using-cloudflare-with-vercel) to do, but is not working
+
+## Discover nzxt's website，also using vercel, but thery can bindding second domain 
+![](https://i.imgur.com/GEGdRoY.jpg)
+
+## I using online nslookup tool get nzxt DNS record
+https://mxtoolbox.com/
+![](https://i.imgur.com/sCciXcf.png)
+
+## Change our DNS
+I thing vercel offical documentation ip is wrong.Modify Cloudfalre DNS A record， from 76.76.21.21 to 76.223.126.88  
+![](https://i.imgur.com/7ac9Vrq.png)
+
+See it's work   
+![](https://i.imgur.com/kza1Mha.jpg)
+
+## Make sure second domain binding in vercel
+![](https://i.imgur.com/MTvHOo2.png)
