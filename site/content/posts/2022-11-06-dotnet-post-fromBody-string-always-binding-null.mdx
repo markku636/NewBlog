@@ -21,22 +21,23 @@ return test;
 When having [FromBody]attribute, the string sent should not be a raw string, but rather a JSON string as it includes the wrapping quotes:
 
 ```
-'string' or "string"
+'test string' or "test string"
 ```
 
-## So you can use JSON.stringify() let string to 
-```
-let x= JSON.stringify(JSON.stringify('a')) //  => '"\\"x\\""'
-```
+## So you can use JSON.stringify() 
 
+```
+JSON.Stringify('test string') // will be => "test string"
+```
 ## But cannot do JSON.Stringify twice
+
 ```
-JSON.Stringify()
+let x= JSON.stringify(JSON.stringify('test string')) // will be => '"\\"test string\\""'
 ```
 
 ## Avoid execute twice
 
-``
+```
 export const isJsonString = (str: string) => {
   try {
     JSON.parse(str);
