@@ -29,8 +29,8 @@ When having [FromBody]attribute, the string sent should not be a raw string, but
 ```
 JSON.Stringify('test string') // will be => "test string"
 ```
-## But cannot do JSON.Stringify twice
 
+## But cannot do JSON.Stringify twice
 ```
 let x= JSON.stringify(JSON.stringify('test string')) // will be => '"\\"test string\\""'
 ```
