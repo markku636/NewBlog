@@ -1,0 +1,48 @@
+---
+featured: true
+title: Dotnet Post FromBody string Always binding Null
+date:  2022-09-30 01:01:01 +0800
+thumbnail: googlepay.png
+category: Payment
+tags: ['dotnet','bind','always','null']
+description : Google Pay on Web + Cybersource 串接筆記
+author : Mark Ku
+slug: dotnet-post-fromBody-string-always-binding-null
+---
+## Problem
+```
+public string Book([FromBody] string test) // test always is null 
+{
+return test;
+}
+```
+## Root cause
+
+When having [FromBody]attribute, the string sent should not be a raw string, but rather a JSON string as it includes the wrapping quotes:
+
+```
+'string' or "string"
+```
+
+## So you can use JSON.stringify() let string to 
+```
+let x= JSON.stringify(JSON.stringify('a')) //  => '"\\"x\\""'
+```
+
+## But cannot do JSON.Stringify twice
+```
+JSON.Stringify()
+```
+
+## Avoid execute twice
+
+``
+export const isJsonString = (str: string) => {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+};
+```
