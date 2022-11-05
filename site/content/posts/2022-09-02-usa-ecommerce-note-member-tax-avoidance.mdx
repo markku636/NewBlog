@@ -1,0 +1,25 @@
+---
+featured: true
+title: 美國電子商務實務筆記 - 會員避稅的問題
+date:  2022-09-02 01:01:01 +0800
+thumbnail: ecommerce.png
+category: ECommerce
+tags: ['credit','authorize','capture','USA','ecommerce']
+description : usa-ecommerce-note-member-tax-avoidanc
+author : Mark Ku
+slug: usa-ecommerce-note-member-tax-avoidanc
+---
+## 問題原因
+先前我們了解美國會依據州及城市收取不同的稅率，但是美國有些特殊的軍事外交或是艦艇上州別是免稅或經濟比較弱勢的免稅州，從訂單記錄看，過去就會有很多會員會想籍調整收貨地址來避稅。
+
+原本金流商會幫我們檢查州別及郵遞區號對不對，是不是存在詐欺的，因為用了保險承擔，By pass 金流商的高風險的訂單，所以產生這問題。
+
+### 影響
+* 美國政府會要求賣家補稅，我們則得去和客戶追稅
+* 己出貨的，要通知用戶補稅
+* 未出貨的，要通知客戶重新付款
+
+### 解決方式
+* 在結帳前去 Call 美國郵政署 api，檢查 Zip code 和州碼有沒有符合。
+* 在出貨前 Call DHL 驗證地址對不對，不對不給出貨
+* 免稅州選取排序到藏到最後
