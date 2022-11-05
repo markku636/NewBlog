@@ -11,6 +11,7 @@ slug: dotnet-post-fromBody-string-always-binding-null
 ---
 ## Problem
 ```
+[HttpPost]
 public string Book([FromBody] string test) // test always is null 
 {
 return test;
