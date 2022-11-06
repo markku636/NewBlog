@@ -131,7 +131,7 @@ export default props => {
               </Section>
             </Box> */}
           </Flex>
-          {/* <div class='iframe-container'>
+          {/* <div className='iframe-container'>
             <iframe
               style='width:100%;height:500px'
               src='https://www.youtube.com/embed/QXxuNpwIk4I'

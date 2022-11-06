@@ -22,7 +22,7 @@ const PostCommentsFacebook = ({ siteUrl, slug }) => {
       </Helmet>
       <Divider />
       <div
-        class='fb-comments'
+        className='fb-comments'
         data-href={`${siteUrl}${slug}`}
         data-width='100%'
         data-numposts='5'
