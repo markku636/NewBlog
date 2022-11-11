@@ -63,3 +63,5 @@ Register-ScheduledTask -TaskName 'RedisSync' -InputObject $Task -User $account -
 ## Open the Windows Task Scheduler. You will see the task you just created.
 
 ![](https://i.imgur.com/vPbU7o7.png)
+
+## P.S. In during the synchronization process, the slave redis cannot modify any redis data.
