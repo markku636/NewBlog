@@ -1,0 +1,110 @@
+---
+featured: true
+title: Custom NextJS image loader with cloudflare
+date:  2022-11-12 01:01:01 +0800
+thumbnail: nextjs.png
+category: Frontend
+tags: ['React','Next','image loader','cloudflare']
+description : Custom NextJS image loader with cloudflare
+author : Mark Ku
+slug: custom-nextjs-image-loader-with-cloudflare
+---
+# Custom NextJS image loader with cloudflare
+## Problem 
+Our NextJS Application are occasionally overloaded.
+Causes not catch-up rendering to get old pages.
+
+## Solution concept
+For reduce NEXT JS load and optimize images, We plan change Next JS Image loader to Cloudfalre resize api
+
+## Cloudfalre image resizing document
+[Link](https://developers.cloudflare.com/images/image-resizing/integration-with-frameworks/)
+
+## Enable image-resizing in cloudfalre 
+[Link](https://developers.cloudflare.com/images/image-resizing/enable-image-resizing/)
+
+## create a fuction for image optimization  
+```
+import { ImageLoaderProps } from 'next/image';
+
+export const contentDomain = 'https://content.ibuypower.com/';
+
+const normalizeSrc = (src: string) => {
+  return src.startsWith('/') ? src.slice(1) : src;
+};
+
+export const cloudflareLoader = ({ src, width, quality = 75 }: ImageLoaderProps) => {
+  const params = [`width=${width}`, 'format=auto'];
+
+  if (quality) {
+    params.push(`quality=${quality}`);
+  }
+  const paramsString = params.join(',');
+
+  return `${$contentDomain}cdn-cgi/image/${paramsString}/${normalizeSrc(src)}`;
+};
+
+export const cloudflareImageUrl = (
+  src?: string,
+  width?: number,
+  height?: number,
+  quality?: number,
+  fit?: string,
+  options?: string[]
+) => {
+  const params: string[] = ['format=auto'];
+
+  // todo default image
+  if (!src) {
+    return;
+  }
+
+  quality = quality || 75;
+
+  if (width) {
+    params.push(`width=${width}`);
+  }
+
+  if (height) {
+    params.push(`height=${height}`);
+  }
+
+  if (fit) {
+    params.push(`fit=${fit}`);
+  }
+
+  if (quality) {
+    params.push(`quality=${quality}`);
+  }
+
+  if (options) {
+    params.push(...options);
+  }
+
+  const paramsString = params.join(',');
+
+  return `${contentDomain}cdn-cgi/image/${paramsString}/${normalizeSrc(src)}`;
+};
+
+```
+
+## Useage
+### Specify the NextJS image loader
+It is recommended to use NextJS image in Next.
+it will make better experience on our website. 
+```
+   <Image
+    loader={cloudflareLoader}
+    src={`${$projects.content}${item.Image}`}
+    width={175}
+    height={175}
+    alt={'promo image'}
+    ></Image>
+```
+
+## Another useage. You can call then cloudflareImageUrl then get the optimized image url
+
+```
+<div style={{ backgroundImage: `url("${cloudflareImageUrl(contentURL + communityJson.Content.Image)}")` }} >
+</div>
+```
