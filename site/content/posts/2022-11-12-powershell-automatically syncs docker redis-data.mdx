@@ -1,0 +1,65 @@
+---
+featured: true
+title: Powershell automatically syncs docker redis data
+date:  2022-11-12 01:01:01 +0800
+thumbnail: powershell.png
+category:  PowerShell
+tags: ['powershell','redis','docker','automatically syncs redis']
+description : Powershell automatically syncs docker redis data
+author : Mark Ku
+slug: powershell-automatically syncs docker redis-data
+---
+# Powershell automatically syncs docker redis data
+## Problem 
+because our develop environment is in USA.
+So front-end development often has a lot of dealy and instability.
+
+## Solution concept
+Use Windows Task Scheduler and Powershell to sync data  with redis in USA
+
+## First. You need create auto-sync.ps1 script and put Powershell to D:\Powershell\ folder 
+
+```
+## auto-sync.ps1
+$masterRedisIp = 192.168.40.30 // usa redis 
+$masterRedisPort = 6399
+$slaveRedisIp = 192.168.0.39  // taiwan redis 
+slaveRedisPort = 6400
+
+$Logfile = "D:\Logs\proc_$env:computername.log"
+$sleepSecond = 900
+
+function WriteLog
+{
+Param ([string]$LogString)
+$Stamp = (Get-Date).toString("yyyy/MM/dd HH:mm:ss")
+$LogMessage = "$Stamp $LogString"
+Add-content $LogFile -value $LogMessage
+}
+
+WriteLog "The script is run"
+docker exec -u 0 -it f08e2fc8c5a4 redis-cli -h $slaveRedisIp -p $slaveRedisPort slaveof $masterRedisIp $masterRedisPort
+
+Write-Host "wait $sleepSecond sec"
+Start-Sleep -Seconds $sleepSecond
+
+docker exec -u 0 -it f08e2fc8c5a4 redis-cli -h $slaveRedisIp -p $laveRedisPort slaveof no one
+WriteLog "The script is successfully executed"
+```
+## Second, Create create-sync-redis-task.ps1 and run this power shell 
+```
+$account='admin'
+$password='password'
+$Action = New-ScheduledTaskAction -Execute 'Powershell.exe' -Argument '-ExecutionPolicy Bypass -File D:\Powershell\sync-redis.ps1"'
+
+$Trigger = New-ScheduledTaskTrigger -Daily -At 3am
+
+$Settings = New-ScheduledTaskSettingsSet
+
+$Task = New-ScheduledTask -Action $Action -Trigger $Trigger -Settings $Settings
+
+Register-ScheduledTask -TaskName 'RedisSync' -InputObject $Task -User $account -Password $password
+```
+## Open the Windows Task Scheduler. You will see the task you just created.
+
+![](https://i.imgur.com/vPbU7o7.png)
