@@ -44,7 +44,7 @@ export const cloudflareLoader = ({ src, width, quality = 75 }: ImageLoaderProps)
   return `${$contentDomain}cdn-cgi/image/${paramsString}/${normalizeSrc(src)}`;
 };
 
-export const cloudflareImageUrl = (
+export const getCloudflareImageUrl = (
   src?: string,
   width?: number,
   height?: number,
@@ -102,9 +102,9 @@ it will make better experience on our website.
     ></Image>
 ```
 
-## Another useage. You can call the cloudflareImageUrl method to get the optimized image url
+## Another useage. You can call the getCloudflareImageUrl method to get the optimized image url
 
 ```
-<div style={{ backgroundImage: `url("${cloudflareImageUrl(contentURL + communityJson.Content.Image)}")` }} >
+<div style={{ backgroundImage: `url("${getCloudflareImageUrl(contentURL + communityJson.Content.Image)}")` }} >
 </div>
 ```
