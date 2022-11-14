@@ -12,7 +12,7 @@ slug: custom-nextjs-image-loader-with-cloudflare
 # Custom NextJS image loader with cloudflare
 ## Problem 
 Our NextJS Application are occasionally overloaded.
-Causes not catch-up rendering and then get old pages.
+Cause not catch-up rendering then get old pages.
 
 ## Solution concept
 For reduce NEXT JS load and optimize images, We plan change Next JS Image loader to Cloudfalre resize api
@@ -27,7 +27,7 @@ For reduce NEXT JS load and optimize images, We plan change Next JS Image loader
 ```
 import { ImageLoaderProps } from 'next/image';
 
-export const contentDomain = 'https://content.ibuypower.com/';
+export const contentDomain = 'https://content.letgo.com.tw/';
 
 const normalizeSrc = (src: string) => {
   return src.startsWith('/') ? src.slice(1) : src;
