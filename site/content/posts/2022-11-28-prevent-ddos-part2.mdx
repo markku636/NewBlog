@@ -1,0 +1,102 @@
+---
+featured: true
+title: Cloudflare Http DDoS 防禦筆記 - 黑色星期五檔期
+date:  2022-11-28 01:01:01 +0800
+thumbnail: defense-ddos.webp
+category: Security
+tags: ['ddos','prevent','black','friday','period','thanksgiving','day']
+description : DDOS 防禦筆記
+author : Mark Ku
+slug: prevent-ddos-part2
+---
+
+## 時空背景 - Background
+我在一家販售電競電腦的電子商務公司工作，該公司在美國、德國和加拿大提供遊戲電腦。
+
+在黑色星期五前幾天。我們的網站經常受到 DDoS 攻擊。直到有一天我們的網站當機了。
+
+[先前有寫一篇文章](https://blog.markkulab.net/2022/01/16/prevent-ddos/) 也是有關防禦 DDos，此篇將規則實踐在 Cloudfalre WAF
+
+I work for an gaming-pc e-commerce company. 
+The company provide gaming pc in the US, Germany, and Canada.
+
+Days before Black friday. Our website is often under DDoS attack. Until one day our website went down.
+
+![](https://i.imgur.com/nANZAqj.png)
+
+### 接著，我從 cloudflare 安全報告中 在12 日，有 2000 萬個流量請求發送到我們的網站。
+
+### Next,from the cloudflare security report,  we know that there are 20 million traffic requests sent to our website on the 12th.
+
+![](https://i.imgur.com/ZZcMKIn.png)
+
+### 而且我發現攻擊者的單個IP有非常大的請求
+
+### And I found that the attacker's single IP has a very large request 
+
+![](https://i.imgur.com/fd3Hjn1.png)
+### 我還發現來許多未開展業務的國家/地區對我們網站發出的大量請求。
+### I also see very large requests from countries where We don't operate.
+
+### 雖然我們的cloudflare是企業版的，但是靠預設的設定，還是無法抵抗 Ddos 
+
+### I think we our cloudflare is enterprise version, But we can't resist the attack.
+
+### 然後花了很多時間學習cloudflare。查看 cloudflalre 所有設置，並和我的老闆討論。
+
+### Then I spent a lot of time learning cloudflare. review cloudflalre all setting and discuss my boss.
+
+
+### 我制定了一個防止ddos的計劃。我建議創建 Web 應用程序防火牆規則以在黑色星期五期間保護我們的生意。我們得到美國老闆的許可。
+
+### I made a plan to prevent ddos. I recommend creating web application firewall rules to protect our business during Black Friday. And We get permission from the American boss.
+
+### 為了對生意影響最小，只有針對大量請求的單一IP 進行封鎖。
+![](https://i.imgur.com/DhNvfeN.png)
+
+### 其他規則只有開啟人類驗證，驗證通過才能進入網站
+![](https://i.imgur.com/P0OLwSP.png)
+
+![](https://i.imgur.com/Gd5SfbS.png)
+
+## 建立規則 - Rule
+### 
+![](https://i.imgur.com/W9JrIh1.png)
+
+#### 1. WhiteL ist
+![](https://i.imgur.com/jCN1Q5Q.png)
+
+#### 2. IP Block ( attacker )
+![](https://i.imgur.com/CggFyEH.png)
+
+#### 3. Country challenge
+
+![](https://i.imgur.com/CnZ7q6V.png)
+
+#### 4. IP Challenge( suspicious )
+
+![](https://i.imgur.com/4dMWWvS.png)
+#### 99. Automated ( last resort )
+![](https://i.imgur.com/b8SdAzv.png)
+
+#### 99. Likely automated ( last resort )
+![](https://i.imgur.com/1PDyWAK.png)
+
+#### 99. Request Rate ( last resort )
+![](https://i.imgur.com/7yXmDJ1.png)
+
+#### 100. Non-operating country
+![](https://i.imgur.com/ktMCQCe.png)
+
+## 效益 - (effective) 
+從感恩節 - 黑五檔期(三天)，一共遇到 7 次 DDoS 攻擊，累積收到1300多萬惡意流量，最高一次攻擊瞬間收到300萬個請求，直到第五次攻擊後，網站跳停約30秒，從報表中發現攻擊型態轉變，從集中的 IP、 國家，從大量集中變成小量又分散的攻擊，最後決定透過 Cloudfalre 精準的械器學習結果規則做限制，在不影響生意下，除了單一 IP大量請求是直接封鎖，其他都是送他人類驗證，順利的度過今年的黑五檔期。
+
+### 總共收到1363萬的請求
+![](https://i.imgur.com/RZijw3y.png)
+
+### WAF 也阻擋了 500 多萬的請求
+![](https://i.imgur.com/yLnNpgS.png)
+
+### Bot 分析報表
+![](https://i.imgur.com/q9OEuh6.png)
+
