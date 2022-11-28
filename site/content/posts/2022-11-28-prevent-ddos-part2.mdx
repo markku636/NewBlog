@@ -12,7 +12,6 @@ slug: prevent-Ddos-part2
 
 ## 時空背景 - Background
 我在一家的電子商務公司工作，公司的產品主要服務於美國、德國及加拿大，事情發生在黑色星期五前幾天，我們的網站經常受到 Ddos 攻擊，直到有一天我們的網站被打掛了。
-![](https://i.imgur.com/eqMXU6s.png)
 
 [先前有寫一篇文章](https://blog.markkulab.net/2022/01/16/prevent-Ddos/) 也是有關防禦 Ddos，此篇將規則實踐在 Cloudfalre WAF
 
@@ -65,7 +64,7 @@ slug: prevent-Ddos-part2
 #### 規則100. Non-operating country
 ![](https://i.imgur.com/ktMCQCe.png)
 
-## 效益 - (effective) 
+## 效益 - Effective
 從感恩節 - 黑五檔期(三天)，一共遇到 7 次 Ddos 攻擊，累積收到1300多萬惡意流量，最高一次攻擊瞬間收到300萬個請求，直到第五次攻擊後，網站跳停約30秒，從報表中發現攻擊型態轉變，從集中的 IP、 國家，從大量集中變成小量又分散的攻擊，最後決定透過 Cloudfalre 精準的械器學習結果規則做限制，在不影響生意下，除了單一 IP大量請求是直接封鎖，其他都是送他人類驗證，順利的度過今年的黑五檔期。
 
 ### 總共收到1363萬的請求
