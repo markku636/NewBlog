@@ -34,13 +34,13 @@ slug: prevent-Ddos-part2
 ### 接著我制定了一個防止Ddos的計劃。我建議創建 Web 應用程序防火牆規則以在黑色星期五期間保護我們的生意。我們得到美國老闆的許可。
 ![](https://i.imgur.com/Gd5SfbS.png)
 
-### 為了對生意影響最小，只有針對大量請求的單一IP 進行封鎖。
+### 為了對生意影響最小，針對大量請求的單一IP 進行封鎖。
 ![](https://i.imgur.com/DhNvfeN.png)
 
 ### 在加入 IP 黑名單前，避免誤判，會先用[abuseipdb](https://www.abuseipdb.com/check/34.121.210.98)查詢及回報可疑 IP。
 ![](https://i.imgur.com/m3kgWmU.png)
 
-### 其他規則只有開啟人類驗證，驗證通過才能進入網站
+### 其他規則，避免誤判影響訂單，僅開啟人類驗證，驗證通過才能進入網站
 ![](https://i.imgur.com/P0OLwSP.png)
 
 ## 建立 WAF 規則 - Create Firewall rules
