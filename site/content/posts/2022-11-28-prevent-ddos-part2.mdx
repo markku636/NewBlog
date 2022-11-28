@@ -11,45 +11,28 @@ slug: prevent-ddos-part2
 ---
 
 ## 時空背景 - Background
-我在一家販售電競電腦的電子商務公司工作，該公司在美國、德國和加拿大提供遊戲電腦。
+我在一家的電子商務公司工作，該公司的產品服務於美國、德國及加拿大。  
 
 在黑色星期五前幾天。我們的網站經常受到 DDoS 攻擊。直到有一天我們的網站當機了。
 
 [先前有寫一篇文章](https://blog.markkulab.net/2022/01/16/prevent-ddos/) 也是有關防禦 DDos，此篇將規則實踐在 Cloudfalre WAF
 
-I work for an gaming-pc e-commerce company. 
-The company provide gaming pc in the US, Germany, and Canada.
-
-Days before Black friday. Our website is often under DDoS attack. Until one day our website went down.
-
 ![](https://i.imgur.com/nANZAqj.png)
 
 ### 接著，我從 cloudflare 安全報告中 在12 日，有 2000 萬個流量請求發送到我們的網站。
 
-### Next,from the cloudflare security report,  we know that there are 20 million traffic requests sent to our website on the 12th.
-
 ![](https://i.imgur.com/ZZcMKIn.png)
 
-### 而且我發現攻擊者的單個IP有非常大的請求
-
-### And I found that the attacker's single IP has a very large request 
+### 從報表中發現，為何會有單個IP有著非常大的請求
 
 ![](https://i.imgur.com/fd3Hjn1.png)
-### 我還發現來許多未開展業務的國家/地區對我們網站發出的大量請求。
-### I also see very large requests from countries where We don't operate.
+### 且許多未開展業務的國家/地區，對我們網站發出的大量請求。
 
-### 雖然我們的cloudflare是企業版的，但是靠預設的設定，還是無法抵抗 Ddos 
+### 雖然我們的 Cloudflare是企業版的，看起來靠預設的設定，看起來還是無法抵抗 Ddos。
 
-### I think we our cloudflare is enterprise version, But we can't resist the attack.
+### 然後花了很多時間學習 Cloudflare，查看 Cloudflalre 所有設置，並和我的老闆討論。
 
-### 然後花了很多時間學習cloudflare。查看 cloudflalre 所有設置，並和我的老闆討論。
-
-### Then I spent a lot of time learning cloudflare. review cloudflalre all setting and discuss my boss.
-
-
-### 我制定了一個防止ddos的計劃。我建議創建 Web 應用程序防火牆規則以在黑色星期五期間保護我們的生意。我們得到美國老闆的許可。
-
-### I made a plan to prevent ddos. I recommend creating web application firewall rules to protect our business during Black Friday. And We get permission from the American boss.
+### 接著我制定了一個防止ddos的計劃。我建議創建 Web 應用程序防火牆規則以在黑色星期五期間保護我們的生意。我們得到美國老闆的許可。
 
 ### 為了對生意影響最小，只有針對大量請求的單一IP 進行封鎖。
 ![](https://i.imgur.com/DhNvfeN.png)
@@ -59,8 +42,8 @@ Days before Black friday. Our website is often under DDoS attack. Until one day 
 
 ![](https://i.imgur.com/Gd5SfbS.png)
 
-## 建立規則 - Rule
-### 
+## 建立 WAF 規則 - Create Firewall rules
+### Secuity > WAF > Create firewall rule
 ![](https://i.imgur.com/W9JrIh1.png)
 
 #### 1. WhiteL ist
