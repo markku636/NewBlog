@@ -42,29 +42,32 @@ slug: prevent-Ddos-part2
 ### 至Cloudflare 後台 > Secuity > WAF > Create firewall rule
 ![](https://i.imgur.com/W9JrIh1.png)
 
-#### 規則1. WhiteL ist
+#### 規則1. 白名單- WhiteL ist
 ![](https://i.imgur.com/jCN1Q5Q.png)
 
-#### 規則2. IP Block ( attacker )
+#### 規則2. 黑名單 - IP Block ( attacker )
 ![](https://i.imgur.com/CggFyEH.png)
 
-#### 規則3. Country challenge
+#### 規則3. 國家挑戰 - Country challenge
 ![](https://i.imgur.com/CnZ7q6V.png)
 
-#### 規則4. IP Challenge( suspicious )
+#### 規則4. 指定IP挑戰 - IP Challenge( suspicious )
 ![](https://i.imgur.com/4dMWWvS.png)
 
-#### 規則99. Automated ( last resort )
+#### 規則99. 機械人挑戰 - Automated ( last resort )
 ![](https://i.imgur.com/b8SdAzv.png)
 
-#### 規則99. Likely automated ( last resort )
+#### 規則99. 機械人挑戰 - Likely automated ( last resort )
 ![](https://i.imgur.com/1PDyWAK.png)
 
-#### 規則99. Request Rate ( last resort )
+#### 規則99. 請求頻率限制 - Request Rate ( last resort )
 ![](https://i.imgur.com/7yXmDJ1.png)
 
-#### 規則100. Non-operating country
+#### 規則100. 僅運營國家能訪問 - Non-operating country
 ![](https://i.imgur.com/ktMCQCe.png)
+
+#### 另外將 DDOS 敏感度調整成 Medium
+![](https://i.imgur.com/QfPWICC.png)
 
 ## 效益 - Effective
 從感恩節 - 黑五檔期(三天)，一共遇到 7 次 Ddos 攻擊，累積收到1300多萬惡意流量，最高一次攻擊瞬間收到300萬個請求，直到第五次攻擊後，網站跳停約30秒，從報表中發現攻擊型態轉變，從集中的 IP、 國家，從大量集中變成小量又分散的攻擊，最後決定透過 Cloudfalre 精準的械器學習結果規則做限制，在不影響生意下，除了單一 IP大量請求是直接封鎖，其他都是送他人類驗證，順利的度過今年的黑五檔期。的黑五很精彩，很多外部服務都出現異常狀況。
