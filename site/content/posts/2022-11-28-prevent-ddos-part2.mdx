@@ -30,10 +30,10 @@ slug: prevent-Ddos-part2
 ### 為了對生意影響最小，針對大量請求的單一IP 進行封鎖。
 ![](https://i.imgur.com/DhNvfeN.png)
 
-### 在加入 IP 黑名單前，避免誤判，會先用[abuseipdb](https://www.abuseipdb.com/check/34.121.210.98)查詢及回報可疑 IP。
+### 避免誤判，並在加入 IP 黑名單前，會先用[abuseipdb](https://www.abuseipdb.com/check/34.121.210.98)查詢及回報可疑 IP。
 ![](https://i.imgur.com/m3kgWmU.png)
 
-### 其他規則，避免誤判影響訂單，僅開啟人類驗證，驗證通過才能進入網站
+### 其餘規則，避免誤判影響訂單，僅開啟人類驗證，驗證通過才能進入網站
 ![](https://i.imgur.com/P0OLwSP.png)
 
 ## 建立 WAF 規則 - Create Firewall rules
