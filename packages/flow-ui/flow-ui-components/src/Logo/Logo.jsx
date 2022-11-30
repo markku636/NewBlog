@@ -49,7 +49,7 @@ const Logo = ({ title, grayscale, image, to, ...props }) => (
 export default Logo
 
 Logo.defaultProps = {
-  to: '/'
+  to: 'https://blog.markkulab.net/'
 }
 
 Logo.propTypes = {
