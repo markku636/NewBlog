@@ -1,19 +1,19 @@
 ---
 featured: true
-title: Prevent Http Ddos With Cloudflare - 黑五檔期 Ddos 防禦筆記
+title: Prevent Http DDoS With Cloudflare - 黑五檔期 DDoS 防禦筆記
 date:  2022-11-28 01:01:01 +0800
 thumbnail: defense-ddos.webp
 category: Security
-tags: ['Ddos','prevent','black','friday','period','thanksgiving','day']
-description : Ddos 防禦筆記
+tags: ['DDoS','prevent','black','friday','period','thanksgiving','day']
+description : Prevent Http DDoS With Cloudflare - 黑五檔期 DDoS 防禦筆記
 author : Mark Ku
-slug: prevent-Ddos-part2
+slug: prevent-ddos-part2
 ---
 
 ## 時空背景 - Background
-我目前在一家的電子商務公司工作，公司的產品主要服務於美國、德國及加拿大，事情發生在黑色星期五前幾天，一直就有觀察到，我們的網站經常受到 Ddos 攻擊，直到有一天我們的網站被打掛了，就開始做進一步的調查。
+我目前在一家的電子商務公司工作，公司的產品主要服務於美國、德國及加拿大，事情發生在黑色星期五前幾天，就有觀察到，網站經常受到 DDoS 攻擊，直到有一天我們的網站被打掛了，就開始做進一步的調查。
 
-[先前有寫一篇文章](https://blog.markkulab.net/2022/01/16/prevent-ddos/) 也是有關防禦 Ddos 觀念，此篇將防禦規則實踐在 Cloudfalre WAF。
+[先前有寫一篇文章](https://blog.markkulab.net/2022/01/16/prevent-ddos/) 也是有關防禦 DDoS 觀念，此篇將防禦規則實踐在 Cloudfalre WAF。
 
 ### 接著參考 Cloudflare 的安全報表，得知在12日，有著約 2000 萬個惡意請求發送到我們的網站。
 ![](https://i.imgur.com/nANZAqj.png)  
@@ -25,10 +25,10 @@ slug: prevent-Ddos-part2
 ### 且為何有許多未運營的國家，對我們網站發出的大量請求。
 ![](https://i.imgur.com/fd3Hjn1.png)
 
-### 雖然我們的 Cloudflare是企業版的，看起來靠預設的設定，Cloudflare 雖然擋掉大部份的Ddos，但攻擊的量太大，仍有漏網之魚，然後我花了很多時間學習 Cloudflare，查看 Cloudflalre 所有設置，並和我的老闆討論，接著我制定了一個防止Ddos的計劃，採用 Web 應用程序防火牆規則以在黑色星期五期間保護我們的生意，並取我們得美國老闆的許可。
+### 雖然我們的 Cloudflare是企業版的，看起來靠預設的設定，Cloudflare 雖然擋掉大部份的DDoS，但攻擊的量太大，仍有漏網之魚，然後我花了很多時間學習 Cloudflare，查看 Cloudflalre 所有設置，並和我的老闆討論，接著我制定了一個防止DDoS的計劃，採用 Web 應用程序防火牆規則以在黑色星期五期間保護我們的生意，並取我們得美國老闆的許可。
 ![](https://i.imgur.com/Gd5SfbS.png)
 
-### 考量誤判而影響到生意，僅對大量請求的單一IP 進行封鎖，下圖為封鎖畫桶。
+### 考量誤判而影響到生意，僅對大量請求的單一IP 進行封鎖，下圖為封鎖畫面。
 ![](https://i.imgur.com/DhNvfeN.png)
 
 ### 避免誤判，並在加入 IP 黑名單前，會先用[abuseipdb](https://www.abuseipdb.com/check/34.121.210.98)查詢及回報可疑 IP。
@@ -74,7 +74,7 @@ slug: prevent-Ddos-part2
 ![](https://i.imgur.com/jOQpWzY.png)
 
 ## 效益 - Effective
-從感恩節 - 黑五檔期(三天)，一共遇到 7 次 Ddos 攻擊，累積收到1300多萬惡意流量，最高一次攻擊瞬間收到300萬個請求，直到第五次攻擊後，網站跳停約30秒，從報表中發現攻擊型態轉變，從集中的 IP、 國家，從大量集中變成小量又分散的攻擊，最後決定透過 Cloudfalre 精準的械器學習結果規則做限制，在不影響生意下，除了單一 IP大量請求是直接封鎖，其他都是送他人類驗證，順利的度過今年的黑五檔期。的黑五很精彩，很多外部服務都出現異常狀況。
+從感恩節 - 黑五檔期(三天)，一共遇到 7 次 DDoS 攻擊，累積收到1300多萬惡意流量，最高一次攻擊瞬間收到300萬個請求，直到第五次攻擊後，網站跳停約30秒，從報表中發現攻擊型態轉變，從集中的 IP、 國家，從大量集中變成小量又分散的攻擊，最後決定透過 Cloudfalre 精準的械器學習結果規則做限制，在不影響生意下，除了單一 IP大量請求是直接封鎖，其他都是送他人類驗證，順利的度過今年的黑五檔期。的黑五很精彩，很多外部服務都出現異常狀況。
 
 ### 總共收到1363萬的請求
 ![](https://i.imgur.com/RZijw3y.png)
