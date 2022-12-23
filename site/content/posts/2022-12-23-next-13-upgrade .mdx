@@ -1,0 +1,52 @@
+---
+featured: true
+title: NEXTJS 13 昇級筆記
+date:  2022-12-23 01:01:01 +0800
+thumbnail: nextjs.png
+category: Frontend
+tags: ['React','Next','upgrade']
+description : NEXTJS 13 昇級筆記
+author : Mark Ku
+slug: next-13-upgrade
+---
+
+# NEXTJS 13 昇級筆記
+## 前言
+下午將公司專案從 NEXT 12 昇到 NEXT 13，NEXT 版更真的很快，在NEXT 13 替大家帶來了
+* 簡化 next link 寫法 => 不需要 a 標籤
+* 重寫 next/image  =>  並優化優化效能
+* 用 Rust 打造 Turbopack 將取代原有的 webpack
+* NEXT Font   => 載入 google 圖檔更容易
+* [更容易寫寫服務端元件](https://zhuanlan.zhihu.com/p/579068537)
+
+## Next Image
+新寫法，每個image，Image 強制一定要加 alt 不然會爆錯
+
+import Image from 'next/image';
+
+P.S. 相容舊寫法(不推薦，新的 next image 有重寫，優化一些東西)
+
+```
+import Image from next/legacy/image
+ ```
+ 
+###  Next.js 12
+```
+<Link href="/about">
+  <a>About</a>
+</Link>
+```
+
+### Next.js 13
+```
+<Link href="/about">
+  About
+</Link>
+```
+P.S. 修改 next config ，可維持 next 12寫法(不推薦，因為修正了連結的錯誤)
+
+```
+ experimental: {
+       newNextLinkBehavior: false,
+ },
+```
