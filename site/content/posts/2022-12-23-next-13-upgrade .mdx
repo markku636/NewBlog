@@ -19,7 +19,6 @@ slug: next-13-upgrade
 * NEXT Font => 載入 google 字型更容易
 * [開始支援非同步的伺服器元件](https://zhuanlan.zhihu.com/p/579068537)
 * 修正一些框架上的 bug
-* 但因 NEXT JS 13 的Image 移除的 layout，我們很多頁面，目前用了會跑版，所以仍用舊的next image (next/legacy/image)，逐步去昇級，如果有新寫程式，或改到舊的，請逐步改成新的 next/image。
 
 ##　實測建置效能
 實測網站建置 (npm run build) ,將近快了1倍
@@ -32,10 +31,9 @@ NEXT JS 13 local build 56 秒
 ```
 import Image from 'next/image';
 ```
-P.S. 相容舊寫法(不推薦，新的 next image 有重寫，優化一些東西)
-
+P.S. 但因 NEXT JS 13 移除 Image 的 layout，我們很多頁面，目前用了會跑版，所以仍用舊的next image (next/legacy/image)，逐步去昇級，如果有新寫程式，或改到舊的，請逐步改成新的 next/image。 [新版 image 範例](https://github.com/vercel/next.js/tree/canary/examples/image-component/pages)
 ```
-import Image from next/legacy/image
+import Image from next/legacy/image 
 ```
  
 ###  Next.js 12
