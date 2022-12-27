@@ -15,7 +15,7 @@ slug: next-13-upgrade
 下午將公司專案從 NEXT 12 昇到 NEXT 13，NEXT 版更真的很快，在NEXT 13 替大家帶來了
 * 採用新的建置網頁的技術 Turbopack (Rust based)，提昇網站建置的效能 ( 依據官方數據，快至少3倍 )
 * 簡化 next/link 撰寫方式 => 自己長 a 標籤，不需要像過去還要包個 a 標籤
-* 重寫 next/image => 並優化圖片載入效能，並移除 layout屬性，強制要求填寫  alt 屬性。
+* 重寫 next/image 元件 => 採用原生的瀏覽器的lazy load，safari 舊版會回到預加載，並移除 layout屬性，強制要求填寫  alt 屬性。
 * NEXT Font => 載入 google 字型更容易
 * [開始支援非同步的伺服器元件](https://zhuanlan.zhihu.com/p/579068537)
 * 修正一些框架上的 bug
@@ -27,15 +27,48 @@ NEXT JS 13 local build 56 秒
 昇級 NEXT JS 13，有明顯渲染頁面效能上的改善。
 
 ## Next Image
-新寫法，每個image，Image 強制一定要加 alt 不然會爆錯
+### 新寫法，每個image，Image 強制一定要加 alt 不然會爆錯
 ```
 import Image from 'next/image';
+
+<Image
+loader={cloudflareLoader}
+src={contentURL + item.Image}
+width={600}
+height={350}
+></Image>
 ```
 P.S. 但因 NEXT JS 13 移除 Image 的 layout，我們很多頁面，目前用了會跑版，所以仍用舊的next image (next/legacy/image)，逐步去昇級，如果有新寫程式，或改到舊的，請逐步改成新的 next/image。 [新版 image 範例](https://github.com/vercel/next.js/tree/canary/examples/image-component/pages)
 ```
 import Image from next/legacy/image 
+
+<Image
+alt=""
+loader={cloudflareLoader}
+src={contentURL + item.Image}
+width={600}
+height={350}
+style={{
+width: '100%',
+height: 'auto',
+}}
+></Image>
 ```
- 
+### Responsive
+```
+<Image
+alt=""
+loader={cloudflareLoader}
+src={contentURL + item.Image}
+width={600}
+height={350}
+sizes="100vw"
+style={{
+width: '100%',
+height: 'auto',
+}}
+></Image>
+``` 
 ###  Next.js 12
 ```
 <Link href="/about">
