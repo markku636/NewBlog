@@ -27,7 +27,7 @@ NEXT JS 13 local build 56 秒
 昇級 NEXT JS 13，有明顯渲染頁面效能上的改善。
 
 ## Next Image
-### 新寫法，每個image，Image 強制一定要加 alt 不然會爆錯
+### 載入圖片新寫法，每個image，Image 強制一定要加 alt 不然會爆錯  [新版 image 範例](https://github.com/vercel/next.js/tree/canary/examples/image-component/pages)
 ```
 import Image from 'next/image';
 
@@ -38,10 +38,8 @@ width={600}
 height={350}
 ></Image>
 ```
-P.S. 但因 NEXT JS 13 移除 Image 的 layout，我們很多頁面，目前用了會跑版，所以仍用舊的next image (next/legacy/image)，逐步去昇級，如果有新寫程式，或改到舊的，請逐步改成新的 next/image。 [新版 image 範例](https://github.com/vercel/next.js/tree/canary/examples/image-component/pages)
+P.S. 但因 NEXT JS 13 移除 Image 的 layout，我們很多頁面，目前用了會跑版，多數可以參考以下的範例修正
 ```
-import Image from next/legacy/image 
-
 <Image
 alt=""
 loader={cloudflareLoader}
@@ -54,7 +52,7 @@ height: 'auto',
 }}
 ></Image>
 ```
-### Responsive
+### Responsive 新寫法
 ```
 <Image
 alt=""
@@ -69,7 +67,11 @@ height: 'auto',
 }}
 ></Image>
 ``` 
-###  Next.js 12
+### 如果暫時昇級不過，仍保留舊圖片元件可以使用
+```
+ import Image from next/legacy/image
+ ```
+##  Next/Link 改寫
 ```
 <Link href="/about">
   <a>About</a>
