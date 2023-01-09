@@ -1,6 +1,6 @@
 ---
 featured: true
-title: 用微軟 playwright 及 Github action 實踐 End to End 輕易搭建自動化測試框架，保護公司的核心商業網站，並整合 Teams 通知及外部觸發
+title: 用微軟 playwright 及 Github action 實踐 End to End Testing 輕易搭建自動化測試框架，保護公司的核心商業網站，並整合 Teams 通知及外部觸發
 date:  2023-01-09 01:01:01 +0800
 thumbnail: playwright.png
 category: Frontend
@@ -21,17 +21,17 @@ slug: playwright-end-to-end-test
 ## 我預期的運作流程
 ![](https://i.imgur.com/WTrTa91.png)
 ## 步驟
-### 首先，我們先初始化 playwright 測試專案 [官方文件](https://playwright.dev/docs/release-notes)
+### 首先，我們先建立 playwright 測試專案 [官方文件](https://playwright.dev/docs/release-notes)
 ```
 npm init playwright@latest
 
 ```
 ### 選擇 Typescript 及 github action flow 整合
 ![](https://i.imgur.com/yo5sRXA.png)
-### 打開剛剛建立的專案，發現裡面己寫好基本的測試程式
+### 打開剛剛建立的測試專案，在資料夾裡其實己寫好基本的測試範例
 ![](https://i.imgur.com/SmwdCUI.png)
 ### 請先在 vscode 安裝 [jest 套件](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest)
-### 加入中斷點，並對綠色的啟動箭頭 >右鍵 > 對測試偵錯
+### 並加入中斷點，並對綠色的啟動箭頭 >右鍵 > 對測試偵錯
 ![](https://i.imgur.com/J3F3ki4.png)
 ### 此時就會跳出瀏覽器，並可以逐行除錯
 ![](https://i.imgur.com/npHATRA.png)
