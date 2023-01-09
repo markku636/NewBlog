@@ -133,10 +133,10 @@ jobs:
 on: push
 jobs:
   test-curl-action:
-    name: "Call Test Api"
+    name: "Call Test CICD"
     runs-on: ubuntu-latest
     steps:      
-      - name: "Call API 2"
+      - name: "Call Github API"
         uses: indiesdev/curl@v1.1
         id: api2
         with:
