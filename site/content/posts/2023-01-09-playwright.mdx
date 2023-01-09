@@ -55,13 +55,13 @@ npm init playwright@latest
 ### 下載報表
 ![](https://i.imgur.com/HS9dxhw.png)
 
-### 如果我們將測試的結果及報表推送到 Teams 
+### 因為我們期待將測試的結果及報表推送到 Teams 
 ![](https://i.imgur.com/QKCoX7d.png)
 
-### 至 github repo 的 Settings > Secrets > 輸入Actions secrets 參數。
+### 請至 github repo 的 Settings > Secrets > 輸入Actions secrets 參數。
 ![](https://i.imgur.com/K700jnK.png)
 
-### 修改 .github/workflows/playwright.yml　加入通知　 ，程式碼如下
+### 修改 .github/workflows/playwright.yml 參考以下程式碼，加入通知
 ```
 name: Playwright Tests
 on:
