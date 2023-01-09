@@ -1,6 +1,6 @@
 ---
 featured: true
-title: 用微軟 playwright 及 Github action 實踐 End to End 輕易搭建自動化測試框架，保護公司的核心商業網站。
+title: 用微軟 playwright 及 Github action 實踐 End to End 輕易搭建自動化測試框架，保護公司的核心商業網站，整合 Teams 通知及外部觸發
 date:  2023-01-09 01:01:01 +0800
 thumbnail: playwright.png
 category: Frontend
@@ -36,20 +36,20 @@ npm init playwright@latest
 ### 打開剛剛建立的專案，發現裡面己寫好基本的測試程式
 ![](https://i.imgur.com/SmwdCUI.png)
 
-### 安裝 vs code 安裝 [jest 套件](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest)
+### 請先安裝 vs code 安裝 [jest 套件](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest)
 
-### 加入中斷點，並對綠色的箭頭右鍵>對測試偵錯
+### 加入中斷點，並對綠色的啟動箭頭 >右鍵 > 對測試偵錯
 ![](https://i.imgur.com/vLXU5Xo.png)
 ![](https://i.imgur.com/J3F3ki4.png)
 
-### 此時就會跳出瀏覽器逐行除錯
+### 此時就會跳出瀏覽器，並可以逐行除錯
 ![](https://i.imgur.com/npHATRA.png)
 
-### 看到這邊爽度提高很多，過去寫過 selenium 都還要花很多時間配置系統環境。
+### 看到這邊爽度就爽度超高，過去寫過 python selenium 都還要花很多時間配置系統環境。
 
 ### 將你的專案推上 github，此時就會自動建置( 測試 )，點開工作記錄
 ![](https://i.imgur.com/q5VA5SS.png)
-### 我們可以發現主控台及報表的入口
+### 接著我們可以發現主控台入口及報表的入口
 ![](https://i.imgur.com/AkLBTY1.png)
 ### 進入測試主控台，job 執行了些什麼
 ![](https://i.imgur.com/5Ix7h3U.png)
