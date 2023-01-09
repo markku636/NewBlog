@@ -44,9 +44,9 @@ npm init playwright@latest
 ![](https://i.imgur.com/5Ix7h3U.png)
 ### 打開下載的報表
 ![](https://i.imgur.com/HS9dxhw.png)
-### 接著，因我們期待將測試的結果及報表推送到 Teams 
+### 接著，因我們預期將測試的結果及報表推送到 Teams 
 ![](https://i.imgur.com/QKCoX7d.png)
-### 請至 github repo 的 Settings > Secrets > 輸入Actions secrets 參數。
+### 請先至 github repo 的 Settings > Secrets > 建立 Actions secrets 參數。
 ![](https://i.imgur.com/K700jnK.png)
 ### 修改 .github/workflows/playwright.yml 參考以下程式碼，加入通知
 ```
@@ -112,8 +112,8 @@ jobs:
 ### 測試執行完的圖表
 ![](https://i.imgur.com/CDMyIoQ.png)
 ### 在欲應用程式，新增外部觸發 wrokflows，[可參考此篇設定遠程觸發 git action](https://www.chenshaowen.com/blog/how-to-trigger-github-action-remotely.html)，並將下面的程式碼參數換掉
-:owner/:repo => markku636/first-ui-teset
-:token => [Github token 點我申請](https://github.com/settings/tokens/new)
+:owner/:repo => markku636/first-ui-teset  
+:token => [Github token 點我申請](https://github.com/settings/tokens/new)  
 ```
 on: push
 jobs:
