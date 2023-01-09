@@ -1,0 +1,162 @@
+---
+featured: true
+title: 用微軟 playwright 及 Github action 實踐 End to End 輕易搭建自動化測試框架，保護公司的核心商業網站。
+date:  2023-01-09 01:01:01 +0800
+thumbnail: playwright.png
+category: Frontend
+tags: ['playwright','Vscode','Github action','end to end test']
+description : 用微軟 playwright 及 Github action 實踐 End to End 輕易搭建自動化測試框架，保護公司的核心商業網站。
+author : Mark Ku
+slug: playwright-end-to-end-test
+---
+# 用微軟 playwright 及 Github action 實踐 End to End 輕易搭建自動化測試框架，保護公司的核心商業網站。
+## 問題
+目前我任職流量不小的電子商務公司，市場主要是在美國和德國，為避免有人把將結帳畫面改壞了，而沒被發現，而我著手研究 UI TEST，幫我的結帳流程加個保護，之前就有用 playwright 來做 SEO 的預渲染，評估了幾套 UI 測試，發現 playwright 的生態很完整及簡單，非常適合我們，其優點如下 
+* 微軟推出的 UI-Test
+* 整合 Jest 
+* 整合 vs code 開發
+* 預設整合 Github
+* 提供完整的 Report
+* 不用像 Python 要設定很多環境
+* 支援 node js
+
+## 我設計的運作流程
+![](https://i.imgur.com/WTrTa91.png)
+
+## 步驟
+### 首先，我們先初始化專案 [官方文件](https://playwright.dev/docs/release-notes)
+
+```
+npm init playwright@latest
+
+```
+### 選擇 Typescript 及 github action flow 整合
+![](https://i.imgur.com/yo5sRXA.png)
+
+### 打開剛剛建立的專案，發現裡面己寫好基本的測試程式
+![](https://i.imgur.com/SmwdCUI.png)
+
+### 安裝 vs code 安裝 [jest 套件](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest)
+
+### 加入中斷點，並對綠色的箭頭右鍵>對測試偵錯
+![](https://i.imgur.com/vLXU5Xo.png)
+![](https://i.imgur.com/J3F3ki4.png)
+
+### 此時就會跳出瀏覽器逐行除錯
+![](https://i.imgur.com/npHATRA.png)
+
+### 看到這邊爽度提高很多，過去寫過 selenium 都還要花很多時間配置系統環境。
+
+### 將你的專案推上 github，此時就會自動建置( 測試 )，點開工作記錄
+![](https://i.imgur.com/q5VA5SS.png)
+### 我們可以發現主控台及報表的入口
+![](https://i.imgur.com/AkLBTY1.png)
+### 進入測試主控台，job 執行了些什麼
+![](https://i.imgur.com/5Ix7h3U.png)
+### 下載報表
+![](https://i.imgur.com/HS9dxhw.png)
+
+### 如果我們將測試的結果及報表推送到 Teams 
+![](https://i.imgur.com/QKCoX7d.png)
+
+### 至 github repo 的 Settings > Secrets > 輸入Actions secrets 參數。
+![](https://i.imgur.com/K700jnK.png)
+
+### 修改 .github/workflows/playwright.yml　加入通知　 ，程式碼如下
+```
+name: Playwright Tests
+on:
+  repository_dispatch:
+    types: remote-trigger-ui-test
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 16
+    - name: Install dependencies
+      run: npm ci
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    - name: Run Playwright tests
+      run: npx playwright test
+    - uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
+  success_notify:
+    needs: test
+    name: notify
+    runs-on: ubuntu-18.04    
+    steps:  
+      - name: 📣 Send teams notification
+        uses: simbo/msteams-message-card-action@v1
+        with:
+          webhook: ${{ secrets.MSTEAMS_WEBHOOK }}
+          title: 😊 UI - Test Success 
+          message: <p>UI - Test Success<strong>\ ^ ^ /</strong></p>
+          color: 007FFF
+          buttons: |
+            See Test Report! ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}      
+  error_notify:
+    needs: test
+    name: error_notify
+    if: ${{ always() && needs.test.result == 'failure' }}
+    runs-on: ubuntu-18.04    
+    steps:        
+      - name: Send fail notification
+        uses: simbo/msteams-message-card-action@v1        
+        with:
+          webhook: ${{ secrets.MSTEAMS_WEBHOOK }}
+          title: 💩UI - Test Fail 
+          message: <p>Ba Be Q ...<strong>= =...</strong></p>
+          color: FF0000
+          buttons: |
+            See Test Report! ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+```
+### 測試執行完的圖表
+![](https://i.imgur.com/CDMyIoQ.png)
+
+### 在欲應用程式，新增外部觸發 wrokflows，[可參考此篇設定遠程觸發 git action](https://www.chenshaowen.com/blog/how-to-trigger-github-action-remotely.html)，並將下面的程式碼參數換掉
+:owner/:repo => markku636/first-ui-teset
+:token => [Github token 點我申請](https://github.com/settings/tokens/new)
+```
+on: push
+jobs:
+  test-curl-action:
+    name: "Call Test Api"
+    runs-on: ubuntu-latest
+    steps:      
+      - name: "Call API 2"
+        uses: indiesdev/curl@v1.1
+        id: api2
+        with:
+          url: https://api.github.com/repos/:owner/:repo/dispatches
+          method: "POST"
+          accept: 200,201,204
+          headers: '{ "authorization": "token :token", "accept": "application/vnd.github.everest-preview+json","content-type":"application/x-www-form-urlencoded" }'
+
+          # you can use multiline format to construct json data object, the content should be yml format.
+           
+          # this format apply to inputs: body, headers and params
+          "body": '{ "event_type": "remote-trigger-ui-test" }'
+          log-response: true
+      - name: "Use response"
+        run: echo ${{ steps.api.outputs.response }}
+
+```
+## 結論
+使用 playwright 最大的好處，微軟挾著完整的生態，把整個工作流程都整合起來，我僅用很短的時間，就能將 vscode + github + teams 整合完成，爽度超級高。
+
+## 參考資料
+* [如何远程触发 GitHub Action](https://www.chenshaowen.com/blog/how-to-trigger-github-action-remotely.html)
+* [MS Teams Message Card](https://github.com/marketplace/actions/ms-teams-message-card)
