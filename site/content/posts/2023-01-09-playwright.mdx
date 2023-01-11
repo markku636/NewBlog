@@ -139,6 +139,15 @@ jobs:
         run: echo ${{ steps.api.outputs.response }}
 
 ```
+
+### 錄製腳本
+
+```
+npx playwright codegen www.ibuypower.com --output ./tests/ibuypower.spec.js
+```
+超酷的，什麼環境也沒特別配置，居然能夠跳出瀏覽器錄製，真的是太好用了
+![](https://i.imgur.com/z8AamkQ.png)
+
 ## 結論
 使用 playwright 最大的好處，微軟挾著完整的生態，把整個工作流程都整合起來，我僅用很短的時間，就能將 vscode + github + teams 整合完成，爽度超級高。
 ## 參考資料
