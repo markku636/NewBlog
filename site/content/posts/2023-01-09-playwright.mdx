@@ -150,6 +150,12 @@ npx playwright codegen www.ibuypower.com --output ./tests/ibuypower.spec.js
 
 ## 結論
 使用 playwright 最大的好處，微軟挾著完整的生態，把整個工作流程都整合起來，我僅用很短的時間，就能將 vscode + github + teams 整合完成，爽度超級高。
+
+## 補充
+如果無法在 vscode 中使用 jest 偵錯測試檔，請執行以下指令
+```
+npm install -D jest jest-playwright-preset playwright
+```
 ## 參考資料
 * [如何远程触发 GitHub Action](https://www.chenshaowen.com/blog/how-to-trigger-github-action-remotely.html)
 * [MS Teams Message Card](https://github.com/marketplace/actions/ms-teams-message-card)
