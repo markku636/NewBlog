@@ -30,7 +30,7 @@ npm init playwright@latest
 ![](https://i.imgur.com/yo5sRXA.png)
 ### 打開剛剛建立的測試專案，在資料夾裡其實己寫好基本的測試範例
 ![](https://i.imgur.com/SmwdCUI.png)
-### 請先在 vscode 安裝 [jest 套件](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest)
+### 請先在 vscode 安裝 [jest 套件](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest) 及 [Playwright Test for VSCode 套件](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright)
 ### 並加入中斷點，並對綠色的啟動箭頭 >右鍵 > 對測試偵錯
 ![](https://i.imgur.com/J3F3ki4.png)
 ### 此時就會跳出瀏覽器，並可以逐行除錯
@@ -144,12 +144,18 @@ jobs:
 超酷的，什麼環境也沒特別配置，居然能夠跳出瀏覽器錄製，真的是太好用了  
 
 ```
-npx playwright codegen www.ibuypower.com --output ./tests/ibuypower.spec.js
+npx playwright codegen www.ibuypower.com --output ./tests/ibuypower.spec.ts
 ```
 ![](https://i.imgur.com/z8AamkQ.png)
 
 ## 結論
 使用 playwright 最大的好處，微軟挾著完整的生態，把整個工作流程都整合起來，我僅用很短的時間，就能將 vscode + github + teams 整合完成，爽度超級高。
+
+## 補充
+如果無法在 vscode 中使用 jest 偵錯測試檔，請執行以下指令
+```
+npm install -D jest jest-playwright-preset playwright
+```
 ## 參考資料
 * [如何远程触发 GitHub Action](https://www.chenshaowen.com/blog/how-to-trigger-github-action-remotely.html)
 * [MS Teams Message Card](https://github.com/marketplace/actions/ms-teams-message-card)
