@@ -1,0 +1,58 @@
+---
+featured: true
+title:  quick set up developer environment using chocolatey and powershell
+date:   2021-06-03 15:01:35 +0800
+thumbnail:  chocolatey.svg
+category:  PowerShell
+tags:   ['powershell','chocolatey','docker','powershell']
+description : quick set up developer environment using chocolatey and powershell
+author : Mark Ku
+slug: quick-set-up-developer-environment-using-chocolatey
+---
+## Propose 
+In order for new developers to quickly set up the computer environment, please help me write a script referring to the following information
+
+## Software List
+* vs code 
+* git 
+* git tortoise
+* visual studio 2019
+* visual studio 2022
+* SQL SSMS Tools
+* 7zip 
+* docker desktop
+* git-fork
+* teams 
+* Another redis 
+* chrome 
+* notepad ++
+
+## script 
+```
+# 1. install choco ( manual )
+Set-ExecutionPolicy AllSigned
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+# 2. set up policy 
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force
+# 3. set right click 
+reg add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f /ve
+# 4. install software 
+choco install vscode -y
+choco install git -y
+choco install tortoisegit -y
+choco install sql-server-management-studio -y
+choco install 7zip -y
+choco install docker-desktop -y
+choco install git-fork -y
+choco install microsoft-teams -y
+choco install another-redis-desktop-manager -y
+choco install chrome-remote-desktop-chrome  -y
+choco install notepadplusplus -y
+choco install sqlsearch -y
+choco install visualstudio2019community -y
+choco install visualstudio2022community -y
+
+```
+## Reference
+[Official Doc](https://docs.chocolatey.org/en-us/choco/setup)
