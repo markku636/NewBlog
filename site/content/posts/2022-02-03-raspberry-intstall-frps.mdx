@@ -15,16 +15,16 @@ slug: 2022/02/02/raspberry-intstall-frps
 
 ## 首先，下載最新版的 frps
 ```
-wget https://github.com/fatedier/frp/releases/download/v0.39.0/frp_0.39.0_linux_arm.tar.gz
+wget https://github.com/fatedier/frp/releases/download/v0.47.0/frp_0.47.0_linux_arm.tar.gz
 ```
 
 解壓縮檔案並重新命名資料夾為 frp
 
 ```
-tar -zxvf frp_0.39.0_linux_arm.tar.gz
+tar -zxvf frp_0.47.0_linux_arm.tar.gz
 mkdir /var/frps
-mv frp_0.39.0_linux_arm/* /var/frps/
-cd frp
+mv frp_0.47.0_linux_arm/* /var/frps/
+cd /var/frps
 ```
 
 編輯 frps 的設定檔 (sudo vim frps.ini)
@@ -111,6 +111,9 @@ Wants=network.target
 Restart=on-failure
 RestartSec=5
 ExecStart=/var/frps/frps -c /var/frps/frps.ini
+
+[Install]
+WantedBy=multi-user.target
 ```
 
 ### 啟動服務
