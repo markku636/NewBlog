@@ -1210,7 +1210,7 @@
   resolved "https://registry.npmjs.org/@builder.io/partytown/-/partytown-0.7.5.tgz"
   integrity sha512-Zbr2Eo0AQ4yzmQr/36/h+6LKjmdVBB3Q5cGzO6rtlIKB/IOpbQVUZW+XAnhpJmJr9sIF97OZjgbhG9k7Sjn4yw==
 
-"@elegantstack/flow-ui-components@^4.0.0", "@elegantstack/flow-ui-components@file:C:\\Project\\NewBlog\\packages\\flow-ui\\flow-ui-components":
+"@elegantstack/flow-ui-components@^3.4.0", "@elegantstack/flow-ui-components@^4.0.0", "@elegantstack/flow-ui-components@file:C:\\Project\\NewBlog\\packages\\flow-ui\\flow-ui-components":
   version "4.0.0"
   resolved "file:packages/flow-ui/flow-ui-components"
   dependencies:
@@ -1225,14 +1225,14 @@
     slick-carousel "^1.8.1"
     theme-ui "^0.3.4"
 
-"@elegantstack/flow-ui-layout@^4.0.0", "@elegantstack/flow-ui-layout@file:C:\\Project\\NewBlog\\packages\\flow-ui\\flow-ui-layout":
+"@elegantstack/flow-ui-layout@^3.1.0", "@elegantstack/flow-ui-layout@^4.0.0", "@elegantstack/flow-ui-layout@file:C:\\Project\\NewBlog\\packages\\flow-ui\\flow-ui-layout":
   version "4.0.0"
   resolved "file:packages/flow-ui/flow-ui-layout"
   dependencies:
     rc-switch "^4.0.0"
     theme-ui "^0.3.4"
 
-"@elegantstack/flow-ui-theme@^4.0.0", "@elegantstack/flow-ui-theme@file:C:\\Project\\NewBlog\\packages\\flow-ui\\flow-ui-theme":
+"@elegantstack/flow-ui-theme@^3.5.0", "@elegantstack/flow-ui-theme@^4.0.0", "@elegantstack/flow-ui-theme@file:C:\\Project\\NewBlog\\packages\\flow-ui\\flow-ui-theme":
   version "4.0.0"
   resolved "file:packages/flow-ui/flow-ui-theme"
   dependencies:
@@ -1244,7 +1244,7 @@
     prop-types "^15.8.1"
     theme-ui "^0.3.4"
 
-"@elegantstack/flow-ui-widgets@^4.0.0", "@elegantstack/flow-ui-widgets@file:C:\\Project\\NewBlog\\packages\\flow-ui\\flow-ui-widgets":
+"@elegantstack/flow-ui-widgets@^3.9.0", "@elegantstack/flow-ui-widgets@^4.0.0", "@elegantstack/flow-ui-widgets@file:C:\\Project\\NewBlog\\packages\\flow-ui\\flow-ui-widgets":
   version "4.0.0"
   resolved "file:packages/flow-ui/flow-ui-widgets"
   dependencies:
@@ -1267,7 +1267,7 @@
   version "4.0.0"
   resolved "file:packages/blog/gatsby-blog-algolia"
 
-"@elegantstack/gatsby-blog-core@^4.0.0", "@elegantstack/gatsby-blog-core@file:C:\\Project\\NewBlog\\packages\\blog\\gatsby-blog-core":
+"@elegantstack/gatsby-blog-core@^3.11.0", "@elegantstack/gatsby-blog-core@^4.0.0", "@elegantstack/gatsby-blog-core@file:C:\\Project\\NewBlog\\packages\\blog\\gatsby-blog-core":
   version "4.0.0"
   resolved "file:packages/blog/gatsby-blog-core"
   dependencies:
@@ -1295,7 +1295,7 @@
     remark-slug "^6.0.1"
     url-join "^4.0.1"
 
-"@elegantstack/gatsby-blog-helpers@^4.0.0", "@elegantstack/gatsby-blog-helpers@file:C:\\Project\\NewBlog\\packages\\blog\\gatsby-blog-helpers":
+"@elegantstack/gatsby-blog-helpers@^3.2.0", "@elegantstack/gatsby-blog-helpers@^4.0.0", "@elegantstack/gatsby-blog-helpers@file:C:\\Project\\NewBlog\\packages\\blog\\gatsby-blog-helpers":
   version "4.0.0"
   resolved "file:packages/blog/gatsby-blog-helpers"
   dependencies:
@@ -1308,7 +1308,7 @@
   dependencies:
     theme-ui "^0.3.4"
 
-"@elegantstack/gatsby-common-helpers@^4.0.0", "@elegantstack/gatsby-common-helpers@file:C:\\Project\\NewBlog\\packages\\common\\gatsby-common-helpers":
+"@elegantstack/gatsby-common-helpers@^3.1.0", "@elegantstack/gatsby-common-helpers@^4.0.0", "@elegantstack/gatsby-common-helpers@file:C:\\Project\\NewBlog\\packages\\common\\gatsby-common-helpers":
   version "4.0.0"
   resolved "file:packages/common/gatsby-common-helpers"
   dependencies:
@@ -1324,7 +1324,7 @@
   version "3.0.0"
   resolved "file:packages/plugins/gatsby-plugin-mkdir"
 
-"@elegantstack/gatsby-plugin-proxy-directives@^4.0.0", "@elegantstack/gatsby-plugin-proxy-directives@file:C:\\Project\\NewBlog\\packages\\plugins\\gatsby-plugin-proxy-directives":
+"@elegantstack/gatsby-plugin-proxy-directives@^3.1.0", "@elegantstack/gatsby-plugin-proxy-directives@^4.0.0", "@elegantstack/gatsby-plugin-proxy-directives@file:C:\\Project\\NewBlog\\packages\\plugins\\gatsby-plugin-proxy-directives":
   version "4.0.0"
   resolved "file:packages/plugins/gatsby-plugin-proxy-directives"
 
@@ -1351,11 +1351,12 @@
     gatsby-plugin-google-gtag "^5.7.0"
     gatsby-plugin-manifest "^5.7.0"
     gatsby-plugin-meta-redirect "^1.1.1"
+    gatsby-plugin-netlify-cms "^7.7.0"
     gatsby-plugin-sitemap "^6.7.0"
     react "^18.2.0"
     react-dom "^18.2.0"
 
-"@elegantstack/gatsby-theme-flexiblog-agency@file:C:\\Project\\NewBlog\\packages\\themes\\gatsby-theme-flexiblog-agency":
+"@elegantstack/gatsby-theme-flexiblog-agency@*", "@elegantstack/gatsby-theme-flexiblog-agency@file:C:\\Project\\NewBlog\\packages\\themes\\gatsby-theme-flexiblog-agency":
   version "4.0.0"
   resolved "file:packages/themes/gatsby-theme-flexiblog-agency"
   dependencies:
@@ -1368,7 +1369,7 @@
     "@elegantstack/gatsby-blog-pages" "^3.2.0"
     "@elegantstack/gatsby-common-helpers" "^4.0.0"
 
-"@elegantstack/gatsby-theme-flexiblog-beauty@file:C:\\Project\\NewBlog\\packages\\themes\\gatsby-theme-flexiblog-beauty":
+"@elegantstack/gatsby-theme-flexiblog-beauty@*", "@elegantstack/gatsby-theme-flexiblog-beauty@file:C:\\Project\\NewBlog\\packages\\themes\\gatsby-theme-flexiblog-beauty":
   version "4.0.0"
   resolved "file:packages/themes/gatsby-theme-flexiblog-beauty"
   dependencies:
@@ -1381,7 +1382,7 @@
     "@elegantstack/gatsby-blog-pages" "^3.2.0"
     "@elegantstack/gatsby-common-helpers" "^4.0.0"
 
-"@elegantstack/gatsby-theme-flexiblog-education@file:C:\\Project\\NewBlog\\packages\\themes\\gatsby-theme-flexiblog-education":
+"@elegantstack/gatsby-theme-flexiblog-education@*", "@elegantstack/gatsby-theme-flexiblog-education@file:C:\\Project\\NewBlog\\packages\\themes\\gatsby-theme-flexiblog-education":
   version "4.0.0"
   resolved "file:packages/themes/gatsby-theme-flexiblog-education"
   dependencies:
@@ -1394,7 +1395,7 @@
     "@elegantstack/gatsby-blog-pages" "^3.2.0"
     "@elegantstack/gatsby-common-helpers" "^4.0.0"
 
-"@elegantstack/gatsby-theme-flexiblog-medical@file:C:\\Project\\NewBlog\\packages\\themes\\gatsby-theme-flexiblog-medical":
+"@elegantstack/gatsby-theme-flexiblog-medical@*", "@elegantstack/gatsby-theme-flexiblog-medical@file:C:\\Project\\NewBlog\\packages\\themes\\gatsby-theme-flexiblog-medical":
   version "4.0.0"
   resolved "file:packages/themes/gatsby-theme-flexiblog-medical"
   dependencies:
@@ -1407,7 +1408,7 @@
     "@elegantstack/gatsby-blog-pages" "^3.2.0"
     "@elegantstack/gatsby-common-helpers" "^4.0.0"
 
-"@elegantstack/gatsby-theme-flexiblog-minimal-v2@file:C:\\Project\\NewBlog\\packages\\themes\\gatsby-theme-flexiblog-minimal-v2":
+"@elegantstack/gatsby-theme-flexiblog-minimal-v2@*", "@elegantstack/gatsby-theme-flexiblog-minimal-v2@file:C:\\Project\\NewBlog\\packages\\themes\\gatsby-theme-flexiblog-minimal-v2":
   version "4.0.0"
   resolved "file:packages/themes/gatsby-theme-flexiblog-minimal-v2"
   dependencies:
@@ -1420,7 +1421,7 @@
     "@elegantstack/gatsby-blog-pages" "^3.2.0"
     "@elegantstack/gatsby-common-helpers" "^4.0.0"
 
-"@elegantstack/gatsby-theme-flexiblog-minimal@file:C:\\Project\\NewBlog\\packages\\themes\\gatsby-theme-flexiblog-minimal":
+"@elegantstack/gatsby-theme-flexiblog-minimal@*", "@elegantstack/gatsby-theme-flexiblog-minimal@file:C:\\Project\\NewBlog\\packages\\themes\\gatsby-theme-flexiblog-minimal":
   version "4.0.0"
   resolved "file:packages/themes/gatsby-theme-flexiblog-minimal"
   dependencies:
@@ -1433,7 +1434,7 @@
     "@elegantstack/gatsby-blog-pages" "^3.2.0"
     "@elegantstack/gatsby-common-helpers" "^4.0.0"
 
-"@elegantstack/gatsby-theme-flexiblog-news@file:C:\\Project\\NewBlog\\packages\\themes\\gatsby-theme-flexiblog-news":
+"@elegantstack/gatsby-theme-flexiblog-news@*", "@elegantstack/gatsby-theme-flexiblog-news@file:C:\\Project\\NewBlog\\packages\\themes\\gatsby-theme-flexiblog-news":
   version "4.0.0"
   resolved "file:packages/themes/gatsby-theme-flexiblog-news"
   dependencies:
@@ -1459,7 +1460,7 @@
     "@elegantstack/gatsby-blog-pages" "^3.2.0"
     "@elegantstack/gatsby-common-helpers" "^4.0.0"
 
-"@elegantstack/gatsby-theme-flexiblog-science@file:C:\\Project\\NewBlog\\packages\\themes\\gatsby-theme-flexiblog-science":
+"@elegantstack/gatsby-theme-flexiblog-science@*", "@elegantstack/gatsby-theme-flexiblog-science@file:C:\\Project\\NewBlog\\packages\\themes\\gatsby-theme-flexiblog-science":
   version "4.0.0"
   resolved "file:packages/themes/gatsby-theme-flexiblog-science"
   dependencies:
@@ -6456,7 +6457,7 @@ gatsby-plugin-mailchimp@^5.2.2:
     email-validator "^2.0.4"
     jsonp "^0.2.1"
 
-gatsby-plugin-manifest@^5.7.0:
+gatsby-plugin-manifest@^5.6.0, gatsby-plugin-manifest@^5.7.0:
   version "5.7.0"
   resolved "https://registry.npmjs.org/gatsby-plugin-manifest/-/gatsby-plugin-manifest-5.7.0.tgz"
   integrity sha512-UiMKCqIOLUFvjJsny0wOMCQWs/Wx0BXmBTQ7Ck1HJsgvq4N3yKTlwAlgu1+eV/ExcpESKc6bncKZFUibwnE/QA==
@@ -8988,7 +8989,7 @@ node-addon-api@^5.0.0:
   resolved "https://registry.npmjs.org/node-addon-api/-/node-addon-api-5.1.0.tgz"
   integrity sha512-eh0GgfEkpnoWDq+VY8OyvYhFEzBk6jIYbRKdIlyTiAXIVJ8PyBaKb0rp7oDtoddbdoHWhq8wwr+XZ81F1rpNdA==
 
-node-fetch@^2.6.8:
+node-fetch@^2.6.8, node-fetch@^3.3.0:
   version "2.6.9"
   resolved "https://registry.npmjs.org/node-fetch/-/node-fetch-2.6.9.tgz"
   integrity sha512-DJm/CJkZkRjKKj4Zi4BsKVZh3ValV5IR5s7LVZnW+6YMh0W1BfNA8XSs6DLMGYlId5F3KnA70uu2qepcR08Qqg==
