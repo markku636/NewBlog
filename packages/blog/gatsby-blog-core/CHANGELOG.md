@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.0](https://github.com/ElegantStack/gatsby-themes/compare/@elegantstack/gatsby-blog-core@3.11.0...@elegantstack/gatsby-blog-core@4.0.0) (2023-03-11)
+
+
+### Features
+
+* upgrade to Gatsby v5 and update other dependencies ([aba9eb2](https://github.com/ElegantStack/gatsby-themes/commit/aba9eb243ebe39f0f02885b9693703a316c0a91f))
+
+
+### Bug Fixes
+
+* use patch hook for specific themes ([6b9d9e2](https://github.com/ElegantStack/gatsby-themes/commit/6b9d9e2e900b845c76e5323bc33b92ea27585b2e))
+
+
+### Refactor
+
+* refactor code for Gatsby v5 support ([f3852fd](https://github.com/ElegantStack/gatsby-themes/commit/f3852fd3b880cb7b77271f358b092ce730797334))
+
+
+
+
 ## [3.11.0](https://github.com/ElegantStack/gatsby-themes/compare/@elegantstack/gatsby-blog-core@3.10.0...@elegantstack/gatsby-blog-core@3.11.0) (2022-05-18)
 
 

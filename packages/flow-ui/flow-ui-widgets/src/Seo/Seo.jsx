@@ -4,7 +4,6 @@ import { helmetJsonLdProp } from 'react-schemaorg'
 import { getSrc } from 'gatsby-plugin-image'
 import useSiteMetadata from '@helpers-blog/useSiteMetadata'
 import getImageVariant from '@components/utils/getImageVariant'
-import { useStaticQuery, graphql } from 'gatsby'
 
 const Seo = ({
   title,
@@ -29,19 +28,12 @@ const Seo = ({
 
   description = excerpt || description || site.description
 
-  let imageSrc = ''
-  let imageUrl = ''
-  if (!thumbnail) {
-    const data = useStaticQuery(heroQuery)
-    imageSrc = data?.file?.publicURL
-    imageUrl = 'https://www.markkulab.net' + imageSrc
-   
-  } else {
-    imageSrc = getSrc(getImageVariant(thumbnail, 'hero'))
-    imageUrl =
-      imageSrc &&
-      (imageSrc.startsWith('//') ? imageSrc : `${siteUrl}${imageSrc}`)
-  }
+  const imageSrc = getSrc(getImageVariant(thumbnail, 'hero'))
+  const imageUrl =
+    imageSrc &&
+    (imageSrc.startsWith('//')
+      ? 'https:' + imageSrc
+      : siteUrl && `${siteUrl}${imageSrc}`)
 
   /**
    * Meta Tags
@@ -58,11 +50,12 @@ const Seo = ({
     { property: 'og:site_name', content: site.name },
     { property: 'og:image', content: imageUrl },
 
-    { name: 'twitter:card', content: 'summary' },
+    { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'twitter:site', content: site.name },
     { name: 'twitter:title', content: title },
     { name: 'twitter:description', content: description },
-    { name: 'twitter:creator', content: twitter.url }
+    { name: 'twitter:creator', content: twitter.url },
+    { name: 'twitter:image', content: imageUrl }
   ]
 
   if (keywords && keywords.length > 0) {
@@ -147,11 +140,3 @@ const Seo = ({
 }
 
 export default Seo
-
-const heroQuery = graphql`
-  query HeroQuery1 {
-    file(absolutePath: { regex: "/hero.(jpeg|jpg|gif|png|webp)/" }) {
-      publicURL
-    }
-  }
-`

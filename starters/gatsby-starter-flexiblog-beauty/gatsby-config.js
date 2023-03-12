@@ -1,7 +1,4 @@
 module.exports = {
-  flags: {
-    DEV_SSR: false
-  },
   plugins: [
     {
       resolve: '@elegantstack/gatsby-theme-flexiblog-beauty',
@@ -40,7 +37,7 @@ module.exports = {
     //Header Menu Items
     headerMenu: [
       {
-        name: '首頁',
+        name: 'Home',
         slug: '/'
       },
       {
@@ -48,7 +45,7 @@ module.exports = {
         slug: '/authors'
       },
       {
-        name: '聯繫我',
+        name: 'Contact',
         slug: '/contact'
       }
     ],

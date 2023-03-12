@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.0](https://github.com/ElegantStack/gatsby-themes/compare/@elegantstack/flow-ui-widgets@3.9.0...@elegantstack/flow-ui-widgets@4.0.0) (2023-03-11)
+
+
+### Features
+
+* upgrade to Gatsby v5 and update other dependencies ([aba9eb2](https://github.com/ElegantStack/gatsby-themes/commit/aba9eb243ebe39f0f02885b9693703a316c0a91f))
+
+
+### Bug Fixes
+
+* add React Suspense to fix hydration error ([95a16bc](https://github.com/ElegantStack/gatsby-themes/commit/95a16bcfde3839a957006cd57c91c46229deda06))
+* fix react warnings and hydration errors ([cd0f1e9](https://github.com/ElegantStack/gatsby-themes/commit/cd0f1e9dc127a426c95550e46b925047f1e7d1ca))
+
+
+### Refactor
+
+* **flow-ui-widgets:** improve Twitter sharing card meta tags ([837cce1](https://github.com/ElegantStack/gatsby-themes/commit/837cce123ced9ff0fb9660a9a126bdab7791d0c6))
+* lock mdx plugin version ([38dcc87](https://github.com/ElegantStack/gatsby-themes/commit/38dcc876b24f70df414c82ca8fb59f91d8d74af8))
+* refactor code for Gatsby v5 support ([f3852fd](https://github.com/ElegantStack/gatsby-themes/commit/f3852fd3b880cb7b77271f358b092ce730797334))
+
+
+
+
 ## [3.9.0](https://github.com/ElegantStack/gatsby-themes/compare/@elegantstack/flow-ui-widgets@3.8.0...@elegantstack/flow-ui-widgets@3.9.0) (2022-05-18)
 
 

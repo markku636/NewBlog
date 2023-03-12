@@ -85,7 +85,7 @@ const blockContentToMarkdown =
 
     // Get gatsby-source-sanity options
     const plugin = context.nodeModel
-      .getAllNodes({ type: 'SitePlugin' })
+      .findAll({ type: 'SitePlugin' })
       .find(node => node.name === 'gatsby-source-sanity')
 
     const { projectId, dataset } = plugin.pluginOptions

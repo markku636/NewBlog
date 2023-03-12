@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.0](https://github.com/ElegantStack/gatsby-themes/compare/@elegantstack/gatsby-theme-flexiblog-personal@3.10.0...@elegantstack/gatsby-theme-flexiblog-personal@4.0.0) (2023-03-11)
+
+
+### Refactor
+
+* refactor code for Gatsby v5 support ([f3852fd](https://github.com/ElegantStack/gatsby-themes/commit/f3852fd3b880cb7b77271f358b092ce730797334))
+
+
+
+
 ## [3.10.0](https://github.com/ElegantStack/gatsby-themes/compare/@elegantstack/gatsby-theme-flexiblog-personal@3.9.0...@elegantstack/gatsby-theme-flexiblog-personal@3.10.0) (2022-05-18)
 
 

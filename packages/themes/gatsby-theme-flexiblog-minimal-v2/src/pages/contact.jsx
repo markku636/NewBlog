@@ -7,7 +7,7 @@ import ContactForm from '@widgets/ContactForm'
 
 export default props => (
   <Layout {...props}>
-    <Seo title='聯繫我' />
+    <Seo title='Contact' />
     <Divider />
     <Stack>
       <Main>

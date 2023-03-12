@@ -16,10 +16,7 @@ const styles = {
   imageWrapper: {
     borderRadius: `default`,
     overflow: `hidden`,
-    position: `relative`,
-    alignItems: `center`,
-    display: `flex`,
-    justifyContent: `center`
+    position: `relative`
   },
   button: {
     display: [`none`, `block`],
@@ -46,30 +43,29 @@ export default props => {
   return (
     <Layout {...props}>
       <Seo title='About' />
-      {/* <Divider /> */}
-      <Text variant='p'></Text>
+      <Divider />
       <Stack>
         <Main>
-          <PageTitle header='關於我' subheader='' />
-          {/* <Divider /> */}
+          <PageTitle
+            header='About Me'
+            subheader='The future belongs to those who believe in the beauty of their dreams.'
+          />
+          <Divider />
           <Box sx={styles.imageWrapper}>
-            <Img image={image} alt='about' />
-            {/* <Button as={GLink} to='/contact' sx={styles.button}>
+            <Img image={image} />
+            <Button as={GLink} to='/contact' sx={styles.button}>
               Contact Me
-            </Button> */}
+            </Button>
           </Box>
-
-          <Divider space={2} />
+          <Divider />
           <Flex sx={styles.grid}>
             <Box sx={styles.column}>
               <Section title='My Story'>
-                <Card variant='paper'>
-                  <Text variant='p'>
-                    Hi, I’m Mark.Ku.
-                    我是一位網頁軟體工程師，喜歡研究各種技術的解決方案，並用於實踐商業上、興趣是鐵人三項及登山、攝影，這個BLOG主要分享工作及生活的點滴。
-                  </Text>
-                </Card>
-                {/* <Text variant='p'>
+                <Text variant='p'>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam
+                  ac elit nec felis faucibus pellentesque in sit amet neque.
+                </Text>
+                <Text variant='p'>
                   Nulla est elit, feugiat et lacinia nec, aliquam sit amet est.
                   Ut in consequat ipsum, in sagittis felis.
                 </Text>
@@ -103,10 +99,10 @@ export default props => {
                 </Text>
                 <Text variant='p'>
                   Eum ludus iudico ne. Vel labitur habemus vituperata vix!
-                </Text> */}
+                </Text>
               </Section>
             </Box>
-            {/* <Box sx={styles.column}>
+            <Box sx={styles.column}>
               <Section title='Art Directing'>
                 <Card variant='paper'>
                   During the brainstorming process, art directors, co-workers,
@@ -129,17 +125,8 @@ export default props => {
                   information in a way that is both accessible and memorable.
                 </Card>
               </Section>
-            </Box> */}
+            </Box>
           </Flex>
-          {/* <div className='iframe-container'>
-            <iframe
-              style='width:100%;height:500px'
-              src='https://www.youtube.com/embed/QXxuNpwIk4I'
-              frameborder='0'
-              allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture'
-              allowfullscreen
-            ></iframe>
-          </div> */}
         </Main>
       </Stack>
     </Layout>
@@ -148,12 +135,12 @@ export default props => {
 
 const aboutQuery = graphql`
   query AboutQuery {
-    avatar: file(absolutePath: { regex: "/about.(jpeg|jpg|gif|png|webp)/" }) {
+    avatar: file(absolutePath: { regex: "/about.(jpeg|jpg|gif|png)/" }) {
       childImageSharp {
         gatsbyImageData(
+          width: 1140
+          height: 500
           transformOptions: { cropFocus: NORTH }
-          width: 600
-          height: 570
         )
       }
     }

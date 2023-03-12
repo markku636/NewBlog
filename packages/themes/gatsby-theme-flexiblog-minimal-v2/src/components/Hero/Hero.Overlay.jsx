@@ -32,7 +32,7 @@ export default () => {
 
 const minimalHeaderBgQuery = graphql`
   query MinimalHeaderBgQuery {
-    file(absolutePath: { regex: "/background.(jpeg|jpg|gif|png|webp)/" }) {
+    file(absolutePath: { regex: "/background.(jpeg|jpg|gif|png)/" }) {
       publicURL
     }
   }

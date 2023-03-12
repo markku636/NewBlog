@@ -5,16 +5,12 @@
   "workspaces": ["packages/**", "site"],
   "scripts": {
     "clean": "lerna clean",
-    "release": "lerna version",
-    "prettier:windows": "./node_modules/.bin/prettier --write \"{packages,starters}/**/*.{jsx,js}\""
+    "release": "lerna version"
   },
   "devDependencies": {
-    "conventional-changelog-conventionalcommits": "^4.6.3",
-    "lerna": "^4.0.0",
-    "prettier": "^2.6.2"
+    "conventional-changelog-conventionalcommits": "^4.6.3"
   },
   "engines": {
-    "yarn": "^1.17.3",
-    "node": ">=14.15.0"
+    "node": ">=18.0.0"
   }
 }

@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.0](https://github.com/ElegantStack/gatsby-themes/compare/@elegantstack/gatsby-theme-flexiblog-minimal@3.10.0...@elegantstack/gatsby-theme-flexiblog-minimal@4.0.0) (2023-03-11)
+
+**Note:** Version bump only for package @elegantstack/gatsby-theme-flexiblog-minimal
+
+
+
+
+
+
 ## [3.10.0](https://github.com/ElegantStack/gatsby-themes/compare/@elegantstack/gatsby-theme-flexiblog-minimal@3.9.0...@elegantstack/gatsby-theme-flexiblog-minimal@3.10.0) (2022-05-18)
 
 

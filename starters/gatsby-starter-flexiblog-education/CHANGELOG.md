@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.0](https://github.com/ElegantStack/gatsby-themes/compare/@elegantstack/gatsby-starter-flexiblog-education@3.10.0...@elegantstack/gatsby-starter-flexiblog-education@4.0.0) (2023-03-11)
+
+
+### Features
+
+* upgrade to Gatsby v5 and update other dependencies ([aba9eb2](https://github.com/ElegantStack/gatsby-themes/commit/aba9eb243ebe39f0f02885b9693703a316c0a91f))
+
+
+### Refactor
+
+* enable DEV_SSR in gatsby ([abf906d](https://github.com/ElegantStack/gatsby-themes/commit/abf906dfe01a534371b94421296134df133ffcfa))
+* fix invalid author name in demo article ([b121fd1](https://github.com/ElegantStack/gatsby-themes/commit/b121fd190424b1fc15f7e5f57ac7bcc08d8afc7d))
+* refactor code for Gatsby v5 support ([f3852fd](https://github.com/ElegantStack/gatsby-themes/commit/f3852fd3b880cb7b77271f358b092ce730797334))
+
+
+
+
 ## [3.10.0](https://github.com/ElegantStack/gatsby-themes/compare/@elegantstack/gatsby-starter-flexiblog-education@3.9.0...@elegantstack/gatsby-starter-flexiblog-education@3.10.0) (2022-05-18)
 
 

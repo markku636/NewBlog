@@ -2,16 +2,10 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { IconButton, css, useThemeUI } from 'theme-ui'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
+import Slider from 'react-slick'
 import 'slick-carousel/slick/slick.css'
 import './CardList.Slider.css'
 import styles from './CardList.Slider.Styles'
-
-import loadable from '@loadable/component'
-const Slider = loadable(() =>
-  import(
-    /* webpackChunkName: 'react-slick' */ /* webpackPrefetch: true */ 'react-slick'
-  )
-)
 
 const CardListSlider = React.forwardRef((props, ref) => {
   const {
@@ -116,13 +110,7 @@ const CardListSlider = React.forwardRef((props, ref) => {
     }
   }
 
-  const loadableFallback = children.slice(0, columns[columns.length - 1])
-
-  return (
-    <Slider {...settings} fallback={loadableFallback}>
-      {children}
-    </Slider>
-  )
+  return <Slider {...settings}>{children}</Slider>
 })
 
 export default CardListSlider

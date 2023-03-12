@@ -11,8 +11,8 @@ const styles = {
     textAlign: `center`
   },
   pattern: {
-    height: `100%`,
-    transform: `translate(0, 0)`
+    height: `1/2`,
+    transform: `translate(0, 50%)`
   }
 }
 
@@ -34,13 +34,13 @@ export default () => {
 
 const heroQuery = graphql`
   query HeroQuery {
-    avatar: file(absolutePath: { regex: "/hero.(jpeg|jpg|gif|png|webp)/" }) {
+    avatar: file(absolutePath: { regex: "/hero.(jpeg|jpg|gif|png)/" }) {
       childImageSharp {
         regular: gatsbyImageData(
           width: 320
           height: 320
           transformOptions: { cropFocus: NORTH }
-          placeholder: TRACED_SVG
+          placeholder: BLURRED
         )
       }
     }

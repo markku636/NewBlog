@@ -1,23 +1,26 @@
 import React from 'react'
 import { Card as CardComponent } from 'theme-ui'
-import { Layout, Stack, Main } from '@layout'
+import { Layout, Stack, Main, Sidebar } from '@layout'
 import CardList from '@components/CardList'
-import Card from '@components/Card'
 import Divider from '@components/Divider'
+import Sticky from '@components/Sticky'
 import Seo from '@widgets/Seo'
-import AuthorExpanded from '@widgets/AuthorExpanded'
-import NewsletterExpanded from '@widgets/NewsletterExpanded'
-import TableOfContentsExpanded from '@widgets/TableOfContentsExpanded'
+import AuthorCompact from '@widgets/AuthorCompact'
+import Categories from '@widgets/Categories'
 import {
+  PostHead,
+  PostImage,
   PostBody,
   PostComments,
   PostCommentsFacebook,
   PostCommentsGraph,
-  PostTagsShare
+  PostTagsShare,
+  PostFooter
 } from '@widgets/Post'
+import { useBlogCategories } from '@helpers-blog'
 
 const Post = ({
-  data: { post, tagCategoryPosts, tagPosts, categoryPosts },
+  data: { post, tagCategoryPosts, tagPosts, categoryPosts, previous, next },
   ...props
 }) => {
   const relatedPosts = [
@@ -26,26 +29,20 @@ const Post = ({
     ...(categoryPosts ? categoryPosts.nodes : [])
   ]
   const { pageContext: { services = {}, siteUrl } = {} } = props
+  const categories = useBlogCategories()
 
   return (
     <Layout {...props}>
       <Seo {...post} siteUrl={siteUrl} />
       <Divider />
       <Stack effectProps={{ effect: 'fadeInDown' }}>
-        <Main>
-          <Card {...post} variant='horizontal-hero' omitExcerpt />
-        </Main>
+        <PostHead {...post} />
       </Stack>
-      <Divider space={3} />
+      <Divider />
       <Stack effectProps={{ fraction: 0 }}>
         <Main>
-          {/* {post.tableOfContents?.items && (
-            <>
-              <TableOfContentsExpanded {...post} />
-              <Divider />
-            </>
-          )} */}
-          <CardComponent variant='paper-lg'>
+          <CardComponent variant='paper'>
+            <PostImage {...post} inCard />
             <PostBody {...post} />
             <PostTagsShare {...post} location={props.location} />
             {services.disqus && <PostComments {...post} />}
@@ -53,27 +50,29 @@ const Post = ({
             {services.facebookComment && (
               <PostCommentsFacebook {...post} siteUrl={siteUrl} />
             )}
+            <PostFooter {...{ previous, next }} />
           </CardComponent>
+        </Main>
+        <Sidebar>
+          <AuthorCompact author={post.author} omitTitle />
           <Divider />
-          <AuthorExpanded author={post.author} />
+          <Categories categories={categories} />
           <Divider />
           {post.category && (
-            <CardList
-              nodes={relatedPosts}
-              variant={['horizontal-md']}
-              columns={[1, 2, 3, 3]}
-              limit={6}
-              title='Related Posts'
-              distinct
-            />
+            <Sticky>
+              <CardList
+                title='Related Posts'
+                nodes={relatedPosts}
+                variant='horizontal-aside'
+                omitMedia
+                omitCategory
+                limit={6}
+                distinct
+                aside
+              />
+            </Sticky>
           )}
-          {services.mailchimp && (
-            <>
-              <Divider />
-              <NewsletterExpanded simple />
-            </>
-          )}
-        </Main>
+        </Sidebar>
       </Stack>
     </Layout>
   )

@@ -9,7 +9,7 @@ const Tags = ({ tags, ...props }) => (
       <Box variant='lists.badges'>
         {tags &&
           tags.map(({ id, name, slug }) => (
-            <Badge variant='tag' key={id} as={Link} to={slug} aria-label={name}>
+            <Badge variant='tag' key={id} as={Link} to={slug}>
               {name}
             </Badge>
           ))}

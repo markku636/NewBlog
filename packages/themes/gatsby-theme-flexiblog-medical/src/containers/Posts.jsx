@@ -22,7 +22,7 @@ const Posts = ({
 
   return (
     <Layout {...props}>
-      <Seo title='關於我' />
+      <Seo title='Home' />
       <Divider />
       <Stack effectProps={{ effect: false }}>
         <Main>
@@ -78,7 +78,7 @@ const Posts = ({
             nodes={recentPosts.nodes}
             limit={4}
             variant='horizontal-aside'
-            title='近期文章'
+            title='Recently Published'
             omitMedia
             omitCategory
             aside

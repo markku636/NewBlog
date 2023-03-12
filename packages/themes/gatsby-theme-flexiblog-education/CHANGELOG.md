@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.0](https://github.com/ElegantStack/gatsby-themes/compare/@elegantstack/gatsby-theme-flexiblog-education@3.10.0...@elegantstack/gatsby-theme-flexiblog-education@4.0.0) (2023-03-11)
+
+
+### Bug Fixes
+
+* fix react warnings and hydration errors ([cd0f1e9](https://github.com/ElegantStack/gatsby-themes/commit/cd0f1e9dc127a426c95550e46b925047f1e7d1ca))
+
+
+
+
 ## [3.10.0](https://github.com/ElegantStack/gatsby-themes/compare/@elegantstack/gatsby-theme-flexiblog-education@3.9.0...@elegantstack/gatsby-theme-flexiblog-education@3.10.0) (2022-05-18)
 
 

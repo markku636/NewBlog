@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.0](https://github.com/ElegantStack/gatsby-themes/compare/@elegantstack/flow-ui-layout@3.1.0...@elegantstack/flow-ui-layout@4.0.0) (2023-03-11)
+
+
+### Features
+
+* upgrade to Gatsby v5 and update other dependencies ([aba9eb2](https://github.com/ElegantStack/gatsby-themes/commit/aba9eb243ebe39f0f02885b9693703a316c0a91f))
+
+
+
+
 ## [3.1.0](https://github.com/ElegantStack/gatsby-themes/compare/@elegantstack/flow-ui-layout@3.0.3...@elegantstack/flow-ui-layout@3.1.0) (2022-05-18)
 
 

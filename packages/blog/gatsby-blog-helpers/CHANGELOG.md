@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.0](https://github.com/ElegantStack/gatsby-themes/compare/@elegantstack/gatsby-blog-helpers@3.2.0...@elegantstack/gatsby-blog-helpers@4.0.0) (2023-03-11)
+
+
+### Features
+
+* upgrade to Gatsby v5 and update other dependencies ([aba9eb2](https://github.com/ElegantStack/gatsby-themes/commit/aba9eb243ebe39f0f02885b9693703a316c0a91f))
+
+
+### Refactor
+
+* refactor code for Gatsby v5 support ([f3852fd](https://github.com/ElegantStack/gatsby-themes/commit/f3852fd3b880cb7b77271f358b092ce730797334))
+
+
+
+
 ## [3.2.0](https://gitlab.com/alimoosavi15/gatsby-theme-flexiblog/compare/@elegantstack/gatsby-blog-helpers@3.1.0...@elegantstack/gatsby-blog-helpers@3.2.0) (2021-08-01)
 
 

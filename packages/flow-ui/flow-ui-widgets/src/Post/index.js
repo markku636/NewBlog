@@ -1,21 +1,29 @@
-import loadable from '@loadable/component'
-
+import React, { Suspense } from 'react'
 export { PostBody } from './Post.Body'
 export { PostFooter } from './Post.Footer'
 export { PostHead } from './Post.Head'
 export { PostImage } from './Post.Image'
-export { PostTags } from './Post.Tags'
 export { PostTagsShare } from './Post.Tags.Share'
 
-export const PostComments = loadable(() =>
-  import(/* webpackPrefetch: true */ './Post.Comments')
+const PostCommentsLazy = React.lazy(() => import('./Post.Comments'))
+export const PostComments = () => (
+  <Suspense fallback={null}>
+    <PostCommentsLazy />
+  </Suspense>
 )
-export const PostCommentsFacebook = loadable(() =>
-  import(/* webpackPrefetch: true */ './Post.Comments.Facebook')
+
+const PostCommentsFacebookLazy = React.lazy(() =>
+  import('./Post.Comments.Facebook')
 )
-export const PostCommentsGraph = loadable(() =>
-  import(/* webpackPrefetch: true */ './Post.Comments.Graph')
+export const PostCommentsFacebook = () => (
+  <Suspense fallback={null}>
+    <PostCommentsFacebookLazy />
+  </Suspense>
 )
-export const PostShare = loadable(() =>
-  import(/* webpackPrefetch: true */ './Post.Share')
+
+const PostCommentsGraphLazy = React.lazy(() => import('./Post.Comments.Graph'))
+export const PostCommentsGraph = () => (
+  <Suspense fallback={null}>
+    <PostCommentsGraphLazy />
+  </Suspense>
 )
