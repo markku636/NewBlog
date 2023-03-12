@@ -19,6 +19,7 @@
 		"gatsby-plugin-meta-redirect": "^1.1.1",
 		"gatsby-plugin-netlify-cms": "^7.7.0",
 		"gatsby-plugin-sitemap": "^6.7.0",
+		"netlify-cms": "^2.10.192",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0"
 	},
