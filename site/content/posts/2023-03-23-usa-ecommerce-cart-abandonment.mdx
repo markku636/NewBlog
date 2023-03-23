@@ -1,0 +1,64 @@
+---
+featured: true
+title: 前言 - 何謂購物車遺棄
+date:  2022-03-23 01:01:01 +0800
+thumbnail: ecommerce.png
+category: ECommerce
+tags: ['usa','ecommerce','note','abandonment','cart','USA']
+description : usa-ecommerce-note-credit-card-authorize-and-capture
+author : Mark Ku
+slug: usa-ecommerce-cart-abandonment
+---
+## 前言 - 何謂購物車遺棄
+消費者將商品放入購物車後，卻沒有進行結帳付款的行為。
+
+## 購物車遺棄率公式
+購物車遺棄率 = 1- ( 己結帳購物車筆數  / 總購物車創建率 ) 
+
+## 2022 年 15 項重要的購物車遺棄統計數據
+
+[參考連結](https://www.cloudways.com/blog/shopping-cart-abandonment-statistics/)
+
+## 導入自動化行銷工具 - 何謂 Omnisend
+Omnisend 是基於電郵及短訊行銷工具，主要透過電商網站將購物流程中的資料打給 Omnisend 伺服器，行銷人員可以透過 Omnisend 友善的後台工具，動態去設定及蒐集行銷的策略，達到自動化的行銷，並也可以製作線上型錄及電子報，吸引潛在客戶、將顧客做名單的分眾、紀錄顧客的行為歷程，透過豐富後台數據報告的輔佐，製定未來有效的行銷策略等。
+
+[官方網站](https://www.omnisend.com/)
+
+## 原理
+依據 omnsend 定義好的事件，將消費者的購物參數打給 omnsend api，Omnsend 就會依據建立好的 Automation 去發送購物車遺棄的信件。
+![](https://i.imgur.com/NNTe9K0.png)
+![](https://i.imgur.com/55A9e3Y.png)
+
+## 工作步驟拆解
+* 埋入 omnisend 程式碼
+* 建立購物車 Automation
+* 整合測試 ( post api 能收到購物車遺棄的信 )
+* 整合到實際的頁面
+* 測試
+
+## 遇到的問題
+### 成功下單仍然還收到購物車遺棄的信
+omnisend 會依據 create Order api 裡的 createAt 欄位決定是不是要發送購物車遺棄的信，createAt 參數必須轉換成 ISO 8601 
+```
+new Date().toISOString()​
+```
+![](https://i.imgur.com/LgP8aIl.png)
+
+### 第二次收不到信
+cart id 不能重覆， 因為原本架構關係 cart Id會重覆，在不大改架構下，訂單成立後會刪掉 cart Id
+
+### 除錯
+![](https://i.imgur.com/hd8SSdw.png)
+https://developers.omnisend.com/developer-console#!/login
+## 結果
+因為美國市場很大，看似傳統的很簡單 email 行銷，沒幾天就能獲得到很大的收益。
+![](https://i.imgur.com/19jWhNo.png)
+
+## 參考
+[【Omnisend】電商行銷工具，5個技巧幫你提高銷售轉換率
+](https://oldshen.com/omnisend/#:~:text=%E9%A6%96%E5%85%88%E4%BE%86%E5%88%B0Omnisend%20%E7%9A%84,%E4%BF%A1%E7%AE%B1%E6%94%B6%E5%8F%96%E9%A9%97%E8%AD%89%E4%BF%A1%E5%9B%89%E3%80%82)
+[omnisend guides](https://developers.omnisend.com/guides)
+[How to Generating API Key](https://oldshen.com/omnisend/)
+[Abandoned Cart](https://support.omnisend.com/en/articles/1061852-abandoned-cart)
+
+
