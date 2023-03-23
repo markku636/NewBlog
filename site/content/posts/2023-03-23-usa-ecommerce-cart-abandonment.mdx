@@ -40,16 +40,17 @@ Omnisend 是基於電郵及短訊行銷工具，主要透過電商網站將購�
 * 測試
 
 ## 遇到的問題
-### 成功下單仍然還收到購物車遺棄的信
+### 成功下單，仍然會收到購物車遺棄的信
 Omnisend 會依據 create Order api 裡的 createAt 欄位決定是不是要發送購物車遺棄的信，createAt 參數必須轉換成 ISO 8601 
 ```
 new Date().toISOString()​
 ```
 ![](https://i.imgur.com/LgP8aIl.png)
 
-### 第二次下訂收不到信
-Omnisend 的 cart id 不能重覆， 但因為原本架構關係 cart Id會重覆，在不大改架構下，訂單成立手動刪掉 cart Id
-
+### 第二次下訂，收不到購物車遺棄的信
+* 有可能 Omnisend 的 cart id 不能重覆， 但因為原本架構關係 cart Id會重覆，在不大改架構下，訂單成立手動刪掉 cart Id
+* 但也有可能是 Frequency 設定造成的，只要觸發一次，就不會觸發
+![](https://i.imgur.com/0kLVGLQ.png)
 ### 除錯
 ![](https://i.imgur.com/hd8SSdw.png)
 [Debug 連結](https://developers.omnisend.com/developer-console#!/login)
