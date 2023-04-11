@@ -1,0 +1,107 @@
+---
+title: GA4 升級筆記 Part's 1
+slug: upgrad-to-ga-4
+date: 2023-04-11 01:01:02 +0800
+featured: true
+author: Mark Ku
+category: Google Analysis
+thumbnail: google-analytics.png
+tags:
+  - ga4
+  - google
+  - analysis
+  - google
+  - tag
+  - manger
+  - gtm
+  - integration
+description: GA4 升級筆記 Part's 1
+---
+
+## Google 怎麼怎麼收蒐用戶資訊
+
+Google 是透過Cookie在記錄使用者，但使用者如果使用不同的裝置，不同的瀏覽器來瀏覽頁面的話，就無法追蹤到是同一個人在瀏覽頁面。
+
+但 Google 為了解決這問題，在 2018 推出[Google Signals](https://support.google.com/analytics/answer/7532985?hl=zh-Hant#zippy=%2C%E6%9C%AC%E6%96%87%E5%85%A7%E5%AE%B9)，透過 Google 擁有眾多產品及用戶，透過這些線上服務，獲得 
+
+* 搭配 Google Analytics (分析) 進行再行銷。
+* 廣告報表功能 (收集相關額外資訊)
+* 獲得客層或興趣、姓別等相關資訊。
+* 跨裝置報表 (更精準辨別，是不是同個使用者)
+
+## GA 發展使
+2006 GA上線  
+2012 GA SDK 上線 ( 分析 web )  
+2014 Google 買下 FireBase ( 分析 APP、即時資料庫 )  
+2016 Google FireBase 上線 ( 分析 app )  
+2019 FireBase 整合 GA  
+2020 更名GA4 (把 Firebase 及 GA 合併在一起)  
+2023/07/01 停用 UA  
+
+## 對於技術人員的影響
+
+### GA 埋入代碼寫法的改變 (Data layer =>  gtag)
+```
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-xxxxx"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-xxxxx');
+</script>
+```
+### 進階電子商務報表(傳遞的參數變得不一樣)
+### 內建報表變少了，希望多使用自訂報表及觀察長期趨勢
+### 事件預設只記錄兩個月 > 可調整成 14 個月 (預設兩個月，付費可以更長)
+![](https://i.imgur.com/U0UGpQB.png)
+### 以前通用版 GA 只會追蹤網頁瀏覽，現在多了加強型評估 
+會額外蒐集捲動、外站點擊、站內搜尋(查詢參數得自己設定)、影片參與(播放長度)、檔案下載(有沒有人下載)
+
+管理> 資料串流 > 加強型評估 > 預設打開，設定可以依據自己網站設定
+
+![](https://i.imgur.com/yLVfzYt.png)
+
+### 資料蒐集 
+Google 信號資料收集 - 預設開啟 辨別不同裝置是不是同個使用者，透過使用者有登入chrome 或 Google 相關網站，來辨別年齡、姓別...辨別使用者相關身份
+![](https://i.imgur.com/ekNhaEq.png)
+
+![](https://i.imgur.com/LC0xd3n.png)
+
+### 資源 - 進階設定
+在「資源」欄中，按一下「資料串流」。
+按一下網站資料串流。
+在網站串流詳細資料中，按一下「進行代碼設定」。
+點選「全部顯示」。
+![](https://i.imgur.com/Vtp4651.png)
+
+#### 跨網域設定 - 埋在兩個網站, 
+如果埋在兩個網站「避免同個域，重覆計到同個使用者 
+設定網域>新增網域
+
+#### 進階設定> 定義內部流量，不要算在 GA4 報表，排除內部辦 IP
+
+按一下「定義內部流量」。
+
+#### 排除參照連結網址 > 網頁導出去又導回來，被列入。ex:金流
+
+#### Google Ad 連接廣告
+![](https://i.imgur.com/A4e871N.png)
+
+#### Google search console 報表
+![](https://i.imgur.com/FPsBKNs.png)
+
+#### 智能報告引擎 
+![](https://i.imgur.com/qXChlcR.png)
+* 昨天有多少使用者
+* 昨日新使用者
+* 昨日熱門網頁
+* 使用者逐月成長情形
+* 昨天收益多少
+* 昨天平均停留時間
+
+#### 報表 > 一共有四區
+* 客戶開發: 使用者如何進入網站
+* 參與度:使用者進入網站做什麼
+* 營利:網站的獲利狀況 ( 需要請工程師埋入程式才會有數據 )
+* 回訪: 有多少是新客 or 舊客
