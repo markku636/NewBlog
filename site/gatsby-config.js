@@ -7,6 +7,12 @@ module.exports = {
     DEV_SSR: false
   },
   plugins: [
+    {
+      resolve: `gatsby-plugin-google-adsense`,
+      options: {
+        publisherId: `ca-pub-2396931274355535`
+      },
+    },
     `gatsby-plugin-meta-redirect`, // make sure to put last in the array
     {
       resolve: `gatsby-plugin-google-gtag`,
