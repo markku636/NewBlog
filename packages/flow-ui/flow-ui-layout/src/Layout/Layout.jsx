@@ -23,12 +23,7 @@ export const Layout = ({ children, pageContext, location }) => (
         rel='stylesheet'
       />
 
-      <script
-        id='first-unique-id'
-        dangerouslySetInnerHTML={{
-          __html: `window.$crisp=[];window.CRISP_WEBSITE_ID="04b00852-a5b2-4c94-b2d1-1f432ce3eac0";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();`
-        }}
-      />
+      <script src="https://assets.salesmartly.com/js/project_14754_15283_1681818583.js"></script>
 
       <Flex variant='layout.layout'>
         <Global styles={css(theme => theme.global)} />
