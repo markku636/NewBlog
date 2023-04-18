@@ -6,6 +6,11 @@ module.exports = {
   flags: {
     DEV_SSR: false
   },
+  developMiddleware: app => {
+    app.get('/ads.txt', (req, res) => {
+      res.sendFile(`${__dirname}/static${req.path}`)
+    })
+  },
   plugins: [
     {
       resolve: `gatsby-plugin-google-adsense`,
