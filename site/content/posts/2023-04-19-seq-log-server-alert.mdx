@@ -19,19 +19,19 @@ slug: seq-log-server-alert
 當金流或訂單異常時，能夠監控異常事件，並打到 Teams 通知相關開發人員。
 
 ## 安裝 Seq 擴充套件
-SEQ 並沒有內建通知，所以我們需要安裝
+SEQ 並沒有內建通知，所以我們需要安裝 Teams 通知套件  
 https://www.nuget.org/packages?q=Tags%3A%22seq-app%22
-## 輸入 "Seq.App.Teams"
+## 在APPS 的 Package 欄位輸入 "Seq.App.Teams"
 ![](https://i.imgur.com/3lBLEwg.png)
-## 選擇 Add instance 
+## 選擇 ADD INSTANCE 
 ![](https://i.imgur.com/fIpsGDE.png)
 ## 輸入 Teams Web hook 
 ![](https://i.imgur.com/DeNJQiQ.png)
 
-## Setting > Add alert
+## 接著我們要開始新增Alert，Settings > Add ALERT
 ![](https://i.imgur.com/pGKhOhd.png)
 
-## 設定相關條件，依據時間及筆數觸發通知
+## 設定相關條件，系統依據時間及筆數觸發通知
 ![](https://i.imgur.com/N1MZ0wB.png)
 ```
 @Message like '%[Paypal][Build]%' AND @Message like '%[Error]%'
