@@ -1,0 +1,40 @@
+---
+featured: true
+title: 透過 Google Schema 增加額外的搜尋版面 SERP( Search Engine Results Page )
+date:  2023-04-19 01:01:01 +0800
+thumbnail: seo.webp
+category: SEO
+tags: ['seo','verify','cloudflare','block']
+description : 立即驗證 SSR 或 Pre render SEO 是否正常運行的幾種方式
+author : Mark Ku
+slug: search-engine-result-page
+---
+## 什麼是  SERP ( Search Engine Results Page )
+使用者在搜索引擎上輸入關鍵字時返回的頁面，搜索引擎會顯示與該關鍵字相關的結果，獲得更多版面，並會用不同的方式呈現。 [參考資料](https://www.semrush.com/blog/serp-features-guide/)
+
+### FAQ
+![](https://i.imgur.com/dDnRqXb.png)
+### Organization
+![](https://i.imgur.com/cpDu4KC.png)
+
+### Shopping Tab
+![](https://i.imgur.com/5CRjHEF.png)
+
+
+## 什麼是 Google Schema 
+Google Schema，也被稱為Schema.org或結構化數據，是一種指定數據結構的語言，旨在幫助搜索引擎更好地理解網頁上的內容。它是由Google、Bing、Yahoo等搜索引擎共同開發的一個標準，可以用於描述和標記各種類型的信息，如產品、組織、地點、事件等。
+
+通過在網站埋設的Google Schema標記，搜尋引擎的爬蟲，更加準確地理解和解析網站的內容，則更容易獲得額外的搜尋版面，吸引更多的用戶訪問和點擊，提供更好的搜索體驗和展示效果，吸引更多的用戶訪問和點擊，進而提高網站的流量和轉化率。
+
+Google Schema可以使用各種不同的標記語言，如Microdata、JSON-LD和RDFa等，可以根據具體的應用場景和網站類型進行選擇和應用。
+
+## 參考 MOMO 商城的產品內頁，我們可以發現，在 `<head> </head>`有下列的程式碼
+```
+<script type="application/ld+json">[{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"https://www.momoshop.com.tw","name":"momo購物網"}},{"@type":"ListItem","position":2,"item":{"@id":"https://www.momoshop.com.tw/category/LgrpCategory.jsp?l_code=2199900000&FTOOTH=21","name":"品牌旗艦"}},{"@type":"ListItem","position":3,"item":{"@id":"https://www.momoshop.com.tw/category/LgrpCategory.jsp?l_code=2111800000","name":"Tefal 法國特福"}},{"@type":"ListItem","position":4,"item":{"@id":"https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=8110124&Area=search&mdiv=403&oid=1_1&cid=index&kw=8110124&mdiv=1099900000-bt_0_253_01-bt_0_253_01_P1_4_e1&ctype=B","name":"超值鍋組"}}]},{"@context":"https://schema.org","@type":"Product","sku":"8110124","name":"\n            \n            【Tefal 特福】momo獨家 極巧系列不沾鍋3件組(28cm炒鍋+26cm深平底鍋+鍋鏟)\n          ","image":["https://i4.momoshop.com.tw/1681816391/goodsimg/0008/110/124/8110124_R.webp","https://i1.momoshop.com.tw/1681816391/goodsimg/0008/110/124/8110124_R1.webp","https://i2.momoshop.com.tw/1681816391/goodsimg/0008/110/124/8110124_R2.webp","https://i3.momoshop.com.tw/1681816391/goodsimg/0008/110/124/8110124_R3.webp","https://i4.momoshop.com.tw/1681816391/goodsimg/0008/110/124/8110124_R4.webp","https://i1.momoshop.com.tw/1681816391/goodsimg/0008/110/124/8110124_R5.webp"],"description":"推薦【Tefal 特福】momo獨家 極巧系列不沾鍋3件組(28cm炒鍋+26cm深平底鍋+鍋鏟),高鍋邊順手好翻炒,智慧佳溫紅心，掌握最佳烹調溫度,塗層添加鈦合金粒子抗刮超耐用,momo購物網總是優惠便宜好價格,值得推薦！","url":"https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=8110124","brand":{"@type":"Brand","name":"Tefal 特福"},"offers":{"@type":"Offer","price":"990","priceCurrency":"TWD","itemCondition":"https://schema.org/NewCondition","availability":"https://schema.org/InStock"}}]</script>
+```
+
+## 我們可以透過工具，產生出一樣的結構，並將 Google schema 埋到你的網站中
+https://technicalseo.com/tools/schema-markup-generator/
+
+## 最後，我們可以透過 Google 的工具驗證
+https://developers.google.com/search/docs/appearance/structured-data
