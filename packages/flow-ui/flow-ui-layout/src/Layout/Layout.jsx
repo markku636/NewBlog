@@ -45,7 +45,7 @@ export const Layout = ({ children, pageContext, location }) => (
 
       <script src='https://assets.salesmartly.com/js/project_14754_15283_1681818583.js'></script>
       <link rel='canonical' href='http://https://blog.markkulab.net/' />
-      {personSchema}
+      {personSchema()}
       <Flex variant='layout.layout'>
         <Global styles={css(theme => theme.global)} />
         <Header />
