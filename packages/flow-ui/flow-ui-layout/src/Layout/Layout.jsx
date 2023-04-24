@@ -42,6 +42,8 @@ export const Layout = ({ children, pageContext, location }) => (
         href='https://cdn.jsdelivr.net/npm/taipei-sans-tc/dist/Bold/TaipeiSansTCBeta-Bold.css'
         rel='stylesheet'
       />
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2396931274355535"
+     crossorigin="anonymous"></script>
 
       <script src='https://assets.salesmartly.com/js/project_14754_15283_1681818583.js'></script>
       <link rel='canonical' href='http://https://blog.markkulab.net/' />
