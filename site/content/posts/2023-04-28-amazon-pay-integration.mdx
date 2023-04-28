@@ -26,13 +26,13 @@ Our company's Amazon Pay integration often breaks down, so we need to reconnect/
 * [Backend Doc](https://developer.amazon.com/docs/amazon-pay-api-v2/checkout-session.html)
 
 ## Amazon pay demo dite
-https://pay.amazon.com/demo
+[Demo Site](https://pay.amazon.com/demo)
 
 ### Amazmon pay check out process
-* Create Checkout Session - POST https://pay-api.amazon.com/:version/checkoutSessions
-* Get Checkout Session - GET https://pay-api.amazon.com/:version/checkoutSessions/:checkoutSessionId
-* Update Checkout Session - PATCH https://pay-api.amazon.com/:version/checkoutSessions/:checkoutSessionId
-* Complete Checkout Session - POST https://pay-api.amazon.com/:version/checkoutSessions/:checkoutSessionId/complete
+* Create Checkout Session - POST `https://pay-api.amazon.com/:version/checkoutSessions`
+* Get Checkout Session - GET `https://pay-api.amazon.com/:version/checkoutSessions/:checkoutSessionId`
+* Update Checkout Session - PATCH `https://pay-api.amazon.com/:version/checkoutSessions/:checkoutSessionId`
+* Complete Checkout Session - POST `https://pay-api.amazon.com/:version/checkoutSessions/:checkoutSessionId/complete`
 
 ## Step1 Embedding Amaon pay checkout js
 ```
@@ -82,7 +82,7 @@ public static AmazonCreateCheckoutSession AmazonPayButton(string ChangePaymentRe
       }
 ```
 
-## Step3 Render Amazon pay button (fontend)
+## Step3 Render Amazon pay button (frontend)
 
 ```
 async function amazonPaySetting() {
@@ -121,21 +121,41 @@ async function amazonPaySetting() {
     }
 
 ```
-## Step 4 When user Click Express Checkout will Redirect to Select Payment methods > Continue checkout (fontend)
-
 ![](https://i.imgur.com/E47TLTf.png)
+
+## Step 4 When the user clicks 'Express Checkout', they will be redirected to the payment selection page and can continue with the checkout process (frontend)
 
 ![](https://i.imgur.com/sqc48uc.png)
 
-## Step5 Amazon will redirect to payload's checkoutReviewReturnUrl with checkout session Id (fontend)
+## Step5 Amazon will redirect to payload's checkoutReviewReturnUrl with checkout session Id (frontend)
 ![](https://i.imgur.com/qhg0FIz.png)
 
-## Step6 Call our backend Api with  Amazon Checkout Session Id. (backend)
+## Step6 Call our backend API to retrieve the checkout session and obtain Amazon shipping information.(backend)
+```
+public static AmazonV2Result GetPaymentInfo(string AmazonCheckoutSessionId) {
+         var client = InitiateAmazonPayClient();
+         var getInfo = client.GetCheckoutSession(AmazonCheckoutSessionId);
+         var result = new AmazonV2Result {
+            Success = false
+         };
+
+         if (!getInfo.Success) {
+            return GetAmazonIssue(getInfo.RawResponse);
+         }
+
+         result.Success = true;
+         result.CustomerInfo = FilloutCustomerInfo(getInfo.ShippingAddress, getInfo.Buyer.Email);
+
+         return result;
+}
+```
+![](https://i.imgur.com/eSSlkyq.png)
+## Step7 Call our backend API to update the checkout session and retrieve the Amazon purchase URL(backend)
 Backend will UpdateCheckoutSession then get Checkout Url with Amazon pay SDK.
 
 ```
 private static AmazonV2Result UpdateCheckoutSession(string AmazonCheckoutSessionId, AmazonV2Request Data, bool Authorize, string ChangPaymentsReferID) {
-         var client = InitiateClient();
+         var client = InitiateAmazonPayClient();
          var request = new UpdateCheckoutSessionRequest();
          var isChangPaymentsStep = !string.IsNullOrEmpty(ChangPaymentsReferID);
 
@@ -163,15 +183,15 @@ private static AmazonV2Result UpdateCheckoutSession(string AmazonCheckoutSession
       }
 
 ```
-## Step 7 When a member checks out on Amazon's website, they are redirected to our website with an 'amazonCheckoutSessionId.' This allows us to initiate the 'CompleteCheckoutSession' process.
+## Step8 When a member checks out on Amazon's website, they are redirected to our website with an 'amazonCheckoutSessionId.' This allows us to initiate the 'CompleteCheckoutSession' process.
 ![](https://i.imgur.com/BO91nXV.png)  
  ( return to CheckoutResultReturnUrl)
 
-## Step 8  CompleteCheckoutSession (backend)
+## Step9  CompleteCheckoutSession (backend)
 
 ```
 var request = new CompleteCheckoutSessionRequest(Amount, Currency.USD);
             CheckoutSessionResponse checkoutSessionResponse = client.CompleteCheckoutSession(AmazonCheckoutSessionId, request);
 ```
-## Finsih 
+## Step 10 Finsih 
 Amazon pay is a bit complicated, with a lot of page redirections, so it's really difficult to integrate.
