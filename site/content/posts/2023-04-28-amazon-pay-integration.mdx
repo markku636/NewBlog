@@ -29,10 +29,14 @@ Our company's Amazon Pay integration often breaks down, so we need to reconnect/
 [Demo Site](https://pay.amazon.com/demo)
 
 ### Amazmon pay check out process
-* Create Checkout Session - POST `https://pay-api.amazon.com/:version/checkoutSessions`
-* Get Checkout Session - GET `https://pay-api.amazon.com/:version/checkoutSessions/:checkoutSessionId`
-* Update Checkout Session - PATCH `https://pay-api.amazon.com/:version/checkoutSessions/:checkoutSessionId`
-* Complete Checkout Session - POST `https://pay-api.amazon.com/:version/checkoutSessions/:checkoutSessionId/complete`
+* Create Checkout Session - POST 
+```https://pay-api.amazon.com/:version/checkoutSessions```
+* Get Checkout Session - GET 
+```https://pay-api.amazon.com/:version/checkoutSessions/:checkoutSessionId```
+* Update Checkout Session - PATCH 
+```https://pay-api.amazon.com/:version/checkoutSessions/:checkoutSessionId```
+* Complete Checkout Session - POST 
+```https://pay-api.amazon.com/:version/checkoutSessions/:checkoutSessionId/complete```
 
 ## Step1 Embedding Amaon pay checkout js
 ```
