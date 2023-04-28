@@ -1,0 +1,177 @@
+---
+featured: true
+title: Amazon pay integration note with csharp - one-time payments
+date:  2023-04-28 01:01:01 +0800
+thumbnail: amazonpay.png
+category: Payment
+tags: ['Amazon pay','integrate','Fontend']
+description : Amazon pay integration note with csharp - one-time payments
+author : Mark Ku
+slug: amazon-pay-integration
+---
+# Amazon pay integration note with csharp - one-time payments
+
+## Propose
+Our company's Amazon Pay integration often breaks down, so we need to reconnect/reintegrate it
+
+## Prepare
+* Amazon pay api key 
+* Setting white list of domains in the Amazon pay backend sytem.
+* Embedding Amaon pay checkout js in Fontend Web site
+* Install Amazon SDK in your backend
+
+## Doc
+* [Get set up for integration](https://developer.amazon.com/docs/amazon-pay-checkout/get-set-up-for-integration.html)
+* [Fontend Doc](https://developer.amazon.com/docs/amazon-pay-checkout/v1-amazon-pay-script.html)
+* [Backend Doc](https://developer.amazon.com/docs/amazon-pay-api-v2/checkout-session.html)
+
+## Amazon pay demo dite
+https://pay.amazon.com/demo
+
+### Amazmon pay check out process
+* Create Checkout Session - POST https://pay-api.amazon.com/:version/checkoutSessions
+* Get Checkout Session - GET https://pay-api.amazon.com/:version/checkoutSessions/:checkoutSessionId
+* Update Checkout Session - PATCH https://pay-api.amazon.com/:version/checkoutSessions/:checkoutSessionId
+* Complete Checkout Session - POST https://pay-api.amazon.com/:version/checkoutSessions/:checkoutSessionId/complete
+
+## Step1 Embedding Amaon pay checkout js
+```
+<Script src="https://static-na.payments-amazon.com/checkout.js" strategy="afterInteractive"></Script>
+```
+## Step2 Call our backend api to Create Amazon Session get signature and payload (backend)
+
+```
+private static WebStoreClient InitiateAmazonPayClient() {
+         var environment = Projects.InTestingServer ? Environment.Sandbox : Environment.Live;
+         var payConfiguration = new ApiConfiguration
+         (
+             region: Region.UnitedStates,
+             environment: environment,
+             publicKeyId: Projects.AmazonV2.Public_key_id,
+             privateKey: Projects.AmazonV2.PrivateKey
+         );
+
+         var client = new WebStoreClient(payConfiguration);
+
+         return client;
+}
+
+public static AmazonCreateCheckoutSession AmazonPayButton(string ChangePaymentReferID) {
+         var isChangePayment = !string.IsNullOrEmpty(ChangePaymentReferID);
+         var client = InitiateAmazonPayClient();
+         var request = new CreateCheckoutSessionRequest(
+             checkoutReviewReturnUrl: "http://{your-domain}/carts",
+             storeId: Projects.AmazonV2.Store_Id
+         );
+         request.PaymentDetails.CanHandlePendingAuthorization = false;
+         request.DeliverySpecifications.AddressRestrictions.Type = RestrictionType.Allowed;
+         request.DeliverySpecifications.AddressRestrictions.AddCountryRestriction("US");
+         request.DeliverySpecifications.AddressRestrictions.AddCountryRestriction("CA");
+
+         //generate the button signature
+         var signature = client.GenerateButtonSignature(request);
+         var payload = request.ToJson();
+
+         return new AmazonCreateCheckoutSession {
+            Signature = signature,
+            PayloadJSON = payload,
+            PublicKeyId = Projects.AmazonV2.Public_key_id,
+            MerchantId = Projects.AmazonV2.Merchant_Id,
+            IsSandbox = Projects.InTestingServer
+         };
+      }
+```
+
+## Step3 Render Amazon pay button (fontend)
+
+```
+async function amazonPaySetting() {
+        const resp = await createAmazonCheckoutSession('');
+    
+        if (reviewItems) {
+            updateCartReviewItems(reviewItems);
+        }
+
+        if (resp.Success) {
+            const data = resp.Data;
+            const request = {
+                merchantId: data.MerchantId,
+                ledgerCurrency: 'USD',
+                checkoutLanguage: 'en_US',
+                productType: 'PayAndShip',
+                placement: 'Cart',
+                buttonColor: 'Gold',
+                createCheckoutSessionConfig: {
+                    payloadJSON: data.PayloadJSON,
+                    signature: data.Signature,
+                    publicKeyId: data.PublicKeyId,
+                },               
+                sandbox: process.env.NODE_ENV === 'development' ? true : false,
+            };
+
+            
+            (window as any).amazon.Pay.renderButton('#AmazonPayButton', request);
+
+            setTimeout(() => {
+                if (amazonBtn.current) {
+                    amazonBtn.current.click();
+                }
+            }, 1000);
+        }
+    }
+
+```
+## Step 4 When user Click Express Checkout will Redirect to Select Payment methods > Continue checkout (fontend)
+
+![](https://i.imgur.com/E47TLTf.png)
+
+![](https://i.imgur.com/sqc48uc.png)
+
+## Step5 Amazon will redirect to payload's checkoutReviewReturnUrl with checkout session Id (fontend)
+![](https://i.imgur.com/qhg0FIz.png)
+
+## Step6 Call our backend Api with  Amazon Checkout Session Id. (backend)
+Backend will UpdateCheckoutSession then get Checkout Url with Amazon pay SDK.
+
+```
+private static AmazonV2Result UpdateCheckoutSession(string AmazonCheckoutSessionId, AmazonV2Request Data, bool Authorize, string ChangPaymentsReferID) {
+         var client = InitiateClient();
+         var request = new UpdateCheckoutSessionRequest();
+         var isChangPaymentsStep = !string.IsNullOrEmpty(ChangPaymentsReferID);
+
+         request.WebCheckoutDetails.CheckoutResultReturnUrl = "http://{your-domain}/carts/amazonpayresponse";
+         request.PaymentDetails.ChargeAmount.Amount = Data.OrderAmount;
+         request.PaymentDetails.ChargeAmount.CurrencyCode = Currency.USD;
+         request.PaymentDetails.PaymentIntent = Authorize ? PaymentIntent.Authorize : PaymentIntent.AuthorizeWithCapture;
+         request.MerchantMetadata.MerchantReferenceId = Data.OrderId;
+         request.MerchantMetadata.MerchantStoreName = "ibuypower.com";
+         request.MerchantMetadata.NoteToBuyer = Data.ModelName;
+
+         // send the request
+         var result = client.UpdateCheckoutSession(AmazonCheckoutSessionId, request);
+
+         // check if API call was successful
+         if (!result.Success) {
+            return GetAmazonIssue(result.RawResponse);
+         }
+
+         return new AmazonV2Result {
+            Success = true,
+            AmazonPayRedirectUrl = result.WebCheckoutDetails.AmazonPayRedirectUrl,
+            ResponseJson = JsonConvert.SerializeObject(result.RawResponse, Formatting.Indented)
+         };
+      }
+
+```
+## Step 7 When a member checks out on Amazon's website, they are redirected to our website with an 'amazonCheckoutSessionId.' This allows us to initiate the 'CompleteCheckoutSession' process.
+![](https://i.imgur.com/BO91nXV.png)  
+ ( return to CheckoutResultReturnUrl)
+
+## Step 8  CompleteCheckoutSession (backend)
+
+```
+var request = new CompleteCheckoutSessionRequest(Amount, Currency.USD);
+            CheckoutSessionResponse checkoutSessionResponse = client.CompleteCheckoutSession(AmazonCheckoutSessionId, request);
+```
+## Finsih 
+Amazon pay is a bit complicated, with a lot of page redirections, so it's really difficult to integrate.
