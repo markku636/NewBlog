@@ -1,10 +1,10 @@
 ---
 featured: true
-title: Amazon pay integration note with csharp - one-time payments
+title: Amazon pay V2 integration note with csharp - one-time payments
 date:  2023-04-28 01:01:01 +0800
 thumbnail: amazonpay.png
 category: Payment
-tags: ['Amazon pay','integrate','Fontend']
+tags: ['Amazon pay','Amazon pay v2','integrate','Fontend']
 description : Amazon pay integration note with csharp - one-time payments
 author : Mark Ku
 slug: amazon-pay-integration
@@ -59,8 +59,8 @@ private static WebStoreClient InitiateAmazonPayClient() {
          (
              region: Region.UnitedStates,
              environment: environment,
-             publicKeyId: Projects.AmazonV2.Public_key_id,
-             privateKey: Projects.AmazonV2.PrivateKey
+             publicKeyId: AmazonV2.Public_key_id,
+             privateKey: AmazonV2.PrivateKey
          );
 
          var client = new WebStoreClient(payConfiguration);
@@ -167,31 +167,48 @@ Backend will UpdateCheckoutSession then get Checkout Url with Amazon pay SDK.
 
 ```
 private static AmazonV2Result UpdateCheckoutSession(string AmazonCheckoutSessionId, AmazonV2Request Data, bool Authorize, string ChangPaymentsReferID) {
-         var client = InitiateAmazonPayClient();
-         var request = new UpdateCheckoutSessionRequest();
-         var isChangPaymentsStep = !string.IsNullOrEmpty(ChangPaymentsReferID);
+         NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
-         request.WebCheckoutDetails.CheckoutResultReturnUrl = "http://{your-domain}/carts/amazonpayresponse";
-         request.PaymentDetails.ChargeAmount.Amount = Data.OrderAmount;
-         request.PaymentDetails.ChargeAmount.CurrencyCode = Currency.USD;
-         request.PaymentDetails.PaymentIntent = Authorize ? PaymentIntent.Authorize : PaymentIntent.AuthorizeWithCapture;
-         request.MerchantMetadata.MerchantReferenceId = Data.OrderId;
-         request.MerchantMetadata.MerchantStoreName = "ibuypower.com";
-         request.MerchantMetadata.NoteToBuyer = Data.ModelName;
+         var result = new AmazonV2Result {
+            Success = false,
+            AmazonPayRedirectUrl = string.Empty,
+            ResponseJson = string.Empty
+         };
 
-         // send the request
-         var result = client.UpdateCheckoutSession(AmazonCheckoutSessionId, request);
+         try {
+            var client = InitiateAmazonPayClient();
+            var request = new UpdateCheckoutSessionRequest();
+            var isChangPaymentsStep = !string.IsNullOrEmpty(ChangPaymentsReferID);
 
-         // check if API call was successful
-         if (!result.Success) {
-            return GetAmazonIssue(result.RawResponse);
+            request.WebCheckoutDetails.CheckoutResultReturnUrl = isChangPaymentsStep ? ChangePaymentsSuccessLink + ChangPaymentsReferID + "&complete=1" : successLink;
+            request.PaymentDetails.ChargeAmount.Amount = Data.OrderAmount;
+            request.PaymentDetails.ChargeAmount.CurrencyCode = Currency.USD;
+            request.PaymentDetails.CanHandlePendingAuthorization = false;
+            request.PaymentDetails.PaymentIntent = Authorize ? PaymentIntent.Authorize : PaymentIntent.AuthorizeWithCapture;
+            request.MerchantMetadata.MerchantReferenceId = Data.OrderId;
+            request.MerchantMetadata.MerchantStoreName = "ibuypower.com";
+            request.MerchantMetadata.NoteToBuyer = Data.ModelName;
+
+            // send the request
+            var updateResult = client.UpdateCheckoutSession(AmazonCheckoutSessionId, request);
+
+            // check if API call was successful
+            if (updateResult.Success) {
+               var josn = DataPackager.Json(updateResult);
+            result.Success = true;
+               result.AmazonPayRedirectUrl = updateResult.WebCheckoutDetails.AmazonPayRedirectUrl;
+               result.ResponseJson = JsonConvert.SerializeObject(updateResult.RawResponse, Formatting.Indented);
+            }
+            else {
+               logger.Error($"[AmazonPay][AmazonV2Helper][PurchaseGetAmazonPayRedirectUrl][UpdateCheckoutSession][Error]Request:{DataPackager.Json(request)},Response:{DataPackager.Json(updateResult)}");
+               result.Message = "Please select another credit card or change payment method and try again.";
+            }
+         }
+         catch (Exception ex) {
+            logger.Error($"[AmazonPay][AmazonV2Helper][PurchaseGetAmazonPayRedirectUrl][UpdateCheckoutSession][Error]{ex.Message},{ex.StackTrace}");
          }
 
-         return new AmazonV2Result {
-            Success = true,
-            AmazonPayRedirectUrl = result.WebCheckoutDetails.AmazonPayRedirectUrl,
-            ResponseJson = JsonConvert.SerializeObject(result.RawResponse, Formatting.Indented)
-         };
+         return result;
       }
 
 ```
@@ -202,8 +219,40 @@ private static AmazonV2Result UpdateCheckoutSession(string AmazonCheckoutSession
 ## Step9  CompleteCheckoutSession (backend)
 
 ```
-var request = new CompleteCheckoutSessionRequest(Amount, Currency.USD);
+private static AmazonV2Result CompleteCheckoutSession(string AmazonCheckoutSessionId, decimal Amount) {
+         NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+
+         AmazonV2Result result = new AmazonV2Result();
+
+         try {
+            var client = InitiateAmazonPayClient();
+            var request = new CompleteCheckoutSessionRequest(Amount, Currency.USD);
             CheckoutSessionResponse checkoutSessionResponse = client.CompleteCheckoutSession(AmazonCheckoutSessionId, request);
+
+            logger.Info($"[AmazonPay][Success][CompleteCheckoutSession]AmazonCheckoutSessionId:{AmazonCheckoutSessionId},Amount{Amount},Data:{DataPackager.Json(checkoutSessionResponse)}");
+
+            if (checkoutSessionResponse.Success) {
+               result.Success = true;
+               result.ChargeId = checkoutSessionResponse.ChargeId;
+               result.ChargePermissionId = checkoutSessionResponse.ChargePermissionId;
+               result.ResponseJson = JsonConvert.SerializeObject(checkoutSessionResponse.RawResponse, Formatting.Indented);
+            }
+            else {
+               result = GetAmazonIssue(checkoutSessionResponse.RawResponse);
+
+               logger.Error($"[AmazonPay][Error][CompleteCheckoutSession][GetAmazonIssue][Step 3]AmazonCheckoutSessionId:{AmazonCheckoutSessionId},Amount{Amount},Data:{DataPackager.Json(checkoutSessionResponse)}");
+            }
+         }
+         catch (System.Exception ex) {
+            logger.Error($"[AmazonPay][Error][CompleteCheckoutSession][Step 3]AmazonCheckoutSessionId:{AmazonCheckoutSessionId},Amount{Amount},Ex:{ex.Message},StackTrace:{ex.StackTrace}");
+         }
+
+         return result;
+      }
 ```
 ## Step 10 Finsih 
 Amazon pay is a bit complicated, with a lot of page redirections, so it's really difficult to integrate.
+
+
+## Reference
+### (Error Code)[https://developer.amazon.com/docs/amazon-pay-api-v2/charge.html]
