@@ -27,16 +27,6 @@ export const personSchema = () => {
   )
 }
 
-const loadClarityJs = ()=>{
-  return (<script type="text/javascript" dangerouslySetInnerHTML={{__html: (function(c,l,a,r,i,t,y){
-    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-    t=l.createElement(r);t.async=1;t.src="https://www.loadClarityJs.ms/tag/"+i;
-    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-})(window, document, "loadClarityJs", "script", "h6t6k0bky8")}}>
- 
-</script>)
-}
-
 export const Layout = ({ children, pageContext, location }) => (
   <ThemeProvider theme={theme}>
     <pageContextProvider.Provider value={{ pageContext, location }}>
@@ -57,7 +47,6 @@ export const Layout = ({ children, pageContext, location }) => (
 
       <script src='https://assets.salesmartly.com/js/project_14754_15283_1681818583.js'></script>
       <link rel='canonical' href='http://https://blog.markkulab.net/' />
-      {loadClarityJs()}
       {personSchema()}
       <Flex variant='layout.layout'>
         <Global styles={css(theme => theme.global)} />
