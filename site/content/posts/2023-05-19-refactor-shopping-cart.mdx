@@ -41,11 +41,9 @@ slug: react-refactor-shopping-cart
 
 ## 上線後問題開始浮現
 在上線後，我們開始遇到問題。由於時間和資源的限制，我們選擇繼續使用原有的 API，然而，因為其與我們原本的流程相反，我們在上線後發現了一些錯誤訂單。為了解決這些問題，我們在購物流程和金流中添加了 log，並透過 Seq Alert 監控錯誤訊息。一旦出現錯誤，我們就會立即通過 Teams 進行通知，並逐一修正錯誤，進一步消除 bug。
-
 ![](https://i.imgur.com/q3nLVAF.png)
 ![](https://imgur.com/VqCgyrd.png)
-![](https://i.imgur.com/GkQycj0.png)
-
+![](https://i.imgur.com/DVHTtjy.png)
 ## 減少 google map api 使用量
 每當使用者輸入郵遞區號，我們的系統會頻繁地調用Google Map API，導致API的使用量劇增。為了節省成本，我們優化了系統，採取Redis Cache技術來緩存常用數據。這項策略不僅顯著降低了Google Map API的使用次數，大大節省了我們的 Google api 的費用。
 
