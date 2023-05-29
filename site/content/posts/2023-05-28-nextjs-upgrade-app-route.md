@@ -114,13 +114,9 @@ export default function Page({ params, searchParams }: Props) {}
 
 ## 4 套件受到的影響
 ### 4.1 i18n 套件 ( 推薦 )
-剛昇級完後就會發現 i18n 套件就無法使用，新版 useRouter 也不提供 locale 可以使用
-
-~~const { locale } = useRouter(); ~~
+剛昇級完後就會發現相關的 i18n 套件無法使用，新版 useRouter 也不提供 locale 可以使用，試了好幾個 i18n 套件，發現這個套件最好用
 
 [相關文章](https://next-intl-docs.vercel.app/docs/next-13/server-components )
-
-試了好幾個 i18n 套件，發現這個最好用
 
 ```
 import { useLocale } from 'next-intl';
