@@ -11,7 +11,7 @@ slug: nextjs-upgrade-app-route
 ---
 
 ##  前言
-為了重寫我們的德國電商網站，我進行了深入評估，並決定採用 Next js 的最新穩定版本，Next 13.4.3。這個版本的App route和server side component功能具有極高的吸引力，加上未來許多的功能都將以app route為主要實作方向，因此我們選擇採用app route對我們來說毫無疑問。
+為了重寫我們的德國電商網站，我進行了深入評估，並決定採用 Next js 的最新穩定版本，Next 13.4.3，這個版本的 SEO meta api和server side component功能具有極高的吸引力，且加上未來許多的功能都將以app route為主要實作方向，因此我們選擇採用app route對我們來說毫無疑問。
 
 ## 1 [Server side component](https://nextjs.org/docs/getting-started/react-essentials)
 
@@ -140,4 +140,4 @@ const locale = useLocale();
 ## 6. 結論
 無可否認，Next js 的更新速度令人驚訝，經常在我醒來之後就有了新的穩定版本，每次改版都會有點小陣痛，但大概都花個一至兩天就能昇級，也保留舊的寫法。  
 
-app route 的調整，正式掀開 server side component 的序幕。
+app route 改動的幅度有點大，且有點痛，但 app route出現，正式掀開 server side component 的序幕。
