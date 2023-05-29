@@ -1,6 +1,6 @@
 ---
 featured: true
-title: NEXTJS 13.3.4 昇級筆記，server side compoent 時代來臨 - migrate page route to app route 
+title: NEXTJS 13.3.4 踩坑筆記，server side compoent 時代來臨 - migrate page route to app route 
 date:  2023-05-28 01:01:01 +0800
 thumbnail: nextjs.png
 category: Frontend
