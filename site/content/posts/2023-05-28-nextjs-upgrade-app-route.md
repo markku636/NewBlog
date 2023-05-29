@@ -26,7 +26,7 @@ Server Components的運作方式是在伺服器上進行渲染，從而只傳遞
 
 不能使用 useState 和 useReducer、 Hooks、useEffect、useLayoutEffect 
 
-### 1.4 如果要使用 clinet side component ，每個component 前都要加上這一樣
+### 1.4 如果要使用 clinet side component ，每個 component 都要加上這一行
 ```
 "use client";
 import xxx
