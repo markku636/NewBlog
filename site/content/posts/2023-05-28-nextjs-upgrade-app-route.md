@@ -10,14 +10,14 @@ author : Mark Ku
 slug: nextjs-upgrade-app-route
 ---
 ##  前言
-為了重寫我們的德國電商網站，我進行了深入評估，並決定採用 Next js 的最新穩定版本，Next 13.4.3，這個版本的 SEO meta api和server side component功能具有極高的吸引力，且加上未來許多的功能都將以app route為主要實作方向，因此我們選擇採用app route對我們來說毫無疑問。
+為了重寫我們的德國電商網站，我進行了深入評估，並決定採用 Next js 的最新穩定版本13.4.3，這個版本的 SEO meta api和server side component功能具有極高的吸引力，且加上未來許多 NextJS的功能都將以app route 上，因此我們選擇採用app route對我們來說毫無疑問。
 
 ## 1 [Server side component](https://nextjs.org/docs/getting-started/react-essentials)
 
-### 1.1 App folder 下的，預設都是 server side component 
-By default, all components on NextJS 13 inside the App folder are server components. And Server Components cannot use client features such as useState, useEffect, etc.
+### 1.1 App folder 下的元件或頁面，預設都是 server side component 
+* By default, all components on NextJS 13 inside the App folder are server components. And Server Components cannot use client features such as useState, useEffect, etc.
 
-For now, to use third-party components the solution is to create a wrapper for each client component that doesn't include the directive 'use client':
+* For now, to use third-party components the solution is to create a wrapper for each client component that doesn't include the directive 'use client':
 
 ### 1.2 Server side component 好處
 Server Components的運作方式是在伺服器上進行渲染，從而只傳遞需要的JS Bundle程式碼至用戶端瀏覽器，不必要的js則不會被下載，這個特性能有效地減少網路傳輸量，提高效能和速度。
@@ -112,7 +112,7 @@ export async function generateMetadata(
 export default function Page({ params, searchParams }: Props) {}
 ```
 
-## 4 套件受到的影響
+## 4 昇級後受到影響的套件
 ### 4.1 i18n 套件 ( 推薦 )
 剛昇級完後就會發現相關的 i18n 套件無法使用，新版 useRouter 也不提供 locale 可以使用，試了好幾個 i18n 套件，發現這個套件最好用
 
