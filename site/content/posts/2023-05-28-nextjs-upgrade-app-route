@@ -9,7 +9,7 @@ description : NEXTJS 13 昇級筆記
 author : Mark Ku
 slug: nextjs-upgrade-app-route
 ---
-
+# NEXTJS 13.3.4 踩坑筆記，server side compoent 時代來臨 - migrate page route to app route 
 ##  前言
 為了重寫我們的德國電商網站，我進行了深入評估，並決定採用 Next js 的最新穩定版本，Next 13.4.3，這個版本的 SEO meta api和server side component功能具有極高的吸引力，且加上未來許多的功能都將以app route為主要實作方向，因此我們選擇採用app route對我們來說毫無疑問。
 
