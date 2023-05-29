@@ -50,6 +50,7 @@ const { locale } = useRouter();
 | -------- | -------- | -------- |
 | /     | /page/index.tsx     | /app/page.tsx     |
 | /about-us     | /page/about-us.tsx     | /app/about-us/page.tsx     |
+P.S. 附錄有寫了一個Powershell 快速將 page folder 遷移到 app folder 
 
 ## 2.3 要資料的方式調整
 新的寫法並不透過 getStaticProps、getServerSideProp 去要資料
@@ -136,3 +137,26 @@ const locale = useLocale();
 無可否認，Next js 的更新速度令人驚訝，經常在我醒來之後就有了新的穩定版本，每次改版都會有點小陣痛，但大概都花個一至兩天就能昇級，也保留舊的寫法。  
 
 app route 改動的幅度有點大，且有點痛，但 app route出現，正式掀開 server side component 的序幕。
+
+## 附錄 - 寫了一個 powershell  快速將 page folder 搬到 app folder 
+```
+# Get a reference to all tsx files in the src\pages directory.
+$files = Get-ChildItem -Path "src\pages" -Filter "*.tsx"
+
+# For each file, create a new directory in src\app with the same name as the file (without extension),
+# move the file to the new directory, rename it to page.tsx, and prepend 'use client;' to it.
+foreach ($file in $files) {
+    # Create new directory.
+    $newDir = New-Item -Path "src\app\$($file.BaseName)\" -ItemType Directory
+
+    # Move and rename the file.
+    $newFile = Move-Item -Path $file.FullName -Destination "$($newDir.FullName)\page.tsx" -PassThru
+
+    # Add 'use client;' to the beginning of the file.
+    $content = Get-Content -Path $newFile.FullName
+    $newContent = 'use client;' + "`n" + $content
+    Set-Content -Path $newFile.FullName -Value $newContent
+}
+
+pause
+```
