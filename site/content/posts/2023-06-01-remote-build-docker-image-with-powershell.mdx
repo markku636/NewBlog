@@ -1,0 +1,83 @@
+---
+featured: true
+title: Windows Docker Desktop 用Powershell 遠端建置及佈署容器
+date:  2023-06-01 01:01:01 +0800
+thumbnail: powershell.png
+category:  PowerShell
+tags: ['powershell','redis','docker','remote build']
+description : Windows Docker Desktop 用Powershell 遠端建置及佈署容器
+author : Mark Ku
+slug: remote-build-docker-image-with-powershell
+---
+# Windows Docker Desktop 用Powershell 遠端建置及佈署容器
+## 前言
+由於台灣公司缺乏專職的網絡管理人員，開發人員才幾個人，暫時不希望負責維護一個Jenkins系統，且為了避免上傳和下載所需的時間，我也不想搭建一個Docker倉庫。因此，我現在花了些時間研究如何在 Windows Docker Desktop 遠端建置及管理。
+
+## 架構
+首先，我們在兩台電腦上都安裝了Docker Desktop，開發人員在他們自己的Windows電腦上，透過PowerShell 點擊觸發遠端開發Docker命令，達成遠建立Docker容器。
+
+## 開啟Docker Desktop > 設定 > 勾選 "expose daemon on tcp://localhost:2375 without TLS remote build"
+![](https://i.imgur.com/5pkjVit.png)
+
+## 用 powershell 開啟 2665 port
+```
+netsh interface portproxy add v4tov4 listenport=2375 listenaddress=0.0.0.0 connectaddress=127.0.0.1 connectport=2375
+```
+# 開啟防火牆 2367 port
+```
+New-NetFirewallRule -DisplayName "Allow Port 2375" -Direction Inbound -Protocol TCP -LocalPort 2375 -Action Allow
+```
+
+## 測試
+```
+docker -H 192.168.0.88:2375 version
+```
+![](https://i.imgur.com/2kT4EHq.png)
+
+# 遠端佈署的腳本
+
+```
+$tag=":latest"
+$imageShortName="de-next-ap"
+$imageName = $imageShortName + $tag
+$containerName = $imageShortName + "-1"
+$containerUrl = "192.168.0.88:2375"
+$dockerfile = "./Dockerfile"
+$port="30000:80"
+
+# 遠端停用容器
+docker  -H="$containerUrl" ps -a -f ancestor=$containerName --no-trunc -q | foreach-object { docker  -H="$containerUrl" stop $_ }
+docker  -H="$containerUrl" ps -a -f name=$containerName --no-trunc -q | foreach-object { docker  -H="$containerUrl" stop $_ }
+
+# 遠端移除容器
+docker -H="$containerUrl" ps -a -f ancestor=$containerName* --no-trunc -q | foreach-object { docker  -H="$containerUrl" rm -f $_ }
+docker -H="$containerUrl" ps -a -f name=$containerName* --no-trunc -q | foreach-object { docker  -H="$containerUrl" rm -f $_ }
+
+# 遠端移除映像檔
+
+ $existingImages = docker  -H="$containerUrl" images $imageName
+ If ($existingImages.count -gt 1) {
+ write-host "[Removing image]Removing the existing image.."
+ docker  -H="$containerUrl" rmi -f $imageName
+ } else {
+ write-host "[Removing image]The image does not exist"
+ }
+
+# # # 遠端建置映像檔 (nas 比本機電腦慢，這個就不建議了)
+docker  -H="$containerUrl" build -t $imageName . -f $dockerfile
+
+# # 建立及啟動容器應用
+docker  -H="$containerUrl" run -d --name $containerName --restart=always -p $port $imageShortName
+
+pause
+```
+
+P.S. 如果無法 push ，docker engine 兩台記得加上這段
+```
+ "insecure-registries": [
+    "192.168.0.88:2365"
+  ]
+```
+## 參考
+
+[連結](https://yfxie.com/build-docker-image-on-remote-windows-host/)
