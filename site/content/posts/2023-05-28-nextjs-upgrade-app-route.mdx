@@ -138,7 +138,8 @@ const locale = useLocale();
 
 app route 改動的幅度有點大，且有點痛，但 app route出現，正式掀開 server side component 的序幕。
 
-## 附錄 - 寫了一個 powershell  快速將 page folder 搬到 app folder 
+## 附錄 - 一些快速昇級的 powershell
+###  1.寫了一個 powershell  快速將 page folder 搬到 app folder 
 ```
 # Get a reference to all tsx files in the src\pages directory.
 $files = Get-ChildItem -Path "src\pages" -Filter "*.tsx"
@@ -159,4 +160,52 @@ foreach ($file in $files) {
 }
 
 pause
+```
+
+### 2.用 powershell 快速將元件轉成 client side 元件的  
+```
+# Get a reference to all tsx files in the src\pages directory.
+$files = Get-ChildItem -Path "src\pages" -Filter "*.tsx"
+
+# For each file, create a new directory in src\app with the same name as the file (without extension),
+# move the file to the new directory, rename it to page.tsx, and prepend 'use client;' to it.
+foreach ($file in $files) {
+    # Create new directory.
+    $newDir = New-Item -Path "src\app\$($file.BaseName)\" -ItemType Directory
+
+    # Move and rename the file.
+    $newFile = Move-Item -Path $file.FullName -Destination "$($newDir.FullName)\page.tsx" -PassThru
+
+    # Add 'use client;' to the beginning of the file.
+    $content = Get-Content -Path $newFile.FullName
+    $newContent = 'use client;' + "`n" + $content
+    Set-Content -Path $newFile.FullName -Value $newContent
+}
+
+pause
+```
+
+### 3. 用Powershell 遍歷資料夾下的Json 合併成在一個新的 JSON 檔案
+```
+# 初始化空的 Hashtable
+$combinedJson = @{}
+
+# 指定資料夾路徑
+$folderPath = 'C:\path\to\json\files'
+
+# 尋找所有 .json 檔案
+Get-ChildItem -Path $folderPath -Filter *.json | ForEach-Object {
+    # 獲取檔案名稱並移除 .json 副檔名
+    $propertyName = $_.BaseName
+
+    # 讀取 JSON 檔案內容
+    $content = Get-Content $_.FullName | ConvertFrom-Json
+
+    # 將 JSON 內容加入到 combinedJson 中，使用檔案名稱作為屬性
+    $combinedJson[$propertyName] = $content
+}
+
+# 將合併的 JSON 轉換為字符串並寫入到一個新的 JSON 檔案
+$combinedJson | ConvertTo-Json | Set-Content -Path "$folderPath\combined.json"
+
 ```
