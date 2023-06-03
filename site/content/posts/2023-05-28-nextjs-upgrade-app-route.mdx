@@ -43,14 +43,43 @@ import { useRouter, useParams, usePathname ,useSearchParams } from 'next/navigat
 const { locale } = useRouter(); 
 ```
 
-## 2.2 路由及資料夾結構
+## 2.2 路由
+### 2.2.1 資料夾結構
 這種改動的方式，更直觀從資料夾結構了解是頁面還是元件。
 
 | Url | Page route| App route |
 | -------- | -------- | -------- |
 | /     | /page/index.tsx     | /app/page.tsx     |
 | /about-us     | /page/about-us.tsx     | /app/about-us/page.tsx     |
+
 P.S. 附錄有寫了一個Powershell 快速將 page folder 遷移到 app folder 
+
+### 2.2.2 [api 路由](https://nextjs.org/docs/app/building-your-application/routing/router-handlers)
+
+| Page  | Route 2 | Result 3 |
+| -------- | -------- | -------- |
+| app/page.js     | app/route.js     | Conflict     |
+| app/page.js     | app/api/route.js     | Valid     |
+| app/[user]/page.js     | app/api/route.js     | Valid     |
+
+```
+app/products/api/route.ts
+import { NextResponse } from 'next/server';
+ 
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
+  const res = await fetch(`https://data.mongodb-api.com/product/${id}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'API-Key': process.env.DATA_API_KEY,
+    },
+  });
+  const product = await res.json();
+ 
+  return NextResponse.json({ product });
+}
+``` 
 
 ## 2.3 Data Fetching 方式調整
 ### 2.3.1 新的寫法並不透過 getStaticProps、getServerSideProp 去要資料
@@ -73,7 +102,7 @@ use(getData(id))
 ### 2.3.3 server side 改寫了元生的 fetch api ，並預設有cache 機制，且官方並不建議包裝fetch 在client component 
 ### 2.3.4 revalidate  
 SSG：頁面預設就是 SSG  
-SSR：在伺服器端元件宣告為非同步元件，且數據請求關閉緩存，在fetch請求參數中的cache欄位設置為 no-store、no-cache 或者設置revalidate 為 0 的時候，才會是動態服務端渲染。  
+SSR：在元件宣告為非同步，且請求時必須關閉緩存，並在請求參數中的cache欄位設置為 no-store、no-cache 或者設置revalidate 為 0 的時候，才會是動態服務端渲染。  
 CSR：在使用 "use client" 的客戶端元件中，在Use Effect 後請用的渲染的元件  
 ISR：在 fetch 請求中設置 revalidate，或者在 page.tsx 宣告  revalidate。
 ```
