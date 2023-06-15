@@ -27,7 +27,6 @@ $slaveRedisIp = 192.168.0.39  // taiwan redis
 slaveRedisPort = 6400
 
 $Logfile = "D:\Logs\proc_$env:computername.log"
-$sleepSecond = 900
 
 function WriteLog
 {
@@ -40,8 +39,18 @@ Add-content $LogFile -value $LogMessage
 WriteLog "The script is run"
 docker exec -u 0 -it f08e2fc8c5a4 redis-cli -h $slaveRedisIp -p $slaveRedisPort slaveof $masterRedisIp $masterRedisPort
 
-Write-Host "wait $sleepSecond sec"
-Start-Sleep -Seconds $sleepSecond
+# Initial state
+$syncCompleted = $false
+
+# Monitor the replication status
+while($syncCompleted -eq $false){
+    Write-Host "Waiting for replication sync..."
+    Start-Sleep -Seconds 10
+    $replicaSyncStatus = docker exec -u 0 -it $containerId redis-cli -h $localRedis -p $localPort info replication | Select-String -Pattern "master_sync_in_progress:0"
+    if($null -ne $replicaSyncStatus){
+        $syncCompleted = $true
+    }
+}
 
 docker exec -u 0 -it f08e2fc8c5a4 redis-cli -h $slaveRedisIp -p $laveRedisPort slaveof no one
 WriteLog "The script is successfully executed"
