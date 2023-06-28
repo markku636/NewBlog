@@ -1,0 +1,37 @@
+---
+featured: true
+title:  Reduce the risk of manual deployment using powershell and beyondcompare
+date:   2023-06-28 01:01:35 +0800
+thumbnail:  chocolatey.png
+category:  PowerShell
+tags:   ['powershell','manual deployment','binary compare']
+description : Reduce the risk of manual deployment using powershell and beyondcompare
+author : Mark Ku
+slug: reduce-the-risk-of-manual-deployment-using-powershell-and-beyondcompare
+---
+## Purpose
+To reduce the time spent and human error on manual deployment, the deployment method for the C# API has been changed.
+
+Firstly, all deployment DLLs must be committed to USApiArtifact, which can be accessed by navigating to the Publish folder at https://github.com/iBuypowerUS/USApiArtifact.
+
+Next, connect remotely to 192.168.20.150 and right-click deploy-us-api.ps1 on the desktop and select "Run with PowerShell". This will pull down the latest DLLs.
+
+Select the DLLs to be deployed, and then manually click "Copy to Side " folder as shown in the image below.
+
+## Create ApiArtifact repo and git clone in deploy server ( And always upload all )
+(https://i.imgur.com/tFZbusd.png)
+
+## create powershell file ( compare-deploy-binaray.ps1  ) 
+```
+git pull 
+
+$LOCAL = "C:\Workspace\ApiArtifact\bin"
+$REMOTE = "C:\inetpub\Web\bin"
+
+$env:Path = "C:\Program Files\Beyond Compare 4\" 
+$filters = "/filters=-web.config"
+BCompare.exe /excludefilter="web.config"  "$LOCAL" "$REMOTE" $filters
+
+```
+## Result 
+![](https://i.imgur.com/nYxr2an.png)
