@@ -11,7 +11,7 @@ slug: remote-build-docker-image-with-powershell
 ---
 # Windows Docker Desktop 用Powershell 遠端建置及佈署容器
 ## 前言
-由於台灣公司缺乏專職的網絡管理人員，開發人員才幾個人，暫時不希望負責維護一個Jenkins系統，且為了避免上傳和下載所需的時間，我也不想搭建一個Docker倉庫。因此，我現在花了些時間研究如何在 Windows Docker Desktop 遠端建置及管理。
+由於台灣公司缺乏專職的網絡管理人員，開發環境資源並不是這麼充足，同時也不希望負責維護一個Jenkins系統，且為了避免上傳和下載所需的時間，我也不想搭建一個Docker倉庫。因此，我現在花了些時間研究如何在 Windows Docker Desktop 遠端建置及管理。
 
 ## 架構
 首先，我們在兩台電腦上都安裝了Docker Desktop，開發人員在他們自己的Windows電腦上，透過PowerShell 點擊觸發遠端開發Docker命令，達成遠建立Docker容器。
