@@ -44,7 +44,7 @@ docker run -d -p 8080:8080  -p 50000:50000 -v ${workspacePath}:/var/jenkins_home
 * Office 365 ConnectorVersion
 * PowerShell 
 
-## 因為我比較熟 docker 指令，用以下指令在 Jenkins 容器安裝 Docker 
+## 因為我比較熟 docker 指令，用以下指令在 Jenkins 容器中安裝 Docker 
 ```
 docker exec -it -uroot jenkins bash
 apt-get update && apt-get -y install apt-transport-https ca-certificates curl gnupg2 software-properties-common && curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg > /tmp/dkey; apt-key add /tmp/dkey && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable" && apt-get update && apt-get -y install docker-ce
