@@ -159,3 +159,41 @@ npm install -D jest jest-playwright-preset playwright
 ## 參考資料
 * [如何远程触发 GitHub Action](https://www.chenshaowen.com/blog/how-to-trigger-github-action-remotely.html)
 * [MS Teams Message Card](https://github.com/marketplace/actions/ms-teams-message-card)
+
+## Github Action 上線後覺得太慢了，後來搬到自己家的 jenkins pipeline 中運行
+```
+properties([pipelineTriggers([githubPush()])])
+
+pipeline {
+	agent any
+
+	environment {
+		registry = "192.168.20.99:5000/next-ibuypower"
+		registryCredential = "dockerhub"
+		authorizationToken = "fcxULFWbvOoqXPKGLd8LuZJBKnQFqmhioELzCJVc"
+		
+		
+	}
+
+	tools {nodejs "Node Core"}
+	
+	options {
+		buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '20', daysToKeepStr: '', numToKeepStr: '20')
+	}
+
+	stages {
+		stage("GitHub Pull") {
+			steps {
+				git branch: "main", url: "https://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@github.com/iBuypowerUS/iBuypower.UI.Test.git"
+			}
+		}	
+
+		stage("Testing") {
+			steps {
+				bat "npm install"
+				bat "npm run testCase"
+			}
+		}	
+	}
+}
+```
