@@ -15,9 +15,9 @@ slug: docker-jenkins-build-docker-image-and-github-integration
 ## 開發環境說明
 預期開發者 Commit Code 後，自動將 Github Repo 拉下來，並自動建置，最後佈署到最終的 Windows Docker Desktop 主機。
 
-## 建立 Jenkins 環境
+## 首先，建立 Jenkins 環境
 
-### 首先開啟 Powershell ，建立資料夾作為 Jenkins 的工作目錄
+### 開啟 Powershell ，建立資料夾作為 Jenkins 的工作目錄
 ```
 $workspacePath = "C:\jenkins_workspace"
 New-Item -ItemType Directory -Path $workspacePath -Force | Out-Null
