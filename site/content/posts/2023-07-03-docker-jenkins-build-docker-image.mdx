@@ -5,12 +5,12 @@ date:   2023-07-03 01:01:35 +0800
 thumbnail:  jenkins.png
 category:  DevOps 
 tags:   ['jenkins','docker image build','Docker Desktop','github ssh']
-description : Docker Jenkin + github SSH 憑證 + Build Docker Image 整合筆記
+description : Docker Jenkins + github SSH 憑證 + Build Docker Image 整合筆記
 author : Mark Ku
 slug: docker-jenkins-build-docker-image-and-github-integration
 ---
 ## 目的
-先前用 [Powershell 遠端建置測試機的 DockerDesktop](https://blog.markkulab.net/remote-build-docker-image-with-powershell/)，開發人員一多後，發現太麻煩了，最後還是弄了Jenkin，並整合 Github 憑證及遠端佈署 DockerDesktop
+先前用 [Powershell 遠端建置測試機的 DockerDesktop](https://blog.markkulab.net/remote-build-docker-image-with-powershell/)，開發人員一多後，發現太麻煩了，最後還是弄了Jenkins，並整合 Github 憑證及遠端佈署 DockerDesktop
 
 ## 開發環境說明
 預期開發者 Commit Code 後，自動將 Github Repo 拉下來，並自動建置，最後佈署到最終的 Windows Docker Desktop 主機。
