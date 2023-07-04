@@ -185,6 +185,6 @@ cat /var/jenkins_home/secrets/initialAdminPassword
 ```
 ### 複製出備份檔及還原
 ```
-docker cp 4fb47c3911c283867cf6058e965f675497711f2b7a1ee011b16c8306ea0ebe4c:/var/jenkins_home/jenkins-backup d:\\jenkins-backup
-docker cp 4fb47c3911c283867cf6058e965f675497711f2b7a1ee011b16c8306ea0ebe4c:d:\\jenkins-backup /var/jenkins_home/jenkins-backup 
+docker cp jenkins:/var/jenkins_home/jenkins-backup/. d:\\jenkins-backup
+docker cp jenkins:d:\\jenkins-backup /var/jenkins_home/jenkins-backup 
 ```
