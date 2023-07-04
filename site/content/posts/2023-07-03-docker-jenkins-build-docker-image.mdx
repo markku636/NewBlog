@@ -13,7 +13,7 @@ slug: docker-jenkins-build-docker-image-and-github-integration
 先前用 [Powershell 遠端建置測試機的 DockerDesktop](https://blog.markkulab.net/remote-build-docker-image-with-powershell/)，開發人員一多後，發現太麻煩了，最後還是弄了Jenkins，並整合 Github 憑證及遠端佈署 DockerDesktop
 
 ## 開發環境說明
-預期開發者 Commit Code 後，自動將 Github Repo 拉下來，並自動建置，最後佈署到最終的 Windows Docker Desktop 主機。
+預期開發者 Commit Code 後，自動將 Github Repo 拉下來，並自動建置，最後直接佈署到最終的 Windows Docker Desktop 主機。
 
 ## 首先，建立 Jenkins 環境
 
@@ -45,7 +45,7 @@ docker run -d -p 8080:8080  -p 50000:50000 -v ${workspacePath}:/var/jenkins_home
 * PowerShell
 * ThinBackup
 
-## 因為我比較熟 docker 指令，用以下指令在 Jenkins 容器中安裝 Docker 
+## 因為我比較熟 docker 指令，所以在 Jenkins 容器中安裝 Docker 
 ```
 docker exec -it -uroot jenkins bash
 apt-get update && apt-get -y install apt-transport-https ca-certificates curl gnupg2 software-properties-common && curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg > /tmp/dkey; apt-key add /tmp/dkey && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable" && apt-get update && apt-get -y install docker-ce
