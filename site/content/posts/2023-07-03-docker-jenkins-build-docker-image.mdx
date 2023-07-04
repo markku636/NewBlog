@@ -170,6 +170,14 @@ pipeline {
 }
 
 ```
+## 最後，我們要設定當 Gihtub Commit Push 時 trigger 建置
+
+### 將你的 Jenkins 透過 Cloudflare Tunnel 當反向代理工具，讓Github Push 可以訪問
+ ## 至 Github 的 Setting 設定 Webhook 
+ ```
+ https://{your-domain}/github-webhook/
+ ```
+![](https://i.imgur.com/J7rqy4H.png)
 
 ### 設定這麼久，終於大功告成，自從有了容器化，建置開發環境，越來越簡單及方便遷移。
 ![](https://i.imgur.com/WaHng5f.png)
