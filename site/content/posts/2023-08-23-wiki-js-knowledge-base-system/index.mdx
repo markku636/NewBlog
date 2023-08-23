@@ -1,0 +1,64 @@
+---
+featured: true
+title:  一個開源的知識庫軟體 Wiki.JS - 解決團隊知識共享問題
+date:   2023-03-12 01:01:35 +0800
+thumbnail:  wiki-js.png
+category:  Agile-developmen
+tags:   ['wiki.js','knowledge base system']
+description : 一個開源的知識庫軟體 Wiki.JS - 解決團隊知識共享問題
+author : Mark Ku
+slug: wiki-js-knowledge-base-system
+---
+## 解決問題
+原本想解決部門內資料共用知識，但其他部門有這個需求，因此從公司面思考知識共享的議題，原本的 OneNote 也被很多工程師，反應不太好用，我自己也覺得，因此想看看有沒有其他的解決方案。
+
+## 費用
+Wiki.Js 支援多人共同維護，不需額外費用，開源程式碼，且免費，並支援 Docker 佈署
+
+![](1.png)
+## 有那些公司在使用
+![](https://hackmd.io/_uploads/B1zFKlXan.png)
+
+## 完整的生態
+![](2.png)
+
+## 功能特點
+
+### 文件中可以顯示流程圖
+![](3.png)
+
+### 文件可以留言
+![](4.png)
+
+### 編輯模式，很像 hack md ，支援多種 editor ，甚至可以插入流程圖，點擊兩下可就可以直接編輯，但儲存要在右上角按 save。
+
+![](5.png)
+
+![](6.png)
+
+![](7.png)
+
+### 整合社群登入整合，同時能支援公司的 teams 帳號
+![](8.png)
+
+### 支援群組權限訪問，並設定登入 url
+![](9.png)
+
+### 並可以針對群組，更動態的存取限制
+![](10.png)
+
+### 支援各種流量分析及熱圖分析工具 hotjar
+![](11.png)
+
+### 支援多語系，富豐的後台功能
+![](12.png)
+
+### 擴充性
+open souce 前端用的是 vue  +node js 所撰寫 ，db 用的是 My sql  因此有機會可以客製，本身也也很多 plugin
+https://js.wiki/modules
+![](13.png)
+
+### Docker + Mysql 指令
+```
+docker run -d -p 8080:3000 --name wiki --restart unless-stopped -e "DB_TYPE=mariadb " -e "DB_HOST=192.168.0.106" -e "DB_PORT=33066" -e "DB_USER=wiki" -e "DB_PASS=6U3WApD9" -e "DB_NAME=wiki" ghcr.io/requarks/wiki:2
+```
