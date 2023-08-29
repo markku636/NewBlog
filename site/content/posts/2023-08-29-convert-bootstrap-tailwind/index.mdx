@@ -21,7 +21,7 @@ slug: convert-bootstrap-tailwind
 * ChatGPT Plus
 * 同時也參考 node_module 資料夾下 Boostrap 原始碼
 
-## 撰寫一個 powershell 腳本名為 convert-boostrap-to-tailwindcss.ps1，用於批量修改 Bootstrap
+## 撰寫一個 Powershell 腳本，檔案名為 convert-boostrap-to-tailwindcss.ps1，用於批量修改 Bootstrap CSS Class 
 ```
 # 設定搜尋的目錄路徑
 $directoryPath = "E:\VisualStudioProject\Apps\NextJS"
@@ -140,6 +140,7 @@ $replacements = @{
     'col-xl-6' = 'xl:w-1/2'
     'col-xl-2' = 'xl:w-1/6'
     'col-sm-offset-1' = 'sm:ml-1/12'
+	// 依據你們專案用到的，可以自己增加... 
 }
 
 Set-Location -Path $directoryPath
