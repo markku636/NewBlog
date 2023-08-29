@@ -15,12 +15,6 @@ slug: convert-bootstrap-tailwind
 
 同時因為頁面太多了，如果將每每頁的網格佈局，重構成 Tailwind Grid 的排版方式，可能需要耗費相當多的時間，改壞的風險也提高，因此重構頁面拆分到下個階段執行。
 
-## 為何選擇 Tailwind 框架
-* 在 React 中利用 Styled componet切版，是一件極其痛苦的事，且效率很差，不在同個檔案中開發，且不好管理 style 
-* 與 Bootstrap 的定義式元件不同，Tailwind 提供了一種更直觀的方式來建立自定義的設計。
-* 在更多種尺寸大小的裝置，透過 selector 讓程式碼，更容易維護。
-* Tailwind 也使用 PurgeCSS 來移除生產環境中未使用的CSS，從而得到一個更小的檔案。
-
 ## 此次轉換Tailwind所用到的工具
 * [Bootstrap to Tailwind Online Tool](https://tools.bitfertig.de/bootstrap2tailwind/)
 * [CSS to Tailwind Online Tool](https://transform.tools/css-to-tailwind)
