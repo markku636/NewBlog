@@ -154,7 +154,11 @@ npx playwright codegen www.ibuypower.com --output ./tests/ibuypower.spec.ts
 ## 補充
 如果無法在 vscode 中使用 jest 偵錯測試檔，請執行以下指令
 ```
+npm i -D @playwright/test
+npx playwright install
 npm install -D jest jest-playwright-preset playwright
+code --install-extension Orta.vscode-jest
+code --install-extension ms-playwright.playwright
 ```
 ## 參考資料
 * [如何远程触发 GitHub Action](https://www.chenshaowen.com/blog/how-to-trigger-github-action-remotely.html)
@@ -167,12 +171,7 @@ properties([pipelineTriggers([githubPush()])])
 pipeline {
 	agent any
 
-	environment {
-		registry = "192.168.20.99:5000/next-ibuypower"
-		registryCredential = "dockerhub"
-		authorizationToken = "fcxULFWbvOoqXPKGLd8LuZJBKnQFqmhioELzCJVc"
-		
-		
+	environment {			
 	}
 
 	tools {nodejs "Node Core"}
@@ -184,7 +183,7 @@ pipeline {
 	stages {
 		stage("GitHub Pull") {
 			steps {
-				git branch: "main", url: "https://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@github.com/iBuypowerUS/iBuypower.UI.Test.git"
+				git branch: "main", url: "https://xxxxxxx@github.com/iBuypowerUS/iBuypower.UI.Test.git"
 			}
 		}	
 
@@ -193,7 +192,22 @@ pipeline {
 				bat "npm install"
 				bat "npm run testCase"
 			}
-		}	
-	}
+		}
+		stage('Make report') {
+                steps {             
+                publishHTML([
+                    alwaysLinkToLastBuild: true,
+                    allowMissing: false,
+                    keepAll: true,
+                    reportDir: 'playwright-report',
+                    reportFiles: 'index.html',
+                    reportName: 'HTML Report',
+                    reportTitles: 'HTML Report'
+                    ])
+     	       }
+    }
+}
 }
 ```
+P.S. Jenkins 顯示報表需要安裝 HTML Publisher plugin，若報表的 html 顯示不出內容則需要在 Jenkins Script Console 執行 System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "")"
+
