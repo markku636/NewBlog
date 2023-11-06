@@ -23,7 +23,7 @@ slug: remote-build-docker-image-with-powershell
 ```
 netsh interface portproxy add v4tov4 listenport=2375 listenaddress=0.0.0.0 connectaddress=127.0.0.1 connectport=2375
 ```
-# 開啟防火牆 2367 port
+# 開啟防火牆 2375 port
 ```
 New-NetFirewallRule -DisplayName "Allow Port 2375" -Direction Inbound -Protocol TCP -LocalPort 2375 -Action Allow
 ```
