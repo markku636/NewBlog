@@ -56,7 +56,17 @@ apt-get update && apt-get -y install apt-transport-https ca-certificates curl gn
 docker exec -it -uroot jenkins bash
 ```
 
-### 產生ssh key，一直按 Enter 就好
+### 安裝 docker 
+```
+apt-get update
+apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
+curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+echo "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list
+apt-get update
+apt-get install -y docker-ce-cli
+```
+
+### 接著，產生ssh key，一直按 Enter 就好
 ```
 ssh-keygen -t rsa -C "root" 
 ```
@@ -180,4 +190,26 @@ pipeline {
 ## 備忘錄 - 找回 admin 初始密碼
 ```
 cat /var/jenkins_home/secrets/initialAdminPassword
+```
+
+## 常用套件
+
+```
+```
+docker 
+Build User Vars 
+Build Monitor View 
+Build Environment Plugin
+ThinBackup
+build-failure-analyzer
+log-parser-plugin
+SSH
+Publish Over SSH
+Msbuild
+.NET SDK Support
+DOCKER
+Office 365 ConnectorVersion
+PowerShell
+jenkins container 安裝 docker d
+```
 ```
