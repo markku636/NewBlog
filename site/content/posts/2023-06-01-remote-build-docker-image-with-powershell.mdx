@@ -19,18 +19,18 @@ slug: remote-build-docker-image-with-powershell
 ## 開啟Docker Desktop > 設定 > 勾選 "expose daemon on tcp://localhost:2375 without TLS remote build"
 ![](https://i.imgur.com/5pkjVit.png)
 
-## 用 powershell 開啟 2665 port
+## 用 powershell 開啟 2376 port
 ```
-netsh interface portproxy add v4tov4 listenport=2375 listenaddress=0.0.0.0 connectaddress=127.0.0.1 connectport=2375
+netsh interface portproxy add v4tov4 listenport=2376 listenaddress=0.0.0.0 connectaddress=127.0.0.1 connectport=2375
 ```
 # 開啟防火牆 2375 port
 ```
-New-NetFirewallRule -DisplayName "Allow Port 2375" -Direction Inbound -Protocol TCP -LocalPort 2375 -Action Allow
+New-NetFirewallRule -DisplayName "Allow Port 2376" -Direction Inbound -Protocol TCP -LocalPort 2376 -Action Allow
 ```
 
 ## 測試
 ```
-docker -H 192.168.0.88:2375 version
+docker -H 192.168.0.88:2376 version
 ```
 ![](https://i.imgur.com/2kT4EHq.png)
 
@@ -41,7 +41,7 @@ $tag=":latest"
 $imageShortName="de-next-ap"
 $imageName = $imageShortName + $tag
 $containerName = $imageShortName + "-1"
-$containerUrl = "192.168.0.88:2375"
+$containerUrl = "192.168.0.88:2376"
 $dockerfile = "./Dockerfile"
 $port="30000:80"
 
@@ -75,7 +75,7 @@ pause
 P.S. 如果無法 push ，docker engine 兩台記得加上這段
 ```
  "insecure-registries": [
-    "192.168.0.88:2365"
+    "192.168.0.88:2376"
   ]
 ```
 ## 參考
