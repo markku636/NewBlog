@@ -1,0 +1,99 @@
+---
+featured: true
+title: powerhsell-backup-and-mysql-contrainer
+date:  2022-11-19 01:01:01 +0800
+thumbnail: powershell.png
+category:  PowerShell
+tags: ['backup','restore','MariaDB','mysql']
+description : 使用powershell 備份及還原 docker 容器
+author : Mark Ku
+slug: powerhsell-backup-and-restore-docker
+---
+## 解決問題
+企業越來越多開源服務，headless 、wordpress，損毀資料要補就很困難，很多都是 Mysql ，寫了個腳本搭配 Windows 排程備份，並將其備份至 One Drive。
+
+## 撰寫備份 Powershell腳本 - backup-mysql-contrainer.ps1
+```
+# MariaDB資料庫備份腳本，帶有參數化的憑證
+
+# 數據帳密
+$dbUser = "your_username" # 用您的資料庫用戶名替換
+$dbPassword = "your_password" # 用您的資料庫密碼替換
+
+# 設置備份文件夾路徑
+$backupDir = "E:\mysql-backup\de-cms-maria-db"
+$containerName = "de-cms-maria-db"
+
+# 確保備份目錄存在
+if (-not (Test-Path -Path $backupDir)) {
+    New-Item -ItemType Directory -Path $backupDir
+}
+
+# 獲取當前日期
+$date = Get-Date -Format "yyyy-MM-dd"
+
+# 初始化流水號
+$serial = 1
+
+# 定義備份文件名
+do {
+    $serialPadded = "{0:D2}" -f $serial
+    $backupFileName = "$date-$serialPadded-db.dump"
+    $backupFilePath = Join-Path -Path $backupDir -ChildPath $backupFileName
+    $serial++
+} while (Test-Path -Path $backupFilePath)
+
+# 執行Docker命令以備份資料庫
+$dockerCommand = "docker exec $containerName /bin/bash -c ""mysqldump -u $dbUser -p$dbPassword --routines --triggers strapi"""
+Invoke-Expression "$dockerCommand > `"$backupFilePath`""
+
+# 刪除舊的備份，只保留最新的20個
+$allBackups = Get-ChildItem -Path $backupDir -Filter "*.dump" | Sort-Object LastWriteTime -Descending
+if ($allBackups.Count -gt 20) {
+    $backupsToDelete = $allBackups[20..($allBackups.Count-1)]
+    foreach ($backup in $backupsToDelete) {
+        Remove-Item $backup.FullName
+    }
+}
+
+robocopy C:\mysql-backup "C:\Users\Administrator\OneDrive - ABC Technology Corp\Database\mysql-backup\us-strapi-db" /MIR
+```
+
+## 撰寫資料庫還原 Powershell腳本 - restore-mysql-contrainer.ps1
+```
+
+# 資料庫憑證
+$dbUser = "your_username" # 用您實際的資料庫用戶名替換
+$dbPassword = "your_password" # 用您實際的資料庫密碼替換
+
+# 設置備份目錄路徑
+$backupDir = "E:\mysql-backup\de-cms-maria-db"
+$containerName = "de-cms-maria-db"
+
+# 確保備份目錄存在
+if (-not (Test-Path -Path $backupDir)) {
+    Write-Host "備份目錄不存在。退出腳本。"
+    exit
+}
+
+# 選擇要恢復的備份文件
+$allBackups = Get-ChildItem -Path $backupDir -Filter "*.dump" | Sort-Object LastWriteTime -Descending
+if ($allBackups.Count -eq 0) {
+    Write-Host "未找到備份文件。退出腳本。"
+    exit
+}
+
+# 可選操作，列出所有備份並讓用戶選擇一個
+Write-Host "可用的備份文件："
+$allBackups | ForEach-Object { Write-Host $_.Name }
+
+# 假設恢復最新的備份，但這可以修改
+$backupToRestore = $allBackups[0].FullName
+Write-Host "從此文件恢復：$backupToRestore"
+
+# 執行Docker命令以恢復資料庫
+$dockerCommand = "docker exec -i $containerName /bin/bash -c ""mysql -u $dbUser -p$dbPassword strapi"""
+Invoke-Expression "`"$dockerCommand`" < `"$backupToRestore`""
+
+Write-Host "資料庫恢復完成。"
+```
