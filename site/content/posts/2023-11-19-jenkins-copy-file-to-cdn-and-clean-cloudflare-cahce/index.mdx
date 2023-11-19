@@ -1,11 +1,11 @@
 ---
 featured: true
-title:  Jenkins pipline copy file to Content server & clean cloudflare cahce 
+title:  透過 Jenkins Pipeline 複製靜態檔案到內容伺服器，並清除 Cloudflare 快取
 date:   2023-11-19 01:01:35 +0800
 thumbnail:  jenkins.png
 category:  DevOps 
 tags:   ['jenkins','docker image build','Docker Desktop','github ssh']
-description : Docker Jenkins + github SSH 憑證 + Build Docker Image 整合筆記
+description : 透過 Jenkins Pipeline 複製靜態檔案到內容伺服器，並清除 Cloudflare 快取
 author : Mark Ku
 slug: docker-jenkins-build-docker-image-and-github-integration
 ---
@@ -28,8 +28,7 @@ pipeline {
     options {
         buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '20', daysToKeepStr: '', numToKeepStr: '20')
      
-        disableConcurrentBuilds()     
-    
+        disableConcurrentBuilds()    
     }
 
     stages {
