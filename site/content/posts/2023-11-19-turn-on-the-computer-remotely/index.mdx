@@ -1,6 +1,6 @@
 ---
 featured: true
-title:  在家遠端喚醒公司的電腦 ( Wake on lan )
+title:  在家將辨公室的電腦開機 ( Wake on lan )
 date:   2023-11-19 01:01:35 +0300
 thumbnail: turn-on-the-computer-remotely.png
 category: Infra
@@ -16,7 +16,7 @@ slug: turn-on-the-computer-remotely
 是透過台灣的一台不關機開的機器，並透過 Cloudflare tunnel 訪問 wol-go-web 容器去喚醒各位的電腦。
 
 ## 限制
-一定要插網路線，不允許走 WIFI
+一定要插網路線，不允許走 WIFI。
 
 ## 服務架設
 ### 建立 Wake on lan 容器服務（伺服器架設）　
@@ -45,7 +45,7 @@ https://wol.ec666.com => http://localhost:9090
 ## 接著，Advanced > APM Configuration > POWER ON BY PCI-E
 ![未命名](6.png)
 
-## 最後，依據這個url 換掉自己的 IP 和 mac  ，訪問 URL 就能遠端喚醒辨公室的電腦了。
+## 最後，依據這個URL 換掉自己的內網 IP 和 MAC網卡位置 參數，訪問 URL 就能遠端喚醒辨公室的電腦了。
 ```
 https://wol.ec666.com/wol?mac=58-11-22-B6-4A-60&ip=192.168.0.1
 ```
