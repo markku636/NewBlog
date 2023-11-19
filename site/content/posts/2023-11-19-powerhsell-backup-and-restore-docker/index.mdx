@@ -1,0 +1,90 @@
+---
+featured: true
+title: 使用powershell 備份及還原 docker 容器
+date:  2022-11-19 01:01:01 +0800
+thumbnail: powershell.png
+category:  PowerShell
+tags: ['backup','restore','docker']
+description : 使用powershell 備份及還原 docker 容器
+author : Mark Ku
+slug: powerhsell-backup-and-restore-docker
+---
+## 解決問題
+Windows docker 常常自動昇級完後就掛了，因此寫了個 Powerhsell 腳本，搭配windows 排程，定期備份 Docker 容器。
+
+## Backup shell script 
+```
+# 定義備份的路徑
+$backupPath = "C:\DockerBackup"
+if (-Not (Test-Path -Path $backupPath)) {
+    New-Item -ItemType Directory -Path $backupPath
+}
+
+# 獲取所有容器的ID
+
+$containerIds = docker ps -aq
+
+foreach ($id in $containerIds) {
+    # 獲取容器的名稱
+    $containerName = docker ps --filter "id=$id" --format "{{.Names}}"
+
+    # 為每個容器創建一個備份目錄
+    $containerBackupPath = Join-Path -Path $backupPath -ChildPath $containerName
+    if (-Not (Test-Path -Path $containerBackupPath)) {
+        New-Item -ItemType Directory -Path $containerBackupPath
+    }
+
+    # 備份容器的映像為tar文件
+    $image = docker container inspect $id --format "{{.Image}}"
+    $imageName = $image -replace '[:/]', '-'
+    $imageBackupPath = Join-Path -Path $containerBackupPath -ChildPath "$imageName.tar"
+    docker save -o $imageBackupPath $image
+    
+    # 備份容器的設定（JSON格式）
+    $configBackupPath = Join-Path -Path $containerBackupPath -ChildPath "config.json"
+    docker container inspect $id | Out-File -FilePath $configBackupPath
+}
+
+Write-Output "Backup Completed!"
+```
+
+## Restore shell script
+
+```
+# 定義備份的路徑
+$backupPath = "C:\DockerBackup"
+
+# 確認備份路徑是否存在
+if (-Not (Test-Path -Path $backupPath)) {
+    Write-Error "Backup path does not exist!"
+    exit
+}
+
+# 遍歷備份目錄中的每一個容器備份
+Get-ChildItem -Path $backupPath | ForEach-Object {
+    $containerBackupPath = $_.FullName
+
+    # 還原映像
+    $imageBackupPath = Get-ChildItem -Path $containerBackupPath -Filter "*.tar" | Select-Object -First 1
+    if ($null -eq $imageBackupPath) {
+        Write-Error "No image backup found for $($_.Name)!"
+        return
+    }
+    docker load -i $imageBackupPath.FullName
+
+    # 獲取備份的配置信息
+    $configBackupPath = Join-Path -Path $containerBackupPath -ChildPath "config.json"
+    if (-Not (Test-Path -Path $configBackupPath)) {
+        Write-Error "No config backup found for $($_.Name)!"
+        return
+    }
+    $config = Get-Content -Path $configBackupPath | ConvertFrom-Json
+    
+    # 創建新的容器使用還原的映像和配置
+    # 注意：這可能需要基於實際的配置和用例進行調整
+    docker run -d --name $config.Name $config.Image
+}
+
+Write-Output "Restore Completed!"
+
+```
