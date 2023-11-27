@@ -60,5 +60,5 @@ Wiki.JS 的前端使用 vue 和 node.js，資料庫使用 MySQL，具有高度�
 
 ### Docker + Mysql 指令
 ```
-docker run -d -p 8080:3000 --name wiki --restart unless-stopped -e "DB_TYPE=mariadb " -e "DB_HOST=192.168.0.106" -e "DB_PORT=33066" -e "DB_USER=wiki" -e "DB_PASS=6U3WApD9" -e "DB_NAME=wiki" ghcr.io/requarks/wiki:2
+docker run -d -p 8080:3000 --name wiki --restart unless-stopped -e "DB_TYPE=mariadb " -e "DB_HOST=192.168.0.106" -e "DB_PORT=33066" -e "DB_USER=wiki" -e "DB_PASS=password" -e "DB_NAME=wiki" ghcr.io/requarks/wiki:2
 ```
