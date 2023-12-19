@@ -1,0 +1,123 @@
+---
+featured: true
+title:  解決巢狀Hyper-V 架構，使用 Nginx 做https 埠轉發
+date:   2023-12-19 01:01:35 +0800
+thumbnail:  nginx.png
+category:  Infra
+tags:   ['nginx','docker']
+description : 解決巢狀Hyper-V 架構，使用 Nginx 做https 埠轉發
+author : Mark Ku
+slug: nginx-https-forwarding
+---
+## 時空背景
+因為一台電腦只有一個 Https (443) 埠，由於目前公司的架構是巢狀Hyper-V，每次需要新的服務都得開一個虛擬器 ( Virtual Machine )，這架構在擴展服務上，非常的沒有效率，且又浪費伺服器資源(CPU 、記憶體、硬碟、外部IP)，而如今這個時代，只要透過 Docker 就能輕鬆架起一個服務也不需要像過去安裝OS，設定很多的環境，才能佈署，因為短時間我們也暫時還無法走到k8s，先透過 Nginx 簡化這個佈署流程。
+
+## 效益
+* 伺服器利用率極大化，減少不必要的效能消耗。
+* 備份容易及佔用的容量更小。
+* 橫向擴展更容易。
+* 因為我們 DNS 託管於 Cloudfalre 己挷定的IP，增加新域名可以不用找網管人員再設定防火牆
+
+## 網路架構設計
+![網路架構圖](1.png)
+
+## 建立 nginx 容器所需的設定檔案
+![nginx 容器所需的設定檔案](2.png)
+
+
+### 首先，下載 Https 憑證
+因為我們將 DNS 託管於 Cloudfalre，因此可以免費使用 https ，可以從 Cloudfalre 後台[下載憑證](https://developers.cloudflare.com/ssl/client-certificates/create-a-client-certificate/)。
+
+### 接著，撰寫 dockerfile 
+
+```
+FROM nginx
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY upstream.conf /etc/nginx/conf.d/upstream.conf
+COPY ca.crt /etc/nginx/ca.crt
+COPY ca.key /etc/nginx/ca.key
+
+```
+
+### 再設定 nginx.config 
+```
+server {
+    # Listen HTTP
+    listen 80;
+    server_name cms.abc.com;
+
+    # Redirect HTTP to HTTPS
+    return 301 https://$host$request_uri;
+}
+
+server {
+    client_max_body_size 5M;
+    # Listen HTTPS
+    listen 443 ssl;
+    server_name cms.abc.com;
+
+    # SSL config
+    ssl_certificate /etc/nginx/ca.crt;
+    ssl_certificate_key /etc/nginx/ca.key;
+
+    # Proxy Config
+    location / {
+        proxy_pass http://192.168.0.220:27777;
+        proxy_http_version 1.1;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host $http_host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_pass_request_headers on;
+    }
+} 
+```
+
+### 設定負載平衡 ( 如果應用程式有多台才需要 ) upstream.conf 
+
+```
+upstream cms.abc.com {
+     server 192.168.0.99:27777;
+}
+```
+
+### 建立並執行 Powershell 建啟及啟動容器
+```
+$imageName = "certificate-centerlize-nginx"
+docker build -t $imageName . 
+$containerName="certificate-centerlize-nginx"
+$port80="80:80"
+$port443="443:443"
+docker run -d --name $containerName --restart=always -p "${port80}" -p "${port443}"  $imageName 
+PAUSE
+```
+## 不停機重載設定
+Nginx 強大的地方，就是config 或憑證變更，使用 nginx -s reload 命令重載 Nginx 配置時，通常不會導致服務中斷或訪問不到的情況，這個命令的設計目的就是為了讓配置的更改能夠在不中斷當前客戶端變更設定。
+
+```
+$containerName="certificate-centerlize-nginx"
+$localDir = "C:\Users\Administrator\Desktop\nginx - Copy"
+$nginxConfigPath = $localDir + "\nginx.conf"
+$nginxUpstreamConfig = $localDir + "\upstream.conf"
+
+docker cp "${nginxConfigPath}" "${containerName}:/etc/nginx/conf.d/default.conf"
+
+docker cp "${nginxUpstreamConfig}" "${containerName}:/etc/nginx/conf.d/upstream.conf"
+
+
+docker exec $containerName nginx -t // test config 
+docker exec $containerName nginx -s reload
+```
+![執行測試指令](3.png)
+
+
+## 參考資料
+[Nginx负载均衡配置](https://blog.csdn.net/xyang81/article/details/51702900)
+[五分钟看懂 Nginx 负载均衡](https://juejin.cn/post/6844904106541203464)
+
+
+
