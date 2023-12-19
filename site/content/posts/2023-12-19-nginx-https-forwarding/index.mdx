@@ -100,14 +100,13 @@ Nginx 強大的地方，就是config 或憑證變更，使用 nginx -s reload �
 
 ```
 $containerName="certificate-centerlize-nginx"
-$localDir = "C:\Users\Administrator\Desktop\nginx - Copy"
+$localDir = "C:\Users\Administrator\Desktop\nginx-setting"
 $nginxConfigPath = $localDir + "\nginx.conf"
 $nginxUpstreamConfig = $localDir + "\upstream.conf"
 
 docker cp "${nginxConfigPath}" "${containerName}:/etc/nginx/conf.d/default.conf"
 
 docker cp "${nginxUpstreamConfig}" "${containerName}:/etc/nginx/conf.d/upstream.conf"
-
 
 docker exec $containerName nginx -t // test config 
 docker exec $containerName nginx -s reload
