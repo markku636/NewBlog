@@ -16,7 +16,7 @@ slug: nginx-https-forwarding
 * 伺服器利用率極大化，減少不必要的效能消耗。
 * 備份容易及佔用的容量更小。
 * 橫向擴展更容易。
-* 因為我們 DNS 託管於 Cloudfalre 己挷定的IP，增加新域名可以不用找網管人員再設定防火牆
+* 因為我們 DNS 託管於 Cloudflare 己挷定的IP，增加新域名可以不用找網管人員再設定防火牆
 
 ## 網路架構設計
 ![網路架構圖](1.png)
@@ -26,7 +26,7 @@ slug: nginx-https-forwarding
 
 
 ### 首先，下載 Https 憑證
-因為我們將 DNS 託管於 Cloudfalre，因此可以免費使用 Https ，可以從 Cloudfalre 後台[下載憑證](https://developers.cloudflare.com/ssl/client-certificates/create-a-client-certificate/)。
+因為我們將 DNS 託管於 Cloudflare，因此可以免費使用 Https ，可以從 Cloudflare 後台[下載憑證](https://developers.cloudflare.com/ssl/client-certificates/create-a-client-certificate/)。
 
 ### 接著，撰寫 dockerfile 
 
