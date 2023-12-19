@@ -96,7 +96,7 @@ docker run -d --name $containerName --restart=always -p "${port80}" -p "${port44
 PAUSE
 ```
 ## 不停機重載設定
-Nginx 強大的地方，就是config 或憑證變更，使用 nginx -s reload 命令重載 Nginx 配置時，通常不會導致服務中斷或訪問不到的情況，這個命令的設計目的就是為了讓配置的更改能夠在不中斷當前客戶端變更設定。
+Nginx 強大的地方，就是config 或憑證變更，使用 nginx -s reload 命令重載 Nginx 配置時，通常不會導致服務中斷或訪問不到的情況。
 
 ```
 $containerName="certificate-centerlize-nginx"
@@ -114,6 +114,8 @@ docker exec $containerName nginx -s reload
 ```
 ![執行測試指令](3.png)
 
+## 最後
+通過本文的步驟，讀者可以學習到如何利用 Nginx 處理 https 重定向，設定 Docker 容器，以及配置負載平衡，從而在現代化的基礎架構下提高服務部署的效率和靈活性。這些技術不僅適用於小型專案，也能輕鬆擴展到大型企業級應用。
 
 ## 參考資料
 [Nginx负载均衡配置](https://blog.csdn.net/xyang81/article/details/51702900)  
