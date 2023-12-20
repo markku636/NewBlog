@@ -22,7 +22,6 @@ slug: docker-web-ui-ftp-server-sftpgo
 * 安裝 Cloudfalre tunenl 
 ![image](1.png)
 
-
 ## 建立及啟動 FTP Docker 容器
 ```
 docker run -d --name sftpgo --restart always -p 8080:8080 -p 2022:2022 -p 8090:8090 -e TZ=America/Los_Angeles -e SFTPGO_HTTPD__BINDINGS__0__PORT=8080  -e SFTPGO_WEBDAVD__BINDINGS__0__PORT=8090 -v E:\ftp1-data:/srv/sftpgo drakkan/sftpgo
