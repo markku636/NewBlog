@@ -66,7 +66,7 @@ export default props => {
                 <Card variant='paper'>
                   <Text variant='p'>
                     Hi, I’m Mark.Ku.
-                    我是一位網頁軟體工程師，喜歡研究各種技術的解決方案，並用於實踐商業上、興趣是鐵人三項及登山、攝影，這個BLOG主要分享工作及生活的點滴。
+                    我是一位網頁軟體工程師，8年以上豐富網站開發經驗，開發過各種網站，直播系統、POS系統、電子商務、平台網站、SEO、金流串接、Infra 出身，近8年都從事軟體開發，帶過幾次團隊，目前專注於北美及德國市場電商網站開發團隊。
                   </Text>
                 </Card>
                 {/* <Text variant='p'>
