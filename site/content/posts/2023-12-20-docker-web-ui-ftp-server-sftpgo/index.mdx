@@ -1,17 +1,17 @@
 ---
 featured: true
-title:  使用 Cloudflare Tunnel 及 Docker 快速 架設 具有 Web UI 的 FTP Server - sftpgo
+title:  使用 Cloudflare Tunnel 及 Docker 快速 架設 具有 Web UI 管理界面的 FTP Server - sftpgo
 date:   2023-12-20 01:01:35 +0800
 thumbnail:  ftp.png
 category:  DevOps
 tags:   ['ftp server','docker','sftpgo']
-description : 使用 Cloudflare Tunnel 及 Docker 快速 架設 具有 Web UI 的 FTP Server - sftpgo
+description : 使用 Cloudflare Tunnel 及 Docker 快速 架設 具有 Web UI 管理界面的 FTP Server - sftpgo
 author : Mark Ku
 slug: docker-web-ui-ftp-server-sftpgo
 ---
 
 ## 時空背景
-因為德國及美國的網站需要一套全新的FTP Server，因此花了些時間研究，試了幾套 Docker FTP後，終於找到擁有 Web UI ，且開源 FTP Server - sftpgo。
+因為德國及美國的網站需要一套全新的FTP Server，因此花了些時間研究，試了幾套 Docker FTP後，終於找到擁有 Web UI 管理界面，且開源 FTP Server - sftpgo。
 
 ## 官方資料
 [sftpgo官網](https://sftpgo.com/)  
@@ -19,12 +19,12 @@ slug: docker-web-ui-ftp-server-sftpgo
 
 ## 預先準備
 * 在宿主主機，安裝 Docker Desktop
-* 安裝 Cloudfalre tunenl 
+* 安裝及設定 Cloudfalre Tunnel，並挷定 sftpgo 所需要的連接埠。
 ![image](1.png)
 
 ## 首先，建立及啟動 FTP Docker 容器
 ```
-docker run -d --name sftpgo --restart always -p 8080:8080 -p 2022:2022 -p 8090:8090 -e TZ=America/Los_Angeles -e SFTPGO_HTTPD__BINDINGS__0__PORT=8080  -e SFTPGO_WEBDAVD__BINDINGS__0__PORT=8090 -v E:\ftp1-data:/srv/sftpgo drakkan/sftpgo
+docker run -d --name sftpgo --restart always -p 8080:8080 -p 2022:2022 -p 8090:8090 -e TZ=America/Los_Angeles -e SFTPGO_HTTPD__BINDINGS__0__PORT=8080  -e SFTPGO_WEBDAVD__BINDINGS__0__PORT=8090 -v E:\ftp\:/srv/sftpgo drakkan/sftpgo
 ```
 ### sftpgo 預設目錄
 * SFTP/FTP/WebDAV預設目錄: /srv/sftpgo  
