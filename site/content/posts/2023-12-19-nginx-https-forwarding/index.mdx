@@ -46,7 +46,7 @@ Nginx 會根據 server_name 指令中指定的域名來轉發請求到不同的�
 server {
     # Listen HTTP - From Firewall
     listen 80;
-    server_name aafes.ibuypower.com;
+    server_name aafes.abc.com;
 
     # Redirect HTTP to HTTPS
     return 301 https://$host$request_uri;
@@ -80,7 +80,7 @@ server {
 server {
     # Listen HTTP - Cloudflare Tunnel
     listen 80;
-    server_name new-aafes.ibuypower.com;
+    server_name new-aafes.abc.com;
 
     location / {
         proxy_pass http://192.168.0.99:10080;
@@ -100,7 +100,7 @@ server {
 server {
       # Listen on HTTP
     listen 80;
-    server_name cdn.ibuypower.com;
+    server_name cdn.abc.com;
 
     # Root directory for static content
     root /var/www/html;
