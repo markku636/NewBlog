@@ -44,19 +44,18 @@ Nginx 會根據 server_name 指令中指定的域名來轉發請求到不同的�
 
 ```
 server {
-    # Listen HTTP
+    # Listen HTTP - From Firewall
     listen 80;
-    server_name cms.abc.com; // 
+    server_name aafes.ibuypower.com;
 
     # Redirect HTTP to HTTPS
     return 301 https://$host$request_uri;
 }
 
 server {
-    client_max_body_size 5M;
-    # Listen HTTPS
+    # Listen HTTPS - From Firewall
     listen 443 ssl;
-    server_name cms.abc.com;
+    server_name aafes.abc.com;
 
     # SSL config
     ssl_certificate /etc/nginx/ca.crt;
@@ -64,7 +63,7 @@ server {
 
     # Proxy Config
     location / {
-        proxy_pass http://192.168.0.220:27777;
+        proxy_pass http://192.168.0.99:20080;
         proxy_http_version 1.1;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Server $host;
@@ -76,7 +75,48 @@ server {
         proxy_set_header Connection "Upgrade";
         proxy_pass_request_headers on;
     }
-} 
+}
+ 
+server {
+    # Listen HTTP - Cloudflare Tunnel
+    listen 80;
+    server_name new-aafes.ibuypower.com;
+
+    location / {
+        proxy_pass http://192.168.0.99:10080;
+        proxy_http_version 1.1;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host $http_host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_pass_request_headers on;
+    }
+}
+
+server {
+      # Listen on HTTP
+    listen 80;
+    server_name cdn.ibuypower.com;
+
+    # Root directory for static content
+    root /var/www/html;
+
+    # Default location
+    location / {
+        # Enable directory listings
+        autoindex off;
+		
+		# Try to serve file as is, return 404 if not found
+        try_files $uri $uri/ =404;
+    }
+
+    # Other configurations (if needed)
+}
+
 ```
 
 ### 設定負載平衡 ( 如果應用程式有多台才需要 ) upstream.conf 
@@ -101,16 +141,13 @@ PAUSE
 Nginx 強大的地方，就是config 或憑證變更，使用 nginx -s reload 命令重載 Nginx 配置時，通常不會導致服務中斷或訪問不到的情況。
 
 ```
-$containerName="certificate-centerlize-nginx"
-$localDir = "C:\Users\Administrator\Desktop\nginx-setting"
-$nginxConfigPath = $localDir + "\nginx.conf"
-$nginxUpstreamConfig = $localDir + "\upstream.conf"
+$containerName = "certificate-centerlize-nginx"
+$localDir = (Get-Location).Path
+$nginxConfigPath = "$localDir\nginx.conf"
+$nginxUpstreamConfig = "$localDir\upstream.conf"
 
 docker cp "${nginxConfigPath}" "${containerName}:/etc/nginx/conf.d/default.conf"
-
 docker cp "${nginxUpstreamConfig}" "${containerName}:/etc/nginx/conf.d/upstream.conf"
-
-docker exec $containerName nginx -t // test config 
 docker exec $containerName nginx -s reload
 ```
 ![執行測試指令](3.png)
