@@ -13,13 +13,15 @@ slug: docker-web-ui-ftp-server-sftpgo
 ## 時空背景
 因為德國及美國的網站需要一套全新的FTP Server，因此花了些時間研究，試了幾套 Docker FTP後，終於找到擁有 Web UI 管理界面，且開源 FTP Server - sftpgo。
 
-## 官方資料
+## sftpgo - 官方資料
+功能齊全，且高度可配置的 SFTP 伺服器，具有可選的 HTTP/S、FTP/S 和 WebDAV 支援，支援的儲存後端：本機檔案系統、加密本機檔案系統、S3（相容）物件儲存、Google 雲端儲存、Azure Blob 儲存、其他 SFTP 伺服器，並擁有 WebAdmin 及 WebClient 上傳機制。
 [sftpgo官網](https://sftpgo.com/)  
 [Github](https://github.com/drakkan/sftpgo)
 
 ## 預先準備
 * 在宿主主機，安裝 Docker Desktop
 * 安裝及設定 Cloudfalre Tunnel，並挷定 sftpgo 所需要的連接埠。(sftpgo Web 透過 Cloudflare Tunnel 讓外部可以透過web 上傳檔案，但SFTP 詢問Cloudflare 官方 SFTP 仍有bug， 這邊先直接用防火牆指向)
+
 ![image](1.png)
 
 ## 首先，建立及啟動 FTP Docker 容器
@@ -35,7 +37,6 @@ docker run -d --name sftpgo --restart always -p 8080:8080 -p 2022:2022 -p 8090:8
 * 2022 用於 SFTP 服務。  
 * 8080 用於 Web 管理員用戶界面。  
 * 8090 用於 Webdav
-
 
 ## 接著，訪問Web 管理員用戶界面，建立後台管理帳號 - [連結](http://localhost:8080/web/admin/setup)
 
