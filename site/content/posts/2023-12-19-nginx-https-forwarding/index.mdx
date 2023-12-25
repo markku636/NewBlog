@@ -40,11 +40,13 @@ COPY ca.key /etc/nginx/ca.key
 ```
 
 ### 再設定 nginx.config 
+Nginx 會根據 server_name 指令中指定的域名來轉發請求到不同的伺服器。當一個 HTTPS 請求抵達 Nginx 伺服器時，Nginx 會檢查請求的 HTTP Host 頭部來決定使用哪個伺服器區塊（server block）來處理該請求。
+
 ```
 server {
     # Listen HTTP
     listen 80;
-    server_name cms.abc.com;
+    server_name cms.abc.com; // 
 
     # Redirect HTTP to HTTPS
     return 301 https://$host$request_uri;
