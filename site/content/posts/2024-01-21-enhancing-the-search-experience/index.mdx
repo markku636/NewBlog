@@ -60,7 +60,7 @@ P.S. Elasticsearch 並沒有內建中文的分詞器，但可以另外安裝常�
 | MAPPING (結構)  | 表結構　　 | 
 
 
-## 安裝
+## 建立及啟動容器
 ### Docker Compose  (docker-compose.yml )
 ```
 # 注意version要和docker-compose的版本對應 docker-compose --version
@@ -86,7 +86,7 @@ services:
       - elasticsearch
 ```
 
-docker up
+### 運行及啟動 Docker Compose
 ```
 docker-compose -p ibp-us-elasticsearch-group up
 ```
