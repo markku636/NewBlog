@@ -102,9 +102,9 @@ New-NetFirewallRule -DisplayName "kibana -Port 9200" -Direction Inbound -Protoco
 ![image](3.png)
 
 
-### 先訪問 ElasticSearch http://localhost:9200/_cat/indices 查詢所有的索引，ElasticSearch 其實很單純，他本身就內建了rest api ，透過訪問URL 就能拿到我們要的結果
+### 首先，先訪問 ElasticSearch http://localhost:9200/_cat/indices 查詢所有的索引，ElasticSearch 其實很單純，他本身就內建了rest api ，透過訪問URL 就能拿到我們要的結果
 
-### 接著再訪問 Kabana http://localhost:5601/ ，點開導覽列，找到DevTools，就可以透過 UI  去操作先前在Docker 指定的ElasticSearch 。
+### 接著，再訪問 Kabana http://localhost:5601/ ，點開導覽列，找到DevTools，就可以透過 UI  去操作先前在Docker 指定的ElasticSearch 。
 
 ```
 GET /_cat/indices 
