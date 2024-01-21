@@ -148,7 +148,7 @@ POST _bulk
 GET /product/_mapping
 ```
 P.S 資料庫則需要先定表結構，才能新增資料，但ElasticSearch 相當強大，先新增資料，會依據資料自動推斷表結構的欄位型態。
-###  查詢該筆id=1001的資料
+###  查詢該筆_id=1001的資料
 ```
 GET /product/_doc/1001
 ```
@@ -272,7 +272,7 @@ POST /product/_doc
 ### 依據ID刪除該筆資料
 
 ```
-DELETE /product/_doc/1
+DELETE /product/_doc/1001
 ```
 ### 刪除索引含資料
 ```
