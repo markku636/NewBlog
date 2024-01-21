@@ -20,11 +20,11 @@ slug: enhancing-the-search-experience
 
 ### 以資料庫存儲的商品為例
 
-| SkuID ( 庫存量單位ID ) | Name (庫存量單位名稱)         | 
-| --------               | --------            | 
-| 1                      | Kingstom 16GB Ram   | 
-| 2                      | Transcend 16GB Ram  | 
-| ...                    | ...                 | 
+| SkuID ( 庫存量單位ID ) | Name (庫存量單位名稱)| 
+| --------               | --------             | 
+| 1                      | Kingstom 16GB Ram    | 
+| 2                      | Transcend 16GB Ram   | 
+| ...                    | ...                  | 
 P.S. Sku ( Stock Keeping Unit )為庫存量單位的ID
 
 ### 在全文檢索技術的倒排索引的檢索方式，透過事前分詞及記錄順序，當使用者查詢時，才有辦法簡單快速及精準。
@@ -53,12 +53,12 @@ P.S. Elasticsearch 並沒有內建中文的分詞器，但可以另外安裝常�
 
 ## 其實ElasticSearch 與 RDBMS 的概念類似，這邊整理了名詞的對照表
 
-| ElasticSearch | RDBMS | 
-| --------  | -------- | 
+| ElasticSearch | RDBMS   　  | 
+| --------  | --------   　   | 
 | INDEX (索引)    | 表   　   | 
 | DOCUMENT (文件) | 行   　   | 
 | FIELD   (欄位)  | 欄位   　 | 
-| MAPPING (結構)  | 表結構　　 | 
+| MAPPING (結構)  | 表結構　　| 
 
 
 ## 建立及啟動容器
