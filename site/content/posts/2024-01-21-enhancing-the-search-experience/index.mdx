@@ -20,19 +20,21 @@ slug: enhancing-the-search-experience
 
 ### 以資料庫存儲的商品為例
 
-| SkuID | Column 2 | 
-| -------- | -------- | 
-| 1     | Kingstom 16GB Ram  | 
-| 2     | Transcend 16GB Ram  | 
-| ...     | ...  | 
+| SkuID ( 庫存量單位ID ) | Name (庫存量單位名稱)         | 
+| --------               | --------            | 
+| 1                      | Kingstom 16GB Ram   | 
+| 2                      | Transcend 16GB Ram  | 
+| ...                    | ...                 | 
+P.S. Sku ( Stock Keeping Unit )為庫存量單位的ID
+
 ### 在全文檢索技術的倒排索引的檢索方式，透過事前分詞及記錄順序，當使用者查詢時，才有辦法簡單快速及精準。
 
-| Term | SkuID | 
-| -------- | -------- | 
-| kingstom | 1        | 
-| 16gb     | 1,2      | 
-| ram      | 1,2      | 
-| transcend| 1,2      | 
+| Term (分詞) | SkuID (庫存量單位ID)| 
+| --------    | --------            | 
+| kingstom    | 1                   | 
+| 16gb        | 1,2                 | 
+| ram         | 1,2                 | 
+| transcend   | 1,2                 | 
 
 ## 內建分詞器
 Elasticsearch 就內建的分詞器，有標準分詞器、空格分詞器、簡單分詞器等等，它們的主要工作就是把文字拆成一個個詞彙，還有做一些處理，像是轉成小寫、詞幹提取、過濾停用詞等等，讓系統可以更好地建立索引和進行全文檢索，你可以根據需要，選擇適合的分詞器和分析器，或者自己客製化一個，這樣就能有更好的搜尋效果了。
