@@ -51,7 +51,7 @@ POST _analyze
 ![分詞拆解的結果](2.png)
 P.S. Elasticsearch 並沒有內建中文的分詞器，但可以另外安裝常用的[中文分詞器](https://blog.csdn.net/qq_26803795/article/details/106522611)，EX:IK 分词器、Smartcn 分词器和 Jieba 。
 
-## ElasticSearch 與 RDBMS 的概念類似，這邊整理了名詞的對照表
+## 其實ElasticSearch 與 RDBMS 的概念類似，這邊整理了名詞的對照表
 
 | ElasticSearch | RDBMS | 
 | --------  | -------- | 
@@ -112,7 +112,7 @@ GET /_cat/indices
 ![Kabana查詢所有的索引](4.png)
 
 
-### 資料庫則需要先定表結構，才能新增資料，但ElasticSearch 相當強大，先新增資料，會自動推斷欄位型態。
+### 資料庫則需要先定表結構，才能新增資料，但ElasticSearch 相當強大，先新增資料，會依據資料自動推斷表結構的欄位型態。
 #### 單筆新增資料
 ```
 POST product/_doc/1004
@@ -147,7 +147,7 @@ POST _bulk
 ```
 GET /product/_mapping
 ```
-P.S 資料庫則需要先定表結構，才能新增資料，但ElasticSearch 相當強大，先新增資料，會自動推斷欄位型態。
+P.S 資料庫則需要先定表結構，才能新增資料，但ElasticSearch 相當強大，先新增資料，會依據資料自動推斷表結構的欄位型態。
 ###  查詢該筆id=1的資料
 ```
 GET /product/_doc/1001
