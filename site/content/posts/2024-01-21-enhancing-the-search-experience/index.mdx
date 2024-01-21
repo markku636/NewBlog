@@ -1,23 +1,22 @@
 ---
 featured: true
-title:  導入高效全文檢索工具 Elasticsearch，改善電商搜尋體驗 - Part's 1
+title:  提升電商搜索體驗，使用Elasticsearch進行高效全文檢索 - Part's 1
 date:   2024-01-21 01:01:35 +0800
 thumbnail:  enhancing-the-search-experience.jpg
 category:  ECommerce
 tags:   ['enhancing the search experience']
-description : 導入高效全文檢索工具 Elasticsearch，改善電商搜尋體驗 - Part's 1
+description : 提升電商搜索體驗,使用Elasticsearch進行高效全文檢索 - Part's 1
 author : Mark Ku
 slug: enhancing-the-search-experience
 ---
 ## 時空背景
-客服經理和反饋，我們網站的搜尋功能體驗非常的差，用戶反應常常搜尋不到的規格，然後他說希望能像 Google 一樣搜尋體驗，因此我就花了些時間了解後，發現全文檢索應該是能解決我們的問題。
+客服經理和反饋，我們網站的搜尋功能體驗非常的差，用戶反應常常搜尋不到的規格，然後他說希望能像 Google 一樣搜尋體驗，而且可以搜尋到SKU，因此我就花了些時間了解後，發現全文檢索應該是能解決我們的問題。
 
 ## 為何需要使用 - 全文檢索
-全文檢索工具（Full-Text Search Tools）是一種軟體工具，主要功能在有效地搜索和檢索大量的文字數據，並返回相關的搜索結果，可以在數秒內檢索大規模文本數據集，提供多種搜索選項，例如關鍵字搜索、短語搜索、模糊搜索等，使用戶能夠以多種方式查找所需資訊。
+首先我們得先了解什麼是全文檢索工具（Full-Text Search Tools），它是一種軟體工具，主要功能在有效地搜索和檢索大量的文字數據，並返回相關的搜索結果，可以在數秒內檢索大規模文本數據集，提供多種搜索選項，例如關鍵字搜索、短語搜索、模糊搜索等，使用戶能夠以多種方式查找所需資訊。
 
 ## 全文檢索原理 
-
-因為全文檢索技術和資料庫最大的差別就是，當資料量越大時，要對全表掃描時，對資料庫要耗費相當長的時間，但全文檢索技術採用[倒排索引](https://www.zhihu.com/question/23202010)的檢索技術，以依據各種分詞器將資料以 key 及 value 的形式儲存，查詢時就會變得簡單及快速。
+接著得了解全文檢索技術和資料庫最大的差別就是，就是當資料量越大時，要對全表掃描時，對資料庫要耗費相當長的時間，但全文檢索技術採用[倒排索引](https://www.zhihu.com/question/23202010)的檢索技術，以依據各種分詞器將資料以 key 及 value 的形式儲存，查詢時就會變得簡單及快速。
 
 ### 以資料庫存儲的商品為例
 
