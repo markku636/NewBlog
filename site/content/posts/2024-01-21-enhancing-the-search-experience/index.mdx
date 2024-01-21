@@ -92,7 +92,7 @@ services:
 docker-compose -p ibp-us-elasticsearch-group up
 ```
 
-### 開啟防火牆
+### 用 Powershell 新增防火牆規則
 ```
 New-NetFirewallRule -DisplayName "elasticsearch -Port 5000" -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow
 
