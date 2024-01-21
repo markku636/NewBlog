@@ -1,11 +1,11 @@
 ---
 featured: true
-title:  提升電商網站搜索體驗，使用Elasticsearch進行高效全文檢索 - Part's 1
+title:  提升電商網站搜尋體驗，使用Elasticsearch進行高效全文檢索 - Part's 1
 date:   2024-01-21 01:01:35 +0800
 thumbnail:  enhancing-the-search-experience.jpg
 category:  ECommerce
 tags:   ['enhancing the search experience']
-description : 提升電商網站搜索體驗，使用Elasticsearch進行高效全文檢索 - Part's 1
+description : 提升電商網站搜尋體驗，使用Elasticsearch進行高效全文檢索 - Part's 1
 author : Mark Ku
 slug: enhancing-the-search-experience
 ---
@@ -13,7 +13,7 @@ slug: enhancing-the-search-experience
 經客服經理反饋，發現我們網站的搜尋功能體驗非常的差，用戶常常反應搜尋不到的規格，然後他說希望能像 Google 一樣搜尋體驗，而且可以快速依據產品規格，找到相關的產品，因此我花了些時間評估後，發現全文檢索的技術，應該是能解決我們的問題。
 
 ## 為何需要使用 - 全文檢索
-首先我們得先了解什麼是全文檢索工具（Full-Text Search Tools），它是一種軟體工具，主要功能在有效地搜索和檢索大量的文字數據，並返回相關的搜索結果，可以在數秒內檢索大規模文字數據集，提供多種搜索選項，例如關鍵字搜索、短語搜索、模糊搜索等，使用戶能夠以多種方式查找所需資訊。
+首先我們得先了解什麼是全文檢索工具（Full-Text Search Tools），它是一種軟體工具，主要功能在有效地搜尋和檢索大量的文字數據，並返回相關的搜尋結果，可以在數秒內檢索大規模文字數據集，提供多種搜尋選項，例如關鍵字搜尋、短語搜尋、模糊搜尋等，使用戶能夠以多種方式查找所需資訊。
 
 ## 全文檢索原理 
 接著得了解全文檢索技術和資料庫最大的差別就是，就是當資料量越大時，要對全表掃描時，對資料庫要耗費相當長的時間，但全文檢索技術採用[倒排索引](https://www.zhihu.com/question/23202010)的檢索技術，以依據各種分詞器將資料以 key 及 value 的形式儲存，查詢時就會變得簡單及快速。
@@ -209,9 +209,9 @@ GET /product/_search
 ### 整理一些常見的查詢條件
 | 查詢條件類型           | 描述                                                                                          | 範例                        |
 |--------------------|-----------------------------------------------------------------------------------------------|-----------------------------|
-| **`match`**     | 用於全文檢索，對搜尋詞進行分詞，然後搜索每個分詞，支援文字字段的分析，適用於搜索文字字段。 | 搜尋 "快速的電腦"          |
+| **`match`**     | 用於全文檢索，對搜尋詞進行分詞，然後搜尋每個分詞，支援文字字段的分析，適用於搜尋文字字段。 | 搜尋 "快速的電腦"          |
 | **`match_phrase`** | 也用於全文檢索，但要求匹配整個詞組，考慮詞序，適用於精確詞組匹配的情況。               | 搜尋 "快速的電腦"，但要求匹配整個詞組|
-| **`multi_match`** | 允許在多個字段中進行 `match` 查詢，適用於在多個字段中搜索相同關鍵字的情況。           | 在標題和描述中搜尋 "蘋果"     |
+| **`multi_match`** | 允許在多個字段中進行 `match` 查詢，適用於在多個字段中搜尋相同關鍵字的情況。           | 在標題和描述中搜尋 "蘋果"     |
 | **`term`**       | 用於精確值匹配，不進行分詞，適用於非分析字段，通常用於數字、日期或未分析的文字字段。   | 搜尋具有特定 ID 的文件         |
 | **`fuzzy`**      | 用於處理拼寫錯誤和近似匹配，基於 Levenshtein 編輯距離算法，適用於容忍拼寫錯誤的情況。 | 搜尋 "aple" 可以匹配 "蘋果"   |
 | **`wildcard`**   | 允許使用通配符 `*` 和 `?` 進行模糊匹配。適用於需要匹配特定模式的情況。              | 搜尋 "appl*e" 可以匹配 "測試"  |
@@ -317,7 +317,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
-        // 從請求體或查詢參數中獲取搜索關鍵字
+        // 從請求體或查詢參數中獲取搜尋關鍵字
         const keyword = req.body.keyword || req.query.keyword;
 
         // 建立多字段 Elasticsearch 查詢
@@ -342,7 +342,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
 
 ```
-### 最後在前端建立搜索框
+### 最後在前端建立搜尋框
 
 ```
 // app/elasticsearch/page.tsx
@@ -351,7 +351,7 @@ import { useState } from 'react';
 
 export default function Search() {
     const [keyword, setKeyword] = useState<string>('3060');
-    const [searchResults, setSearchResults] = useState<any[]>([]); // 存儲搜索結果的狀態
+    const [searchResults, setSearchResults] = useState<any[]>([]); // 存儲搜尋結果的狀態
 
     async function searchProducts(keyword: string): Promise<any[]> {
         const response = await fetch('/api/search', {
@@ -367,10 +367,10 @@ export default function Search() {
     const handleSearch = async () => {
         const results = await searchProducts(keyword);
         debugger;
-        // 更新搜索結果的狀態
+        // 更新搜尋結果的狀態
         setSearchResults(results);
 
-        // 處理搜索結果
+        // 處理搜尋結果
     };
 
     return (
@@ -385,7 +385,7 @@ export default function Search() {
                 Search
             </button>
 
-            {/* 渲染搜索結果 */}
+            {/* 渲染搜尋結果 */}
             <div className="mt-4">{JSON.stringify(searchResults)}</div>
         </div>
     );
@@ -397,7 +397,7 @@ export default function Search() {
 
 ## 參考資料
 * [Elasticsearch全文检索入门这一篇就够了](https://zhuanlan.zhihu.com/p/94181307)  
-* [elasticsearch模仿淘宝、京东、百度、谷歌搜索，自动补全、自动完成](https://blog.csdn.net/successCodeMan/article/details/115181760?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522170576110716800197022855%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fvipall.%2522%257D&request_id=170576110716800197022855&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~vipall~first_rank_ecpm_v1~rank_v31_ecpm-8-115181760-null-null&utm_term=ElasticSearch%20%E9%9B%BB%E5%95%86&spm=1018.2226.3001.4187)
-* [搜索功能全流程解析](https://www.woshipm.com/pd/5762531.html)
-* [訂單搜索優化](https://blog.csdn.net/CrossLimit/article/details/124908251)
+* [elasticsearch模仿淘宝、京东、百度、谷歌搜尋，自动补全、自动完成](https://blog.csdn.net/successCodeMan/article/details/115181760?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522170576110716800197022855%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fvipall.%2522%257D&request_id=170576110716800197022855&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~vipall~first_rank_ecpm_v1~rank_v31_ecpm-8-115181760-null-null&utm_term=ElasticSearch%20%E9%9B%BB%E5%95%86&spm=1018.2226.3001.4187)
+* [搜尋功能全流程解析](https://www.woshipm.com/pd/5762531.html)
+* [訂單搜尋優化](https://blog.csdn.net/CrossLimit/article/details/124908251)
 * [oramasearch 開源全文檢索工具](https://cloud.oramasearch.com/indexes)
