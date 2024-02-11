@@ -24,7 +24,7 @@ New-Item -ItemType Directory -Path $workspacePath -Force | Out-Null
 ```
 ### 執行以下指令，Docker 運行 Jenkins 容器，並將 workspace 掛載到本地磁碟
 ```
-docker run -d -p 8080:8080  -p 50000:50000 -v ${workspacePath}:/var/jenkins_home/workspace --name jenkins --restart=always jenkins/jenkins:lts 
+docker run -d -p 8080:8080  -p 50000:50000 -v ${workspacePath}:/var/jenkins_home/workspace  -v /var/run/docker.sock:/var/run/docker.sock --name jenkins --restart=always jenkins/jenkins:lts 
 ```
 ### 看到這畫面，要進去容器拿這密碼
 
