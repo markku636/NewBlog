@@ -79,8 +79,9 @@
 	.st73{fill:#9BB5CC;}
 	.st74{fill:#FCFBF7;}
 	.st75{fill:#FEECD1;}
-	.st76{font-family:'ComicSansMS-Bold';}
-	.st77{font-size:285.0226px;}
+	.st76{fill:#FFFFFF;}
+	.st77{font-family:'ComicSansMS-Bold';}
+	.st78{font-size:285.0226px;}
 </style>
 <path class="st0" d="M756.8,702.7c-9.1-7-15.7-15.7-21.9-24.8c-2-3-3.8-3.5-7.3-2.6c-31,7.5-62.6,9.1-94.3,6.9
 	c-43.5-3-84.9-14-124.4-32.6c-54.6-25.7-91.2-67.3-110.4-124.4c-2.6-7.6-2.6-7.6-10.2-6.4c-20.8,3.4-47.1-9.5-58.6-28.9
@@ -1749,5 +1750,5 @@
 <path class="st37" d="M281.7,606.5c0.1,0,0.1-1,0.2,0C281.7,606.5,281.7,606.5,281.7,606.5z"/>
 <path class="st21" d="M244.2,587.6c-0.5-2.2,1.4-2.6,2.8-3.5c0.2,0.5,0.5,1.1,0.7,1.9C246.7,586.8,245.6,587.2,244.2,587.6z"/>
 <path class="st21" d="M250.4,589.6c0.5,0.8,2,1.8-0.2,2.8C250,591.7,250.1,590.8,250.4,589.6z"/>
-<text transform="matrix(0.7058 0 0 1 925.1126 516.3984)" class="st76 st77">Tech Tactician</text>
+<text transform="matrix(0.7058 0 0 1 925.1126 516.3984)" class="st76 st77 st78">Tech Tactician</text>
 </svg>
