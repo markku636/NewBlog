@@ -10,11 +10,10 @@ author : Mark Ku
 slug: protect-your-website-with-cloudflare-turnstile
 ---
 ## 時空背景
-因為
-* 發現網站機械人被註冊了一萬多個會員帳號
+* 某日發現網站機械人被註冊了一萬多個會員帳號
 * Visa公司通知我們太多機械人在試不存在的卡號，失敗率太高，將會停用我們的信用卡收款
 * 發現有機械人在試重置密碼及訂單狀態
-因為 Google recaptcha v2/v3使用者體驗不是這麼好，因此請我同事研究界接了Cloudflare Turnstile ，Google recaptcha 常常要選很久，浪費使用者蠻多時間的。
+評估 Google recaptcha v2/v3使用者體驗不是這麼好，因此請我同事研究界接了Cloudflare Turnstile ，Google recaptcha 常常要選很久，浪費使用者蠻多時間的。
 
 ## 工作原理
 * 行為分析：分析用戶的行為模式（如鼠標移動、鍵盤輸入、滾動行為等），來判斷是否為真實人類。
