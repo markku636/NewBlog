@@ -55,7 +55,7 @@ apt-get update && apt-get -y install apt-transport-https ca-certificates curl gn
 // jenkins 權限不足
 sermod -aG docker jenkins 
 usermod -aG root jenkins
-chmod 664 /var/run/docker.sock
+chmod 777 /var/run/docker.sock
 ```
 
 ## Jenkins Github 全域憑證設定
