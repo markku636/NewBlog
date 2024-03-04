@@ -60,7 +60,7 @@ export default function TestPaypal() {
 
     const [Process] = useProcessMutation(); // rtk query 用來呼叫建立建立授權訂單的api
 
-    const [Capture] = useCaptureMutation(); // rtk query 用來呼叫提取信用的api
+    const [Capture] = useCaptureMutation(); // rtk query 用來呼叫提取信用請款的api
 
     const gernalPaymentParams: IGeneralPaymentParameter = {
         PaymentTypeCode: PaymentOptions[PaymentOptions.Paypal],
