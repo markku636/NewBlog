@@ -120,7 +120,7 @@ public async Task<string> Authorization()
       return Convert.ToBase64String(Encoding.ASCII.GetBytes($"{GeneralPaymentConfig.ClientId}:{GeneralPaymentConfig.Secret}")); ;
 }
 ```
-### 接著　我們實作 /api/orders 建立訂單及授權
+### 接著，我們實作 /api/orders 建立訂單及授權
 
 ```
 public async Task<Result<PaymentResult>> ProcessAsync(GernalPaymentParameter paymentParameter)
@@ -194,7 +194,7 @@ public async Task<Result<PaymentResult>> ProcessAsync(GernalPaymentParameter pay
 }
 ```
 
-### 再來實作 /api/orders 請款 ( capture )
+### 最後，再來實作 /api/orders 請款 ( capture )
 ```
 public virtual async Task<Result<PaymentResult>> CaptureAsync(GernalPaymentParameter paymentParameter)
 {
