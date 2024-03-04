@@ -1,0 +1,243 @@
+---
+featured: true
+title:  串接 Paypal 筆記
+date:  2024-02-27 01:01:35 +0800
+thumbnail:  cloudflare-turnstile.png
+category:  Payment 
+tags:   ['Payment','Paypal']
+description : 串接 Paypal 筆記
+author : Mark Ku
+slug: integrate-paypal-checkout
+---
+## 時空背景
+據[統計](https://www.rapyd.net/blog/ecommerce-and-payment-trends-germany/?fbclid=IwAR0uLqmxcAoefhQMFfvoOPw3OutAOioXDsqRH9BaRusOieVHPZP2n1NDziQ) Paypal 在德國擁有22%以上的市佔，並在歐盟也有一定的市佔，但過去因為詐騙太嚴重，因此把Paypal 關閉，藉由此次重新打造德國網站，把Paypal 重新串接，並搭配 [Riskified](https://www.riskified.com/) 保險服務，來分攤掉網路電商的詐欺風險。
+![](riskified.png)
+
+## Paypal js 串接文件
+Api 看起來改了版，官方也建議用新版的rest api 來串接
+
+## 相關文件
+* [前端串接文件](https://developer.paypal.com/docs/checkout/standard/integrate/#link-integratefrontend)
+* [取得Api Access Token](https://developer.paypal.com/api/rest/requests/)
+* [建立訂單相關的api](https://developer.paypal.com/docs/api/orders/v2/#orders_create)
+
+## 新版相當的方便，可以透過Event logs [除錯](https://developer.paypal.com/dashboard/dashboard/sandbox)
+
+![debug-tools](debug-tools.png)
+
+## 進階付款功能
+額外發現進階模式多了，Venmo(社交支付)、Debit or Credit Card、Paypal Pay Later (先買後付)，但需要額外申請 PayPal 的 Braintree。
+
+P.S. PayPal 的 Braintree 是一個全面的支付解決方案，旨在幫助商家接受、處理和分配支付。它解決了多個與接受線上支付相關的問題，提供了一個安全、靈活且易於集成的平台。
+
+## 流程圖
+![integration diagram](integration-diagram.png)
+
+## 開始串接
+### Integration builder 
+其實官方的 [Integration builder](https://developer.paypal.com/integration-builder/) 的範例寫的不錯，基本上照著界接就能做完了
+
+![integration-builder-1](integration-builder-1.png)
+![integration-builder-2](integration-builder-2.png)
+![integration-builder-3](integration-builder-3.png)
+
+### 前端
+#### 安裝SDK
+```
+npm install @paypal/react-paypal-js --save
+```
+
+### 撰寫前端串接的程式
+
+```
+'use client'; // next js client component
+import { PaymentOptions } from '@/const/payment/payment-option';
+import { useCaptureMutation, useGetConfigQuery, useProcessMutation } from '@/redux/api/test-payment-apiSlice';
+import { IGeneralPaymentParameter } from '@/typing/cart';
+import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
+import { v4 as uuidv4 } from 'uuid';
+
+export default function TestPaypal() {
+    const { data: paymentInitOption, isLoading: isPaymentInitLoading } = useGetConfigQuery();
+
+    const [Process] = useProcessMutation(); // rtk query 用來呼叫建立建立授權訂單的api
+
+    const [Capture] = useCaptureMutation(); // rtk query 用來呼叫提取信用的api
+
+    const gernalPaymentParams: IGeneralPaymentParameter = {
+        PaymentTypeCode: PaymentOptions[PaymentOptions.Paypal],
+        OrderNo: uuidv4(),
+        FinalAmount: 100,
+    } as IGeneralPaymentParameter;
+
+    const createOrder = (): Promise<string> => {
+        return Process(gernalPaymentParams)
+            .unwrap()
+            .then((res: any) => {
+                // TODO TYPE
+                const orderId = res.data.paymentReturnValue;
+
+                gernalPaymentParams.PaymentGatewayOrderId = orderId;
+                return orderId;
+            });
+    };
+
+    const onApprove = (data: any) => {
+        return Capture(gernalPaymentParams)
+            .unwrap()
+            .then((res: any) => {
+                const orderId = res.data.paymentReturnValue;
+
+                gernalPaymentParams.PaymentGatewayOrderId = orderId;
+
+                alert('Payment success');
+            });
+    };
+
+    return (
+        <>
+            {!isPaymentInitLoading && (
+                <PayPalScriptProvider options={paymentInitOption}>
+                    <PayPalButtons
+                        createOrder={createOrder}
+                        onApprove={onApprove}
+                        style={{ layout: 'horizontal', color: 'white', tagline: true }}
+                    />
+                </PayPalScriptProvider>
+            )}
+        </>
+    );
+}
+```
+
+## 後端
+### PAYPAL API 請求權限 - Authorization paypal 支援，兩種token，這邊採用 <client_id:secret> 當成登入的token 
+
+依據官方文件，所述，我們可以呼叫api 取得 Access-Token 或是使用 client_id:secret 呼叫paypal API
+
+```
+// To make REST API calls, include the bearer token in this header with the Bearer authentication scheme. The value is Bearer <Access-Token> or Basic <client_id:secret> 
+
+public async Task<string> Authorization()
+   {
+      return Convert.ToBase64String(Encoding.ASCII.GetBytes($"{GeneralPaymentConfig.ClientId}:{GeneralPaymentConfig.Secret}")); ;
+}
+```
+### 接著　我們實作 /api/orders 建立訂單及授權
+
+```
+public async Task<Result<PaymentResult>> ProcessAsync(GernalPaymentParameter paymentParameter)
+{
+   var headers = new Dictionary<string, string>
+    {
+      { "Authorization", $"Basic  {Authorization()}" },
+      { "PayPal-Request-Id",  HttpContext.Current.TraceIdentifier},
+    };
+
+   var paymentCapture = new PaymentCapture
+   {
+      Intent = "CAPTURE",
+      PurchaseUnits = new List<PurchaseUnit>
+   {
+   new PurchaseUnit
+   {
+      ReferenceId = paymentParameter.OrderNo,
+      Amount = new Model.ViewModels.Payment.Amount
+      {
+          CurrencyCode = "EUR",
+          Value = "1.00"
+      },
+      Shipping = new PaypalShipping
+      {
+          Address =  new PaypalAddress
+          {
+              AddressLine1 = "2211 N First Street",
+              AddressLine2 = "Building 17",
+              AdminArea2 = "San Jose",
+              AdminArea1 = "CA",
+              PostalCode = "95131",
+              CountryCode = "US"
+          }
+      }
+      }
+      },
+      PaymentSource = new PaymentSource
+      {
+         PayPal = new PayPal
+         {
+            ExperienceContext = new ExperienceContext
+            {
+               PaymentMethodPreference = "IMMEDIATE_PAYMENT_REQUIRED",
+               BrandName = "EXAMPLE INC",
+               Locale = "en-US",
+               LandingPage = "LOGIN",
+               ShippingPreference = "SET_PROVIDED_ADDRESS",
+               UserAction = "PAY_NOW",
+               ReturnUrl = "https://example.com/returnUrl",
+               CancelUrl = "https://example.com/cancelUrl"
+            }
+         }
+      }
+   };
+
+   // Use Newtonsoft.Json to serialize the object to JSON (for demonstration)
+   string body = JsonConvert.SerializeObject(paymentCapture, Formatting.Indented);
+
+
+   var orderRsult = await HttpHelper.PostAsync<PaypalOrderResponse>(GeneralPaymentConfig.EndPoint + "/v2/checkout/orders", body, headers);
+
+   return new Result<PaymentResult>
+   {
+      IsSuccess = true,
+      Message = "",
+      Data = new PaymentResult
+      {
+         PaymentReturnType = PaymentReturnType.OrderId,
+         PaymentReturnValue = orderRsult.Id
+      }
+   };
+}
+```
+
+### 再來實作 /api/orders 提款 ( capture )
+```
+public virtual async Task<Result<PaymentResult>> CaptureAsync(GernalPaymentParameter paymentParameter)
+{
+   // sandbox have some issue. cannot not support capture
+   var result = new Result<PaymentResult>
+   {
+      IsSuccess = true,
+      Message = "",
+      Data = new PaymentResult
+      {
+         PaymentReturnType = PaymentReturnType.Token,
+         //PaymentReturnValue = response
+      }
+   };
+
+   try
+   {
+      var url = GeneralPaymentConfig.EndPoint + $"/v2/checkout/orders/{paymentParameter.PaymentGatewayOrderId}/capture";
+      var requestBody = "";
+
+      var headers = new Dictionary<string, string>
+    {
+      { "Authorization", $"Basic  {Authorization()}" },
+      { "PayPal-Request-Id",  HttpContext.Current.TraceIdentifier},
+    };
+
+      var response = await HttpHelper.PostAsync<PaypalOrderResponse>(url, requestBody, headers);
+   }
+   catch (Exception ex)
+   {
+      result.Fail(ex.Message);
+      NLogUtil.WriteSEQLog($"[Paypal][CaptureAsync]Error:{ex.Message},StackTrace:{ex.StackTrace}", NLog.LogLevel.Error);
+   }
+
+   return result;
+}
+```
+
+### 相關文章，授權和提款 
+* [美國電子商務實務筆記 - 信用卡授權(Authorize)及拿取(Capture)](https://blog.markkulab.net/usa-ecommerce-note-credit-card-authorize-and-capture/)
+* [Paypal express Checkout 整合指南](https://www.paypalobjects.com/webstatic/lvm/tw/zh/using-paypal/integration-guide.pdf)
