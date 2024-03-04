@@ -39,6 +39,25 @@ slug: protect-your-website-with-cloudflare-turnstile
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <div class="turnstile" data-sitekey="你的站點密鑰"></div>
 
+ const widgetId = turnstile.render(`#${containerId}`, {
+            sitekey,
+            language: 'en',
+            action,
+            execution,
+            callback: function (token: string) {
+                // console.log(`${widgetId}: Challenge Success ${token}`);
+                setTurnstileToken(token);
+            },
+            'expired-callback': function () {
+                // console.log('Expired Callback');
+
+                // refresh token
+                setTurnstileToken('');
+                turnstile.reset(`#${containerId}`); // 當過期時,透過這方法重新刷新這個 token
+                turnstile.execute(`#${containerId}`);
+            },
+        });
+
 ```
 
 ### 4. 服務器端驗證
@@ -92,28 +111,6 @@ public class TurnstileVerificationResponse
 ```
 ### 4. 處理驗證結果
 根據 VerifyTokenAsync 方法的返回值，你可以決定是否處理用戶的請求。如果驗證成功（返回 true），則可以繼續處理請求；如果失敗，則可能需要拒絕請求或要求用戶重試。
-
-## 當過期時重新刷新這個 token
-```
- const widgetId = turnstile.render(`#${containerId}`, {
-            sitekey,
-            language: 'en',
-            action,
-            execution,
-            callback: function (token: string) {
-                // console.log(`${widgetId}: Challenge Success ${token}`);
-                setTurnstileToken(token);
-            },
-            'expired-callback': function () {
-                // console.log('Expired Callback');
-
-                // refresh token
-                setTurnstileToken('');
-                turnstile.reset(`#${containerId}`);
-                turnstile.execute(`#${containerId}`);
-            },
-        });
-```
 
 ## 成效
 Cloudflare turnstile同時上線，阻止20-30% 以上的機器人重置密碼、登入、建立帳號、機械人惡意測試銀行信用卡的請求。  
