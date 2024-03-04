@@ -13,7 +13,7 @@ slug: integrate-paypal-checkout
 據[統計](https://www.rapyd.net/blog/ecommerce-and-payment-trends-germany/?fbclid=IwAR0uLqmxcAoefhQMFfvoOPw3OutAOioXDsqRH9BaRusOieVHPZP2n1NDziQ) Paypal 在德國擁有22%以上的市佔，並在歐盟也有一定的市佔，但過去因為詐騙太嚴重，因此把Paypal 關閉，藉由此次重新打造德國網站，把Paypal 重新串接，並搭配 [Riskified](https://www.riskified.com/) 保險服務，來分攤掉網路電商的詐欺風險。
 ![](riskified.png)
 
-## Paypal js 串接文件
+## Paypal 串接
 Api 看起來改了版，官方也建議用新版的rest api 來串接
 
 ## 相關文件
@@ -34,14 +34,13 @@ P.S. PayPal 的 Braintree 是一個全面的支付解決方案，旨在幫助商
 ![integration diagram](integration-diagram.png)
 
 ## 開始串接
-### Integration builder 
 首先，可以先參考官方的 [Integration builder](https://developer.paypal.com/integration-builder/) 的範例，其實寫的不錯，基本上照著界接就能做完了
 
 ![integration-builder-1](integration-builder-1.png)
 ![integration-builder-2](integration-builder-2.png)
 ![integration-builder-3](integration-builder-3.png)
 
-### 前端
+### 前端範例
 #### 安裝SDK
 ```
 npm install @paypal/react-paypal-js --save
@@ -110,7 +109,7 @@ export default function TestPaypal() {
 }
 ```
 
-## 後端
+## 後端範例
 ### PAYPAL API 請求權限 - Authorization paypal 支援，兩種token，這邊採用 <client_id:secret> 當成登入的token 
 
 依據官方文件，所述，我們可以呼叫api 取得 Access-Token 或是使用 client_id:secret 呼叫paypal API
