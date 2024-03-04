@@ -14,7 +14,7 @@ slug: integrate-paypal-checkout
 ![](riskified.png)
 
 ## Paypal 串接
-Api 看起來改了版，官方也建議用新版的rest api 來串接
+Paypal 的Api 看起來改了版，官方也建議用新版的 Rest Api v2 版本串接
 
 ## 相關文件
 * [前端串接文件](https://developer.paypal.com/docs/checkout/standard/integrate/#link-integratefrontend)
@@ -26,16 +26,15 @@ Api 看起來改了版，官方也建議用新版的rest api 來串接
 ![debug-tools](debug-tools.png)
 
 ## 進階付款功能
-額外發現進階模式多了，Venmo(社交支付)、Debit or Credit Card、Paypal Pay Later (先買後付)，但需要額外申請 PayPal 的 Braintree。
+進階模式多了，Venmo(社交支付)、Debit or Credit Card、Paypal Pay Later (先買後付)，但需要額外申請 PayPal 的 Braintree 付款功能。
 
-P.S. PayPal 的 Braintree 是一個全面的支付解決方案，旨在幫助商家接受、處理和分配支付。它解決了多個與接受線上支付相關的問題，提供了一個安全、靈活且易於集成的平台。
+P.S. PayPal 的 Braintree 是一個全面的支付解決方案，類似於Payment gateway，主要是幫助商家接受、處理和分配支付，它解決了多個與接受線上支付相關的問題，提供了一個安全、靈活且易於集成的平台。
 
-## 流程圖
+## 整合的流程圖
 ![integration diagram](integration-diagram.png)
 
 ## 開始串接
 首先，可以先參考官方的 [Integration builder](https://developer.paypal.com/integration-builder/) 的範例，其實寫的不錯，基本上照著界接就能做完了
-
 ![integration-builder-1](integration-builder-1.png)
 ![integration-builder-2](integration-builder-2.png)
 ![integration-builder-3](integration-builder-3.png)
@@ -75,8 +74,7 @@ export default function TestPaypal() {
             .then((res: any) => {
                 // TODO TYPE
                 const orderId = res.data.paymentReturnValue;
-
-                gernalPaymentParams.PaymentGatewayOrderId = orderId;
+                
                 return orderId;
             });
     };
@@ -112,7 +110,7 @@ export default function TestPaypal() {
 ## 後端範例
 ### PAYPAL API 請求權限 - Authorization paypal 支援，兩種token，這邊採用 <client_id:secret> 當成登入的token 
 
-依據官方文件，所述，我們可以呼叫api 取得 Access-Token 或是使用 client_id:secret 呼叫paypal API
+依據官方文件，所述，我們可以呼叫 api 取得 Access-Token 或是使用 client_id:secret 當成 token 去呼叫paypal API
 
 ```
 // To make REST API calls, include the bearer token in this header with the Bearer authentication scheme. The value is Bearer <Access-Token> or Basic <client_id:secret> 
@@ -178,10 +176,8 @@ public async Task<Result<PaymentResult>> ProcessAsync(GernalPaymentParameter pay
          }
       }
    };
-
-   // Use Newtonsoft.Json to serialize the object to JSON (for demonstration)
+   
    string body = JsonConvert.SerializeObject(paymentCapture, Formatting.Indented);
-
 
    var orderRsult = await HttpHelper.PostAsync<PaypalOrderResponse>(GeneralPaymentConfig.EndPoint + "/v2/checkout/orders", body, headers);
 
