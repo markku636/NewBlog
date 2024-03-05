@@ -63,7 +63,7 @@ import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { v4 as uuidv4 } from 'uuid';
 
 export default function TestPaypal() {
-    const { data: paymentInitOption, isLoading: isPaymentInitLoading } = useGetConfigQuery();
+    const { data: paymentInitOption, isLoading: isPaymentInitLoading } = useGetConfigQuery(); // rtk query 取得 payal sdk 前端初始化的參數
 
     const [Process] = useProcessMutation(); // rtk query 用來呼叫建立建立授權訂單的api
 
