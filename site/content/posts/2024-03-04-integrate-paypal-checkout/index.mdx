@@ -115,7 +115,7 @@ export default function TestPaypal() {
 ```
 
 ## 後端範例
-### Appsetting.json
+### 定義Appsetting.json
 ```
   "Payment": {
     "PaymentOptions": [
@@ -129,6 +129,18 @@ export default function TestPaypal() {
   }
 ```
 
+### 從後端環境變數組出來SDK 初始化需要的參數給前端
+```
+     public async Task<Result<Dictionary<string, string>>> GetConfig()
+     {
+        var dic = new Dictionary<string, string>();
+        dic.Add("client-id", GeneralPaymentConfig.ClientId);
+        dic.Add("currency", HardCodeKey.BasedCurrency);
+
+        var result = new Result<Dictionary<string, string>> { IsSuccess = true, Message = "", Data = dic };
+        return result;
+     }
+```
 ### PAYPAL API 請求授權 - Authorization paypal 支援，兩種token，這邊採用 <client_id:secret> 當成登入的token 
 
 依據官方文件，所述，我們可以呼叫 api 取得 Access-Token 或是使用 client_id:secret 當成 token 去呼叫paypal API
@@ -144,18 +156,30 @@ public async Task<string> Authorization()
 ### 接著，我們實作 /api/orders 建立訂單及授權
 
 ```
-public async Task<Result<PaymentResult>> ProcessAsync(GernalPaymentParameter paymentParameter)
+public async Task<Result<GeneralPaymentResult>> ProcessAsync(GernalPaymentParameter paymentParameter)
 {
-   var headers = new Dictionary<string, string>
+   var result = new Result<GeneralPaymentResult>
+   {
+      IsSuccess = false,
+      Message = "",
+      Data = new GeneralPaymentResult
+      {
+         PaymentReturnType = PaymentReturnType.OrderId,
+      }
+   };
+
+   try
+   {
+      var headers = new Dictionary<string, string>
     {
       { "Authorization", $"Basic  {Authorization()}" },
       { "PayPal-Request-Id",  HttpContext.Current.TraceIdentifier},
     };
 
-   var paymentCapture = new PaymentCapture
-   {
-      Intent = "CAPTURE",
-      PurchaseUnits = new List<PurchaseUnit>
+      var paymentCapture = new PaymentCapture
+      {
+         Intent = "CAPTURE",
+         PurchaseUnits = new List<PurchaseUnit>
    {
    new PurchaseUnit
    {
@@ -179,52 +203,54 @@ public async Task<Result<PaymentResult>> ProcessAsync(GernalPaymentParameter pay
       }
       }
       },
-      PaymentSource = new PaymentSource
-      {
-         PayPal = new PayPal
+         PaymentSource = new PaymentSource
          {
-            ExperienceContext = new ExperienceContext
+            PayPal = new PayPal
             {
-               PaymentMethodPreference = "IMMEDIATE_PAYMENT_REQUIRED",
-               BrandName = "EXAMPLE INC",
-               Locale = "en-US",
-               LandingPage = "LOGIN",
-               ShippingPreference = "SET_PROVIDED_ADDRESS",
-               UserAction = "PAY_NOW",
-               ReturnUrl = "https://example.com/returnUrl",
-               CancelUrl = "https://example.com/cancelUrl"
+               ExperienceContext = new ExperienceContext
+               {
+                  PaymentMethodPreference = "IMMEDIATE_PAYMENT_REQUIRED",
+                  BrandName = "EXAMPLE INC",
+                  Locale = "en-US",
+                  LandingPage = "LOGIN",
+                  ShippingPreference = "SET_PROVIDED_ADDRESS",
+                  UserAction = "PAY_NOW",
+                  ReturnUrl = "https://example.com/returnUrl",
+                  CancelUrl = "https://example.com/cancelUrl"
+               }
             }
          }
-      }
-   };
-   
-   string body = JsonConvert.SerializeObject(paymentCapture, Formatting.Indented);
+      };
 
-   var orderRsult = await HttpHelper.PostAsync<PaypalOrderResponse>(GeneralPaymentConfig.EndPoint + "/v2/checkout/orders", body, headers);
+      // Use Newtonsoft.Json to serialize the object to JSON (for demonstration)
+      string body = JsonConvert.SerializeObject(paymentCapture, Formatting.Indented);
 
-   return new Result<PaymentResult>
+
+      var orderRsult = await HttpHelper.PostAsync<PaypalOrderResponse>(GeneralPaymentConfig.EndPoint + "/v2/checkout/orders", body, headers);
+      result.Data.PaymentReturnValue = orderRsult.Id;
+      result.Success();
+   }
+   catch (Exception ex)
    {
-      IsSuccess = true,
-      Message = "",
-      Data = new PaymentResult
-      {
-         PaymentReturnType = PaymentReturnType.OrderId,
-         PaymentReturnValue = orderRsult.Id
-      }
-   };
+      result.Fail(ex.Message);
+      NLogUtil.WriteSEQLog($"[Paypal][ProcessAsync]Error:{ex.Message},StackTrace:{ex.StackTrace}", NLog.LogLevel.Error);
+   }
+
+   return result;
 }
 ```
 
 ### 最後，再來實作 /api/orders 請款 ( capture )
 ```
-public virtual async Task<Result<PaymentResult>> CaptureAsync(GernalPaymentParameter paymentParameter)
+public virtual async Task<Result<GeneralPaymentResult>> CaptureAsync(GernalPaymentParameter paymentParameter)
 {
-   // sandbox have some issue. cannot not support capture
-   var result = new Result<PaymentResult>
+   // sandbox is not support capture
+   var result = new Result<GeneralPaymentResult>
    {
-      IsSuccess = true,
-      Message = "",
-      Data = new PaymentResult{
+      IsSuccess = false,
+      Message = "Capture fail!",
+      Data = new GeneralPaymentResult
+      {
       }
    };
 
@@ -240,7 +266,13 @@ public virtual async Task<Result<PaymentResult>> CaptureAsync(GernalPaymentParam
     };
 
       var response = await HttpHelper.PostAsync<PaypalOrderResponse>(url, requestBody, headers);
-	  result.Susccess  = response.isSuccess;
+
+      if (response.Status == "COMPLETED")
+      {
+         result.IsSuccess = true;
+         result.Message = "Capture success";
+      }
+
    }
    catch (Exception ex)
    {
