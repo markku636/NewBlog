@@ -225,7 +225,6 @@ public async Task<Result<GeneralPaymentResult>> ProcessAsync(GernalPaymentParame
       // Use Newtonsoft.Json to serialize the object to JSON (for demonstration)
       string body = JsonConvert.SerializeObject(paymentCapture, Formatting.Indented);
 
-
       var orderRsult = await HttpHelper.PostAsync<PaypalOrderResponse>(GeneralPaymentConfig.EndPoint + "/v2/checkout/orders", body, headers);
       result.Data.PaymentReturnValue = orderRsult.Id;
       result.Success();
@@ -244,7 +243,7 @@ public async Task<Result<GeneralPaymentResult>> ProcessAsync(GernalPaymentParame
 ```
 public virtual async Task<Result<GeneralPaymentResult>> CaptureAsync(GernalPaymentParameter paymentParameter)
 {
-   // sandbox is not support capture
+   // Sandbox have some issue.cannot use capture
    var result = new Result<GeneralPaymentResult>
    {
       IsSuccess = false,
