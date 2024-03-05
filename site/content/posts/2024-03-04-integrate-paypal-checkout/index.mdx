@@ -16,10 +16,16 @@ slug: integrate-paypal-checkout
 ## Paypal 串接
 Paypal 的Api 看起來改了版，官方也建議用新版的 Rest Api v2 版本串接
 
-## 相關文件
+### 相關文件
 * [前端串接文件](https://developer.paypal.com/docs/checkout/standard/integrate/#link-integratefrontend)
 * [取得Api Access Token](https://developer.paypal.com/api/rest/requests/)
 * [建立訂單及信用請款相關的api](https://developer.paypal.com/docs/api/orders/v2/#orders_create)
+
+### Sandbox endpoint 
+```
+Sandbox. https://api-m.sandbox.paypal.com
+Live. https://api-m.paypal.com
+```
 
 ## 新版相當的方便，可以透過Event logs [偵錯](https://developer.paypal.com/dashboard/dashboard/sandbox)
 
@@ -38,6 +44,7 @@ P.S. PayPal 的 Braintree 是一個全面的支付解決方案，類似於Paymen
 ![Integration-builder-1](integration-builder-1.png)
 ![Integration-builder-2](integration-builder-2.png)
 ![Integration-builder-3](integration-builder-3.png)
+
 
 ### 前端範例
 #### 安裝SDK
@@ -108,7 +115,21 @@ export default function TestPaypal() {
 ```
 
 ## 後端範例
-### PAYPAL API 請求權限 - Authorization paypal 支援，兩種token，這邊採用 <client_id:secret> 當成登入的token 
+### 
+```
+  "Payment": {
+    "PaymentOptions": [
+      {
+        "PaymentName": "Paypal",
+        "IsSandbox": true,
+        "ClientId": "Your paypal clientId",
+        "Secret": "Your paypal secret",             
+        "EndPoint": "https://api-m.sandbox.paypal.com"
+      }
+  }
+```
+
+### PAYPAL API 請求授權 - Authorization paypal 支援，兩種token，這邊採用 <client_id:secret> 當成登入的token 
 
 依據官方文件，所述，我們可以呼叫 api 取得 Access-Token 或是使用 client_id:secret 當成 token 去呼叫paypal API
 
@@ -219,6 +240,7 @@ public virtual async Task<Result<PaymentResult>> CaptureAsync(GernalPaymentParam
     };
 
       var response = await HttpHelper.PostAsync<PaypalOrderResponse>(url, requestBody, headers);
+	  result.Susccess  = response.isSuccess;
    }
    catch (Exception ex)
    {
