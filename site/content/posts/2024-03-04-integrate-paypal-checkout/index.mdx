@@ -203,10 +203,7 @@ public virtual async Task<Result<PaymentResult>> CaptureAsync(GernalPaymentParam
    {
       IsSuccess = true,
       Message = "",
-      Data = new PaymentResult
-      {
-         PaymentReturnType = PaymentReturnType.Token,
-         //PaymentReturnValue = response
+      Data = new PaymentResult{
       }
    };
 
