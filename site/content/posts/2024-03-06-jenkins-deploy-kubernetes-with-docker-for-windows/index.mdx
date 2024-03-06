@@ -1,11 +1,11 @@
 ---
 featured: true
-title:  Docker Desktop for windows +  Jenkins  + Kubernetes  佈署筆記
+title:  Docker Desktop for Windows +  Jenkins  + Kubernetes  佈署筆記
 date:   2024-03-06 01:01:35 +0800
 thumbnail:  jenkins-deploy-kubernetes-with-docker-for-windows.jpg
 category:  DevOps
-tags:   ['Kubernetes','docker','widnows']
-description : Docker Desktop for windows +  Jenkins  + Kubernetes  佈署筆記
+tags:   ['Kubernetes','docker','widnows','jenkins']
+description : Docker Desktop for Windows +  Jenkins  + Kubernetes  佈署筆記
 author : Mark Ku
 slug: jenkins-deploy-kubernetes-with-docker-for-windows
 ---
@@ -102,9 +102,8 @@ docker cp C:/Users/Mark/.kube jenkins:/root/.kube // 複製檔案到 Jenkins 容
 * Kubernetes plugin
 * Kubernetes CLI Plugin
 ![install kubernetes plugin](install-kubernetes-plugin.png)
-2. set up cloud
+2. [set up cloud](http://localhost:8080/configureClouds/)
 ![set up cloud](set-cloud.png)
-http://localhost:8080/configureClouds/
 3. set Disable https certificate check => true
 ![disable http certificate check](disable-http-certificate-check.png)
 4. Kubernetes URL => kubectl cluster-info
@@ -183,7 +182,7 @@ pipeline {
 }
 ```
 
-## 在github repo 裡 next-ec 建麼 k8s 的 YAML 佈署設定檔
+## 在github repo 裡 next-ec 建立 Kubernetes 的 YAML 佈署設定檔(next-js-deployment.yaml) 
 ```
 apiVersion: v1
 kind: Deployment
