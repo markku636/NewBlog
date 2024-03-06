@@ -27,7 +27,7 @@ slug: jenkins-deploy-kubernetes-with-docker-for-windows
 公司的人員不擅長用 Linux 
 
 ## 佈署流程
-![k8s deployment](windows-k8s-deployment.png)
+![Kubernetes deployment flow](windows-k8s-deployment.png)
 
 ## 預先準備
 ### 1.安裝Docker Desktop，並勾選 Kubernetes 及 Show system containers
@@ -79,10 +79,6 @@ kubectl config view // 同等於訪問 C:\Users\Mark\.kube\config
 ### 安裝 Jenkins 
 參考先前撰寫的[文章](https://blog.markkulab.net/docker-jenkins-build-docker-image-and-github-integration/) 
 
-### 額外安裝相關的插件
-* Kubernetes plugin
-* Kubernetes CLI Plugin
-
 ### 在Jenkins 容器中中安裝 kubectl -  kubectl: command not found
 ```
 docker exec -it -uroot jenkins bash // 進入jenkins 容器中
@@ -103,7 +99,9 @@ docker cp C:/Users/Mark/.kube jenkins:/root/.kube // 複製檔案到 Jenkins 容
 
 https://blog.csdn.net/m0_45806184/article/details/128190069
 ### Jenkins 透過 Kubernetes CLI 連線 kubernetes 
-1. 要想把jenkins關聯到k8s中需要安裝幾個插件，打開  “系統管理” =》“管理插件” 然後安裝 Kubernetes plugin
+1. 要想把jenkins關聯到Kubernetes中需要安裝幾個最件，打開  系統管理 > 套件管理
+* Kubernetes plugin
+* Kubernetes CLI Plugin
 ![install kubernetes plugin](install-kubernetes-plugin.png)
 2. set up cloud
 ![set up cloud](set-cloud.png)
