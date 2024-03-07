@@ -79,7 +79,7 @@ kubectl config view // 同等於訪問 C:\Users\Mark\.kube\config
 ### 安裝 Jenkins 
 參考先前撰寫的[文章](https://blog.markkulab.net/docker-jenkins-build-docker-image-and-github-integration/) 
 
-### 在Jenkins 容器中中安裝 kubectl -  kubectl: command not found
+### 在Jenkins 容器中中安裝 kubectl
 ```
 docker exec -it -uroot jenkins bash // 進入jenkins 容器中
  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.29.1/bin/linux/amd64/kubectl // 下載 kubectl
@@ -234,9 +234,13 @@ spec:
 ## 結論
 K8S 功能及配置還蠻複雜的，光配置就花蠻多時間，蠻多細節還需要花些時間實驗及測試。
 
-### no matcher for kind "Deploy" in version v1 問題
+## 其他遇到問題
+### 1. no matcher for kind "Deploy" in version v1 問題
+yaml 檔改了幾次版本，請依據[官方文件](https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport)撰寫最新的 YAML 佈署檔
+### 2. kubectl: command not found
+[需要在Jenkins 容器中安裝 kubectl](https://blog.markkulab.net/jenkins-deploy-kubernetes-with-docker-for-windows/#%E5%9C%A8jenkins-%E5%AE%B9%E5%99%A8%E4%B8%AD%E4%B8%AD%E5%AE%89%E8%A3%9D-kubectl)
 
-yaml 改了幾次版本，請依據[官方文件](https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport)撰寫最新的 YAML 佈署檔
+
 
 ## 參考資料
 * [從0開始學習DevOps，並部署CICD至Java專案中 ](https://ithelp.ithome.com.tw/articles/10339029)
