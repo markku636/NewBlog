@@ -75,7 +75,7 @@ kubectl config view // 同等於訪問 C:\Users\Mark\.kube\config
 ```
 ![kube config](kube-config.png)
 
-## Jenkins 配置 K8S
+## Jenkins 配置 Kubernetes
 ### 安裝 Jenkins 
 參考先前撰寫的[文章](https://blog.markkulab.net/docker-jenkins-build-docker-image-and-github-integration/) 
 
@@ -231,6 +231,8 @@ spec:
 此時執行 Jenkins 執行建置，應該己經可以執行成功。
 ![Jenkins 執行結果](final.png)
 
+## 結論
+K8S 功能及配置還蠻複雜的，光配置就花蠻多時間，蠻多細節還需要花些時間實驗及測試。
 
 ### no matcher for kind "Deploy" in version v1 問題
 
