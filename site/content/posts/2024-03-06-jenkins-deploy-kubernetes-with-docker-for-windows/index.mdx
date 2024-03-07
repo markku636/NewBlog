@@ -172,7 +172,7 @@ pipeline {
 		
         stage("Deply") {
              steps {
-                    withKubeConfig([credentialsId: 'secret', serverUrl: 'https://host.docker.internal:6443']) {                     
+                    withKubeConfig([credentialsId: 'k8s-secret', serverUrl: 'https://host.docker.internal:6443']) {                     
                      sh 'kubectl apply -f ./next-js-deployment.yaml'
                     }
                 
