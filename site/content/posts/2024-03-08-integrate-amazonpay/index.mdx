@@ -24,12 +24,12 @@ slug: integrate-amazonpay
 
 ![Find Integration central](find-integration-central.png)
 
-### 因為我有兩個國家的帳號，對照後發現這邊有個bug，有個帳號會找不到上傳 public key的功能
+### 因為我有兩個國家的帳號，對照後發現這邊有個bug，有個帳號會找不到Create keys按鈕(上傳 public key)功能
 ![Integration central - 1](integration-central-1.png)
 如果你沒有Self-developed 下拉選項，此時可以選擇 Woo Commerce
 ![Integration central - 2](integration-central-2.png)
 
-### 接著依據官方文件[doc](https://developer.amazon.com/docs/amazon-pay-api-v2/manually-generating-key-pairs.html#generating-key-pair) , 產生 rsa 公鑰與私鑰
+### 接著依據官方文件[Doc](https://developer.amazon.com/docs/amazon-pay-api-v2/manually-generating-key-pairs.html#generating-key-pair) , 產生 rsa 公鑰與私鑰
 
 ```
 ssh-keygen -t rsa -b 2048 -m PKCS8 -f privateKey.pem
