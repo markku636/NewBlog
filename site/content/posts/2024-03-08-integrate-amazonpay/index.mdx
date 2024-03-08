@@ -46,7 +46,7 @@ ssh-keygen -f privateKey.pem -e -m PKCS8 > publicKey.pub
 ![store id and secret](store-id-and-secret.png)
 
 ## 測試方式
-* 因為Amazon pay需要導頁來導頁去，需要有https，也要有自己的domain，我這邊是透過Cloudfalre tunnel 當反向代理測試
+* 因為Amazon pay付款需要導頁來導頁去，需要有https，也要有自己的domain，我這邊是透過Cloudfalre tunnel 當反向代理測試
 * 正式和測試的金鑰一樣其實蠻方便的，要使用 Sandbox 環境 只要初始化時將 isSandbox 設定成true 即可
 * 關於測試帳號部份，進入後台切到Sandbox view 就能找到 [Test accunts](https://sellercentral.amazon.de/external-payments/sandbox/home)，這邊就可以增加sandbox 的測試帳號。
 
