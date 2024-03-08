@@ -20,8 +20,8 @@ slug: integrate-amazonpay
 Amazon pay checkout 其實就很像 payapal express 的 checkout 
 ![Amazonpay integration flow](amazonpay-integration-flow.png)
 
-## 上傳自己的公鑰及取得相關秘鑰
-### 首先，進入後台 > 選擇Sandbox View > [Integration central](https://sellercentral.amazon.de/gp/pyop/seller/integrationcentral?ref=py_intcentr_confcard_sboxhome_GB) 
+## 首先，取得Amazon pay 相關秘鑰
+### 接著，進入後台 > 選擇Sandbox View > [Integration central](https://sellercentral.amazon.de/gp/pyop/seller/integrationcentral?ref=py_intcentr_confcard_sboxhome_GB) 
 
 ![Find Integration central](find-integration-central.png)
 
@@ -30,14 +30,14 @@ Amazon pay checkout 其實就很像 payapal express 的 checkout
 如果你沒有Self-developed 下拉選項，此時可以選擇 Woo Commerce
 ![Integration central - 2](integration-central-2.png)
 
-### 接著依據官方文件[Doc](https://developer.amazon.com/docs/amazon-pay-api-v2/manually-generating-key-pairs.html#generating-key-pair) , 產生 rsa 公鑰與私鑰
+### 依據官方文件[Doc](https://developer.amazon.com/docs/amazon-pay-api-v2/manually-generating-key-pairs.html#generating-key-pair) , 產生 rsa 公鑰與私鑰
 
 ```
 ssh-keygen -t rsa -b 2048 -m PKCS8 -f privateKey.pem
 ssh-keygen -f privateKey.pem -e -m PKCS8 > publicKey.pub
 ```       
 
-### 因為第一個選項應該是壞了，只會產生公鑰，而無法下載私鑰，請選擇第二個選項，請自行上傳 Amazon pay 公鑰，
+### 因為第一個選項功能應該是壞了，只會產生公鑰，而無法下載私鑰，請選擇第二個選項，請自行上傳 Amazon pay 公鑰，
 
 ![Upload public key](upload-public-key.png)
 ### 此時在這畫面，你就能找到大部份所需要的金鑰
