@@ -18,7 +18,8 @@ Paypal 的Api 看起來昇級了，官方也建議用新版的 Rest api v2 版�
 
 ### 相關文件
 * [前端串接文件](https://developer.paypal.com/docs/checkout/standard/integrate/#link-integratefrontend)
-* [取得Api Access Token](https://developer.paypal.com/api/rest/requests/)
+* [取得Api Access Token](https://developer.paypal.com/api/rest/authentication/)
+* [Api Request相關](https://developer.paypal.com/api/rest/requests/)
 * [建立訂單及授權請款相關的api](https://developer.paypal.com/docs/api/orders/v2/#orders_create)
 
 ### Api Endpoint 
@@ -34,6 +35,8 @@ Live. https://api-m.paypal.com
 
 ![debug-tools](debug-tools.png)
 
+## 前端的錯誤也可以透過瀏覽器偵錯
+![console-debug.png](console-debug.png)
 ## 進階付款功能
 進階模式多了，Venmo(社交支付)、Debit or Credit Card、Paypal Pay Later (先買後付)，但需要申請 PayPal 的 Braintree 付款閘道。
 
@@ -73,31 +76,32 @@ export default function TestPaypal() {
     const [Capture] = useCaptureMutation(); // rtk query 用來呼叫提取信用請款的api
 
     const gernalPaymentParams: IGeneralPaymentParameter = {
-        PaymentTypeCode: PaymentOptions[PaymentOptions.Paypal],
-        OrderNo: uuidv4(),
-        FinalAmount: 100,
+        paymentTypeCode: PaymentOptions[PaymentOptions.Paypal],
+        rderNo: uuidv4(),        
     } as IGeneralPaymentParameter;
 
     const createOrder = (): Promise<string> => {
         return Process(gernalPaymentParams)
             .unwrap()
-            .then((res: any) => {
-                // TODO TYPE
-                const orderId = res.data.paymentReturnValue;
-                
-                return orderId;
+            .then((res: ApiResponse<IGeneralPaymentResult>) => {
+                if (res.isSuccess) {
+                    const orderId = res.data.paymentReturnValue;
+
+                    return orderId;
+                }
+                return '';
             });
     };
 
     const onApprove = (data: any) => {
         return Capture(gernalPaymentParams)
             .unwrap()
-            .then((res: any) => {
-                const orderId = res.data.paymentReturnValue;
-
-                gernalPaymentParams.PaymentGatewayOrderId = orderId;
-
-                alert('Payment success');
+            .then((res: ApiResponse<IGeneralPaymentResult>) => {
+                if (res.isSuccess) {
+                    debugger;
+                    paypalOrderId.current = res.data.paymentReturnValue;
+                    alert('Payment success');
+                }
             });
     };
 
@@ -139,6 +143,7 @@ export default function TestPaypal() {
         var dic = new Dictionary<string, string>();
         dic.Add("client-id", GeneralPaymentConfig.ClientId);
         dic.Add("currency", HardCodeKey.BasedCurrency);
+		// dic.Add("disable-funding", "credit,card"); // 關閉信用卡及借記卡
 
         var result = new Result<Dictionary<string, string>> { IsSuccess = true, Message = "", Data = dic };
         return result;
@@ -285,6 +290,8 @@ public virtual async Task<Result<GeneralPaymentResult>> CaptureAsync(GernalPayme
    return result;
 }
 ```
+## 額外發現 paypal 也能使用信用卡功能不登入
+![paypal credit card](paypal-credit-card.png)
 
 ### 參考文章
 * [美國電子商務實務筆記 - 信用卡授權(Authorize)及請款(Capture)](https://blog.markkulab.net/usa-ecommerce-note-credit-card-authorize-and-capture/)
