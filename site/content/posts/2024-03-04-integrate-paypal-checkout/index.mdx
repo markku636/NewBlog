@@ -64,7 +64,7 @@ npm install @paypal/react-paypal-js --save
 'use client'; // next js client component
 import { PaymentOptions } from '@/const/payment/payment-option';
 import { useCaptureMutation, useGetConfigQuery, useProcessMutation } from '@/redux/api/test-payment-apiSlice';
-import { IGeneralPaymentParameter } from '@/typing/cart';
+import { IGernalPaymentParams } from '@/typing/cart';
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -75,10 +75,10 @@ export default function TestPaypal() {
 
     const [Capture] = useCaptureMutation(); // rtk query 用來呼叫提取信用請款的api
 
-    const gernalPaymentParams: IGeneralPaymentParameter = {
+    const gernalPaymentParams: IGernalPaymentParams = {
         paymentTypeCode: PaymentOptions[PaymentOptions.Paypal],
-        rderNo: uuidv4(),        
-    } as IGeneralPaymentParameter;
+        orderNo: uuidv4(),        
+    } as IGernalPaymentParams;
 
     const createOrder = (): Promise<string> => {
         return Process(gernalPaymentParams)
@@ -290,7 +290,7 @@ public virtual async Task<Result<GeneralPaymentResult>> CaptureAsync(GernalPayme
    return result;
 }
 ```
-## 額外發現 paypal 也能使用信用卡功能不登入
+## Paypal 不登入也能使用信用卡
 ![paypal credit card](paypal-credit-card.png)
 
 ### 參考文章
