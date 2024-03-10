@@ -21,7 +21,7 @@ slug: open-souce-ab-test-with-featureprobe
 ## 假定測試情境
 設計師設計了兩個Banner，想了解Banner A、Banner B，想了解那個Banner 的使用者點擊率比較好。
 
-## 參考了官方文件[連結](https://docs.featureprobe.com/)
+## 參考了［官方文件](https://docs.featureprobe.com/)
 
 ## 首先，我們得先建立應用程式，建立 Docker 容器
 
@@ -31,8 +31,7 @@ git clone https://gitee.com/featureprobe/FeatureProbe.git
 cd FeatureProbe
 docker compose up
 ```
-
-## 接著，訪問先前建立的Featureprobe應用程式後台[連結](http://localhost:4009)
+## 再接著，訪問先前建立的［Featureprobe應用程式後台](http://localhost:4009)
 username: admin  
 password: Pass1234
 
@@ -49,7 +48,7 @@ password: Pass1234
 ![set up conversion event](set-up-conversion-event.png)
 
 ## 撰寫測試程式 
-點選 Connect SDK 按鈕，就會跳出一些程式的範例．範例雖然漏了一些東西，因此我小改了一下。
+點選 Connect SDK 按鈕，就會跳出一些程式的範例．但範例雖然漏了一些東西，因此我小改了一下。
 
 ### 安裝 SDK 
 ```
@@ -197,7 +196,7 @@ interface IFeatureProbe {
 ## 此時只要在畫面重新整理，就會依據先前設定的比例出現相對應的測試情境
 ![final-test](final-test.png)
 
-## 如何除錯 - 按下 Open 才開啟除錯模式，就像Google 的除錯模式
+## 如何除錯 (畫面上按下 Open 才開啟除錯模式)
 ![debug tools](debug-tracker.png)
 
 ## 數據報表
