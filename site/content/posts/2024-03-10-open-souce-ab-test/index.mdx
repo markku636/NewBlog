@@ -18,10 +18,12 @@ slug: open-souce-ab-test-with-featureprobe
 * 測試不同的定價策略或促銷活動對銷售的影響。
 * 衡量重新設計的頁面或功能，有沒有比以前更好，並識別用戶界面中的問題。
 
-## 官方文件
-[連結](https://docs.featureprobe.com/)
+## 官方文件[連結](https://docs.featureprobe.com/)
 
-## 建立 Docker 容器
+## 假定測試事件
+設計師設計了兩個Banner，想了解Banner A、Banner B，想了解那個Banner 的使用者點擊率比較好。
+
+## 首先，我們得先建立應用程式，建立 Docker 容器
 
 ```
 git clone https://gitee.com/featureprobe/FeatureProbe.git
@@ -29,14 +31,11 @@ git clone https://gitee.com/featureprobe/FeatureProbe.git
 cd FeatureProbe
 docker compose up
 ```
-## 接著訪問此[連結](http://localhost:4009)
+![A/B test](abtest.jpg)
+
+## 接著，訪問先前建立的Featureprobe應用程式後台[連結](http://localhost:4009)
 username: admin
 password: Pass1234
-
-## 假定測試事件
-設計師設計了兩個Banner，想了解Banner A、Banner B，想了解那個Banner 的使用者點擊率比較好。
-
-![A/B test](abtest.jpg)
 
 ### 新增測試事件
 ![create ab test case](create-ab-test.png)
