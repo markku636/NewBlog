@@ -10,7 +10,7 @@ author : Mark Ku
 slug: open-souce-ab-test-with-featureprobe
 ---
 ## 時空背景
-之前公司將外包給美國的網站優化機構（ Conversion rate optimization agency)，因為美國人工及軟體月費非常貴，且又常常將我們網站改壞，因此我
+之前公司將外包給美國的網站優化機構(Conversion rate optimization agency)，因為美國人工及軟體月費非常的貴，且又常常將我們網站改壞，因此我
 評估了幾套套A/B Test 當成替代解決方案，但大多都要收費，找了很久才找到一套開源免費，又好用的A/B Test工具 - Featureprobe。
 
 ## 了解  AB Test 能幫助我們做些什麼呢?
@@ -26,7 +26,7 @@ slug: open-souce-ab-test-with-featureprobe
 
 ## 參考了 [官方文件](https://docs.featureprobe.com/)
 
-## 首先，我們得先建立應用程式，建立 Docker 容器
+## 首先，我們得先建立 FeatureProbe 容器應用程式
 
 ```
 git clone https://gitee.com/featureprobe/FeatureProbe.git
@@ -41,7 +41,7 @@ password: Pass1234
 ### 新增測試事件
 ![create ab test case](create-ab-test.png)
 
-### 接著我們開始設定預設規則，依據設定的百分比顯示測試項目
+### 接著我們開始設定預設規則，這裡的百分比，會影響測試項目的出現機率
 ![set default rule](set-default-rule.png)
 
 ### 啟用測試，並按下發佈按鈕(Publish)
