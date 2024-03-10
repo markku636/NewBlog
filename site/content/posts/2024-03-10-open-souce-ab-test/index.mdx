@@ -211,7 +211,7 @@ interface IFeatureProbe {
 
 ## 進階應用，依據傳入條件及分組規則獲取相對應的測試情境
 
-當我成規則中指定 City 等於台北則，顯示 Banner A，City 等於高雄，就顯示Banner B ，在程式中指定使用者為台北的用戶，則可以彈性依據不同的資料，而給不同的測試。
+當我成規則中指定 City 等於台北則，顯示 Banner A，City 等於高雄，就顯示Banner B ，在程式中指定使用者為台北的用戶，就可以彈性依據不同的資料，而給不同的測試。
 
 ```
 const user = new FPUser().with('City', '台北');
