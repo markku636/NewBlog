@@ -13,8 +13,8 @@ slug: open-souce-ab-test-with-featureprobe
 之前公司將外包給美國的網站優化機構(Conversion rate optimization agency)，因為美國人工及軟體月費非常的貴，且又常常將我們網站改壞，因此我
 評估了幾套套A/B Test 當成替代解決方案，但大多都要收費，找了很久才找到一套開源免費，又好用的A/B Test工具 - Featureprobe。
 
-## 了解 A/B Test 能幫助我們做些什麼呢?
-透過A/B Test 我們可以得知
+## 了解  AB Test 能幫助我們做些什麼呢?
+透過AB 我們可以得知
 * 通過測試不同的頁面佈局、按鈕顏色、文案等，找出哪些元素更能激勵用戶採取期望的行動，如購買產品、註冊會員或下載應用，藉此提高轉換率。
 * 測試不同的定價策略或促銷活動對銷售的影響。
 * 衡量重新設計的頁面或功能，有沒有比以前更好，並識別用戶界面中的問題。
@@ -153,24 +153,6 @@ interface IFeatureProbe {
     trackEvent: (eventName: string) => void;
 }
 
-#### 再來撰寫 Banner B Component
-```
-'use client';
-const BannerB = ({ featureValue, trackEvent }: IFeatureProbe) => {
-    const clickHandler = () => {
-        alert(featureValue + ' clicked');
-        trackEvent('banner_click');
-    };
-
-    return (
-        <div id="boolean-result" onClick={clickHandler}>
-            {featureValue.toString()}
-        </div>
-    );
-};
-
-export default BannerB;
-
 ```
 #### 新增 AB Test 的頁面
 ```
@@ -189,11 +171,28 @@ export default function Page() {
             {isLoading && <div>Loading...</div>}
 
             {!isLoading && <BannerA featureValue={featureValue} trackEvent={trackEvent}></BannerA>}
-            {!isLoading && <BannerB featureValue={featureValue} trackEvent={trackEvent}></BannerB>}
+            {!isLoading && <BannerA featureValue={featureValue} trackEvent={trackEvent}></BannerA>}
         </main>
     );
 }
 ```
+#### 再來撰寫 Banner B Component
+```
+'use client';
+const BannerB = ({ featureValue, trackEvent }: IFeatureProbe) => {
+    const clickHandler = () => {
+        alert(featureValue + ' clicked');
+        trackEvent('banner_click');
+    };
+
+    return (
+        <div id="boolean-result" onClick={clickHandler}>
+            {featureValue.toString()}
+        </div>
+    );
+};
+
+export default BannerB;
 
 interface IFeatureProbe {
     featureValue: any;
