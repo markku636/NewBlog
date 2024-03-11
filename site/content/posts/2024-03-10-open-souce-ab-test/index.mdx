@@ -200,6 +200,7 @@ interface IFeatureProbe {
     trackEvent: (eventName: string) => void;
 }
 ```
+## 因為我們使用 Next js 因此，我們不能把頁面cache 起來，A/B Test 頁面必須是SSR 或是CSR
 ## 此時只要在畫面重新整理，就會依據先前設定的比例出現相對應的測試情境
 ![final-test](final-test.png)
 
@@ -227,6 +228,8 @@ const user = new FPUser().with('City', '台北');
 
 ## 最後
 做A/B Test 的成本蠻高的，應該是拿重要功能，小範圍的去做比較，透過使用Featureprobe進行A/B測試，我們可以快速得到了實用的洞察，Featureprobe以其直觀的用戶界面和強大的分析功能脫穎而出，使測試設計和結果評估變得簡單高效，我們確定了哪些改動最能提高用戶參與度和轉化率，從而協助我們的產品迭代，Featureprobe的靈活性和易用性對於支持多樣化測試非常有幫助，確保我們能夠基於數據做出精確的產品決策。
+
+
 
 ## 參考資料
 * [如何提供一个可信的AB测试解决方案](https://tech.meituan.com/2023/08/24/ab-test-practice-in-meituan.html)
