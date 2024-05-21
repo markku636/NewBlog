@@ -37,7 +37,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain_openai import AzureChatOpenAI
 
 # 設定OpenAI環境變數
-os.environ["AZURE_OPENAI_ENDPOINT"] = "https://markku666ai.openai.azure.com/"
+os.environ["AZURE_OPENAI_ENDPOINT"] = "https://xxx.openai.azure.com/"
 os.environ["AZURE_OPENAI_API_VERSION"] = "2024-02-15-preview"
 os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT_NAME"] = "gpt3-turbo"
 
@@ -120,8 +120,6 @@ def translate_speech_to_text_continuous():
 
 if __name__ == "__main__":
     translate_speech_to_text_continuous()
-
-
 ```
 ## 運行結果
 1. 當您運行這個Python腳本時，執行畫面的交互將會按照以下步驟展開：  
