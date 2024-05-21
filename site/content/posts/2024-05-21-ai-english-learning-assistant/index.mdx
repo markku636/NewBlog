@@ -1,0 +1,78 @@
+---
+featured: true
+title:   利用AI強化語言學習：打造即時語音翻譯互動小工具
+date:  2024-05-21 01:01:35 +0800
+thumbnail:  ai-english-learning-assistant.jpg
+category:  AI  
+tags:   ['ai-english-assistant' ]
+description : 利用AI強化語言學習：打造即時語音翻譯互動小工具
+author : Mark Ku
+slug: ai-english-learning-assistant
+---
+
+## 前言
+在多語言溝通日益重要的今天，掌握一門外語已經成為許多人的目標。不過，語言學習不僅需要時間和耐心，還需要有效的實踐機會。本文將介紹如何使用最新的人工智能技術，結合微軟的Azure語音識別和OpenAI的ChatGPT，來創建一個可以即時翻譯和回應的工具，幫助使用者更好地學習和應用新語言。
+
+## 預先準備
+在開始之前，你需要準備以下幾樣東西：
+* Python 環境：用於執行我們的腳本。
+* Microsoft Azure 訂閱：用於訪問語音識別服務。
+* Azure OpenAI API 密鑰：用於生成基於ChatGPT的回答。
+
+## 運作原理
+這個系統的核心是結合了Azure的語音識別技術和OpenAI的語言理解能力。整個流程可以分為以下幾個步驟：  
+
+1. 語音輸入：系統通過麥克風捕捉用戶的語音。  
+2. 語音識別：Azure的語音服務將捕捉到的語音轉換成文本。  
+3. 生成回答：將識別出的文本傳送給ChatGPT，生成三個簡單的回答。  
+4. 顯示結果：將ChatGPT提供的回答即時顯示給用戶。  
+
+程式碼實現
+下面是一個簡單的Python腳本示例，展示了如何整合Azure語音服務和OpenAI的ChatGPT模型：
+
+```
+import os
+import azure.cognitiveservices.speech as speechsdk
+from openai import ChatCompletion
+
+# Azure 設定
+speech_key = "your_speech_key"
+service_region = "your_service_region"
+speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+
+# OpenAI 設定
+openai_api_key = "your_openai_api_key"
+
+def main():
+    # 初始化語音識別器
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
+
+    # 監聽一次語音輸入
+    print("請說些什麼...")
+    result = speech_recognizer.recognize_once()
+
+    # 檢查結果
+    if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+        print("識別的文本:", result.text)
+        # 生成回答
+        response = ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "system", "content": "You are a friendly AI."},
+                      {"role": "user", "content": result.text}],
+            api_key=openai_api_key
+        )
+        print("AI 回答:")
+        for response_message in response['choices'][0]['message']['content']:
+            print(response_message)
+    elif result.reason == speechsdk.ResultReason.NoMatch:
+        print("沒有識別到語音。")
+    elif result.reason == speechsdk
+
+```
+## 運行結果
+1. 當您運行這個Python腳本時，執行畫面的交互將會按照以下步驟展開：  
+2. 啟動提示：當您啟動腳本後，系統會首先顯示"請說些什麼..."，提示用戶開始說話。  
+3. 語音輸入：此時您可以向麥克風說話。您說的話將被系統捕捉。  
+4. 顯示識別結果：一旦語音輸入結束，Azure的語音識別服務會處理這段語音並將其轉換為文字。這個轉換過程通常非常快速。系統將在屏幕上顯示識別的文本，例如："識別的文本: 你好，我想了解更多關於AI的資訊。"  
+5. 回答生成：識別的文字會被發送到ChatGPT，ChatGPT會基於這些文本生成回答。這個過程大約需要幾秒鐘。  
+![final-screen](final-screen.jpg)
