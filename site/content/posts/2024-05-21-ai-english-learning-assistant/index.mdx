@@ -33,40 +33,94 @@ slug: ai-english-learning-assistant
 ```
 import os
 import azure.cognitiveservices.speech as speechsdk
-from openai import ChatCompletion
+from langchain.prompts import ChatPromptTemplate
+from langchain_openai import AzureChatOpenAI
 
-# Azure 設定
-speech_key = "your_speech_key"
-service_region = "your_service_region"
-speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+# 設定OpenAI環境變數
+os.environ["AZURE_OPENAI_ENDPOINT"] = "https://markku666ai.openai.azure.com/"
+os.environ["AZURE_OPENAI_API_VERSION"] = "2024-02-15-preview"
+os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT_NAME"] = "gpt3-turbo"
 
-# OpenAI 設定
-openai_api_key = "your_openai_api_key"
+# 初始化OpenAI模型
+model = AzureChatOpenAI(
+    openai_api_version=os.environ["AZURE_OPENAI_API_VERSION"],
+    azure_deployment=os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT_NAME"],
+)
 
-def main():
-    # 初始化語音識別器
-    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
+# 為OpenAI設定聊天模板
+chat_template = ChatPromptTemplate.from_messages(
+    [
+        ("system", "你是一個國中英文老師.善於用簡單的單詞溝通."),
+        ("human", "關於英文問題{question}, 給我怎麼回覆的三個句子，並給中文翻譯. 比較音節困難的單字額外給音標，音標放在單字後面"),
+    ]
+)
 
-    # 監聽一次語音輸入
-    print("請說些什麼...")
-    result = speech_recognizer.recognize_once()
+def get_responses(question):
+    message = chat_template.format_messages(question=question)
+    response = model.invoke(message)
+    return response.content
 
-    # 檢查結果
-    if result.reason == speechsdk.ResultReason.RecognizedSpeech:
-        print("識別的文本:", result.text)
-        # 生成回答
-        response = ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "system", "content": "You are a friendly AI."},
-                      {"role": "user", "content": result.text}],
-            api_key=openai_api_key
-        )
-        print("AI 回答:")
-        for response_message in response['choices'][0]['message']['content']:
-            print(response_message)
-    elif result.reason == speechsdk.ResultReason.NoMatch:
-        print("沒有識別到語音。")
-    elif result.reason == speechsdk
+def translate_speech_to_text_continuous():
+    # 用於語音翻譯的Azure訂閱金鑰和服務區域
+    speech_key = "<Your-Azure-Speech-Key>"
+    service_region = "eastus"
+    from_language = "en-US"
+    to_language = "zh-Hant"
+
+    # 創建語音翻譯配置和識別器
+    translation_config = speechsdk.translation.SpeechTranslationConfig(
+        subscription=speech_key, region=service_region,
+        speech_recognition_language=from_language)
+    translation_config.add_target_language(to_language)
+
+    recognizer = speechsdk.translation.TranslationRecognizer(translation_config=translation_config)
+
+    with open("translation_log.txt", "w", encoding="utf-8") as log_file:
+        def recognized_handler(evt):
+            result = evt.result
+            if result.reason == speechsdk.ResultReason.TranslatedSpeech:
+                recognized_text = f"Recognized: {result.text}\n"
+                translated_text = f"Translated into Traditional Chinese: {result.translations['zh-Hant']}\n"
+                print(recognized_text)
+                print(translated_text)
+                log_file.write(recognized_text)
+                log_file.write(translated_text)
+
+                # 如果識別的文字是問題，獲得簡單的回答
+                responses = get_responses(result.text)
+                print("例句:\n")
+                print(responses)
+                log_file.write(f"Responses: {responses}\n")
+
+            elif result.reason == speechsdk.ResultReason.NoMatch:
+                no_match_text = "No speech could be recognized\n"
+                print(no_match_text)
+                # log_file.write(no_match_text)
+            elif result.reason == speechsdk.ResultReason.Canceled:
+                cancellation_details = result.cancellation_details
+                canceled_text = f"Speech Recognition canceled: {cancellation_details.reason}\n"
+                # print(canceled_text)
+                # log_file.write(canceled_text)
+                if cancellation_details.reason == speechsdk.CancellationReason.Error:
+                    error_text = f"Error details: {cancellation_details.error_details}\n"
+                    print(error_text)
+                    log_file.write(error_text)
+
+        recognizer.recognized.connect(recognized_handler)
+
+        # 開始連續識別
+        recognizer.start_continuous_recognition()
+        print("Listening...")
+
+        try:
+            # 保持程序運行直到按Enter鍵停止
+            input("Press Enter to stop...\n")
+        finally:
+            recognizer.stop_continuous_recognition()
+
+if __name__ == "__main__":
+    translate_speech_to_text_continuous()
+
 
 ```
 ## 運行結果
