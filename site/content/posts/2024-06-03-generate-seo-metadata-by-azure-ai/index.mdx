@@ -1,0 +1,119 @@
+---
+featured: true
+title:   利用 Azure AI、LangChain 與 Next.js 提升 SEO 效益
+date:  2024-06-03 01:01:35 +0800
+thumbnail:  generate-seo-metadata-by-azure-ai.jpg
+category:  AI  
+tags:   ['generate-seo-metadata-by-azure-ai','ai','seo' ]
+description : 利用 Azure AI、LangChain 與 Next.js 提升 SEO 效益
+author : Mark Ku
+slug: generate-seo-metadata-by-azure-ai
+---
+
+## 前言
+因為德國網站相當的小，因此沒有太多的使用者，可以維護SEO資料，且我們都知道AI 擅長文字處理，因此將頁面預渲染時資料傳給AI，生成 SEO Meta 資料 ( 標題、描述、 關鍵字) 是很省力的方式。  
+
+本文將介紹如何利用 Azure AI、LangChain 與 Next.js 結合，自動生成符合 SEO 的元標籤，這不僅使創建 SEO 內容的過程更加便利，也確保了其相關性和最佳化。
+
+## 技術整合：Next.js、Azure AI 與 LangChain
+
+Next.js 是一個廣受歡迎的 React 框架，擅長建立靜態和伺服器渲染應用，利用其 API Rourte，開發者可以直接在 Next.js 環境中處理後端功能。Azure AI 提供強大的語言模型，能夠根據給定的提示生成類人的文本。此外，LangChain 是一個靈活的工具，可以整合多個 AI 模型，為特定任務提供結構化的輸出，使得生成的 SEO 內容更為精確和具目標性。
+
+## 自動化生成符合 SEO 的元標籤
+
+在 Next.js 中部署的 `generateSEOMetadata` 函數利用 Azure Chat OpenAI 和 LangChain 處理產品描述，並生成相應的元標題、描述和關鍵詞。LangChain 的輸出解析器（Output Parser）確保從 AI 模型接收到的回應符合 SEO 的需求，只提取最關鍵的信息。
+
+#### 實作原理
+1. **請求處理：** 在 Next.js 建立一個 API 傳入 頁面描述
+2. **語言處理：** 利用 Azure Chat OpenAI 與 LangChain 根據產品描述生成 SEO 優化的標題、描述和關鍵詞
+3. 儲存關鍵詞給下次預渲染使用，同時也節省 Azure AI 的用量。
+4. **結果回傳：** 生成的元標籤將被回傳並用於網頁的預渲染，進而在搜尋引擎中達到更好的排名。
+
+透過結合 Next.js 的前端技術、Azure AI 的語言生成能力與 LangChain 的結構化輸出，我們能夠創建一個高效且自動化的流程來優化網站的 SEO 表現，這種方法不僅節省了人力資源，也因其精確和針對性的元標籤生成，而提高了網站在搜尋引擎中的能見度和排名。
+
+##　Ｎｅｘｔ　ｊｓ　程式碼　api/lang-chain/seo-schema.ts
+```
+import { BaseOutputParser } from '@langchain/core/output_parsers';
+import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { AzureChatOpenAI } from '@langchain/openai';
+
+import { NextApiRequest, NextApiResponse } from 'next';
+
+class CustomOutputParser extends BaseOutputParser<string[]> {
+    async parse(output: any) {
+        const json = await JSON.parse(output);
+
+        return json;
+    }
+
+    getFormatInstructions() {
+        return 'Only the title, description, and keywords of the JSON structure are returned. Please delete any other unnecessary information.';
+    }
+}
+
+async function generateSEOMetadata(description: string, langCode: string) {
+    const model = new AzureChatOpenAI({
+        azureOpenAIApiKey: 'YOUR_AZURE_OPENAI_API_KEY',
+        azureOpenAIApiDeploymentName: 'YOUR_DEPLOYMENT_NAME',
+        azureOpenAIApiInstanceName: 'YOUR_INSTANCE_NAME',
+        azureOpenAIApiVersion: '2024-02-15-preview',
+        temperature: 0,
+        maxTokens: 500,
+    });
+
+    const prompt = ChatPromptTemplate.fromTemplate(
+        `
+                You are an SEO expert. Based on the page description provided below, generate an SEO-optimized title, meta description, and keywords. Ensure that the title is engaging and concise, the meta description summarizes the product effectively while enticing users to learn more, and the keywords are relevant to the product's features and market segment. Additionally, translate all content into the language specified by the given language code.
+        Page Description: {description}
+        Target Language Code: {langCode}
+        FormatInstructions: {formatInstructions}
+        `
+    );
+    const parser = new CustomOutputParser();
+
+    const chain = prompt.pipe(model).pipe(parser);
+
+    const response = await chain.invoke({
+        description: description,
+        langCode: langCode,
+        formatInstructions: parser.getFormatInstructions(),
+    });
+
+    return response;
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    try {
+        const { description, langCode = 'tw' } = req.query;
+
+        if (typeof description !== 'string') {
+            return res.status(400).json({ error: 'Description must be a valid string.' });
+        }
+
+        const metadata = await generateSEOMetadata(description, langCode);
+
+        res.status(200).json(metadata);
+    } catch (err) {
+        console.error('API save-multi-language Error:', err);
+        return res.status(500).json({ error: err });
+    }
+}
+
+```
+
+PS. Langchain在JS 版本的，並不是太穩定，文件蠻多都有誤的或功能和python 比有少的，且在不同模型中會跑額外的字元，得自定解析器去處理，生態也不是這麼完整，如果複雜情境使用 python 版本會比較好。  
+
+## How to use
+```
+http://dev.ibuypower.de/api/lang-chain/seo-schema?description={page description }&langCode={translate to lang code}
+```
+
+## Example
+```
+http://ｗｗｗ.xxxx.de/api/lang-chain/seo-schema?description=Case:%20NZXT%20H5%20Flow%20Gaming%20Geh%C3%A4use%20-%20Schwarz%20Processor:%20AMD%20Ryzen%205%205600X%20Processor%20(6x%203.7GHz/32MB%20L3%20Cache)%20Memory:%2016GB%20DDR4/3200MHz%20Memory(G.Skill%20,Corsair,Kingston)%20Storage:%20Video%20Card:%20NVIDIA%20GeForce%20RTX%203050%20-%208GB%20GDDR6X%20(VR-Ready)%20Motherboard:%20ASRock%20B450%20PRO%204%20ATX%20USB%203.1,%20SATA3,%201x%20M.2&langCode=tw
+```
+
+##　Result 
+｀｀｀
+{"title":"頂級遊戲體驗：NZXT H5 Flow 黑色遊戲機殼配備 AMD Ryzen 5 與 RTX 3050","meta_description":"探索 NZXT H5 Flow 遊戲機殼，搭載 AMD Ryzen 5 5600X 處理器、16GB DDR4 記憶體、NVIDIA GeForce RTX 3050 顯示卡，為您的遊戲體驗帶來革命性提升。立即了解更多。","keywords":"NZXT H5 Flow, 遊戲機殼, AMD Ryzen 5 5600X, 16GB DDR4, NVIDIA GeForce RTX 3050, VR準備, ASRock B450 PRO 4, 高性能遊戲電腦"}
+｀｀｀
