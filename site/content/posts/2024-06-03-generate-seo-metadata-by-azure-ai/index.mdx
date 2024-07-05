@@ -34,26 +34,32 @@ slug: generate-seo-metadata-by-azure-ai
 
 ## Next js 程式碼　
 ```
-// api/lang-chain/seo-schema.ts
 import { BaseOutputParser } from '@langchain/core/output_parsers';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { AzureChatOpenAI } from '@langchain/openai';
+import { LogLevel } from '@utils/log/const-logging';
+import { serverSideLog } from '@utils/log/server-side-log';
+import { genOnceEncodedURI } from '@utils/product/gear';
+import { RedisBase } from '@utils/redis/redis-base';
 
+// import { StructuredOutputParser } from 'langchain/output_parsers';
+// https://js.langchain.com/v0.1/docs/modules/model_io/output_parsers/types/structured/
 import { NextApiRequest, NextApiResponse } from 'next';
-
 class CustomOutputParser extends BaseOutputParser<string[]> {
     async parse(output: any) {
-        const json = await JSON.parse(output);
+        const result = output.replaceAll('```json', '').replaceAll('```', ''); // for gpt4
+        const json = await JSON.parse(result);
 
         return json;
     }
 
     getFormatInstructions() {
-        return 'Only the title, description, and keywords of the JSON structure are returned. Please delete any other unnecessary information.';
+        return 'Only the title, description and keywords of the json structure are returned. example :{"title":"","meta_description":"","keywords":""} Please delete any other unnecessary information. Such as python code, Python Flask API, etc.  Give me json result. Do not send back any other information such as python code, Python Flask API, etc.';
     }
 }
 
 async function generateSEOMetadata(description: string, langCode: string) {
+    // https://{InstanceName}.openai.azure.com/openai/deployments/my-openai-deployment/
     const model = new AzureChatOpenAI({
         azureOpenAIApiKey: 'YOUR_AZURE_OPENAI_API_KEY',
         azureOpenAIApiDeploymentName: 'YOUR_DEPLOYMENT_NAME',
@@ -65,41 +71,68 @@ async function generateSEOMetadata(description: string, langCode: string) {
 
     const prompt = ChatPromptTemplate.fromTemplate(
         `
-                You are an SEO expert. Based on the page description provided below, generate an SEO-optimized title, meta description, and keywords. Ensure that the title is engaging and concise, the meta description summarizes the product effectively while enticing users to learn more, and the keywords are relevant to the product's features and market segment. Additionally, translate all content into the language specified by the given language code.
-        Page Description: {description}
-        Target Language Code: {langCode}
+        You are an SEO expert. Based on the page description provided below, generate an SEO-optimized title, meta description, and keywords. Ensure that the title is engaging and concise, the meta description summarizes the product effectively while enticing users to learn more, and the keywords are relevant to the product's features and market segment. Additionally, translate all content into the language specified by the given language code.
+        Company:{companyDescription}
+        Ecommerce Page Description: {description}
+        Translate Target Language Code: {langCode}
         FormatInstructions: {formatInstructions}
         `
     );
     const parser = new CustomOutputParser();
 
+    const companyDescription = `NXPower GmbH markets iBUYPOWER® Computer products in Germany, aiming to offer high-quality products at reasonable prices without compromising service.
+We produce custom-made PC systems tailored to individual or business needs, ensuring the best possible system within your budget. Each PC is built with care, reflecting our passion and profession.
+Every custom PC includes a 3-year pickup and return warranty, extensive testing, and a 24-hour burn-in test. Our sales team ensures you only pay for components you need, and our top IT technicians provide quick assistance for any issues.
+We create dream computers to impress and delight you for years. Partnering with experienced and successful online retailers, we benefit from excellent support.
+`;
+
     const chain = prompt.pipe(model).pipe(parser);
 
     const response = await chain.invoke({
+        companyDescription: companyDescription,
         description: description,
         langCode: langCode,
         formatInstructions: parser.getFormatInstructions(),
     });
 
+    // Example of generated metadata
     return response;
 }
 
+// http://localhost:3001/api/lang-chain/seo-schema?description=%E9%9B%BB%E7%AB%B6%E9%9B%BB%E8%85%A6&langCode
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
-        const { description, langCode = 'tw' } = req.query;
+        const { description = '', slug = '', forceUpdate = false, langCode = 'en' } = req.query;
 
-        if (typeof description !== 'string') {
+        if (!description || !slug) {
             return res.status(400).json({ error: 'Description must be a valid string.' });
         }
 
+        const redis = new RedisBase();
+        const seoKey = 'SEOMETA:' + genOnceEncodedURI(slug) + ':' + langCode;
+
+        const seoResult = await redis.get(seoKey);
+
+        if (seoResult && !forceUpdate) {
+            return res.status(200).json(JSON.parse(seoResult));
+        }
+
+        // Process the description with Langchain and Azure AI
         const metadata = await generateSEOMetadata(description, langCode);
 
+        await redis.setCacheKey(seoKey, JSON.stringify(metadata), -1);
+        // Save the metadata by slug to the database
+
+        // return data for pre-rendering
         res.status(200).json(metadata);
     } catch (err) {
+        serverSideLog('API save-multi-language Error:' + JSON.stringify(err), LogLevel.Error);
         console.error('API save-multi-language Error:', err);
         return res.status(500).json({ error: err });
     }
 }
+
 
 ```
 
