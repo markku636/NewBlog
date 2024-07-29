@@ -38,7 +38,7 @@ Error fetch multi lang data, fallback to local file, environment: production, er
 ![Docker DNS setting](docker-dns-setting.png)
 
 ### SQL Server 版本過舊
-我們發現 SQL Server 2016 使用過時的 TLS 1.0，新應用程式無法通過 TLS 驗證。為解決此問題，我們迅速升級至 SQL Server 2017，導致部署時間延長三小時。
+我們發現 SQL Server 2016 使用過時的 TLS 1.0，導致新應用程式無法通過 TLS 驗證，為解決此問題，我們迅速升級至 SQL Server 2017，導致部署時間延長三小時。
 
 ### 頁面渲染卡住
 當我們將網站上線後，發現有些頁面會卡住，我們都知道 Next.js 採用預渲染技術，如果有任一 API 回應過慢或未能返回，頁面渲染就會被卡住，經過一番埋Log 及分析後，發現是因為多語系 API 的請求頻率過高導致了 SharePoint 的不穩定性，為了解決這個問題，我們最終決定將 Office 365 的多語系寫入 Redis 進行緩存，這樣不僅解決了請求頻率問題，也顯著提升了頁面的加載速度和穩定性。
