@@ -1,0 +1,81 @@
+---
+featured: true
+title:   使用 Next js 打造自己的 Low code CMS
+date:  2024-07-06 01:01:35 +0800
+thumbnail:  build-your-own-low-code-cms.png
+category:  DevOps  
+tags:   ['build-your-own-low-code-cms']
+description : 使用 Next js 打造自己的 Low code CMS
+author : Mark Ku
+slug: build-your-own-low-code-cms
+---
+## 時空背景
+當今許多公司擁有大量的靜態內容，過去，我們依賴各種開源內容管理系統（CMS）來管理這些內容，然而，隨著時間一久，這些系統常常帶來整合和客製化的挑戰。
+
+雖然現有的內容管理機制加速了開發速度，它們同時也增加了運營和溝通方面的負擔，這些額外的工作需要在考慮系統選擇時予以特別注意，以確保能夠有效支持業務的長期發展。
+
+## 目的
+* 降低溝通成本，過去給使用者維護JSON，工程師都要額外撰寫說明文件
+* 提供更友善的維護界面
+* 採用最新技術低代碼
+* 解決檔案上傳和路徑設定要分開設置的工作
+* 解決套裝的CMS 不易整合及客製
+* 資料希望需要有有排程
+
+## 自製低代碼概念
+### 1.設計表單結構
+工程師拖拉元件，建立Schema JSON 結構，最後存進資料庫
+### 2. 內容維護
+從資料庫取得先前工程師設計的表單 Scehma JSON 結構，依據 JSON 結構渲染結構，渲染先前設計的表單，使用者依據表單輸入相關資料。
+### 3. 頁面渲染時呼叫這Api，則可以使用。
+
+## 需求
+* 需要上傳檔案功能
+* 需要有產品下拉選項
+* 結構變更，只留最新版
+* 需要有排程
+
+## 避免重覆造輪子
+隨著拖拉技術的日益成熟，從零開始開發低代碼平台顯得既耗時又不經濟。鑑於此，我們對幾款流行的低代碼編輯器和內容管理系統（CMS）進行了評估。考慮到公司主要使用Next.js技術棧並需要高度客製化，我們最終選擇了基於Next.js的開源低代碼編輯器作為開發基礎。
+
+為進一步節省開發時間，我們選擇購買市面上已開發完成的Next.js模板，包括後台管理系統和各種元件。這讓我們能夠迅速構建出符合業務需求的系統，同時保持了開發流程的靈活性和可擴展性。
+
+* [Github repo](https://github.com/maqi1520/react-antd-low-code)
+* [Demo](https://low-code.runjs.cool/editor)
+* [Website Template](https://themeforest.net/item/pickbazar-react-graphql-ecommerce-template/25283305) 
+
+### 流程圖及雛型畫面
+* [流程圖（draw.io）](https://drive.google.com/file/d/1WLiov-NIOVuH3R1OyP9yXCRqppAH5pgn/view)
+
+## 學習資源：
+* [拖拉技術](https://zhuanlan.zhihu.com/p/654066892)
+
+### 主要的設計檔
+![image](https://hackmd.io/_uploads/SysKUjEYA.png)
+[連結](https://github.com/maqi1520/react-antd-low-code/tree/main/src/components/editor/schema)
+
+```
+preview => 左側導覽清單的設定
+edit => 元件編輯時的預設值
+fields => 定義元件
+```
+### 表單驗證
+採用 react hook 來驗證表單
+
+## 定資料結構及前端輸入元件
+定義資料型態對相對應的元件
+* 1. text > input (輸入盒)
+* 2. json  > json editor (JSON編輯器)
+* 3. html > rich html editor(富文本編輯器)
+* 4. value in array > single selct(單選下拉)
+* 5. array  > multi select  (多選下拉)
+* 6. date >  date picker (日期選擇器)
+* 7. upload image >  single upload (單一圖片上傳 )
+* 8. upload images > multi upload (多圖片上傳)
+* 9. model select > model slect (產品型號選擇)
+* 10. true / false > switch (開關選項)
+
+## 最後
+利用現有技術和資源避免重覆造輪子，可以顯著加速開發進程，降低成本，並提升產品質量。透過選擇合適的工具和技術，公司能夠更有效率地滿足特定的業務需求。  
+
+[Demo 影片](https://www.loom.com/share/a6ecf60ae0bd4ba5a164870ca4e23bb5)
