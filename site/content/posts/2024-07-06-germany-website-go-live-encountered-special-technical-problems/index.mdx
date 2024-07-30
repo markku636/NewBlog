@@ -9,9 +9,8 @@ description : 德國網站上線 - 佈署到正式環境，遇到比較特別的
 author : Mark Ku
 slug: germany-website-go-live-encountered-special-technical-problems
 ---
-## 德國網站上線 - 遇到比較特別的技術問題
 ### Windows 子系統 Linux 內核過舊
-在 Windows Server 2019 環境下，我們發現 Linux 內核過舊導致 Docker build 失敗，並在多次重裝和不同機器上的嘗試後仍未解決。雖然在台灣開發環境表現正常，生產環境中卻反復出現 Docker Build 失敗，推測這可能與 Windows 的內核版本有關，Windows Server 2019 核心是對照 Win 10，最後在找了台 Windows 11 建構，建構完推到正式環境。
+在 Windows Server 2019 環境下，我們發現 Linux 內核過舊導致 Docker build 失敗，並在多次重裝和不同機器上的嘗試後仍未解決，但在台灣開發環境正常，一佈署到生產環境中卻反復出現 Docker Build 失敗，推測這可能與 Windows 的作業系統版本有關，Windows Server 2019 核心是對照 Win 10，Windows Server 2022 核心是對照 Win 11，最後在找了台 Windows 11 建構，建構完推到正式環境。
 
 ### Strapi 版本更新頻繁，建構過程一直出錯，且映像檔過大
 由於 Strapi 更新速度快，使用 yarn 時遇到插件無法正確識別的問題。因應此問題，我們轉而使用 npm。  
