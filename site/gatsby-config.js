@@ -89,7 +89,7 @@ module.exports = {
     //General Site Metadata
     title: 'Mark Ku\'s Blog',
     name: 'Mark Ku\'s Blog',
-    description: '9年以上豐富網站開發經驗，開發過各種網站，直播、POS系統、電子商務、平台網站、SEO、金流串接、AI整合、Infra 出身，帶過幾次團隊，目前專注於北美及德國市場電商網站開發團隊。',
+    description: '9年以上豐富網站開發經驗，開發過各種網站，電子商務、平台網站、直播系統、POS系統、SEO 優化、金流串接、AI 串接，Infra 出身，帶過幾次團隊，也加入過大團隊一起開發。',
     address: 'New York, NY',
     email: 'a4756830@gmail.com',
     phone: '+1 (888) 888-8888',
