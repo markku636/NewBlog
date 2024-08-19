@@ -15,7 +15,7 @@ slug: germany-website-go-live-encountered-special-technical-problems
 ### Strapi 版本更新頻繁，建構過程一直出錯，且映像檔過大
 由於 Strapi 更新速度快，使用 yarn 時遇到插件無法正確識別的問題。因應此問題，我們轉而使用 npm。  
 
-此外因為美國機房缺少 Windows 11 內核的伺服器版本，需要從美國的辦公室將映像檔佈署到Live環境，為了提高網絡傳輸速度，我們使用輕量版的node (node:18.17.0-alpine3.18) 映像將檔案大小從 3.8 GB 壓縮至 1.5 GB。  
+此外因為美國機房缺少 Windows 11 內核的伺服器版本，最後從美國的生產線借了一台Win 11 的機器，從辦公室要將映像檔佈署到IDC 的生產環境，為了提高網絡傳輸速度，我們使用輕量版的node (node:18.17.0-alpine3.18) 映像將檔案大小從 3.8 GB 壓縮至 1.5 GB。  
 
 ![image](after-image-resize.png)
 
@@ -43,6 +43,6 @@ Error fetch multi lang data, fallback to local file, environment: production, er
 當我們將網站上線後，發現有些頁面會卡住，我們都知道 Next.js 採用伺服器渲染技術，如果有任一 API 回應過慢或未能返回，頁面渲染就會被卡住，經過一番埋Log 及分析後，發現是因為多語系 API 的請求頻率過高導致了 SharePoint 的不穩定性，為了解決這個問題，我們最終決定將 Office 365 的多語系寫入 Redis 進行緩存，這樣不僅解決了請求頻率問題，也顯著提升了頁面的加載速度和穩定性。
 
 ## 總結
-這些技術說破都很容易，但當下要查出原因，準時上線，都不是這麼容易 我自己一個人就加班兩週以上，最終，歷經了各種挑戰，終於德國間在7/1 上線，在這些挑戰中學到，使用 Windows Server 環境時，應保持系統及其組件更新至最新版，以避免類似的技術問題。
+技術說破都很容易，但當下要查出原因，準時上線，都不是這麼容易 我自己一個人就加班兩週以上，最終，歷經了各種挑戰，終於德國間在7/1 上線，在這些挑戰中學到，使用 Windows Server 環境時，應保持系統及其組件更新至最新版，以避免類似的技術問題。
 
 ![Final](screenshot.png)
