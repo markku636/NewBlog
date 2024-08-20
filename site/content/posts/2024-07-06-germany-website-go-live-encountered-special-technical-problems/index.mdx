@@ -15,7 +15,7 @@ slug: germany-website-go-live-encountered-special-technical-problems
 ### Strapi 版本更新頻繁，建構過程一直出錯，且映像檔過大
 我們的CMS 採用的是 Strapi，但由於 Strapi 更新速度快，使用 yarn 時遇到插件無法正確識別的問題。因應此問題，我們轉而使用 npm。  
 
-此外因為美國機房缺少 Windows 11 內核的伺服器版本，最後從美國的生產線借了一台Win 11 的機器，從辦公室要將映像檔佈署到IDC 的生產環境，一樣在加州，但因為還是有點距離，為了提高網絡傳輸速度，改使用輕量版的node (node:18.17.0-alpine3.18) 映像將檔案大小從 3.8 GB 壓縮至 1.5 GB。  
+此外因為美國機房缺少 Windows 11 內核的伺服器版本，最後從美國的生產線借了一台伺服器虛擬 Win 11 的虛擬主機做CICD，但從辦公室要將映像檔佈署到IDC 的生產環境，雖然一樣在加州，但因為還是有點距離，為了提高網絡傳輸速度，改使用輕量版的node (node:18.17.0-alpine3.18) 映像將檔案大小從 3.8 GB 壓縮至 1.5 GB。  
 
 ![image](after-image-resize.png)
 
