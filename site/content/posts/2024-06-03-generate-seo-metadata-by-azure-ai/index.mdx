@@ -20,9 +20,9 @@ Bill Gates 曾說許多軟體「仍然相當愚蠢」，因為它們需要大量
 
 ## 這篇使用的技術：Next.js、Azure Open AI 與 LangChain
 
-* Next.js：一個基於React的框架，專門用於構建快速的靜態和動態網頁應用程序。它允許開發者在框架內直接實現API路由，方便進行後端開發。
-* Azure Open AI：微軟金援的 OpenAI 發佈新模型時，身為授權夥伴的微軟，也會同步取得這些模型，封裝成為企業提供客製化的AI 服務。
-* LangChain：這是一個整合多個大型AI模型的框架，能夠為特定任務提供結構化輸出，幫助創造精確且目標導向的SEO內容。
+* Next.js：一個基於React的框架，專門用於構建快速的靜態和動態網頁應用程序，它允許開發者在框架內直接實現API路由，方便進行後端開發。
+* Azure Open AI：微軟投資的 OpenAI 當發佈新模型時，身為授權夥伴的微軟，也會同步取得這些模型，封裝成為企業提供客製化的AI 服務。
+* LangChain：這是一個整合多個大型AI模型的框架，輕易就能調用各種大型語言的模型， 提供模版，解析器、動態路由，通常搭配 Fast api 就能和其他異質系統整合。
 
 ## 設計概念
 1. 頁面請求處理：首先，先在 Next.js 建立一個 API ，並且傳入頁面描述及要翻譯的語言
@@ -45,10 +45,9 @@ import { LogLevel } from '@utils/log/const-logging';
 import { serverSideLog } from '@utils/log/server-side-log';
 import { genOnceEncodedURI } from '@utils/product/gear';
 import { RedisBase } from '@utils/redis/redis-base';
-
-// import { StructuredOutputParser } from 'langchain/output_parsers';
-// https://js.langchain.com/v0.1/docs/modules/model_io/output_parsers/types/structured/
 import { NextApiRequest, NextApiResponse } from 'next';
+
+
 class CustomOutputParser extends BaseOutputParser<string[]> {
     async parse(output: any) {
         const result = output.replaceAll('```json', '').replaceAll('```', ''); // for gpt4
@@ -58,7 +57,7 @@ class CustomOutputParser extends BaseOutputParser<string[]> {
     }
 
     getFormatInstructions() {
-        return 'Only the title, description and keywords of the json structure are returned. example :{"title":"","meta_description":"","keywords":""} Please delete any other unnecessary information. Such as python code, Python Flask API, etc.  Give me json result. Do not send back any other information such as python code, Python Flask API, etc.';
+        return 'Only the title, description and keywords of the json structure are returned. example :{"title":"","description":"","keywords":""} Please delete any other unnecessary information. Such as python code, Python Flask API, etc.  Give me json result. Do not send back any other information such as python code, Python Flask API, etc.';
     }
 }
 
@@ -66,9 +65,9 @@ async function generateSEOMetadata(description: string, langCode: string) {
     // https://{InstanceName}.openai.azure.com/openai/deployments/my-openai-deployment/
     const model = new AzureChatOpenAI({
         azureOpenAIApiKey: 'YOUR_AZURE_OPENAI_API_KEY',
-        azureOpenAIApiDeploymentName: 'YOUR_DEPLOYMENT_NAME',
+        azureOpenAIApiDeploymentName: 'YOUR_DEPLOYMENT_NAME', // gpt4 => 解析器要重寫
         azureOpenAIApiInstanceName: 'YOUR_INSTANCE_NAME',
-        azureOpenAIApiVersion: '2024-02-15-preview',
+        azureOpenAIApiVersion: '2024-02-01', // '2024-02-01',
         temperature: 0,
         maxTokens: 500,
     });
@@ -98,12 +97,10 @@ We create dream computers to impress and delight you for years. Partnering with 
         langCode: langCode,
         formatInstructions: parser.getFormatInstructions(),
     });
-
-    // Example of generated metadata
+    
     return response;
 }
 
-// http://localhost:3001/api/lang-chain/seo-schema?description=%E9%9B%BB%E7%AB%B6%E9%9B%BB%E8%85%A6&langCode
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
@@ -114,7 +111,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         const redis = new RedisBase();
-        const seoKey = 'SEOMETA:' + genOnceEncodedURI(slug) + ':' + langCode;
+        const seoKey = 'SeoMata:' + langCode + ':' + genOnceEncodedURI(slug as string);
 
         const seoResult = await redis.get(seoKey);
 
@@ -123,7 +120,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // Process the description with Langchain and Azure AI
-        const metadata = await generateSEOMetadata(description, langCode);
+        const metadata = await generateSEOMetadata(description as string, langCode as string);
 
         await redis.setCacheKey(seoKey, JSON.stringify(metadata), -1);
         // Save the metadata by slug to the database
@@ -131,14 +128,87 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // return data for pre-rendering
         res.status(200).json(metadata);
     } catch (err) {
-        serverSideLog('API save-multi-language Error:' + JSON.stringify(err), LogLevel.Error);
-        console.error('API save-multi-language Error:', err);
+        serverSideLog('SEO Schema Error' + JSON.stringify(err), LogLevel.Error);
         return res.status(500).json({ error: err });
     }
 }
 
+```
+
+在 Next 14 app route , 在頁面中的 generateMetadata 呼叫封裝好的　Ａｚｕｒｅ AI 的 api 
+```
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    // 構建URL
+
+    const pathname = new URL(headers().get('x-url')!).pathname;
+
+    const productData: IStoreModel | null = await getStoreModelData(params.locale, params.slug);
+
+    const description = generateTitleAndDescription(productData);
+
+    if (description === '') {
+        return generateDefaultMetadata(params.locale, params.slug);
+    }
+
+    const imageUrl = (productData && getAbsoluteImageUrl(productData.desc.info.image)) || '';
+
+    try {
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+        const queryParams = new URLSearchParams({
+            description: description,
+            langCode: params.locale,
+            slug: pathname,
+            // forceUpdate: 'true',
+        });
+
+        const url = `${baseUrl}/api/lang-chain/seo-schema?${queryParams.toString()}`;
+
+        // 獲取數據
+        const response = await fetch(url);
+        const seoMeta = await response.json();
+
+        const image: ImageProps = {
+            url: imageUrl,
+            width: 640,
+            height: 640,
+            alt: seoMeta.title,
+        };
+
+        // 返回Metadata
+        return {
+            title: seoMeta.title,
+            keywords: seoMeta.keywords,
+            description: seoMeta.description,
+            openGraph: {
+                title: seoMeta.title,
+                description: seoMeta.description,
+                ...(imageUrl && {
+                    images: image,
+                }),
+            },
+            twitter: {
+                title: seoMeta.title,
+                description: seoMeta.description,
+                card: 'summary_large_image',
+            },
+        };
+    } catch (e) {
+        return generateDefaultMetadata(params.locale, pathname);
+    }
+}
 
 ```
+並在　ｍｉｄｄｌｅ　ｗａｒｅ　取得　ｓｌｕｇ，並在　ｈｅａｄｅｒ　中傳遞
+｀｀｀
+export default function middleware(request: NextRequest) {
+    const pathname = request.nextUrl.pathname;
+
+    request.headers.set('x-url', request.nextUrl.href);
+      
+
+    return nextIntlMiddleware(request);
+}
+｀｀｀
 
 PS. Langchain在JS 版本的，並不是太穩定，文件蠻多都有誤的或功能和python 比有少的，且在不同模型中會跑額外的字元，得自定解析器去處理，生態也不是這麼完整，如果複雜情境使用 python 版本會比較好。  
 
