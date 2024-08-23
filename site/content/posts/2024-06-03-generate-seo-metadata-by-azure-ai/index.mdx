@@ -35,7 +35,7 @@ AI 能夠讀懂上下文，其實每次都要將對話回傳回去，透過這�
         FormatInstructions: {formatInstructions}
 ```
 
-## 設計概念
+## 生成 SEO Meta AI Api的設計概念
 1. 頁面請求處理：首先，先在 Next.js 建立一個 API ，並且傳入頁面描述及要翻譯的語言
 2. 語言處理： 接著，利用 LangChain 操作 Azure Chat OpenAI 根據傳入的頁面描述生成 SEO 優化的標題、描述和關鍵詞
 3. 儲存結果：再來，依據頁面 Slug 儲存關鍵詞給下次預渲染使用，同時也節省 Azure AI 的用量。
