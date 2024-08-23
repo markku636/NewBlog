@@ -80,7 +80,7 @@ async function generateSEOMetadata(description: string, langCode: string) {
         azureOpenAIApiInstanceName: 'YOUR_INSTANCE_NAME',　
         azureOpenAIApiVersion: '2024-02-01', // '2024-02-01',
         temperature: 0,　// 控制模型生成的隨機性或創造性
-        maxTokens: 500, // 指定模型生成的回應中最大可用的 token（詞的數量
+        maxTokens: 500, // 指定模型生成的回應中最大可用的 token（詞的數量)
     });
 
     const prompt = ChatPromptTemplate.fromTemplate(
