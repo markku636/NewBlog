@@ -76,7 +76,7 @@ async function generateSEOMetadata(description: string, langCode: string) {
     // https://{InstanceName}.openai.azure.com/openai/deployments/my-openai-deployment/
     const model = new AzureChatOpenAI({
         azureOpenAIApiKey: 'YOUR_AZURE_OPENAI_API_KEY',
-        azureOpenAIApiDeploymentName: 'YOUR_DEPLOYMENT_NAME', // gpt4 => 解析器要重寫
+        azureOpenAIApiDeploymentName: 'YOUR_DEPLOYMENT_NAME', // gpt4
         azureOpenAIApiInstanceName: 'YOUR_INSTANCE_NAME',　
         azureOpenAIApiVersion: '2024-02-01', // '2024-02-01',
         temperature: 0,　// 控制模型生成的隨機性或創造性
