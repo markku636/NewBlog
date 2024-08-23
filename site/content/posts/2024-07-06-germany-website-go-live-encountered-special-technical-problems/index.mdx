@@ -9,8 +9,11 @@ description : 德國網站上線 - 佈署到正式環境，遇到比較特別的
 author : Mark Ku
 slug: germany-website-go-live-encountered-special-technical-problems
 ---
+## 時空背景
+問題發生在德國網站的系統上線前兩週，開始準備一些Live環境所發生的一系列問題，做個記錄。
+
 ### Windows Subsystem for Linux 核心過舊
-在上線前兩週，開始建置德國網站生產環境的CICD時，Docker 一直建置不過，經過調查及測試，最後發現 台灣的開發環境都架設在一台Win 11 上的Docker，而 Windows Server 2019 的內核是 Win 10， Linux 內核過會舊導致 Docker build 失敗，並在多次重裝和不同機器上的嘗試後仍未解決，但在台灣開發環境正常，一佈署到生產環境中卻反復出現 Docker Build 失敗，推測這可能與 Windows 的作業系統版本有關，Windows Server 2019 核心是對照 Win 10，Windows Server 2022 核心是對照 Win 11，最後在找了台 Windows 11 建構，建構完推到正式環境。
+在上線前兩週，開始建置德國網站生產環境的CICD時，然後發生Docker 一直建置不過，經過調查及測試，上網也查不到原因，因為外面公司比較少用window 當容器伺服器的主機，所以比較少會遇到，比較環境過後發現台灣的開發環境都架設在一台Win 11 上的Docker，而 Windows Server 2019 的內核是 Win 10， Linux 內核過會舊導致 Docker build 失敗，並在多次重裝和不同機器上的嘗試後仍未解決，但在台灣開發環境正常，一佈署到生產環境中卻反復出現 Docker Build 失敗，推測這可能與 Windows 的作業系統版本有關，Windows Server 2019 核心是對照 Win 10，Windows Server 2022 核心是對照 Win 11，最後在找了台 Windows 11 建構，建構完推到正式環境。
 
 ### Strapi 版本更新頻繁，建構過程一直出錯，且映像檔過大
 我們的 CMS 採用的是 Strapi，但由於 Strapi 版本迭代的速度太快，相依的套件使用 yarn 時遇到插件無法正確識別的問題，因解決此問題，後來轉而使用npm 來安裝套件。  
