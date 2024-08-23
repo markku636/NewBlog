@@ -10,10 +10,10 @@ author : Mark Ku
 slug: germany-website-go-live-encountered-special-technical-problems
 ---
 ### Windows Subsystem for Linux 核心過舊
-由於上線前，台灣的開發環境都架設在一台Win 11 上的Docker，在上線前兩週，開始建置德國網站生產環境時，Docker 一直建置不過，經過調查及測試，最後發現 Windows Server 2019 的內核是 Win 10， Linux 內核過會舊導致 Docker build 失敗，並在多次重裝和不同機器上的嘗試後仍未解決，但在台灣開發環境正常，一佈署到生產環境中卻反復出現 Docker Build 失敗，推測這可能與 Windows 的作業系統版本有關，Windows Server 2019 核心是對照 Win 10，Windows Server 2022 核心是對照 Win 11，最後在找了台 Windows 11 建構，建構完推到正式環境。
+在上線前兩週，開始建置德國網站生產環境時，Docker 一直建置不過，經過調查及測試，最後發現 台灣的開發環境都架設在一台Win 11 上的Docker，而 Windows Server 2019 的內核是 Win 10， Linux 內核過會舊導致 Docker build 失敗，並在多次重裝和不同機器上的嘗試後仍未解決，但在台灣開發環境正常，一佈署到生產環境中卻反復出現 Docker Build 失敗，推測這可能與 Windows 的作業系統版本有關，Windows Server 2019 核心是對照 Win 10，Windows Server 2022 核心是對照 Win 11，最後在找了台 Windows 11 建構，建構完推到正式環境。
 
 ### Strapi 版本更新頻繁，建構過程一直出錯，且映像檔過大
-我們的CMS 採用的是 Strapi，但由於 Strapi 版本迭代的速度太快，相依的套件使用 yarn 時遇到插件無法正確識別的問題，因解決此問題，後來轉而使用npm 來安裝套件。  
+我們的 CMS 採用的是 Strapi，但由於 Strapi 版本迭代的速度太快，相依的套件使用 yarn 時遇到插件無法正確識別的問題，因解決此問題，後來轉而使用npm 來安裝套件。  
 
 此外因為美國機房缺少 Windows 11 內核的伺服器版本，最後從美國的生產線借了一台伺服器虛擬 Win 11 的虛擬主機做CICD，但從美國的辦公室要將映像檔佈署到 IDC 的生產環境，雖然一樣在加州，還是有點距離，為了提高網絡傳輸速度，改使用輕量版的node (node:18.17.0-alpine3.18) 映像將檔案大小從 3.8 GB 壓縮至 1.5 GB。  
 
@@ -46,6 +46,6 @@ Error: Client network socket disconnected before secure TLS connection was estab
 當我們將網站上線後，發現有些頁面偶爾會卡住，我們都知道 Next.js 採用伺服器渲染技術，如果有任一 API 回應過慢或未能返回，頁面渲染就會被卡住，經過一番埋Log 及分析後，發現是因為多語系 API 的請求頻率過高導致了 SharePoint 的不穩定性，為了解決這個問題，我們最終決定將 Office 365 的多語系寫入 Redis 進行緩存，這樣不僅解決了請求頻率問題，也顯著提升了頁面的加載速度和穩定性。
 
 ## 總結
-技術說破都不值錢，但當下要查出關鍵原因，準時上線，都不是這麼容易事，光這麼多Ifra 問題，我自己就加班兩週以上，最終，歷經了各種挑戰，終於德國間在7/1 上線，在這些挑戰中學到，使用 Windows Server 環境時，應保持系統及其組件更新至最新版，以避免類似的技術問題。
+技術說破都不值錢，但當下要查出關鍵原因，準時上線，都不是這麼容易事，光這麼多Ifra 問題，我自己就加班兩週以上，最終，歷經了各種困難，終於德國間在7/1 上線，在這些挑戰中學到，使用 Windows Server 環境時，應保持系統及其組件更新至最新版，以避免類似的技術問題。
 
 ![Final](screenshot.png)
