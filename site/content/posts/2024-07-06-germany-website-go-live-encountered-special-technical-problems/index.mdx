@@ -29,7 +29,7 @@ slug: germany-website-go-live-encountered-special-technical-problems
 Error fetch multi lang data, fallback to local file, environment: production, error: {"cause":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"e645f404c07e0ac86.ibuypower.com"}}
 ```
 
-我們都知道DNS 主要是用於解析 IP 和域名的服務，Dcoker 為了把網路隔離，因此並不會直接繼承宿主主機的DNS ，透過以下設定解決容器無法解析 DNS 伺服器的問題：
+我們都知道DNS 主要是用於解析 IP 和域名的服務，Dcoker 的特性，為了把作業系統，網路環境隔離，因此並不會直接繼承宿主主機的DNS ，透過以下設定解決容器無法解析 DNS 伺服器的問題：
 ```
   "dns": [
     "8.8.8.8",
