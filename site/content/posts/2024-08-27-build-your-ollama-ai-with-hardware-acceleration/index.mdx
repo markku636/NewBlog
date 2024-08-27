@@ -11,7 +11,7 @@ slug: build-your-ollama-ai-with-hardware-acceleration
 ---
 
 ## 背景說明
-過去使用 Azure Open AI 來優化 SEO，但由於 Azure Open AI 每月僅有 $150 美金的額度，常在月底因 MSDN 額度不足而被停用。因此，我們開始尋找其他替代方案，最終選擇了 Facebook 開源的 Ollama。
+過去使用 [Azure Open AI 來優化 SEO](https://blog.markkulab.net/build-your-ollama-ai-with-hardware-acceleration/)，但由於 Azure Open AI 每月僅有 $150 美金的額度，常在月底因 MSDN 額度不足而被停用。因此，我們開始尋找其他替代方案，最終選擇了 Facebook 開源的 Ollama。
 
 ## 安裝及設定
 ### 首先，建立 Docker Compose 檔案 (GPU 版本)
@@ -119,7 +119,7 @@ ollama ps
 
 ## 實測結果
 ### 硬體規格: CPU 13900K + Nvidia TUF RTX 3080 + 64 GB + WIN 11
-### 將先前給 Azure AI 的程式，餵給Ollama 去 擷取重點、翻譯、生成SEO meta、及產生JSON
+### 將先前給 Azure Open AI 產生SEO 的 prompt，去餵給Ollama 。
 
 ```
 You are an SEO expert. Based on the page description provided below, generate an SEO-optimized title, meta description, and keywords. Ensure that the title is engaging and concise, the meta description summarizes the product effectively while enticing users to learn more, and the keywords are relevant to the product's features and market segment. Additionally, translate all content into the language specified by the given language code.
@@ -129,7 +129,6 @@ Translate Target Language Code: en
 FormatInstructions: Only the title, description and keywords of the json structure are returned. example :{"title":"","description":"","keywords":""} Please delete any other unnecessary information. Such as python code, Python Flask API, etc. Give me json result. Do not send back any other information such as python code, Python Flask API, etc.
 ```
 ### 性能比較
-我們將之前在 Azure AI 上運行的程式交給 Ollama 進行測試，包括重點擷取、翻譯、生成 SEO Meta Tag、以及產生最後 JSON。接著對 CPU 版和 GPU 版的效能進行比較：
 * CPU 版：1 分 10 秒 ~ 1 分 30 秒
 * GPU 版：不到 3 秒
 
