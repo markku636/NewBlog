@@ -10,11 +10,13 @@ author : Mark Ku
 slug: net-mvc-auto-build-manual-deploy
 ---
 ## 時空背景
-大部的系統皆能夠容器化，但總有些網站最舊也最大，暫時無法做技術昇級，但人數一多手動佈版，都會遇到有人漏Commit binary，因此想把自動建置的部份自動化，減化佈版流程也減少錯誤帶來的影響。
+大部的系統皆能夠容器化，但總有些網站最舊也最大，暫時無法做技術昇級，但人數一多手動佈版，都會遇到有人漏Commit binary，因此想把自動建置的部份自動化，減化佈版流程也減少錯誤帶來的影響。  
+
+因為是舊系統及Net Mvc的舊框架，無法容器化，全自動佈版，會有點風險，因此這邊佈署的部份，仍然還是採用手動。
 
 ## 目標
-* Jenkins 自動建置，自動commit 
-* 生產環境透過beyond compare 比較 binary
+* Jenkins 自動建置，自動commit 推送到 Github 
+* 生產環境透過 beyond compare 比較 binary 差異，手動佈版
 
 ## 環境說明
 因為是舊系統，Jenkins 安裝在 Windows server 上。
@@ -180,7 +182,7 @@ pipeline {
 ## 手動佈版
 因為是舊系統及Net Mvc的舊框架，無法容器化，全自動佈版，會有點風險，因此這邊佈署的部份，仍然還是採用手動。
 
-### 先安裝Beyond Compare 
+### 再安裝 Beyond Compare
 ### 撰寫powerhsell  deploy.ps1
 ```
 git pull 
