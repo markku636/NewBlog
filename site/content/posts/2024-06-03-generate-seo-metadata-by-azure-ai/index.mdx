@@ -209,8 +209,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 ```
-並在　ｍｉｄｄｌｅ　ｗａｒｅ　取得　ｓｌｕｇ，並在　ｈｅａｄｅｒ　中傳遞
-｀｀｀
+並在　Middleware 取得slug，並在header中傳遞
+```
 export default function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
 
@@ -219,7 +219,7 @@ export default function middleware(request: NextRequest) {
 
     return nextIntlMiddleware(request);
 }
-｀｀｀
+```
 
 PS. Langchain在JS 版本的，並不是太穩定，文件蠻多都有誤的或功能和python 比有少的，且在不同模型中會跑額外的字元，得自定解析器去處理，生態也不是這麼完整，如果複雜情境使用 python 版本會比較好。  
 
