@@ -40,7 +40,7 @@ slug: refine-ai-by-llama
 ### 接著，將要訓練的資料夾，放在LLaMA-Factory\data\
 ![data set folder](data-set-folder.png)
 
-### 修改在 dataset_info.json，加上
+### 修改在 dataset_info.json，加上剛剛定義的檔案，此時在資料集的下拉選單就會出現 acer_faqs 資料集。
 
 ```
 {
@@ -58,15 +58,13 @@ slug: refine-ai-by-llama
 同時你也可以拿開源的Dataset 訓練你的AI 模型，透過修改dataset_info.json。
 
 ## 開始訓練
-我用的是ROG RTX 3080 10G 顯示 進行訓練。
+![用 TUF RTX 3080 10g 開始訓練](start-training.png)
 
-![start training](start-training.png)
-
-### 將訓練好的AI 測試
+### 接著，將訓練好的AI 模型，進行測試
 ![image](verify-fine-tune.png)
-我大概試了幾個資料集，也用預設的wiki_faq 資料集訓練， 看著自己訓練半天的AI 會亂回答，覺得蠻好笑的
+我大概試了幾個資料集，也用預設的wiki_faq 資料集訓練， 看著自己訓練半天的AI 會亂回答，覺得蠻好笑的。
 
-## 從結果回推，我猜一般PC 的顯卡的內存，只能訓練這種閹割版的開源模型，都要用更強大的 AI 晶片來訓練
+## 從 Google 上查了一下，也蠻多人發生的，估計一般PC 的顯卡的內存，只能訓練這種閹割版的開源模型，可能要用完整版的模型，用AI晶片訓練，才可能會更精準。
 ![hardware requirement](hardware-requirement.png)
 
 ## 最後
