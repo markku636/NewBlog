@@ -26,7 +26,7 @@ Langchain 是一個可以整合多種大型 AI 模型的框架，透過它可以
 * 安裝langchain 相關套件
 
 ```
-npm install langchain @langchain/azure-openai @langchain/ollama @langchain/openai
+npm install langchain @langchain/azure-openai @langchain/ollama @langchain/openai --save
 ```
 ## 範例一，透過 AI 產生店名
 ## 原本透過 Azure Open AI 來生成店名
@@ -55,7 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 
 ```
-現在透過 ChatOllama 來生成鞋店店名
+現在透過 ChatOllama 來生成鞋店的店名
 Langchain 是不是很方便，它把界面設計的很好，直接把 AzureChatOpenAI 換成 ChatOllama，後程式也都不用改，就把模型換掉
 ```
 import { ChatOllama } from '@langchain/ollama';
