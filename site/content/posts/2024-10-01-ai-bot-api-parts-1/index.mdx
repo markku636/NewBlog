@@ -173,7 +173,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
 
         const weatherResponse = await chain.invoke({
-            question: '上海今天天气怎么样',
+            question: '今天台北的天氣如何',
         });
 
         res.status(200).json({ weather: weatherResponse });
