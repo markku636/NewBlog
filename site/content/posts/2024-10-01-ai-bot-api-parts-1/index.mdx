@@ -115,7 +115,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 ```
 // pages/api/weather.js
-import { AzureChatOpenAI } from '@langchain/openai';
+import { ChatOllama } from '@langchain/ollama';
 import { APIChain } from 'langchain/chains';
 import { NextApiRequest, NextApiResponse } from 'next/types';
 
@@ -157,14 +157,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        const model = new AzureChatOpenAI({
-            azureOpenAIApiKey: '36eaab1cdeea49748bc4bf1e2762d33e',
-            azureOpenAIApiDeploymentName: 'gpt4', // gpt4 => 解析器要重寫
-            azureOpenAIApiInstanceName: 'markku666ai',
-            azureOpenAIApiVersion: '2024-02-01', // '2024-02-01',
-            temperature: 0,
-            maxTokens: 500,
-        });
+        const model = new ChatOllama({
+        model: 'llama3.2',
+        temperature: 0,
+        maxRetries: 2,
+        baseUrl: 'http://localhost:11434',
+		});
 
         const chain = APIChain.fromLLMAndAPIDocs(model, OPEN_METEO_DOCS, {
             headers: {
