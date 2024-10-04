@@ -89,10 +89,8 @@ gltf-pipeline -i scene.gltf -o mother-board.glb
 ![](3.png)
 ![](4.png)
 
-## 如果你們是 Next js 在本地端除錯是正常，推到生產環境出現這個訊息"next js application error a client-side exception has occurred"，請修改 NEXT.JS config
-```
-swcMinify: false,
-```
+## 如果你們是 Next js 在本地端除錯是正常，推到生產環境出現這個訊息"next js application error a client-side exception has occurred"，請修改成用戶端渲染，伺服器端是reder 不了3D 的元件。
+
 ## 最後
 ![](2.png)
 [Demo](https://3d.ibuypower.com/)  
