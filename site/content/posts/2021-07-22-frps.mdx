@@ -43,43 +43,40 @@ sudo apt-get upgrade
 FRP使用Go語言，大部分Linux主機都有預裝了，但如果你的沒有，可以先執行以下指令
 
 ```
-sudo apt-get install bison ed gawk gcc libc6-dev make golang-go
+sudo apt-get install bison ed gawk gcc libc6-dev make golang-go vim
 ```
 
 接著你必須到FRP的Github上查看最新frps ，並下載他
 
 ```
-wget https://github.com/fatedier/frp/releases/download/v0.39.0/frp_0.39.0_linux_amd64.tar.gz
+wget https://github.com/fatedier/frp/releases/download/v0.60.0/frp_0.60.0_linux_amd64.tar.gz
 ```
 
 解壓縮檔案並重新命名資料夾為 frp
 
 ```
-tar -zxvf frp_0frp_0.39.0_linux_amd64.tar.gz
-mkdir /var/frps
-mv frp_0.36.2_linux_amd64/* /var/frps/
-cd frp
+tar -zxvf frp_0.60.0_linux_amd64.tar.gz
+sudo mkdir /var/frps
+sudo mv frp_0.60.0_linux_amd64/* /var/frps/
+cd /var/frps
 ```
 
-編輯 frps 的設定檔 (sudo vim frps.ini)
+編輯 frps 的設定檔 (sudo vim frps.toml)
 
 ```
-# frps.ini
-[common]
-bind_addr = 0.0.0.0
-bind_port = 7000
-vhost_http_port = 80
-vhost_https_port = 443
-dashboard_port = 7500
-dashboard_user = admin
-dashboard_pwd = 你的密碼
-authentication_method = token
-token = frpc 連線的 token 
+# frps.toml
+bindAddr = "0.0.0.0"
+bindPort = 7000
+vhostHttpPort = 80
+vhostHttpsPort = 443
+webServer = { port = 7500, user = "admin", password = "your password", addr="0.0.0.0" }
+auth.method = "token"
+auth.token = "your token"
 ```
 
 執行
 ```
-sudo ./frps -c ./frps.ini
+sudo ./frps -c ./frps.toml
 ```
 
 ## 在到 DNS 主機中設定域名
@@ -93,37 +90,37 @@ sudo ./frps -c ./frps.ini
 
 ![](https://i.imgur.com/7iCNmjK.webp)
 
-## frpc.ini 的設定
+## frpc.toml 的設定
 
 ```
-[common]
-server_addr = proxy.markkulab.net
-server_port = 7000
-auth_token = 你的密碼
-pool_count = 100
+serverAddr = "35.223.172.254"
+serverPort = 7000
+auth.token = "your token"
+transport.poolCount = 10000
+[[proxies]]
+name = "test-tcp"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 22
+remotePort = 6000
 
-[ShopCartHttps2]
-type = https
-custom_domains = shop.markkulab.net
-local_port = 888
-plugin = https2http
-plugin_local_addr = 127.0.0.1:888
-plugin_crt_path = /Public/shop_certificate.crt
-plugin_key_path = /Public/shop_private.key
-plugin_host_header_rewrite = 127.0.0.1
-plugin_header_X-From-Where = frp
+[[proxies]]
+name = "ShopCarthttps1"
+type = "http"
+customDomains = ["www.letgo.com.tw"]
+localPort = 8896
 
-[blog]
-type = https
-local_port = 49183
-custom_domains = blog.markkulab.net
-plugin = https2http
-plugin_local_addr = 127.0.0.1:49183
-# HTTPS 证书相关的配置
-plugin_crt_path = /Public/blog_certificate.crt
-plugin_key_path = /Public/blog_private.key
-plugin_host_header_rewrite = 127.0.0.1
-plugin_header_X-From-Where = frp
+[[proxies]]
+name = "linebot"
+type = "https"
+customDomains = ["linebot.letgo.com.tw"]
+[proxies.plugin]
+type = "https2http"
+localAddr = "127.0.0.1:48002"
+crtPath = "/Public/!.letgo.com.tw/fullchain.crt"
+keyPath = "/Public/!.letgo.com.tw/cert.key"
+hostHeaderRewrite = "linebot.letgo.com.tw"
+requestHeaders.set.x-from-where = "frp"
 ```
 
 ## 完工
@@ -152,7 +149,7 @@ Wants=network.target
 [Service]
 Restart=on-failure
 RestartSec=5
-ExecStart=/var/frp/frps -c /var/frp/frps.ini
+ExecStart=/var/frps/frps -c /var/frps/frps.toml
 
 [Install]
 WantedBy=multi-user.target
@@ -161,21 +158,31 @@ WantedBy=multi-user.target
 ### 啟動服務
 
 ````
-sudo systemctl start frps.service //啟動 FRP Server 服務
-sudo systemctl stop frps.service //停止 FRP Server 服務
-sudo systemctl restart frps.service //重啟 FRP Server 服務
-sudo systemctl enable frps.service //開機時自動啟動 FRP Server 服務
-sudo systemctl disable frps.service //開機時不要啟動 FRP Server 服務
-sudo systemctl status frps.service //查看FRP Server 狀態
 sudo systemctl daemon-reload  // reload service
+sudo systemctl stop frps.service //停止 FRP Server 服務
+sudo systemctl start frps.service //啟動 FRP Server 服務
+sudo systemctl restart frps.service //重啟 FRP Server 服務
+sudo systemctl disable frps.service //開機時不要啟動 FRP Server 服務
+sudo systemctl enable frps.service //開機時自動啟動 FRP Server 服務
+sudo systemctl status frps.service //查看FRP Server 狀態
+
 ```
 
-## Frps 後台畫面
-![](https://i.imgur.com/1wiQSb8.webp)
-![](https://i.imgur.com/Oh3mysM.webp)
+## 測試防火牆有沒有關
+windows 測試防火牆有沒有關
+```
+telnet 35.223.172.254  7000
+```
+linux 測試防火牆有沒有開
+```
+nc -zv 127.0.0.1 7000
+```
+
+## GCP 必須關閉防火牆
+![](disable-gcp-firewall.png)
 ## 補充
 P.S. 記得 GCP 防火牆輸入要記得開，否則外網連不到。
-![](https://i.imgur.com/SeVXdeZ.webp)
+
 
 ## GCP 免費計劃
 [免費計劃連結](https://cloud.google.com/free/docs/gcp-free-tier/?hl=zh-CN#compute)
