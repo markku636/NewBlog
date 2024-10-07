@@ -124,7 +124,7 @@ const useFeatureProbe = (featureKey: string, defaultValue: any, user: FPUser) =>
         }
     }, []);
 
-    return { featureValue, isLoading, trackEvent };
+    return { featureValue, isLoading, trackEvent, client: fpClientRef.current };
 };
 
 export default useFeatureProbe;
@@ -183,8 +183,9 @@ interface IFeatureProbe {
 'use client';
 
 import useFeatureProbe from '@/hooks/use-featureprobe';
-import BannerA from '@components/ab-test/banner-a';
-import BannerB from '@components/ab-test/banner-b';
+import dynamic from 'next/dynamic';
+const BannerA = dynamic(() => import('@components/ab-test/banner-a'));
+const BannerB = dynamic(() => import('@components/ab-test/banner-b'));
 
 import { FPUser } from 'featureprobe-client-sdk-react';
 
