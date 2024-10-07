@@ -220,7 +220,9 @@ export default function Page() {
 
 ## 進階應用 - 依據傳入條件及分組規則獲取相對應的測試情境
 
-當我建立規則中指定 City 等於台北則，顯示 Banner A，City 等於高雄，就顯示Banner B ，在程式中指定使用者為台北的用戶，就可以彈性依據不同的資料，而給不同的測試。
+當我建立規則中指定 City 等於台北則，顯示 Banner A，City 等於高雄，就顯示Banner B ，在程式中指定使用者為台北的用戶，就可以彈性依據不同的資料，而給不同的測試。  
+
+P.S. Featureprobe 本身沒有 sticky cookie 的機制，但它的程式蠻靈活的，可以透過自己寫入讀取cookie及後台設定條件，讓使用者在測試階段顯示一樣的畫面。
 
 ```
 const user = new FPUser().with('City', '台北');
