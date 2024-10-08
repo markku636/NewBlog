@@ -78,7 +78,10 @@ export default function ProductCardsSection({ productData = [], className = '' }
 
 ![get stock from client side](get-stock-in-from-side.png)
 
-P.S.在試的過程中發現，如果希望 Next js 容器 image 如果要變小，可以透過 standalone 模式，及在docker file 指定過輕量版的alpine-node，Next.js 會進行優化，只打包在運行時真正需要的文件和模塊，這樣可以減少包的體積和部署的覆雜性。
+P.S. 在試的過程中發現，如果希望 Next js 容器 image 如果要變小，可以透過 standalone 模式，在打包時會進行優化，只打包在運行時真正需要的文件和模塊，這樣可以減少包的體積和部署的覆雜性
+P.S. 同時在docker file 指定過輕量版的alpine-node，Next.js 也可以Docker容器讓體積少30%
+
+
 
 
 
