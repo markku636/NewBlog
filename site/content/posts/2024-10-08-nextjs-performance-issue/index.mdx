@@ -72,6 +72,7 @@ export default function ProductCardsSection({ productData = [], className = '' }
         isLoading,
         isError,
     } = useGetStockByModelIDsQuery(productData.map((product) => product.modelId));
+	...
 }
 ```
 
