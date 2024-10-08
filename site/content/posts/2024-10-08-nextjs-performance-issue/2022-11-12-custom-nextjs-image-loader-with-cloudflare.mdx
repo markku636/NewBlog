@@ -1,0 +1,73 @@
+---
+featured: true
+title: 整理 Next JS 遇到的效能問題
+date:  2024-10-07 20:01:01 +0800
+thumbnail: nextjs.png
+category: Frontend
+tags: ['React','Next','image loader','cloudflare']
+description : 整理 Next JS 遇到的效能問題
+author : Mark Ku
+slug: nextjs-performance-issue
+---
+## 時空背景
+在我進來前，前總經理剛退休，台灣資訊部門過去總經理擋著，需求可以排優先順序做，但我來時，就沒人擋著，就變成每個需求又急又趕，系統剛上線，又一堆問題，前面也走了一批人，我就在這兵荒馬亂時期進入這公司。  
+
+剛進來時Next js 剛上線，頁面一直拿到舊的，當時我也才來一個月左右，我們被美國的 User 念了一小時，因為黑五要來了，所以這個問題有時限性，而且當時，我對Next js 沒到很熟。  
+
+首先，我遇到兩個大問題  
+
+## 問題一、一直渲染到舊的頁面沒更新，超過 revalidate，再訪問，頁面仍然沒更新。
+當時我們的頁面流量都不小，每天都超過3萬流量，發現佈署一陣子的 docker 容器的大小，都會從2gb 成長到 8gb，經過分析調查，發現我們user 的上傳原始圖檔過大，且都沒壓縮過，最大有10MB，猜測 node js 因為是單執行緒，只透過 event loop 在調度事件，一邊在轉圖， 一邊在渲染，推測 next js 的轉檔效能問題，
+
+### 解決方案
+Next js 本身為了讓圖片最佳化，內建了image loader ，但網站流量小可能不會遇到卡住的問題，網站流量一大就會遇到效能的瓶頸，
+後來因為我發現我們有買Cloudflare enterprise ，因此，我將圖片最佳化的服務移到 [Cloudflare image api](https://blog.markkulab.net/custom-nextjs-image-loader-with-cloudflare/)，總算解決了網站效能問題。
+
+## 問題二、庫存不準的問題
+另一個是頁面，為了讓使用者快速拿到頁面內容，我們用的是增量渲染 ISR ，但庫存這東西就會不準，如果 
+
+### 在此過程，因為找不到根本的解決方案，用一個臨時的解決方案，我撰寫了一個 rebuild page api ，只要在網址加上 ?forceUpdate=true，就會叫此 api，並請後台工程師產品有更新時順便觸發此頁面。
+```
+import { LogLevel } from '@/lib/log/const-logging';
+import { serverSideLog } from '@/lib/log/server-side-log';
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+export default async function rebuild(req: NextApiRequest, res: NextApiResponse) {
+    const secret = req.headers.$secret || req.query.secret; // req.headers.$secret => backoffice
+    const refreshUrl: string = req?.query?.page?.toString()?.startsWith('/')
+        ? req.query.page?.toString()
+        : `/${req.query.page?.toString()}`;
+
+    const serverUrl = req.headers?.host;
+    const result: IReBuildResponse = { revalidated: true };
+    const param = { revalidatedHost: serverUrl };
+
+    if (secret && secret === $projects.secret) {
+        try {
+            serverSideLog(
+                `[RebuildPage][Manual]Server rebuild is success! (${refreshUrl})`,
+                LogLevel.Information,
+                param
+            );
+            await res.revalidate(refreshUrl);
+            return res.json(result);
+        } catch (err) {
+            serverSideLog(`[RebuildPage][Manual]Trigger rebuild is fail!(${refreshUrl})`, LogLevel.Error, param);
+            return res.status(500).json({ message: JSON.stringify(err) });
+        }
+    }
+
+    return res.status(503).json({ message: `Invalid token: ${$projects.secret}, ${secret}` });
+}
+```
+### 長期解決方案
+分析庫存資訊，其實不能快取，使用者下加入購物車才發現沒庫存，體驗會很不好，但頁面不取快，每次都走伺服器渲染，產品種類多流量大，頁面就很容易遇到阻塞。   
+
+因此頁面仍維持ISR，將庫存改到用戶端去要，就不會遇到沒庫存和畫面顯示不一致的問題，請後台的工程師協助將即時庫存寫入redis，但庫存部份則改成用戶端渲染時才去要庫存資料。
+
+![get stock from client side](get-stock-in-from-side.png)
+
+P.S.在試的過程中發現，如果希望 Next js 容器 image 如果要變小，可以透過 standalone 模式，及在docker file 指定過輕量版的alpine-node，Next.js 會進行優化，只打包在運行時真正需要的文件和模塊，這樣可以減少包的體積和部署的覆雜性。
+
+
+
