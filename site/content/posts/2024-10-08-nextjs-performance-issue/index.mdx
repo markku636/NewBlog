@@ -23,7 +23,7 @@ slug: nextjs-performance-issues-in-e-commerce
 Next js 本身為了讓圖片最佳化，內建了image loader ，但處理圖片需要大量的IO，但網站流量小可能不會遇到卡住的問題，網站流量一大就會遇到效能的瓶頸，
 後來因為我發現我們有買 Cloudflare enterprise ，因此，我將圖片最佳化的服務移到 [Cloudflare image api](https://blog.markkulab.net/custom-nextjs-image-loader-with-cloudflare/)，總算解決了網站效能問題。
 
-## 問題二、庫存不準的問題
+## 問題二、增量渲染頁面(ISR)，庫存不準的問題
 另一個是頁面，為了讓使用者快速拿到頁面內容，我們用的是增量渲染 ISR ，但庫存這東西就會不準，如果 
 
 ### 短期解決方案 - 在此過程，因為找不到根本的解決方案，用一個臨時的解決方案，我撰寫了一個 rebuild page api ，只要在網址加上 ?forceUpdate=true，就會叫此 api，並請後台工程師產品有更新時順便觸發此頁面。
