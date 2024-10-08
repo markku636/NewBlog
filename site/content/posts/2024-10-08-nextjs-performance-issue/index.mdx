@@ -24,7 +24,7 @@ Next js 本身為了讓圖片最佳化，內建了image loader ，但處理圖�
 後來因為我發現我們有買 Cloudflare enterprise ，因此，我將圖片最佳化的服務移到 [Cloudflare image api](https://blog.markkulab.net/custom-nextjs-image-loader-with-cloudflare/)，總算解決了網站效能問題。
 
 ## 問題二、增量渲染頁面(ISR)，庫存不準的問題
-為了讓使用者快速拿到渲染的頁面內容，我們當時採用的是增量渲染 ISR ，但面臨銷售檔期，很容易sold out ，庫存清單及明細頁都顯示有庫存，但加入購物車就會出現庫存不足。
+為了讓使用者快速拿到渲染的頁面內容，我們當時採用的是增量渲染 ISR ，但面臨銷售檔期，很容易遇到 Sold out ，明明庫存清單及明細頁都顯示有庫存，但加入購物車就會出現庫存不足。
 
 ### 短期解決方案 - 因為找不到根本的解決方案，我撰寫了一個 rebuild page api ，只要在網址加上 ?forceUpdate=true，就會叫此 api，並請後台工程師產品有更新時順便觸發此頁面。
 ```
