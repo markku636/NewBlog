@@ -26,7 +26,7 @@ Next js 本身為了讓圖片最佳化，內建了image loader ，但處理圖�
 ## 問題二、增量渲染頁面(ISR)，庫存不準的問題
 為了讓使用者快速拿到渲染的頁面內容，我們當時採用的是增量渲染 ISR ，但面臨銷售檔期，很容易sold out ，庫存清單及明細頁都顯示有庫存，但加入購物車就會出現庫存不足。
 
-### 短期解決方案 - 在此過程，因為找不到根本的解決方案，用一個臨時的解決方案，我撰寫了一個 rebuild page api ，只要在網址加上 ?forceUpdate=true，就會叫此 api，並請後台工程師產品有更新時順便觸發此頁面。
+### 短期解決方案 - 因為找不到根本的解決方案，我撰寫了一個 rebuild page api ，只要在網址加上 ?forceUpdate=true，就會叫此 api，並請後台工程師產品有更新時順便觸發此頁面。
 ```
 import { LogLevel } from '@/lib/log/const-logging';
 import { serverSideLog } from '@/lib/log/server-side-log';
