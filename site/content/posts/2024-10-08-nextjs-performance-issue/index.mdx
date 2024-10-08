@@ -20,7 +20,7 @@ slug: nextjs-performance-issues-in-e-commerce
 當時我們的頁面流量都不小，每天都超過3萬流量，發現佈署一陣子的 docker 容器的大小，都會從2gb 成長到 8gb，經過分析調查，發現我們user 的上傳原始圖檔過大，且都沒壓縮過，最大有10MB，猜測 node js 因為是單執行緒，只透過 event loop 在調度事件，一邊在轉圖， 一邊在渲染，推測 next js 的轉檔效能問題，
 
 ### 解決方案
-Next js 本身為了讓圖片最佳化，內建了image loader ，但網站流量小可能不會遇到卡住的問題，網站流量一大就會遇到效能的瓶頸，
+Next js 本身為了讓圖片最佳化，內建了image loader ，但處理圖片需要大量的IO，但網站流量小可能不會遇到卡住的問題，網站流量一大就會遇到效能的瓶頸，
 後來因為我發現我們有買Cloudflare enterprise ，因此，我將圖片最佳化的服務移到 [Cloudflare image api](https://blog.markkulab.net/custom-nextjs-image-loader-with-cloudflare/)，總算解決了網站效能問題。
 
 ## 問題二、庫存不準的問題
