@@ -7,7 +7,7 @@ category: Frontend
 tags: ['React','Next','image loader','cloudflare']
 description : 整理 Next JS 在電商網站遇到的問題
 author : Mark Ku
-slug: nextjs-performance-issue
+slug: nextjs-performance-issues-in-e-commerce
 ---
 ## 時空背景
 在我進來前，前總經理剛退休，台灣資訊部門過去總經理擋著，需求可以排優先順序做，但我來時，就沒人擋著，就變成每個需求又急又趕，系統剛上線，又一堆問題，前面也走了一批人，我就在這兵荒馬亂時期進入這公司。  
@@ -26,7 +26,7 @@ Next js 本身為了讓圖片最佳化，內建了image loader ，但網站流�
 ## 問題二、庫存不準的問題
 另一個是頁面，為了讓使用者快速拿到頁面內容，我們用的是增量渲染 ISR ，但庫存這東西就會不準，如果 
 
-### 在此過程，因為找不到根本的解決方案，用一個臨時的解決方案，我撰寫了一個 rebuild page api ，只要在網址加上 ?forceUpdate=true，就會叫此 api，並請後台工程師產品有更新時順便觸發此頁面。
+### 短期解決方案 - 在此過程，因為找不到根本的解決方案，用一個臨時的解決方案，我撰寫了一個 rebuild page api ，只要在網址加上 ?forceUpdate=true，就會叫此 api，並請後台工程師產品有更新時順便觸發此頁面。
 ```
 import { LogLevel } from '@/lib/log/const-logging';
 import { serverSideLog } from '@/lib/log/server-side-log';
@@ -61,9 +61,19 @@ export default async function rebuild(req: NextApiRequest, res: NextApiResponse)
 }
 ```
 ### 長期解決方案
-分析庫存資訊，其實不能快取，使用者下加入購物車才發現沒庫存，體驗會很不好，但頁面不取快，每次都走伺服器渲染，產品種類多流量大，頁面就很容易遇到阻塞。   
+到後面更了解了領域知識，分析庫存資訊，其實不能快取，使用者下加入購物車才發現沒庫存，體驗會很不好，但頁面不取快，每次都走伺服器渲染，因為產品種類多，流量一大，頁面就很容易遇到阻塞。   
 
 因此頁面仍維持ISR，將庫存改到用戶端去要，就不會遇到沒庫存和畫面顯示不一致的問題，請後台的工程師協助將即時庫存寫入redis，但庫存部份則改成用戶端渲染時才去要庫存資料。
+
+```
+export default function ProductCardsSection({ productData = [], className = '' }: Readonly<IProductCardsSectionProps>) {
+    const {
+        data: stockData = {},
+        isLoading,
+        isError,
+    } = useGetStockByModelIDsQuery(productData.map((product) => product.modelId));
+}
+```
 
 ![get stock from client side](get-stock-in-from-side.png)
 
