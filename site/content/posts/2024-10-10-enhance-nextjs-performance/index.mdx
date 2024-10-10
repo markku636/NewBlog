@@ -14,7 +14,7 @@ slug: enhance-nextjs-performance
 * 正確使用 Next js / Image 載入圖片
 * 把圖片放在cdn，並將Next js loader 移到第三方的Loader 
 ### 2.減少JS 讓其 Bungle size 
-* next js 本身就會做 code spliting，app.tsx 會被包到主要的js 裡，將其子頁面，這樣就不會包在主要 JS 裡。
+* next js 本身就會做 code spliting，_app.tsx 會被包到主要的js 裡，將其子頁面，這樣就不會包在主要 JS 裡。
 * 只顯示頁面需要的元件 ( 這個會和seo )，頁面用不到的元件，採用動態載入元件 ( dynamic import )，元件就不會打包到主要的js 裡
 * 伺服器渲染時只拿回需要的資料，不需要的資料就不要吐到用戶端。
 * 透過 next/bundle-analyzer 分析工具得知道，那些套件過大，並找到替代的替換 ( Moment.js to Days.js )
@@ -32,5 +32,6 @@ Jenkins 搬到cdn ，靜態檔案cache 起來Cloudflare cache
 ### 10.減少 request 及 api reuqest 減少回傳的資量，把後端不常變動的資料 cache 起來。
 ### 11. 頁面渲染，能採用ISR 就用 ISR ，並減少在渲染使用 API，讀取Redis 會比 API 來的快。
 ### 12. 使用LTM 分散負載
+### 13. 採用App routing 的 Server side component
 
 (待續)
