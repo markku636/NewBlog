@@ -21,8 +21,8 @@ slug: enhance-nextjs-performance
 * 改變lodash 引入方式，也會影響打包的大小。
 ### 3.畫面不需要載入的，延後載入，避免阻塞 
 ### 4.減少 css 大小 
-* 移除肥大的css，框架 bootstrap 
-### 5.減少 server io 不常變動，放cdn 或cache 
+* 移除肥大的css 框架，如:bootstrap 
+### 5.把一些靜態檔案放在 CDN ，可減少 server io，並開啟clinet side  cache 
 Jenkins 搬到cdn ，靜態檔案cache 起來Cloudflare cache 
 ### 6.不要讓，網站偏移或抖動，會被扣分
 ### 7.字體套用swap ，字體在在沒載入前，會先顯示預設字體。
