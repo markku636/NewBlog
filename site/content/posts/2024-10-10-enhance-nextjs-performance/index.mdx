@@ -1,35 +1,33 @@
 ---
 featured: true
-title: 這些年對 Next js 網站做過的前端優化
+title: 這些年對 Next.JS 網站做過的前端優化
 date:  2024-10-10 20:01:01 +0800
 thumbnail: nextjs.png
 category: Frontend
 tags: ['React','Next','image loader','cloudflare']
-description : 這些年對 Next js 網站做過的前端優化
+description : 這些年對 Next.JS 網站做過的前端優化
 author : Mark Ku
 slug: enhance-nextjs-performance
 ---
-## 這些年對 Next js 網站做過的前端優化
+## 這些年對 Next.JS 網站做過的前端優化
 ### 1.降低圖片大小、並使用懶加載
 * 正確使用 Next js / Image 載入圖片
 * 把圖片放在cdn，並將Next js loader 移到第三方的Loader 
 ### 2.減少JS 讓其 bungle size 
-* 將 app.tsx 會被包到主要的js 裡，將其拆到頁面去用
-* next js 本身就會做 code spliting、
-* 只顯示頁面需要的元件 ( 這個會和seo )，頁面用不到的元件，採用動態載入元件 ( dynamic import )
+* next js 本身就會做 code spliting，app.tsx 會被包到主要的js 裡，將其子頁面，這樣就不會包在
+* 只顯示頁面需要的元件 ( 這個會和seo )，頁面用不到的元件，採用動態載入元件 ( dynamic import )，元件就不會打包到主要的js 裡
 * 伺服器渲染時只拿回需要的資料，不需要的資料就不要吐到用戶端。
-* 並且透過分析工具得知道，那些套件過大，並找到替代的替換
+* 並且透過 next/bundle-analyzer 分析工具得知道，那些套件過大，並找到替代的替換 ( Moment.js to Days.js )
 * lodash 引入方式，也會影響打包的大小。
 ### 3.畫面不需要載入的，延後載入，避免阻塞 
-### 4.減少css 大小 
+### 4.減少 css 大小 
 * 移除肥大的css，框架 bootstrap 
 ### 5.減少 server io 不常變動，放cdn 或cache 
 Jenkins 搬到cdn ，靜態檔案cache 起來Cloudflare cache 
 ### 6.不要讓，網站偏移或抖動，會被扣分
-### 7.字體套用swap ，在沒載入先顯示預設字體
-
-### 8.減少第三方js 造成瀏覽器阻塞，不需要的延後載入
+### 7.字體套用swap ，字體在在沒載入前，會先顯示預設字體。
+### 8.移除用不到的第三方JS，減少第三方js 造成瀏覽器阻塞，不需要的延後載入，避免塞在主線程。
 (其實改成捲動後載入，效能應該會更好)
-### 9. 網路傳輸的協定改變 (boti)、啟動協定 http 2 及 3 
+### 9. 調整網路傳輸的協定改變 (boti)、啟動協定 http 2 及 3 
 ### 10.減少 request 及 api reuqest 減少回傳的資量，把後端不常變動的資料 cache 起來。
 (待續)
