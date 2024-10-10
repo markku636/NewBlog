@@ -13,12 +13,12 @@ slug: enhance-nextjs-performance
 ### 1.降低圖片大小、並使用懶加載
 * 正確使用 Next js / Image 載入圖片
 * 把圖片放在cdn，並將Next js loader 移到第三方的Loader 
-### 2.減少JS 讓其 bungle size 
-* next js 本身就會做 code spliting，app.tsx 會被包到主要的js 裡，將其子頁面，這樣就不會包在
+### 2.減少JS 讓其 Bungle size 
+* next js 本身就會做 code spliting，app.tsx 會被包到主要的js 裡，將其子頁面，這樣就不會包在主要 JS 裡。
 * 只顯示頁面需要的元件 ( 這個會和seo )，頁面用不到的元件，採用動態載入元件 ( dynamic import )，元件就不會打包到主要的js 裡
 * 伺服器渲染時只拿回需要的資料，不需要的資料就不要吐到用戶端。
-* 並且透過 next/bundle-analyzer 分析工具得知道，那些套件過大，並找到替代的替換 ( Moment.js to Days.js )
-* lodash 引入方式，也會影響打包的大小。
+* 透過 next/bundle-analyzer 分析工具得知道，那些套件過大，並找到替代的替換 ( Moment.js to Days.js )
+* 改變lodash 引入方式，也會影響打包的大小。
 ### 3.畫面不需要載入的，延後載入，避免阻塞 
 ### 4.減少 css 大小 
 * 移除肥大的css，框架 bootstrap 
