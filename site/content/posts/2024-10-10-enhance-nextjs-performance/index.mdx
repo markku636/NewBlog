@@ -14,7 +14,7 @@ slug: enhance-nextjs-performance
 * Next.JS 的 Image，本身就做了很多的圖片優化，正確 Next.JS 的 Image 元件載入圖片，就可以輕易達到圖片的最佳化。
 * 把圖片放在cdn，並將Next js loader 移到第三方的Loader 
 ### 2.減少JS 讓其 Bungle size 
-* Next.JS 本身就會做 code spliting，在共用_app.tsx元件或 layout 用到的都會被包到主要的 JS 裡，將其拆到子頁面去，這樣就不會包在主要 JS 裡。
+* Next.JS 本身就會做 Code spliting，在共用_app.tsx元件或 layout 用到的JS 都會被包到主要的 JS 裡，將其拆到子頁面去，這樣就不會包在主要 JS 裡。
 * 頁面只顯示頁面需要的元件，頁面用不到的元件，採用動態載入元件 ( Dynamic import )，這樣元件就不會打包到主要 JS 裡
 * 伺服器渲染時只拿回需要的資料，不需要的資料就不要吐到用戶端。
 * 透過 next/bundle-analyzer 分析工具得知道，那些套件過大，並找到替代的替換 ( Moment.js to Days.js )
