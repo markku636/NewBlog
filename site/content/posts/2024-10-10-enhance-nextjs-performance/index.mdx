@@ -14,8 +14,8 @@ slug: enhance-nextjs-performance
 * Next.JS 的 Image，本身就做了很多的圖片優化，正確 Next.JS 的 Image 元件載入圖片，就可以輕易達到圖片的最佳化。
 * 把圖片放在cdn，並將Next js loader 移到第三方的Loader 
 ### 2.減少JS 讓其 Bungle size 
-* Next.JS 本身就會做 code spliting，_app.tsx 會被包到主要的js 裡，將其子頁面，這樣就不會包在主要 JS 裡。
-* 只顯示頁面需要的元件 ( 這個會和seo )，頁面用不到的元件，採用動態載入元件 ( Dynamic import )，元件就不會打包到主要 JS 裡
+* Next.JS 本身就會做 code spliting，在共用_app.tsx元件或 layout 用到的都會被包到主要的 JS 裡，將其拆到子頁面去，這樣就不會包在主要 JS 裡。
+* 頁面只顯示頁面需要的元件，頁面用不到的元件，採用動態載入元件 ( Dynamic import )，這樣元件就不會打包到主要 JS 裡
 * 伺服器渲染時只拿回需要的資料，不需要的資料就不要吐到用戶端。
 * 透過 next/bundle-analyzer 分析工具得知道，那些套件過大，並找到替代的替換 ( Moment.js to Days.js )
 * 改變lodash 引入方式，也會影響打包的大小。
@@ -29,7 +29,7 @@ slug: enhance-nextjs-performance
 ### 8. 移除用不到的第三方JS，減少第三方js 造成瀏覽器阻塞，不需要的延後載入，避免塞在主線程。
 (其實改成捲動後載入，效能應該會更好)
 ### 9. 調整網路傳輸的協定改變 (boti)、並開啟 http 2 及 3 通訊協定效率，可以有更好及壓縮效率更高。
-### 10. 減少 Request 及 api Request 減少回傳的資量，把後端不常變動的資料 cache 起來。
+### 10. 減少 Request 及 API Request 減少回傳的資量，把後端不常變動的資料 cache 起來。
 ### 11. 頁面渲染，能採用ISR 就用 ISR，不需要 SSR 的頁面的，走用戶端 CSR 渲染，並減少在渲染時使用 API，讀取Redis 會比 API 來的快。
 ### 12. 使用LTM 及多幾台機器分散負載
 ### 13. 採用App routing 的 Server side component
