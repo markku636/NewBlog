@@ -33,7 +33,7 @@ const CartView = dynamic(() => import('./cartView'));
 ### 5. 透過 Jenkins 將把一些靜態檔案搬到 CDN ，CDN 可減少對主伺服器的IO負載，並在CDN 開啟 Clinet side cache。
 ### 6. 不要讓網頁載入時,網站偏移或抖動，會被Google 扣分。
 ### 7. 字體套用swap ，字體在在沒載入前，會先顯示預設字體。
-### 8. 移除用不到的第三方JS，減少第三方js 造成瀏覽器阻塞，不需要的延後載入，避免塞在主線程。
+### 8. 移除用不到的第三方JS，減少第三方js 造成瀏覽器阻塞，可以在網頁互動載入的JS，就延後載入，避免在第一次渲染塞在主線程。
 ```
   <Script
    src="https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js"
