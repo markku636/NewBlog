@@ -16,9 +16,16 @@ slug: enhance-nextjs-performance
 ### 2.減少JS 讓其 Bungle size 
 * Next.JS 本身就會做 Code spliting，在共用_app.tsx元件或 layout 用到的JS 都會被包到主要的 JS 裡，將其拆到子頁面去，這樣就不會包在主要 JS 裡。
 * 頁面只顯示頁面需要的元件，頁面用不到的元件，採用動態載入元件 ( Dynamic import )，這樣元件就不會打包到主要 JS 裡
+```
+import dynamic from 'next/dynamic';
+```
 * 伺服器渲染時只拿回需要的資料，不需要的資料就不要吐到用戶端。
 * 透過 next/bundle-analyzer 分析工具得知道，那些套件過大，並找到替代的替換 ( Moment.js to Days.js )
 * 改變lodash 引入方式，也會影響打包的大小。
+```
+import { throttle } from 'lodash';
+const CartView = dynamic(() => import('./cartView'));
+```
 ### 3. 畫面不需要載入的，延後載入，避免阻塞。
 ### 4. 減少 CSS 大小 
 * 不是每頁需要的共用 CSS，拆到各別頁面或元件去，並移除沒用到的 CSS 
