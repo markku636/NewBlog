@@ -45,4 +45,4 @@ const CartView = dynamic(() => import('./cartView'));
 ### 10. 減少 Request 及 API Request 減少回傳的資料量，把後端不常變動的資料 cache 起來。
 ### 11. 頁面渲染，能採用ISR 就用 ISR，不需要 SSR 的頁面的，走用戶端 CSR 渲染，並減少在渲染時使用 API，讀取Redis 會比 API 來的快。
 ### 12. 使用LTM 及多幾台機器分散負載。
-### 13. 採用App routing 的 server side component ，可以讓不需要和使用者互動的元件JS 更小。
+### 13. 昇級App routing 的 server side component ，可以讓不需要和使用者互動的元件，在打包時 JS 更小。
