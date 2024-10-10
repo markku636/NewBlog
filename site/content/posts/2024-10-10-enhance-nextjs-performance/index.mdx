@@ -30,7 +30,7 @@ const CartView = dynamic(() => import('./cartView'));
 ### 4. 減少 CSS 大小 
 * 不是每頁需要的共用 CSS，拆到各別頁面或元件去，並移除沒用到的 CSS 
 * 替換肥大的css 框架，如:bootstrap 
-### 5. 透過 Jenkins 將把靜態檔案搬到 CDN ，CDN 可減少對主伺服器的IO負載，並在CDN開啟clinet side  cache ，
+### 5. 透過 Jenkins 將把一些靜態檔案搬到 CDN ，CDN 可減少對主伺服器的IO負載，並在CDN 開啟 Clinet side cache ，
 ### 6. 不要讓網頁載入時,網站偏移或抖動，會被Google 扣分
 ### 7. 字體套用swap ，字體在在沒載入前，會先顯示預設字體。
 ### 8. 移除用不到的第三方JS，減少第三方js 造成瀏覽器阻塞，不需要的延後載入，避免塞在主線程。
