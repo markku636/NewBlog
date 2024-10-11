@@ -80,8 +80,11 @@ export default props => {
 		
 
 
-		<Divider space={3} />
+		<Divider space={2} />
+		<Section title='除了工程師的角色，我也是位鐵人，並在2022年完成澎湖超級鐵人。'>
+		<Card variant='paper'>
 		<div className="iframe-container">
+		
   <iframe
     style={{ width: "100%", height: "500px" }}
     src="https://www.youtube.com/embed/QXxuNpwIk4I"
@@ -89,8 +92,11 @@ export default props => {
     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
     allowFullScreen
   />
-</div>
+  
 
+</div>
+</Card>
+</Section>
 
                 {/* <Text variant='p'>
                   Nulla est elit, feugiat et lacinia nec, aliquam sit amet est.
