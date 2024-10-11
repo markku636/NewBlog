@@ -66,9 +66,18 @@ export default props => {
                 <Card variant='paper'>
                   <Text variant='p'>
                     Hi, I’m Mark.Ku.
-                    我是一位網頁軟體工程師，8年以上豐富網站開發經驗，開發過各種網站，直播系統、POS系統、電子商務、平台網站、SEO、金流串接、Infra 出身，近8年都從事軟體開發，帶過幾次團隊，目前專注於北美及德國市場電商網站開發團隊。
+                    我是一位網頁軟體工程師，9年以上豐富網站開發經驗，開發過各種網站，電子商務、平台網站、直播系統、POS系統、SEO 優化、金流串接、AI 串接，Infra 出身，帶過幾次團隊，也曾加入過大團隊一起開發。
                   </Text>
                 </Card>
+				
+				<div class="iframe-container">
+				<iframe  style="width:100%;height:500px"    
+				src="https://www.youtube.com/embed/bXOGkVU9wGs"
+				frameborder="0"
+				allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+				allowfullscreen>
+				</iframe>
+				</div>
                 {/* <Text variant='p'>
                   Nulla est elit, feugiat et lacinia nec, aliquam sit amet est.
                   Ut in consequat ipsum, in sagittis felis.
