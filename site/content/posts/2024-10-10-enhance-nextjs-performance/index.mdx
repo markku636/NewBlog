@@ -24,7 +24,7 @@ const CartView = dynamic(() => import('./cartView'));
 ```
 * 伺服器渲染時只拿回需要的資料，不需要的資料就不要吐到用戶端。
 * 透過 next/bundle-analyzer 分析工具得知道，那些套件過大，並找到替代的替換 如: Moment.js to Days.js 。
-* 改變lodash 引入方式，也會影響打包的大小。
+* 改變套件的引入方式，也會影響JS的打包的大小。 如:lodash
 ```
 import { throttle } from 'lodash';
 ```
