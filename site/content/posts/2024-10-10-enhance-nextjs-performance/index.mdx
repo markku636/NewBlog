@@ -23,7 +23,7 @@ import dynamic from 'next/dynamic';
 const CartView = dynamic(() => import('./cartView'));
 ```
 * 伺服器渲染時只拿回需要的資料，不需要的資料就不要吐到用戶端。
-* 透過 next/bundle-analyzer 分析工具得知道，那些套件過大，並找到替代的替換 ( Moment.js to Days.js )。
+* 透過 next/bundle-analyzer 分析工具得知道，那些套件過大，並找到替代的替換 如: Moment.js to Days.js 。
 * 改變lodash 引入方式，也會影響打包的大小。
 ```
 import { throttle } from 'lodash';
@@ -48,3 +48,4 @@ import { throttle } from 'lodash';
 ### 10. 頁面渲染，能採用ISR 就用 ISR，不需要 SSR 的頁面的，走用戶端 CSR 渲染，並減少在渲染時使用 API，讀取Redis 會比 API 來的快。
 ### 11. 使用LTM 及多幾台機器及應用程式分散負載。
 ### 12. 網站昇級App routing ，並使用 server side component ，可以讓不需要和使用者互動的元件，在打包時 JS 更小。
+### 13. 定期將 Next.JS 框架昇級，每次的昇級官方都宣稱有對效能的改善，每次昇級雖然有一些小痛，但如果長時間不昇級，就會變得很難昇級。
