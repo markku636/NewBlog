@@ -28,7 +28,7 @@ const CartView = dynamic(() => import('./cartView'));
 ```
 import { throttle } from 'lodash';
 ```
-* 畫面不需要載入的JS 或 CSS，延後載入，避免首次渲染阻塞。如: 購物車的側邊欄。
+* 畫面不需要載入的JS 或 CSS，按需求載入，避免首次渲染阻塞。如: 購物車的側邊欄。
 ### 3. 減少 CSS 大小 。
 * 不是每頁需要的共用 CSS，拆到各別頁面或元件去，並移除沒用到的 CSS 。
 * 替換肥大的css 框架，如:Bootstrap 。
