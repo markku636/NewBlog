@@ -57,6 +57,10 @@ export default props => {
             {/* <Button as={GLink} to='/contact' sx={styles.button}>
               Contact Me
             </Button> */}
+			
+
+
+
           </Box>
 
           <Divider space={2} />
@@ -70,14 +74,24 @@ export default props => {
                   </Text>
                 </Card>
 				
-				<div class="iframe-container">
-				<iframe  style="width:100%;height:500px"    
-				src="https://www.youtube.com/embed/bXOGkVU9wGs"
-				frameborder="0"
-				allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-				allowfullscreen>
-				</iframe>
-				</div>
+				<div className="iframe-container">
+				
+		</div>
+		
+
+
+		<Divider space={3} />
+		<div className="iframe-container">
+  <iframe
+    style={{ width: "100%", height: "500px" }}
+    src="https://www.youtube.com/embed/QXxuNpwIk4I"
+    frameBorder="0"
+    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+    allowFullScreen
+  />
+</div>
+
+
                 {/* <Text variant='p'>
                   Nulla est elit, feugiat et lacinia nec, aliquam sit amet est.
                   Ut in consequat ipsum, in sagittis felis.
