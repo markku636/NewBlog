@@ -45,4 +45,4 @@ import { throttle } from 'lodash';
 ### 9. 減少 Request 及 API Request 減少回傳的資料量，把後端不常變動的資料，又常查詢的資料 Cache 起來。
 ### 10. 頁面渲染，能採用ISR 就用 ISR，不需要 SSR 的頁面的，走用戶端 CSR 渲染，並減少在渲染時使用 API，讀取Redis 會比 API 來的快。
 ### 11. 使用LTM 及多幾台機器及應用程式分散負載。
-### 12. 昇級App routing 的 server side component ，可以讓不需要和使用者互動的元件，在打包時 JS 更小。
+### 12. 網站昇級App routing ，並使用 server side component ，可以讓不需要和使用者互動的元件，在打包時 JS 更小。
