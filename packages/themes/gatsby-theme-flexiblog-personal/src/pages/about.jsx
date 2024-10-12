@@ -80,8 +80,8 @@ export default props => {
 		
 
 
-		<Divider space={2} />
-		<Section title='除了工程師的角色，我也是位鐵人，並在2022年完成澎湖超級鐵人。'>
+		<Divider space={3} />
+		<Section title='除了扮演好工程師的角色，同時我也是位鐵人，並在2022年完成澎湖超級鐵人。'>
 		<Card variant='paper'>
 		<div className="iframe-container">
 		
