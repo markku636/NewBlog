@@ -1,0 +1,237 @@
+---
+featured: true
+title: 透過 Langchain 及開源 llama AI 在Next JS 打造自己的AI Bot API part's 2 -  打造 AI 具有記憶功能的 AI Agent
+date:  2024-10-13 01:01:35 +0800
+thumbnail:  langchain.jpg
+category:  AI  
+tags:   ['llama','ai','langchain' ]
+description : 透過 Langchain 及開源 llama AI 在Next JS 打造自己的AI Bot API part's 2 -  打造 AI 具有記憶功能的 AI Agent
+author : Mark Ku
+slug: ai-bot-api-parts-2
+---
+## 前言
+[先前有試著將 Python Langchain 換成 node 版](https://blog.markkulab.net/ai-bot-api-parts-1/)，但 Langchain node 版的文件真的有點少，因此，轉換起來有點辛苦。
+
+## 代理組件
+AgentExecutor 是langchain  框架中蠻核心的組件，代理能根據用戶輸入的內容，由AI 動態決定要使用那個工具，並給出最終的答案。
+
+### 初始化代理組件
+```
+// 初化模式
+const llm = new ChatOllama({
+            model: 'llama3.2',
+            temperature: 0,
+            maxRetries: 2,
+            baseUrl: 'http://localhost:11434',
+            // other params...
+        });
+
+const tools = []; // 工具
+
+// 初始化聊天模版
+const prompt = ChatPromptTemplate.fromMessages([
+            ['system', 'You are a helpful assistant'], // default role
+            ['placeholder', '{chat_history}'], // default role
+            ['human', '{input}'],
+            ['placeholder', '{agent_scratchpad}'],
+        ]);
+
+const agent = createToolCallingAgent({
+            llm,
+            tools,
+            prompt,
+        });  
+        
+const result = await agentExecutor.invoke({ input: 'your question ' });        
+```
+
+## 工具 ( 動態路由 )
+前面提到，代理組件，接收使用者問題 > 依據工具的描述，讓 AI 決定使用那個工具 > 執行工具) > 最終回應小用戶。
+
+### 客製化工具
+```
+import { tool } from '@langchain/core/tools';
+...
+ const greetingTool = tool(
+            async ({ input }: { input: string }) => {
+                return input + ' ==';
+            },
+            {
+                name: 'greetingTool',
+                description: 'if some one say hello',
+                schema: z.object({
+                    input: z.string(),
+                })                
+            }
+        );
+...        
+```
+參數說明
+* name：工具的名稱。
+* description：描述該工具的功能，供 AI 會依據描述，決定
+使用那個工具。
+* func：該工具的核心功能，這裡是異步函數，根據輸入值返回
+* schema：使用 zod 定義工具輸入的參數格式。
+
+### 使用第三方工具 - SerpAPI
+SerpAPI 是一個專門設計用來與搜尋引擎互動的 API，特別是 Google 搜尋，SerpAPI 自動化了網頁抓取的過程，讓開發者無需自行管理搜尋引擎的網頁解析和資料提取，簡化了搜尋結果的獲取過程。
+
+```
+import { SerpAPI } from '@langchain/community/tools/serpapi';
+
+ let serpApiTool = new SerpAPI('your key ', {
+           location: 'Austin,Texas,United States', // ，代表你要模擬的搜尋位置。在這裡，它指定了搜索應基於美國德州奧斯汀的位置，這可以影響搜尋結果的區域相關性。
+           hl: 'en', //  語言參數，代表要以哪種語言來顯示搜尋結果。'en' 表示結果會以英文顯示。
+           gl: 'us', // 國家/地區代碼，用來設定你希望搜尋結果的區域依據。'us' 表示結果會根據美國的地區來產生。
+           }),
+```
+
+## 擴充 AI Agent 的記憶功能  
+大型語言模型，本身是不具備記憶功能，之所謂能讀懂上下文的問題，因為每次將討論的過程，再傳遞給大型語言模型，去詢問。
+
+Langchain 的momory ，也是透過這個機制，因此將每次用戶問的問題存在 Redis ，讓AI Bot 也具備記憶功能。
+P.S. 需要準備一台Redis 
+
+### 安裝相關的套件 - [參考文件](https://js.langchain.com/docs/integrations/vectorstores/redis/)
+```
+npm i @langchain/redis @langchain/core redis @langchain/openai --save3
+```
+### 使用 redis memory 
+
+```
+import { RedisChatMessageHistory } from '@langchain/community/stores/message/ioredis';
+import { BufferMemory } from 'langchain/memory';
+...
+ const client = new Redis('redis://localhost:30001');
+
+        const memory = new BufferMemory({
+            chatHistory: new RedisChatMessageHistory({
+                sessionId: 'sessionId:' + new Date().toISOString(),
+                sessionTTL: 300,
+                client,
+            }),
+            aiPrefix: 'ollama',
+            outputKey: 'output', // 沒有錯爆錯
+            memoryKey: 'chat_history', // 沒有錯爆錯
+            inputKey: 'input', // 沒有錯爆錯
+            returnMessages: true,
+            
+            
+const agentExecutor = new AgentExecutor({
+            agent,
+            tools,
+            verbose: true, // enable debug
+            handleParsingErrors: true,
+            memory, // redis 記憶功能
+            returnIntermediateSteps: true,
+        });
+...
+```
+
+## 完整的程式碼 ( Next.JS API)
+
+```
+import { RedisChatMessageHistory } from '@langchain/community/stores/message/ioredis';
+import { Calculator } from '@langchain/community/tools/calculator';
+import { SerpAPI } from '@langchain/community/tools/serpapi';
+import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { tool } from '@langchain/core/tools';
+import { ChatOllama } from '@langchain/ollama';
+import Redis from 'ioredis';
+import { AgentExecutor, createToolCallingAgent } from 'langchain/agents';
+import { BufferMemory } from 'langchain/memory';
+import { NextApiRequest, NextApiResponse } from 'next/types';
+import { z } from 'zod';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    if (req.method !== 'GET') {
+        return res.status(405).json({ message: 'Only GET requests are allowed' });
+    }
+
+    try {
+        const magicTool = tool(
+            async ({ input }: { input: number }) => {
+                return `${input + 2}`;
+            },
+            {
+                name: 'magic_function',
+                description: 'Applies a magic function to an input.',
+                schema: z.object({
+                    input: z.number(),
+                }),
+            }
+        );
+
+        const llm = new ChatOllama({
+            model: 'llama3.2',
+            temperature: 0,
+            maxRetries: 2,
+            baseUrl: 'http://localhost:11434',
+            // other params...
+        });
+
+        const tools = [
+            magicTool, // custom tool
+            new Calculator(),
+            new SerpAPI('your serp key', {
+                location: 'Austin,Texas,United States',
+                hl: 'en',
+                gl: 'us',
+            }),
+        ];
+
+        const prompt = ChatPromptTemplate.fromMessages([
+            ['system', 'You are a helpful assistant'], // default role
+            ['placeholder', '{chat_history}'], // default role
+            ['human', '{input}'],
+            ['placeholder', '{agent_scratchpad}'],
+        ]);
+
+        const agent = createToolCallingAgent({
+            llm,
+            tools,
+            prompt,
+        });
+
+        const client = new Redis('redis://localhost:30001');
+
+        const memory = new BufferMemory({
+            chatHistory: new RedisChatMessageHistory({
+                sessionId: 'sessionId:' + new Date().toISOString(),
+                sessionTTL: 300,
+                client,
+            }),
+            aiPrefix: 'ollama',
+            outputKey: 'output', // 沒有會爆錯
+            memoryKey: 'chat_history', // 沒有會爆錯
+            inputKey: 'input', // 沒有會爆錯
+            returnMessages: true,
+        });
+
+        const agentExecutor = new AgentExecutor({
+            agent,
+            tools,
+            verbose: true, // enable debug
+            handleParsingErrors: true,
+            memory, // redis 記憶功能
+            returnIntermediateSteps: true,
+        });
+
+        const result = await agentExecutor.invoke({ input: 'what is the value of magic_function(3)?' });
+        const serpResult2 = await agentExecutor.invoke({ input: 'what is the Pokomon?' });
+        const result3 = await agentExecutor.invoke({ input: 'what is 5 + 2 *5 =' });
+        const result4 = await agentExecutor.invoke({ input: 'hello', outputKey: 'key1' });
+        const result5 = await agentExecutor.invoke({ input: '幫我推薦電腦' });
+
+        return res.status(200).json({ result, serpResult2, result3, result4, result5 });
+    } catch (error) {
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+```
+
+## 參考資料
+* [官方文件](https://js.langchain.com/docs/how_to/migrate_agent/#basic-usage)
+* [官方程式文件](https://v03.api.js.langchain.com/hierarchy.html#@langchain/community.tools/serpapi.SerpAPI)
+* [Building AI Solutions with LangChain and Node.js: A Comprehensive Guide](https://medium.com/widle-studio/building-ai-solutions-with-langchain-and-node-js-a-comprehensive-guide-widle-studio-4812753aedff)
