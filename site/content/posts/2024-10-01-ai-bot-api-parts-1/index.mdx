@@ -1,11 +1,11 @@
 ---
 featured: true
-title: 透過 Langchain 及開源 llama AI 在Next JS 打造自己的AI Bot API - part's 1
+title: 透過 Langchain 及開源 llama AI 在Next JS 打造自己的AI Bot API part's 1 - 從了解 lanchain 開始
 date:  2024-10-01 01:01:35 +0800
 thumbnail:  langchain.jpg
 category:  AI  
 tags:   ['llama','ai','langchain' ]
-description : 透過 Langchain 及 開源 llama AI 在Next JS 打造自己的AI Bot API - part's 1
+description : 透過 Langchain 及 開源 llama AI 在Next JS 打造自己的AI Bot API part's 1 - 從了解 lanchain 開始
 author : Mark Ku
 slug: ai-bot-api-parts-1
 ---
@@ -138,7 +138,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const weatherResponse = await chain.invoke({ question });
 
         res.status(200).json({ weather: weatherResponse });
-    } catch (error) {
+    } catch (error) {	
         console.error('Error fetching weather:', error);
         res.status(500).json({ message: 'Internal Server Error' });
     }
