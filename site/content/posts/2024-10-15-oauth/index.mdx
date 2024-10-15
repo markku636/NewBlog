@@ -22,7 +22,7 @@ slug: practice-oauth-with-nestjs
 1.在主網站按下登入按鈕，會透過 URL 將 redirect_uri 傳遞至 OAuth 登入頁面。  
 2.使用者輸入帳號密碼完成登入後，系統會產生一個 code，並將其存入資料庫，然後將頁面重定向回電商網站的 callback 頁面，並將 code 透過 URL 傳遞過去。  
 3.在 callback 頁面，前端可以從 URL 中獲取 code，並將其傳送至後端，透過 OAuth API 使用該 code 換取 access token。  
-4.頁面會顯示獲取到的 access token，這時可以使用該 access token 去訪問資源伺服器，取得相關資訊，過期時則可以去換token。  
+4.頁面會取得到的 access token，此時可以使用該 access token 去訪問資源伺服器，取得相關資訊，過期時則可以去換token。  
 
 可以做的更好的部份
 * 資料庫密碼欄位應該要加嚴處理 
