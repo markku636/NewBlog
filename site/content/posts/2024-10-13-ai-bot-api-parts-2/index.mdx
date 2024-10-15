@@ -13,7 +13,7 @@ slug: ai-bot-api-parts-2
 [先前有試著將 Python Langchain 換成 Node 版](https://blog.markkulab.net/ai-bot-api-parts-1/)，但 Langchain node 版的文件真的有點少，因此，轉換起來有點辛苦，因為常常就算有文件，還是漏了參數，程式就炸了，最後還是得對照Python 版本。
 
 ## 代理組件
-接著，我們來看 AgentExecutor，在langchain 框架中蠻核心的組件，代理能根據用戶輸入的內容，由AI 動態決定要使用那個工具，並給出最終的答案。
+首先，我們來看 AgentExecutor，在Langchain 框架中蠻核心的組件，代理能根據用戶輸入的內容，由AI 動態決定要使用那個工具，並給出最終的答案。
 
 ### 初始化代理組件
 ```
@@ -25,9 +25,9 @@ const llm = new ChatOllama({
             baseUrl: 'http://localhost:11434',
         });
 
-const tools = []; // 工具
+const tools = []; // 工具清單
 
-// 初始化聊天模版
+// 初始化聊天範本
 const prompt = ChatPromptTemplate.fromMessages([
             ['system', 'You are a helpful assistant'], // default role
             ['placeholder', '{chat_history}'], // default role
@@ -45,7 +45,7 @@ const result = await agentExecutor.invoke({ input: 'your question ' });
 ```
 
 ## 工具 ( 動態路由 )
-前面提到，當代理組件，接收使用者問題 > 會依據工具的描述，讓 AI 決定使用那個工具 > 執行工具 > 最終回應用戶。
+前面提到，當代理組件，接收使用者問題 > 會依據工具的描述，並讓 AI 決定使用那個工具 > 執行工具 > 最終回應結果給用戶。
 
 ### 客製化工具
 ```
@@ -109,9 +109,9 @@ import { BufferMemory } from 'langchain/memory';
                 client,
             }),
             aiPrefix: 'ollama',
-            outputKey: 'output', // 沒有錯爆錯
-            memoryKey: 'chat_history', // 沒有錯爆錯
-            inputKey: 'input', // 沒有錯爆錯
+            outputKey: 'output', // 沒有會爆錯
+            memoryKey: 'chat_history', // 沒有會爆錯
+            inputKey: 'input', // 沒有會爆錯
             returnMessages: true,
             
             
