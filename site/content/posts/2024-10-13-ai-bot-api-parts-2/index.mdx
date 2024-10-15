@@ -1,16 +1,18 @@
 ---
 featured: true
-title: 透過 Langchain 及開源 llama AI 在Next JS 打造自己的AI Bot API part's 2 -  打造 AI 具有記憶功能的 AI Agent
+title: 使用 Langchain 和開源 Llama AI 在 Next.js 打造 AI Bot API (Part 2): 開發具備記憶功能的 AI Agent
 date:  2024-10-13 01:01:35 +0800
 thumbnail:  langchain.jpg
 category:  AI  
 tags:   ['llama','ai','langchain' ]
-description : 透過 Langchain 及開源 llama AI 在Next JS 打造自己的AI Bot API part's 2 -  打造 AI 具有記憶功能的 AI Agent
+description : 使用 Langchain 和開源 Llama AI 在 Next.js 打造 AI Bot API (Part 2): 開發具備記憶功能的 AI Agent
 author : Mark Ku
 slug: ai-bot-api-parts-2
 ---
 ## 前言
-[先前有試著將 Python Langchain 換成 Node 版](https://blog.markkulab.net/ai-bot-api-parts-1/)，但 Langchain node 版的文件真的有點少，因此，轉換起來有點辛苦，因為常常就算有文件，還是漏了參數，程式就炸了，最後還是得對照Python 版本。
+[先前有試著將 Python Langchain 換成 Node 版](https://blog.markkulab.net/ai-bot-api-parts-1/)，但 Langchain node 版的文件真的有點少，因此，轉換起來有點辛苦，因為常常就算有文件，還是漏了參數，程式就炸了，最後還是得對照Python 版本。  
+
+這篇談到大型語言模型，本身是不具備記憶功能，之所謂能讀懂上下文的問題，因為每次將討論的過程，再傳遞給大型語言模型，再去詢問。
 
 ## 預先準備
 * Redis Server
