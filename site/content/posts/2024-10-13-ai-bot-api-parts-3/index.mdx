@@ -268,7 +268,41 @@ curl -X POST http://localhost:3001/api/lang-chain/query-vector-database \
 }
 ```
 
-## 進階應用 - qdrantClient.search 可以用價格或是相似度做查詢
+## 進階查詢應用
+### 插入結構
+向量資料庫可以存放結構性資料及非結構資料，依據結構化資料，可以透過過濾器查詢會更為精準
+#### 插入非結構性資料
+```
+qdrantClient.upsert({
+    collection_name: 'your_collection_name',
+    points: [
+        {
+            id: 1, // 唯一識別符
+            vector: vector, // 向量資料
+            payload: { text: "your_original_text" } // 非結構化資料作為 payload 插入
+        }
+    ]
+});
+```
+#### 插入結構性資料
+```
+ qdrantClient.upsert({
+    collection_name: 'products_collection',
+    points: [
+        {
+            id: productData.id, // 唯一識別符
+            vector: productData.features, // 插入特徵向量
+            payload: { // 結構化資料作為 payload 插入
+                name: productData.name,
+                price: productData.price, // 結構化資料
+                rating: productData.rating, // 結構化資料
+                category: productData.category // 結構化資料
+            }
+        }
+    ]
+});
+```
+### 進階查詢參數
 本身向量資料庫可以存放結構性資料舉非結構性資料，因此也能透過特定的屬性去查詢
 ![向量資料庫的可視圖表](visua-diagrams-in-vector-database.png)
 
