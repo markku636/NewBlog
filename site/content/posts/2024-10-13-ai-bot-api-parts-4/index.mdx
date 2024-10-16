@@ -432,8 +432,9 @@ curl -X POST http://localhost:3001/api/lang-chain/query-product-vector-database 
 ## 結論
 透過前面幾篇的實驗，因此我們得出，如何用Langchain 打造更精準的產品推薦的AI代理機器人。  
 
-Agent 
+* 代理 (Agent) 
 使用者輸入 > AI解析用戶的意圖，依據動態路由，AI決定採用什麼工具 > 執行自訂工具(產品推薦) >  回傳結果給最終用戶。  
 
+* 工具 (Tool) 
 產品推薦工具的實作，則可以讓AI依據使用者輸入，解析成產品分類的查詢條件，最後查詢向量資料庫。
 
