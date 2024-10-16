@@ -84,7 +84,7 @@ curl -X POST http://localhost:3001/api/lang-chain/ollama-embedding \
   -H "Content-Type: application/json" \
   -d '{"text": "LangChain is the framework for building context-aware reasoning applications"}'
 ```
-## 安裝及用程式操作向量資料庫
+## 接著，安裝及用程式操作向量資料庫
 ### 什麼是 [qdrant](https://qdrant.tech/)
 Qdrant 是一個非常熱門的向量數據庫，用於儲存和檢索高維度向量資料，適合做相似度查詢，例如推薦系統和文字、圖像搜索，它有簡單易用的 RESTful API 和可視化儀表板來管理和查看向量數據。
 
@@ -99,7 +99,7 @@ http://localhost:6333/dashboard
 ![Qdrant dashboard](qdrant-dashboard.png)
 ![Qdrant dashboard](qdrant-dashboard-2.png)
 
-### 也能透過 Restful api 操作向量資料庫
+### 也支援 Restful api 操作向量資料庫
 ```
 ##  測試健康度
 curl http://127.0.0.1:6333/healthz
@@ -269,7 +269,7 @@ curl -X POST http://localhost:3001/api/lang-chain/query-vector-database \
 ```
 
 ## 最近使用 AI 的心得
-最近蠻有感的，AI 出現確實拿走了一些基礎工作，透過用ＡI，工程師可以做更多的事，學習效率也提昇;隨著各種知識學習門檻變得簡單，很多知識，可以透過和AI 聊天就學會，人們獲取知識也更容易，我們花更多時間擷取知識、洞察、規劃、驗證及下決策。
+最近蠻有感的，AI 出現確實拿走了一些基礎工作，透過用ＡI，工程師可以做更多的事，也提昇學習東西效率;隨著各種知識學習門檻變得簡單，很多知識，可以透過和AI 聊天就學會，人們獲取知識也更容易，我們花更多時間擷取知識、洞察、規劃、驗證及下決策。
 
 ## 參考資料
 * [Qdrant 向量資料庫基本練習](https://blog.darkthread.net/blog/qdrant-w-cs/)
