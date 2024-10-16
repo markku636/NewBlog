@@ -85,14 +85,14 @@ curl -X POST http://localhost:3001/api/lang-chain/ollama-embedding \
   -d '{"text": "LangChain is the framework for building context-aware reasoning applications"}'
 ```
 ## 安裝及用程式操作向量資料庫
-### 什麼是 qdrant
+### 什麼是 [qdrant](https://qdrant.tech/)
 Qdrant 是一個非常熱門的向量數據庫，用於儲存和檢索高維度向量資料，適合做相似度查詢，例如推薦系統和文字、圖像搜索，它有簡單易用的 RESTful API 和可視化儀表板來管理和查看向量數據。
 
 ### 啟動 qdrant 向量資料庫容器
 ```
 docker run -d --name qdrant-container -p 6333:6333 qdrant/qdrant
 ```
-### 訪問 dashboard
+### 訪問 Dashboard
 ```
 http://localhost:6333/dashboard
 ```
@@ -206,7 +206,7 @@ import { OllamaEmbeddings } from '@langchain/ollama';
 import { QdrantClient } from '@qdrant/js-client-rest'; // 引入 Qdrant 客戶端
 import { NextApiRequest, NextApiResponse } from 'next';
 
-// 初始化 Qdrant 客戶端
+// 初始化 qdrant 客戶端
 const qdrantClient = new QdrantClient({ url: 'http://localhost:6333' });
 
 // 初始化 OllamaEmbeddings
