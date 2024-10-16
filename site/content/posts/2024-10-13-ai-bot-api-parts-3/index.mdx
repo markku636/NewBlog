@@ -271,7 +271,6 @@ curl -X POST http://localhost:3001/api/lang-chain/query-vector-database \
 本身向量資料庫可以存放結構性資料舉非結構性資料，因此也能透過特定的屬性去查詢
 ![向量資料庫的可視圖表](visua-diagrams-in-vector-database.png)
 
-
 ```
 const searchResults = await qdrantClient.search(collectionName, {
     vector: [0.5, 0.2, ...], // 用於查詢的向量
