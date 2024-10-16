@@ -1,37 +1,37 @@
 ---
 featured: true
-title: 使用 Langchain 和開源 Llama AI 在 Next.js 打造 AI Bot API Part 4 -  AI產品推薦 API
-date:  2024-10-15 01:20:35 +0800
+title: 使用 Langchain 和開源 Llama AI 在 Next.js 打造 AI Bot API Part 4 - AI產品推薦 API
+date:  2024-10-16 19:20:35 +0800
 thumbnail:  langchain.jpg
 category:  AI  
 tags:   ['llama','ai','langchain','qdrant' ,'node']
-description : 使用 Langchain 和開源 Llama AI 在 Next.js 打造 AI Bot API Part 4 -  AI產品推薦 API
+description : 使用 Langchain 和開源 Llama AI 在 Next.js 打造 AI Bot API Part 4 - AI產品推薦 API
 author : Mark Ku
 slug: ai-bot-api-parts-4
 ---
 ## 前言
 上一篇，談到[透過向量資料庫，我們讓AI 擁有自己的知識庫](https://blog.markkulab.net/ai-bot-api-parts-3/)，這篇想要做產品推薦的API。
 
-## 首先，我先塞入了大量資料到我的向資料庫
+## 首先，我先塞入了大量假資料到我的向資料庫
 * 筆電
 * 貓狗、水餃的說明
 * 電腦、筆電、週邊配備
 
-### 之後回到向量資料庫qdrant的 Dashboard > 點選 Visuallize
+### 接著， 回到向量資料庫(qdrant)的Dashboard > 點選 Visuallize
 ```
 http://localhost:6333/dashboard
 ```
 ![Qdrant Dashbaord ](qdrant-dashbaord-1.png)
 
-### 超酷的，點選Run，之後，就能看見向量資料庫所裡資料，像資料宇宙般程現
+### 點選Run，之後，就能看見向量資料庫所裡資料，像資料宇宙般程現。
 ![Data universe](qdrant-dashbaord-2.png)
 
-### 當你點選 OPEN GRAPH，就能展開被選取資料的關係圖，並將滑鼠滑動到連接的線上，就能得知，資料與資料間的相似度
+### 接著點選 OPEN GRAPH 按鈕，就能展開被選取資料的關係圖，並將滑鼠滑動到連接的線上，就能得知，資料與資料間的相似度。
 ![Graph](qdrant-dashbaord-3.png)
 
-P.S. 有趣的是水餃和動物相似度居然有 0.8，和HP筆電的相似度是0.06，不知道是不是因為水餃是用動物做的嗎? XD 
+P.S. 發現有趣像現是的是水餃和動物相似度居然有 0.8，和HP筆電的相似度是0.06，不知道是不是因為水餃是用動物做的嗎? XD 
 
-## 因此我們得知，真實的水餃和動物不相關，因此，必須微調
+### 但真實的水餃和動物，並不太相關，但相似度是模型透過特定演算法得出，看起來是我們不能修改，因此，必須透過其他方式解決查詢精準度的問題，以下是我整理出可行的方式
  
 * 寫入向量資料庫時，加入特徵，在查詢加入類別，並利用篩選條件去查詢
 ```
