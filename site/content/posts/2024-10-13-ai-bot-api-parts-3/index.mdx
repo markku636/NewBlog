@@ -268,6 +268,10 @@ curl -X POST http://localhost:3001/api/lang-chain/query-vector-database \
 ```
 
 ## 進階應用 - qdrantClient.search 可以用價格或是相似度做查詢
+本身向量資料庫可以存放結構性資料舉非結構性資料，因此也能透過特定的屬性去查詢
+![向量資料庫的可視圖表](visua-diagrams-in-vector-database.png)
+
+
 ```
 const searchResults = await qdrantClient.search(collectionName, {
     vector: [0.5, 0.2, ...], // 用於查詢的向量
@@ -289,6 +293,8 @@ const searchResults = await qdrantClient.search(collectionName, {
 });
 
 ```
+
+
 
 ## 最近使用 AI 的心得
 最近蠻有感的，AI 出現確實拿走了一些基礎工作，透過用ＡI，工程師可以做更多的事，也提昇學習東西效率;隨著各種知識學習門檻變得簡單，很多知識，可以透過和AI 聊天就學會，人們獲取知識也更容易，我們花更多時間擷取知識、洞察、規劃、驗證及下決策。
