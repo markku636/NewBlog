@@ -4,7 +4,7 @@ title: 使用 Langchain 和開源 Llama AI 在 Next.js 打造 AI Bot API Part 1 
 date:  2024-10-01 01:01:35 +0800
 thumbnail:  langchain.jpg
 category:  AI  
-tags:   ['llama','ai','langchain' ]
+tags:   ['llama','ai','langchain','node' ]
 description : 使用 Langchain 和開源 Llama AI 在 Next.js 打造 AI Bot API Part 1 - 從了解 lanchain 開始
 author : Mark Ku
 slug: ai-bot-api-parts-1
@@ -27,7 +27,7 @@ Langchain 是一個可以整合多種大型 AI 模型的框架，透過它可以
 ## 預先準備
 * 安裝 Ollama [參考先前寫的文章](https://blog.markkulab.net/build-your-ollama-ai-with-hardware-acceleration/)
 * 預先準備 Next JS 專案
-* 安裝langchain 相關套件
+* 安裝langchain 相關套件 本系列文章都採用 (0.3)
 
 ```
 npm install langchain @langchain/azure-openai @langchain/ollama @langchain/openai --save
@@ -145,3 +145,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
 
 ```
+
+## 此系列相關文章
+* [使用 Langchain 和開源 Llama AI 在 Next.js 打造 AI Bot API Part 1 - 從了解 lanchain 開始](https://blog.markkulab.net/ai-bot-api-parts-1/)
+* [使用 Langchain 和開源 Llama AI 在 Next.js 打造 AI Bot API Part 2 - 打造 AI 具有記憶功能的 AI Agent](https://blog.markkulab.net/ai-bot-api-parts-2/)
+* [使用 Langchain 和開源 Llama AI 在 Next.js 打造 AI Bot API Part 3 - 加入向量資料庫，讓AI擁有額外的腦袋](https://blog.markkulab.net/ai-bot-api-parts-3/)
+* [使用 Langchain 和開源 Llama AI 在 Next.js 打造 AI Bot API Part 4 - AI產品推薦 API](https://blog.markkulab.net/ai-bot-api-parts-4/)
