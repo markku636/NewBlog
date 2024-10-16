@@ -112,7 +112,7 @@ curl -X GET "http://localhost:6333/collections"
 ```
 npm install @qdrant/js-client-rest --save
 ```
-### 接著，先寫一個NextJS API ，使用 Llama 去 Embedding 新增資料到 Collection 
+### 接著，先寫一個NextJS API ，使用 Llama 去 Embedding 新增資料到 Collection  (/api/lang-chain/insert-vector-database)
 ```
 import { OllamaEmbeddings } from '@langchain/ollama';
 import { QdrantClient } from '@qdrant/js-client-rest'; // 引入 Qdrant 客戶端
@@ -194,9 +194,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 ```
 使用方法
 ```
-curl -X POST http://localhost:3001/api/lang-chain/ollama-embedding \
+# Dumpling
+curl -X POST http://localhost:3001/api/lang-chain/insert-vector-database \
   -H "Content-Type: application/json" \
-  -d '{"text": "LangChain is the framework for building context-aware reasoning applications"}'
+  -d '{"text": "Dumpling: A small dough pocket, often filled with meat, vegetables, or other ingredients, commonly boiled or steamed. Dumplings, such as Chinese \"shui jiao,\" are a popular dish in many cultures and can be served with various dipping sauces."}'
 
 ```
 
