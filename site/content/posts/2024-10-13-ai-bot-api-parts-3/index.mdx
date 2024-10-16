@@ -305,7 +305,7 @@ qdrantClient.upsert({
             id: productData.id, // 唯一識別符
             vector: productData.features, // 插入特徵向量
             payload: { // 結構化資料作為 payload 插入
-                name: productData.name,
+                name: productData.name, // 結構化資料
                 price: productData.price, // 結構化資料
                 rating: productData.rating, // 結構化資料
                 category: productData.category // 結構化資料
@@ -315,8 +315,8 @@ qdrantClient.upsert({
 });
 ```
 ### 進階查詢參數
-本身向量資料庫可以存放結構性資料舉非結構性資料，因此也能透過特定的屬性去查詢
-![向量資料庫的可視圖表](visua-diagrams-in-vector-database.png)
+向量資料庫可以存放結構性資料舉非結構性資料，所以也能透過特定的屬性去查詢
+![結構性資料](advance-visua-diagrams-in-vector-database.png)
 
 ```
 const searchResults = await qdrantClient.search(collectionName, {
