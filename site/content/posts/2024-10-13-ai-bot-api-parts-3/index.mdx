@@ -15,22 +15,22 @@ slug: ai-bot-api-parts-3
 為了避免 AI 胡亂生成，因此，此章節我們使用向量資料庫，讓AI擁有其他方面的知識，並可以提前告知告知大型語言模式，不知道就不要任意生成。
 
 ### 首先，我們了解什麼是向量資料庫
-向量資料庫是用於存多維度的資料，由大型語言模型將其向量化，儲放在向量資料庫，就能依據資料與資料間的距離及其他權重，就能夠推算出相似度。  
+向量資料庫主要用於存多維度的資料，由大型語言模型將其向量化，儲放在向量資料庫，就能依據資料與資料間的距離及其他權重，就能夠推算出相似度。  
 
-簡單來說，它會把類似的資料，比如"狗"和"動物"，放得很近，這樣當你搜尋一張狗的圖片時，系統能快速找到跟它相似的圖片或資訊。
+簡單來說，向量資料庫會把類似的資料，比如"狗"和"動物"，放得很近，這樣當你搜尋一張狗的圖片時，系統能快速找到跟它相似的圖片或資訊。
 
 ![向量資料庫的可視圖表](visua-diagrams-in-vector-database.png)
 
 ## 為什麼需要向量化 ? 
-我們都知道數學運算及圖型運算是GPU 的強項，而向量化是把數據轉換成數字向量的過程，這樣能提高計算速度、方便機器學習處理，也讓不同類型的數據（如文字、圖片）變得可比較和操作，因此特性，所以其實非常適合推薦系統。
+我們都知道計算數學運算及圖型運算是GPU 的強項，而向量化是把數據轉換成數字向量的過程，這樣能提高計算速度、方便機器學習處理，也讓不同類型的數據（如文字、圖片）變得可比較和操作，因此特性，所以其實非常適合推薦系統。
 
 ## 向量化的資料包含什麼 ?
 在大一串向量數值中，資料中包含了關鍵特徵、維度、距離度量、權重分配、上下文的關聯。
 
 ### Langchin 如何操作 向量資料庫
-取得各種資料來源(Source) > 加載到應用程式(Load)  > 轉換 (Transform)，切割擷取成比較小的段落  > Embed (向量化) > 儲存到向量資料 (Store) > 取回相似的資料(Retrieve)
+取得各種資料來源(Source) > 加載到應用程式(Load)  > 轉換 (Transform)，切割擷取成比較小的段落  > 向量化(Embed) > 儲存到向量資料 (Store) > 取回相似的資料(Retrieve)
 
-## 將文字向量化 (Embedding)
+## 首先，我們先學習用程式將文字向量化 (Embedding)
 ### 安裝套件
 ```
 npm i @langchain/ollama @langchain/core
@@ -46,9 +46,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         const { text } = req.body;
 
-        // 檢查是否有文本內容
+        // 檢查是否有文字內容
         if (!text) {
-            return res.status(400).json({ message: '文本內容為必填項' });
+            return res.status(400).json({ message: '文字內容為必填項' });
         }
 
         // 初始化 OllamaEmbeddings，設定模型和基礎 URL
@@ -57,13 +57,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             baseUrl: 'http://localhost:11434', // 預設的 API 基礎 URL
         });
 
-        // 使用 OllamaEmbeddings 將文本轉換為向量並存入 MemoryVectorStore 中
+        // 使用 OllamaEmbeddings 將文字轉換為向量並存入 MemoryVectorStore 中
         const vectorstore = await MemoryVectorStore.fromDocuments([{ pageContent: text, metadata: {} }], embeddings);
 
         // 將向量儲存庫作為檢索器，並設置返回單一文件
         const retriever = vectorstore.asRetriever(1);
 
-        // 檢索最相似的文本，根據給定的查詢進行檢索
+        // 檢索最相似的文字，根據給定的查詢進行檢索
         const retrievedDocuments = await retriever.invoke('What is LangChain?');
 
         // 將文字（text）轉換為向量的方法。
@@ -143,12 +143,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         const { text } = req.body;
 
-        // 檢查是否有文本內容;
+        // 檢查是否有文字內容;
         if (!text) {
-            return res.status(400).json({ message: '文本內容為必填項' });
+            return res.status(400).json({ message: '文字內容為必填項' });
         }
 
-        // 生成文本的嵌入向量
+        // 生成文字的嵌入向量
         const vector: number[] = await embeddings.embedQuery(text);
 
         // 定義要插入的點
@@ -156,7 +156,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             {
                 id: Date.now(), // 使用當前時間作為唯一 ID
                 vector: vector, // 插入生成的向量
-                payload: { text }, // 存放文本數據
+                payload: { text }, // 存放文字數據
             },
         ];
 
@@ -224,12 +224,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         const { text } = req.body;
 
-        // 檢查是否有文本內容
+        // 檢查是否有文字內容
         if (!text) {
-            return res.status(400).json({ message: '文本內容為必填項' });
+            return res.status(400).json({ message: '文字內容為必填項' });
         }
 
-        // 生成文本的嵌入向量
+        // 生成文字的嵌入向量
         const vector: number[] = await embeddings.embedQuery(text);
 
         // 使用生成的向量在 Qdrant 中查詢相似的向量
