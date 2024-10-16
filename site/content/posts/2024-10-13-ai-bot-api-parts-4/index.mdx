@@ -67,8 +67,9 @@ P.S. 發現有趣像現是的是水餃和動物相似度居然有 0.8，和HP筆
   console.log(adjustedResults);
 ... 
 
+## 範例程式碼部份
 ```
-### 插入大量產品資料 (/api/lang-chain/insert-products-vector-database)
+### 首先，先撰寫插入大量產品資料 (/api/lang-chain/insert-products-vector-database)
 ```
 import { OllamaEmbeddings } from '@langchain/ollama';
 import { QdrantClient } from '@qdrant/js-client-rest'; // 引入 Qdrant 客戶端
@@ -247,7 +248,7 @@ const products = [
     },
 ];
 
-// 定義 Next.js API 處理器
+// 定義 Next.js API 處理器 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         // 遍歷產品，將每個產品插入 Qdrant
@@ -305,7 +306,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
 
 ```
-查詢產品資料 (/api/lang-chain/query-product-vector-database)
+### 接著，撰寫查詢產品資料的API (/api/lang-chain/query-product-vector-database)
 ```
 import { OllamaEmbeddings } from '@langchain/ollama';
 import { QdrantClient } from '@qdrant/js-client-rest'; // 引入 Qdrant 客戶端
