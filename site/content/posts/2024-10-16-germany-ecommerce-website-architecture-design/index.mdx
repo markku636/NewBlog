@@ -44,17 +44,16 @@ slug: germany-ecommerce-website-architecture-design
 原本是想採用自己打造的 [Low code cms](https://blog.markkulab.net/build-your-own-low-code-cms/)，來做德國網站，但礙於不夠成熟，此次礙於上線時間及資源，採用了Strapi CMS 解決資料維護的問題.
 
 #### 多語系
-多語系原本是放在Strapi ，發現在開發階段時發現，覺得使用者在Strapi新增多語系很繁瑣，後來全部將其維護功能，移到 Office 365 使用者可以更輕鬆快速一次維護多個語系。
+多語系原本是放在Strapi ，發現在開發階段時發現，覺得使用者在Strapi新增多語系很繁瑣，後來全部將其維護功能，移到 Excel 365 使用者可以更輕鬆快速一次維護多個語系。
 
 #### Proxy api (/api/proxy/[...path].ts)
-在過去使用 Next.js 時，每當需要呼叫 C# API，我們都得在 NextJS 裡額外實作一個 API，現在透過使用 http-proxy-middleware 套件客製的代理伺服器 (proxy)，我們不再需要費時維護 NextJS 額外的 API，大幅節省了開發時間及跨域存取(CORS)的問題。
+在過去使用 Next.js 時，每當需要呼叫 C# API，我們都得在 NextJS 裡額外實作一個 API，現在透過使用 http-proxy-middleware 套件來客製的代理伺服器 ，我們不再需要費時維護 NextJS 額外的 API，大幅節省了開發時間及跨域存取(CORS)的問題。
 ```
 import { CookieKeys } from '@/const/keys';
 import { clientSideLog } from '@utils/log/client-side-log';
 import { LogLevel } from '@utils/log/const-logging';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
-// ** The config is for set up Next.js default behavior **
 export const config = {
     api: {
         externalResolver: true, // true, means not use the default settings of Next.js
@@ -75,7 +74,6 @@ const proxy: any = createProxyMiddleware({
     },
 });
 
-// 型別暫時給 any
 function proxyServer(req: any, res: any) {
     proxy(req, res, (err: any) => {
         if (err) {
