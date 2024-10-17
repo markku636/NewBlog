@@ -40,7 +40,7 @@ http://localhost:6333/dashboard
     filter: {
         must: [
             { key: 'price', range: { gte: 50, lte: 150 } }, // 價格範圍查詢
-            { key: 'category', match: { value: 'Electronics' } } // 分類查詢
+            { key: 'category', match: { value: '筆記型電腦' } } // 分類查詢
         ]
     },
     limit: 5
@@ -312,7 +312,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
 
 ```
-### 接著，撰寫查詢產品資料的API (/api/lang-chain/query-product-vector-database)
+### 接著，撰寫查詢產品資料的API (/api/lang-chain/query-products-vector-database)
 ```
 import { OllamaEmbeddings } from '@langchain/ollama';
 import { QdrantClient } from '@qdrant/js-client-rest'; // 引入 Qdrant 客戶端
@@ -388,9 +388,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 ```
 ### 執行API
 ```
-curl -X POST http://localhost:3001/api/lang-chain/query-product-vector-database \
+curl -X POST http://localhost:3001/api/lang-chain/query-products-vector-database \
   -H "Content-Type: application/json" \
-  -d '{"text": "幫我推薦一台筆電"}'
+  -d '{
+  "text": "幫我推薦一台筆電",
+  "category": "筆記型電腦"
+  }'
 ```
 
 ## 加查詢條件後，執行的結果，就變的相當的精準
