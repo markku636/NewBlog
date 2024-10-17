@@ -44,8 +44,57 @@ slug: germany-ecommerce-website-architecture-design
 ### 多語系
 多語系原本是放在Strapi ，發現在開發階段時發現，覺得使用者在Strapi新增多語系很繁瑣，後來全部將其維護功能，移到 Office 365 使用者可以更輕鬆快速一次維護多個語系。
 
-### Proxy api
-在過去使用 Next.js 時，每當需要呼叫 C# API，我們都得在 NextJS 裡額外實作一個 API，現在透過使用 http-proxy-middleware 套件客製的代理伺服器 (proxy)，我們不再需要費時維護 NextJS 額外的 API，大幅節省了開發時間及跨域存取的問題。
+### Proxy api (/api/proxy/[...path].ts)
+在過去使用 Next.js 時，每當需要呼叫 C# API，我們都得在 NextJS 裡額外實作一個 API，現在透過使用 http-proxy-middleware 套件客製的代理伺服器 (proxy)，我們不再需要費時維護 NextJS 額外的 API，大幅節省了開發時間及跨域存取(CORS)的問題。
+```
+import { CookieKeys } from '@/const/keys';
+import { clientSideLog } from '@utils/log/client-side-log';
+import { LogLevel } from '@utils/log/const-logging';
+import { createProxyMiddleware } from 'http-proxy-middleware';
+
+// ** The config is for set up Next.js default behavior **
+export const config = {
+    api: {
+        externalResolver: true, // true, means not use the default settings of Next.js
+        bodyParser: false, // false, means not use Next.js bodyParser(same as express)
+    },
+};
+
+const proxy: any = createProxyMiddleware({
+    target: process.env.NEXT_PUBLIC_API,
+    changeOrigin: true, // change `request domain` to `target`
+    pathRewrite: { '^/api/proxy': '' }, // remove `/api/proxy` prefix
+    onProxyReq: relayRequestHeaders,
+    onError: (err: any, req: any) => {
+        clientSideLog(
+            `[Proxy] Error for ${req.method} '${req.url}' to '${process.env.NEXT_PUBLIC_API}': ${err.message}`,
+            LogLevel.Error
+        );
+    },
+});
+
+// 型別暫時給 any
+function proxyServer(req: any, res: any) {
+    proxy(req, res, (err: any) => {
+        if (err) {
+            throw err;
+        }
+
+        throw new Error(`Request '${req.url}' is not proxied! We should never reach here!`);
+    });
+}
+
+export default proxyServer;
+
+function relayRequestHeaders(proxyReq: any, req: any, res: any) {
+    let cookie = req.headers.cookie;
+
+    if (cookie) {
+        proxyReq.setHeader('cookie', cookie);
+    }
+}
+
+```
 
 ## 解決過去NEXT JS Redis Connect pool 釋放不掉的問題
 頁面的渲染我們用到了大量的Redis ，原本用 node-redis，因為 Connect pool 釋放不掉，Redis 三不五時就需要手動重啟Redis，做了幾個測試後，後來換成 IO redis 套件就沒這個問題了。
