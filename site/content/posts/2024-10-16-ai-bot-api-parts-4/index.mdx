@@ -312,6 +312,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
 
 ```
+API 執行
+```
+curl -X GET http://localhost:3001/api/lang-chain/insert-products-vector-database 
+```
+
 ### 接著，撰寫查詢產品資料的API (/api/lang-chain/query-products-vector-database)
 ```
 import { OllamaEmbeddings } from '@langchain/ollama';
@@ -383,8 +388,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(500).json({ message: '查詢向量時發生錯誤', error: error });
     }
 }
-
-
 ```
 ### 執行API
 ```
