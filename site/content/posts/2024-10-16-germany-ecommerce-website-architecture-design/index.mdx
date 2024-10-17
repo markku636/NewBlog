@@ -34,15 +34,15 @@ slug: germany-ecommerce-website-architecture-design
 ## 接著，我們來回顧針對技術細節，做了那些設計
 ## 前端網站( NextJS )
 ### 選擇 App routing 還是 page routing ?
-當時的時空背景下，App routing 剛stable ，因此，
+當時的時空背景下，NextJS 的版更很快，每個月變動也不小，且App routing 剛stable 我，因此還想了好一陣子，在考量Server sdie componet 的好處，可以讓不需要互動的JS 更小，我試著將購買的專案模板，[從Page routing 昇級到 App routing](https://blog.markkulab.net/nextjs-upgrade-app-route/)，發現新做的專案Side effect , 應該沒這麼大，且之後做完要昇級，可能更痛。
 
-### 導入了Headless CMS [Strapi](https://blog.markkulab.net/headless-cms-strapi/)
+### 導入了Headless CMS - [Strapi](https://blog.markkulab.net/headless-cms-strapi/)
 在過去，我們將網站設定、SEO、多語系等參數儲存在後台，透過 JSON 資料進行操作。這種維護方式確實讓我們可以快速開發，但對使用者來說卻不夠友善。沒有學過程式的人，會對這些JSON設定的作用感到困惑，上傳圖片及設定還要分開來設定。  
 
 原本是想採用自己打造的 [Low code cms](https://blog.markkulab.net/build-your-own-low-code-cms/)，來做德國網站，但礙於不夠成熟，此次礙於上線時間及資源，採用了Strapi cms.
 
 ### 多語系
-多語系原本是放在strapi ，因為發現在開發階段，覺得使用者在Strapi新增多語系很繁瑣，後來全部將其維護功能，移到 Office 365 使用者可以更輕鬆一次維護多個語系。
+多語系原本是放在Strapi ，發現在開發階段時發現，覺得使用者在Strapi新增多語系很繁瑣，後來全部將其維護功能，移到 Office 365 使用者可以更輕鬆快速一次維護多個語系。
 
 ### Proxy api
 在過去使用 Next.js 時，每當需要呼叫 C# API，我們都得在 NextJS 裡額外實作一個 API，現在透過使用 http-proxy-middleware 套件客製的代理伺服器 (proxy)，我們不再需要費時維護 NextJS 額外的 API，大幅節省了開發時間及跨域存取的問題。
