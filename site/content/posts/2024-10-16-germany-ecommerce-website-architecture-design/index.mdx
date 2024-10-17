@@ -133,7 +133,7 @@ function relayRequestHeaders(proxyReq: any, req: any, res: any) {
 為了解決這個問題，我們使用了 CorrelationId 這個套件，每次請求都會產生一個CorrelationId，並顯示在Response Headers。通過這個 [CorrelationId 套件](https://github.com/stevejgordon/CorrelationId)，並在nlog 設定後，就有利於讓我們將相關的Log 串聯起來，以便於追蹤生產環境發生的緊急問題。
 ![](correlationId.png)
 
-### Token base authority - JWT Token
+#### Token base authority - JWT Token
 過去採用的Session，其實就不易做到橫向擴展，為了能讓後端API，未來伺服器能橫向擴展，降低api 偶合度，我們這次導入了，Token base（JWT）為辨別用戶身份的方式。  
 
 #### 模組化串接金流
