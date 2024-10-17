@@ -129,7 +129,6 @@ function relayRequestHeaders(proxyReq: any, req: any, res: any) {
          .WithParameter(new ResolvedParameter(
          (pi, ctx) => pi.ParameterType == typeof(IUnitOfWork),
          (pi, ctx) => ctx.Resolve<IUnitOfWork>()))
-
          .PropertiesAutowired() // 啟用屬性自動注入               
          .Named<IPaymentOptionService>(item.PaymentCode);
    }
