@@ -76,7 +76,7 @@ slug: germany-ecommerce-website-architecture-design
          .Named<IPaymentOptionService>(item.PaymentCode);
    }
 ```
-金流解析時
+當金流解析時
 ```
 var params = new Dictionary<string,string>();
 var paymentService = _context.ResolveNamed<IPaymentOptionService>(checkout.PaymentTypeCode);
