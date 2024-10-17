@@ -31,7 +31,7 @@ slug: germany-ecommerce-website-architecture-design
 
 採用的技術是 NextJS App routing + Dotnet core 8 ，我主要負責分析需求、規劃架構、拆解工作清單，也參與開發，並獨立建置整套佈署開發環境及正式佈署開發環境。
 
-## 針對技術細節，做了那些設計
+## 接著，我們來回顧針對技術細節，做了那些設計
 ## 前端網站( NextJS )
 ### Proxy api
 在過去使用 Next.js 時，每當需要呼叫 C# API，我們都得在 NextJS 裡額外實作一個 API，現在透過使用 http-proxy-middleware 套件客製的代理伺服器 (proxy)，我們不再需要費時維護 NextJS 額外的 API，大幅節省了開發時間及跨域存取的問題。
