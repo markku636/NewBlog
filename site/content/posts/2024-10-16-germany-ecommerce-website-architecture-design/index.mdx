@@ -33,7 +33,7 @@ slug: germany-ecommerce-website-architecture-design
 
 這次採用的技術是 NextJS App routing + Dotnet core 8 ，我主要負責分析需求、規劃架構、拆解工作清單，也參與開發，並獨立建置整套佈署開發環境及正式佈署開發環境。
 
-## 接著，我們來回顧德國電商的技術細節，做了那些設計
+## 接著，回顧德國電商的技術細節，做了那些特別的設計
 ### 前端網站( NextJS )
 #### 選擇 App routing 還是 page routing ?
 當時的時空背景下，NextJS 的版更很快，每個月變動也不小，且App routing 剛stable 我，因此還想了好一陣子，在考量Server sdie component 的好處，可以讓不需要互動的元件的JS 更小，我試著將購買的專案模板，[從Page routing 昇級到 App routing](https://blog.markkulab.net/nextjs-upgrade-app-route/)，發現新做的專案Side effect , 應該沒這麼大，且如果採Page routing 做完之後要昇級，可能更痛。
@@ -178,7 +178,7 @@ curl -X POST https://www.bing.com/indexnow \
 }'
 ```
 網站排名，剛上線時 4350 到 3745 名
-![Ｗｅｂ　Ｒａｎｋ](webrank.png)
+![Web Rank](webrank.png)
 ### 單元測試 
 避免未來改功能時改壞，此次針對結帳金額或算計算運費，前後後端都有寫測試，並依據3A原則撰寫測試。  
 * Arrange: 初始化目標物件、相依物件、方法參數。
