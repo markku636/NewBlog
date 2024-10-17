@@ -151,7 +151,7 @@ paymentService.pay(params);
 為了加速開發，後端底層是採用開源的框架，自己整理過，並透過 [程式產生器](https://www.donet5.com/Doc/33) ，建立模型及資料存取層，加速後端的開發。
 
 #### 解決SFTP不穩定的問題
-舊有的FTP Server 連線進去常常會斷線，因此我一套全新的FTP Server，試了幾套 Docker FTP後，終於找到擁有 Web UI 管理界面，且開源 [SFTP Server - sftpgo。](https://blog.markkulab.net/docker-web-ui-ftp-server-sftpgo/)
+舊有的FTP Server 連線進去常常會斷線，試了幾套 Docker FTP後，終於架了一套擁有 Web UI 管理界面，且開源 [SFTP Server - sftpgo。](https://blog.markkulab.net/docker-web-ui-ftp-server-sftpgo/)
 
 #### Google CAPTCHA 換成 Cloudflare Turnstile  
 在防止機器人攻擊方面，在登入或是查詢訂單頁面，我們將原本的Google CAPTCHA 替換了 [Cloudflare Turnstile](https://blog.markkulab.net/protect-your-website-with-cloudflare-turnstile/)，一來可以省錢(免費)，串接也更容易，且對使用者體驗更好，且比Google CAPTCHA V3又更少誤判。  
