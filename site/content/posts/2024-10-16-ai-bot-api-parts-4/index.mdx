@@ -74,6 +74,34 @@ http://localhost:6333/dashboard
   console.log(adjustedResults);
 ... 
 ```
+
+###　3. 從向量資料庫拿回來的結果，在交由AI處理
+```
+...
+        const searchResults = await qdrantClient.search(collectionName, {
+            vector: vector,
+            limit: 5, // 查詢最相似的 5 條結果
+        });
+		
+        const faqContext = searchResults
+            .map((result: any) => `Q: ${result.payload.question}\nA: ${result.payload.answer} score: ${result.score}`)
+            .join('\n\n');
+
+        // 初始化 ChatOllama
+        const model = new ChatOllama({
+            model: 'llama3.2',
+            temperature: 0,
+            maxRetries: 2,
+            baseUrl: 'http://localhost:11434',
+        });
+
+        // 使用 ChatOllama 根據用戶問題進行進一步分析
+        const response = await model.invoke(
+            `Here is a list of FAQs and their answers:\n\n${faqContext}\n\nBased on the question "${text}", which answer is the most relevant? Please choose the best one.`
+        );
+...
+```
+
 ## 範例程式碼部份
 ### 首先，先撰寫插入大量產品資料 (/api/lang-chain/insert-products-vector-database)
 ```
