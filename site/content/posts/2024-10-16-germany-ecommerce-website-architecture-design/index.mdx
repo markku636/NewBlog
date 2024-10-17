@@ -109,8 +109,21 @@ paymentService.pay(params);
 * 提供非結構化的資料( Google schema)給爬蟲，有機會獲得額外的版面。
 * 修正Google search console 或是 Bring Webmaster 的建議及錯誤, 調整Html，讓其友善於爬蟲 ( title 字數 、alt 、h1 只能有一個 ... )
 * 產品頁，使用Azure AI 產 SEO Meta Tag 資料。
-* 使用了 Bin 的g Index API Now
 * 使用了Ｓｅｒｖｅｒｓｉｄｅ　ｃｏｍｐｏｅｎｔ　提昇了網站效能。
+* 在頁面變更時，使用了 Bing的Index API Now ，可以讓爬蟲更快爬到我們的網站
+```
+curl -X POST https://www.bing.com/indexnow \
+-H "Content-Type: application/json; charset=utf-8" \
+-d '{
+  "host": "www.ibuypower.de",
+  "key": "your-key",
+  "keyLocation": "https://www.ibuypower.de/your-key.txt",
+  "urlList": [
+    "https://www.abc.de/de",
+    "https://www.abc.de/en",
+  ]
+}'
+```
 
 ## 單元測試 
 此次針對結帳金額或算計算運費，前後後端都有寫測試，避免未來改壞，並依據3A元則進行測試。  
