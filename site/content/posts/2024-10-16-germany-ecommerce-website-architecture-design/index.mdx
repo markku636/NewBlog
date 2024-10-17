@@ -36,7 +36,7 @@ slug: germany-ecommerce-website-architecture-design
 ### 選擇 App routing 還是 page routing ?
 當時的時空背景下，NextJS 的版更很快，每個月變動也不小，且App routing 剛stable 我，因此還想了好一陣子，在考量Server sdie componet 的好處，可以讓不需要互動的JS 更小，我試著將購買的專案模板，[從Page routing 昇級到 App routing](https://blog.markkulab.net/nextjs-upgrade-app-route/)，發現新做的專案Side effect , 應該沒這麼大，且之後做完要昇級，可能更痛。
 
-### 導入了Headless CMS - [Strapi](https://blog.markkulab.net/headless-cms-strapi/)
+### 為了加速開發，導入了Headless CMS - [Strapi](https://blog.markkulab.net/headless-cms-strapi/)
 在過去，我們將網站設定、SEO、多語系等參數儲存在後台，透過 JSON 資料進行操作。這種維護方式確實讓我們可以快速開發，但對使用者來說卻不夠友善。沒有學過程式的人，會對這些JSON設定的作用感到困惑，上傳圖片及設定還要分開來設定。  
 
 原本是想採用自己打造的 [Low code cms](https://blog.markkulab.net/build-your-own-low-code-cms/)，來做德國網站，但礙於不夠成熟，此次礙於上線時間及資源，採用了Strapi cms.
