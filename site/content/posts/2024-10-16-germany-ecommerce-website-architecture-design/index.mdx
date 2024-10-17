@@ -96,6 +96,21 @@ function relayRequestHeaders(proxyReq: any, req: any, res: any) {
 頁面的渲染我們用到了大量的Redis ，原本用 node-redis，因為 Connect pool 釋放不掉，Redis 三不五時就需要手動重啟Redis，做了幾個測試後，後來換成 IO redis 套件就沒這個問題了。
 
 ### 後端 (Dotnet core)
+
+## 制訂統一的 api 接口 及錯誤代碼
+制定一致的API 接口，前端可以一致性的處理
+```
+{
+  "count": 0,
+  "data": null,
+  "id": 0,
+  "isSuccess": true,
+  "code": 20000,
+  "message": "Success",
+  "errors": []
+}
+```
+
 #### C# 非同步延申的問題
 為了讓 CPU 和 IO 中達到最高的利用率，讓需要等待的執行緖，先去做其他事情，因此我們此後端API，全部採非同步的方式撰寫。  
 
