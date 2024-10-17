@@ -74,8 +74,7 @@ http://localhost:6333/dashboard
   console.log(adjustedResults);
 ... 
 ```
-
-###　3. 從向量資料庫拿回來的結果，在交由AI處理
+###　3. 從向量資料庫拿回來的結果集，再交給AI決定.
 ```
 ...
         const searchResults = await qdrantClient.search(collectionName, {
