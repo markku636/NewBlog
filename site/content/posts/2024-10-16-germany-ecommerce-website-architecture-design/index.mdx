@@ -154,7 +154,7 @@ var params = new Dictionary<string,string>();
 var paymentService = _context.ResolveNamed<IPaymentOptionService>(checkout.PaymentTypeCode);
 paymentService.pay(params);
 ```
-#### 暫存訂單 ( 抽像 abstract class 及 這邊用了自動注入，命名解析 )
+### 暫存訂單 ( 抽像 abstract class 及 這邊用了自動注入，命名解析 )
 因為外國的金流，有些導來導去，很機會會發生交易失敗，過去的暫存訂單，會在結帳前暫存，直到真正結帳，才會寫入真的訂單，這就會有兩段類似的邏輯，且因為暫存訂單和訂單的關係，欄位相同。
 
 我們都知道，抽像類別是用來讓一系列類別有共用的實作，抽出來，透過抽像類別把原本兩份程式，透過抽像類別及繼承關係，變成只需要一份程式，讓程式碼開發維護起來更輕鬆。
@@ -201,13 +201,13 @@ curl -X POST https://www.bing.com/indexnow \
 * Assert: 驗證是否符合預期，
  
 ### 功能面
-#### 客服軟體
+### 客服軟體
 因為德國網站很小，過去沒有客服軟體，看了歐洲的通訊軟體市佔率後，我建議德國公司用了What's app 當客服軟體，增加和使用者互動的機會。
 
 ### 導入Stripe 金流
 Stripe 的金流串接相當容易，只要串好一個就能透過後台開啟10幾種歐洲的金流，因此在上線後兩週就能很快速的擴充新金流，且可以啟用(3DS)簡訊驗證，讓交易更安全。
 
-#### 避免詐欺
+### 避免詐欺
 歐洲及美國，網路詐欺嚴重，過去也因為刷退容易太容易，將 Paypal 關閉，但因為美國擁有可以透過詐欺保險服務來避免，但不服務於歐洲市場，因此我透過電商朋友的朋友問到，Riskfield，但因為每月要付 3000 歐元基本費，費用有點高，每筆還要額外抽%，因此 先不考慮。  
 ![Riskfield](riskfield.png)
 
