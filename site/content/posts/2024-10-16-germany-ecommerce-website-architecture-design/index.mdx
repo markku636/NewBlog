@@ -125,7 +125,7 @@ function relayRequestHeaders(proxyReq: any, req: any, res: any) {
 過去採用的Session，其實就不易做到橫向擴展，為了能讓後端API，未來伺服器能橫向擴展，降低api 偶合度，我們這次導入了，Token base（JWT）為辨別用戶身份的方式。  
 
 ### 模組化串接金流
-自動讀取 Config 注入相關的金流Service , 並透過界面將定義所有金流需要的界口，並透過 Autofac 將金流解析，達到控制反轉及容易擴充解耦合，傳入payment code 就能自動抽換不同的金流邏輯。
+自動讀取 Config 注入相關的金流Service , 並透過界面將定義所有金流需要的界口，並透過 Autofac 將金流解析，達到控制反轉及容易擴充並解耦合，傳入payment code 就能自動抽換不同的金流邏輯。
 ```
    var generalPaymentConfigs = AppSettingsHelper.GetSection<List<GeneralPaymentConfig>>("Payment", "PaymentOptions").Where(x => !x.Disable).ToList();
 
@@ -148,7 +148,7 @@ function relayRequestHeaders(proxyReq: any, req: any, res: any) {
          .Named<IPaymentOptionService>(item.PaymentCode);
    }
 ```
-當金流解析時
+傳入payment code 就能自動用命名抽換不同的金流邏輯
 ```
 var params = new Dictionary<string,string>();
 var paymentService = _context.ResolveNamed<IPaymentOptionService>(checkout.PaymentTypeCode);
