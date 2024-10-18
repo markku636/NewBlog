@@ -146,7 +146,7 @@ function relayRequestHeaders(proxyReq: any, req: any, res: any) {
          .Named<IPaymentOptionService>(item.PaymentCode);
    }
 ```
-傳入payment code 就能自動用命名抽換不同的金流邏輯
+傳入payment code 就能自動依據傳入命名抽換不同的金流邏輯
 ```
 var params = new Dictionary<string,string>();
 var paymentService = _context.ResolveNamed<IPaymentOptionService>(checkout.PaymentTypeCode);
