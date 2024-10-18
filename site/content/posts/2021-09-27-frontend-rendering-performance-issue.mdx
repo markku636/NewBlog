@@ -26,7 +26,7 @@ slug: 2021/09/26/frontend-rendering-performance-issue
 * Lazy loading 不等於 虛擬列表/虛擬捲軸，虛擬列表每次只會渲染可視範圍的筆數。
 * 當資料筆數過多時，會渲染過多的 DOM，也會造成瀏覽器卡頓。
 * 明明是一千筆資料，因為捲軸往下捲才長出捲軸，捲軸 bar 比例顯示比例不正常，也不好捲動
-![](https://i.imgur.com/dostJfa.png)。
+![](https://i.imgur.com/dostJfa.png)
 
 ### 3.分段渲染 - 依據資料筆數及高度長出，虛擬捲軸Bar，依可視範圍做渲染，超出可視範圍的就不渲染額外的 DOM 了
 1. Clusterize.js 套件
