@@ -33,20 +33,20 @@ slug: germany-ecommerce-website-architecture-design
 
 ## 接著，回顧德國電商的技術細節，做了那些特別的設計
 ### 前端網站( NextJS )
-#### 選擇 App routing 還是 page routing ?
+### 選擇 App routing 還是 page routing ?
 當時的時空背景下，NextJS 的版更很快，每個月變動也不小，且App routing 剛stable 我，因此還想了好一陣子，在考量Server sdie component 的好處，可以讓不需要互動的元件的JS 更小，我試著將購買的專案模板，[從Page routing 昇級到 App routing](https://blog.markkulab.net/nextjs-upgrade-app-route/)，發現新做的專案Side effect , 應該沒這麼大，且如果採Page routing 做完之後要昇級，可能更痛。
 
-#### 為了加速開發，導入了Headless CMS - [Strapi](https://blog.markkulab.net/headless-cms-strapi/)
+### 為了加速開發，導入了Headless CMS - [Strapi](https://blog.markkulab.net/headless-cms-strapi/)
 在過去，我們將網站設定、SEO、多語系等參數儲存在後台，透過 JSON 資料進行操作。這種維護方式確實讓我們可以快速開發，但對使用者來說卻不夠友善，沒有學過程式的人，會對這些JSON設定的作用感到困惑，上傳圖片及設定還要分開來設定。  
 
 原本是想採用自己打造的 [Low code cms](https://blog.markkulab.net/build-your-own-low-code-cms/)，來做德國網站，但礙於不夠成熟及時間不夠，最後採用了Strapi CMS 解決資料維護的問題。
 
-#### 多語系
+### 多語系
 一開始多語系原本是放在Strapi ，發現在開發階段時發現，覺得使用者在Strapi新增多語系很繁瑣，後來全部將其維護功能，移到 Excel 365，再用程式寫入Redis。
 
 讓使用者可以更輕鬆快速一次維護多個語系。
 
-#### Proxy api (/api/proxy/[...path].ts)
+### Proxy api (/api/proxy/[...path].ts)
 在過去使用 Next.js 時，每當需要呼叫 C# API，我們都得在 NextJS 裡額外實作一個 API，現在透過使用 http-proxy-middleware 套件來客製的代理伺服器 ，我們不再需要費時維護 NextJS 額外的 API，大幅節省了開發時間及跨域存取(CORS)的問題。
 ```
 import { CookieKeys } from '@/const/keys';
@@ -99,7 +99,7 @@ function relayRequestHeaders(proxyReq: any, req: any, res: any) {
 
 ### 後端 (Dotnet core)
 
-#### 制訂統一的 api 接口 及錯誤代碼
+### 制訂統一的 api 接口 及錯誤代碼
 制定一致的API 接口，前端可以一致性的處理
 ```
 {
@@ -113,7 +113,7 @@ function relayRequestHeaders(proxyReq: any, req: any, res: any) {
 }
 ```
 
-#### C# 非同步延申的問題
+### C# 非同步延申的問題
 為了讓 CPU 和 IO 中達到最高的利用率，讓需要等待的執行緖，先去做其他事情，因此我們此後端API，全部採非同步的方式撰寫。  
 
 然而，後端在非同步處理，導致在查詢日誌檔的線程時可能出現混亂，變得不好追蹤。  
@@ -121,10 +121,10 @@ function relayRequestHeaders(proxyReq: any, req: any, res: any) {
 為了解決這個問題，我們使用了 CorrelationId 這個套件，每次請求都會產生一個CorrelationId，並顯示在Response Headers。通過這個 [CorrelationId 套件](https://github.com/stevejgordon/CorrelationId)，並在nlog 設定後，就有利於讓我們將相關的Log 串聯起來，以便於追蹤生產環境發生的緊急問題。
 ![](correlationId.png)
 
-#### Token base authority - JWT Token
+### Token base authority - JWT Token
 過去採用的Session，其實就不易做到橫向擴展，為了能讓後端API，未來伺服器能橫向擴展，降低api 偶合度，我們這次導入了，Token base（JWT）為辨別用戶身份的方式。  
 
-#### 模組化串接金流
+### 模組化串接金流
 自動讀取 Config 注入相關的金流Service , 並透過界面將定義所有金流需要的界口，並透過 Autofac 將金流解析，達到控制反轉及容易擴充解耦合，傳入payment code 就能自動抽換不同的金流邏輯。
 ```
    var generalPaymentConfigs = AppSettingsHelper.GetSection<List<GeneralPaymentConfig>>("Payment", "PaymentOptions").Where(x => !x.Disable).ToList();
@@ -159,16 +159,16 @@ paymentService.pay(params);
 
 我們都知道，抽像類別是用來讓一系列類別有共用的實作，抽出來，透過抽像類別把原本兩份程式，透過抽像類別及繼承關係，變成只需要一份程式，讓程式碼開發維護起來更輕鬆。
 
-#### [Https Secure Distribution with ngnix](https://blog.markkulab.net/nginx-https-forwarding/)  
+### [Https Secure Distribution with ngnix](https://blog.markkulab.net/nginx-https-forwarding/)  
 當我剛加入公司時，伺服器的架構是基於巢狀的 Hyper-V。然而，由於每台伺服器僅能使用一個 HTTPS (443) 埠，導致每次擴展 Web 應用服務時都需要啟動一個新的虛擬機器，這不僅效率低下，還浪費大量伺服器資源（如 CPU、記憶體、硬碟和外部 IP）。如今，只需要一行 Docker 指令，就能輕鬆部署多個服務，無需像過去那樣安裝作業系統和繁瑣的環境配置。由於短期內無法實現 K8S 的全面實施，我們決定先通過 Nginx 簡化伺服器架構，提高部署效率。
 
-#### 程式產生器
+### 程式產生器
 為了加速開發，後端底層是採用開源的框架，自己整理過，並透過 [程式產生器](https://www.donet5.com/Doc/33) ，建立模型及資料存取層，加速後端的開發。
 
-#### 解決SFTP不穩定的問題
+### 解決SFTP不穩定的問題
 舊有的FTP Server 連線進去常常會斷線，試了幾套 Docker FTP後，終於架了一套擁有 Web UI 管理界面，且開源 [SFTP Server - sftpgo。](https://blog.markkulab.net/docker-web-ui-ftp-server-sftpgo/)
 
-#### Google CAPTCHA 換成 Cloudflare Turnstile  
+### Google CAPTCHA 換成 Cloudflare Turnstile  
 在防止機器人攻擊方面，在登入或是查詢訂單頁面，我們將原本的Google CAPTCHA 替換了 [Cloudflare Turnstile](https://blog.markkulab.net/protect-your-website-with-cloudflare-turnstile/)，一來可以省錢(免費)，串接也更容易，且對使用者體驗更好，且比Google CAPTCHA V3又更少誤判。  
 ![Cloudflare Turnstile](cloudflare-turnstile.png)
 
