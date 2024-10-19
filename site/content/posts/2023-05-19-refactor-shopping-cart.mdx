@@ -17,7 +17,7 @@ slug: react-refactor-shopping-cart
 
 ## 遇到的困難
 ### 解決非同步問題
-原本的網站，由於未遵循單一資料來源的寫入原則，當多個物件狀態同時寫入時，可能會發生覆蓋或不一致的情況，導致元件維護變得複雜。  
+原本的網站，由於未遵循單一資料來源的寫入原則，常常多個物件狀態同時寫入時或狀態同時在子母元件，常常發生覆蓋或不一致的情況，導致元件維護變得複雜。  
 
 在新版的購物車中，因為購物車元件的狀態需要跨多個層級，我們利用[React Context API + useReducer 實作出類似 Redux 的狀態管理器](https://www.cythilya.tw/2023/05/25/implement-redux-by-react-context-api-and-useReducer/)，用於處理共用狀態，並透過 Context API 提供的方法統一管理狀態的寫入操作。
 
@@ -26,7 +26,7 @@ slug: react-refactor-shopping-cart
 解決狀態非同步寫入互蓋的問題。
 
 ### 在非同步狀態還未變更完成時，就呼叫後端API，導致API獲取到舊的值
-透過 promise 特性讓所有的非同步的回傳值透過 resolve 一個個傳下去，讓其變成事件變成同步。
+React 的setState 是非同步的，但透過 promise 特性讓所有的非同步的回傳值透過 resolve 一個個傳下去，讓其變成事件變成同步。
 
 ### 解決巢狀JS及 CallBack Hell，提升程式的可讀性
 我們的原始程式碼存在著大量的巢狀結構和[回調地獄](http://callbackhell.com/)。為了改進這個狀況，我們採用了ES6的Promise來精簡非同步代碼。此外，我們也採用了早期返回的策略，以降低條件語句的巢狀層級，使得程式碼更易讀和維護。
