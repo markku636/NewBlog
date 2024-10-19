@@ -24,10 +24,6 @@ slug: practice-oauth-with-nestjs
 3.在 callback 頁面，前端可以從 URL 中獲取 code，並將其傳送至後端，透過 OAuth API 使用該 code 換取 access token。  
 4.頁面會取得到的 access token，此時可以使用該 access token 去訪問資源伺服器，取得相關資訊，過期時則可以去換token。  
 
-可以做的更好的部份
-* 資料庫密碼欄位應該要加嚴處理 
-* 驗證過程可以加上 client id 及 secret ，更具安全性
-
 ## 此次採用的技術架構是
 * 前端(電商網站) - (Next.JS、Eslint、Pritter、React、Redux toolkit) - [程式碼](https://github.com/markku636/oauth.nextjs)
 * 後端(OAuth 服務) -( Nest JS、Mysql、Prisma 、 Swagger 、 class-validator做資料驗證、並用Guard 做JWT的API驗證) - [程式碼](https://github.com/markku636/oauth.nest.api)
@@ -39,7 +35,7 @@ slug: practice-oauth-with-nestjs
 * [Swagger Url](https://oauth-nestjs-api.letgo.com.tw/docs) -  admin / 123
 
 ## Demo
-[影片Url](https://www.loom.com/share/fdac0b89ace64bc3b3ad5a85098d0499)
+* [影片Url](https://www.loom.com/share/fdac0b89ace64bc3b3ad5a85098d0499)
 
 佈署環境
 * 使用Powerhsell 佈署到Nas 
