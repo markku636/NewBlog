@@ -54,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         azureOpenAIApiDeploymentName: 'gpt-4',
         azureOpenAIApiInstanceName: 'your-instance-name',
         azureOpenAIApiVersion: '2023-03-15-preview',
-        temperature: 0,
+        temperature: 0, // 用來調控AI 的隨機性
         maxTokens: 500,
     });
 
