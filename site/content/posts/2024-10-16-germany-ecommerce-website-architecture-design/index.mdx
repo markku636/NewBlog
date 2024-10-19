@@ -170,7 +170,11 @@ paymentService.pay(params);
 在防止機器人攻擊方面，在登入或是查詢訂單頁面，我們將原本的Google CAPTCHA 替換了 [Cloudflare Turnstile](https://blog.markkulab.net/protect-your-website-with-cloudflare-turnstile/)，一來可以省錢(免費)，串接也更容易，且對使用者體驗更好，且比Google CAPTCHA V3又更少誤判。  
 ![Cloudflare Turnstile](cloudflare-turnstile.png)
 
+### 另一個要注意的是GDPR
+根據 GDPR 的規範，凡是有歐盟境內人士造訪的網站， 通過 Cookie 彈窗明確告知使用 GA 並徵得用戶同意，這個同意必須是具體的、自願的、明確的，且可撤回的。
+
 ### SEO 的部份
+歐洲對個資使用非常重視，因此不能隨意拿會員資料做行銷，因此SEO 就格外重要。
 * 提交網站索引 Sitemap 到  Google and Bing。
 * 提供 Metadata Tag，更有利益爬蟲建立索引。
 * 提供非結構化的資料( Google schema)給爬蟲，有機會獲得額外的版面。
