@@ -170,9 +170,6 @@ paymentService.pay(params);
 在防止機器人攻擊方面，在登入或是查詢訂單頁面，我們將原本的Google CAPTCHA 替換了 [Cloudflare Turnstile](https://blog.markkulab.net/protect-your-website-with-cloudflare-turnstile/)，一來可以省錢(免費)，串接也更容易，且對使用者體驗更好，且比Google CAPTCHA V3又更少誤判。  
 ![Cloudflare Turnstile](cloudflare-turnstile.png)
 
-### 另一個要注意的是GDPR
-根據 GDPR 的規範，凡是有歐盟境內人士造訪的網站， 通過 Cookie 彈窗明確告知使用 GA 並徵得用戶同意，這個同意必須是具體的、自願的、明確的，且可撤回的。
-
 ### SEO 的部份
 歐洲對個資使用非常重視，因此不能隨意拿會員資料做行銷，因此SEO 就格外重要。
 * 提交網站索引 Sitemap 到  Google and Bing。
@@ -211,6 +208,9 @@ curl -X POST https://www.bing.com/indexnow \
 
 ### 導入Stripe 金流
 Stripe 的金流串接相當容易，只要串好一個就能透過後台開啟10幾種歐洲的金流，因此在上線後兩週就能很快速的擴充新金流，且可以啟用(3DS)簡訊驗證，讓交易更安全。
+
+### 另一個要注意的是GDPR
+根據 GDPR 的規範，凡是有歐盟境內人士造訪的網站， 通過 Cookie 彈窗明確告知使用 GA 並徵得用戶同意，這個同意必須是具體的、自願的、明確的，且可撤回的。
 
 ### 避免詐欺
 歐洲及美國，網路詐欺嚴重，過去也因為刷退容易太容易，將 Paypal 關閉，但因為美國擁有可以透過詐欺保險服務來避免，但不服務於歐洲市場，因此我透過電商朋友的朋友問到，Riskfield，但因為每月要付 3000 歐元基本費，費用有點高，每筆還要額外抽%，因此 先不考慮。  
