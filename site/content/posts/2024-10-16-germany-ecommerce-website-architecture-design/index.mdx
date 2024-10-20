@@ -26,13 +26,16 @@ slug: germany-ecommerce-website-architecture-design
 
 想說終於可以開始做德國網站，因為沒人負責協調，幾個老闆們，有著不同的大目標，礙於我們就只有三個開發人員，好幾個專案，全部一起執行會變慢，專案切來切去大家也很痛苦，來來回回去溝通了幾次，最終可以同一時間專注在一個項目上開發。
 
+
 ## 德國電商網站 - 架構圖
 ![架構設計](architecture.png)
+P.S. 礙於我們各種資源的限制限制，前端在外國網站買了 Theme，後端找了一個開源 NetCore 的專案來改。
 
 這次採用的技術是 NextJS App routing + Dotnet core 8 ，我主要負責分析釐清需求、規劃架構、拆解工作清單，同時也參與開發，並獨立建置整套佈署開發環境及正式佈署開發環境。
 
 ## 接著，回顧德國電商的技術細節，做了那些特別的設計
-### 前端網站( NextJS )
+### 前端網站( NextJS ) 
+
 ### 選擇 App routing 還是 page routing ?
 當時的時空背景下，NextJS 的版更很快，每個月變動也不小，且App routing 剛stable，因此還想了好一陣子，在考量Server sdie component 的好處，可以讓不需要互動的元件的JS 更小，我試著將購買的專案模板，[從Page routing 昇級到 App routing](https://blog.markkulab.net/nextjs-upgrade-app-route/)，發現新做的專案Side effect , 應該沒這麼大，且如果採Page routing 做完之後要昇級，可能更痛。
 
