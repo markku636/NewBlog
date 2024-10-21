@@ -49,9 +49,9 @@ slug: practice-oauth-with-nestjs
 ## 補充: 
 ### 1. OAuth 有好幾種模式 type ，順便整理一下
 * 授權碼模式 Code - 多打一次 request。
-* 憑證式 - (Client Credentials Grant) =>客戶端憑證模式， 服務A想訪問服務B的API，服務A使用自己的客戶端憑證獲取訪問令牌。
-* 隱藏式 - (Implicit Grant)=> 透過 Javascript ，但因為安全性問題逐漸被廢棄。
-* 密码式 - (Resource Owner Password Credentials Grant):直接和用戶端要帳密，安全性較低現在比較沒在用。
+* 憑證式(Client Credentials Grant) - 客戶端憑證模式， 服務A想訪問服務B的API，服務A使用自己的客戶端憑證(服務B發放的)獲取訪問令牌。
+* 隱藏式(Implicit Grant)  -  透過 Javascript ，但因為安全性問題逐漸被廢棄。
+* 密码式(Resource Owner Password Credentials Grant) - :直接和用戶端要帳密，安全性較低現在比較沒在用。
 ### 2. OAuth 和 SSO的差異
 * SSO：SSO 的目的是簡化多個應用程式之間的用戶登入流程，讓用戶只需一次登入，即可在多個應用程式中無縫使用同一個身份。SSO 主要專注於 身份驗證，即確認用戶是誰。
 * OAuth：OAuth 則是一種授權協定，允許第三方應用程式代表用戶訪問受保護的資源，OAuth 的主要目的是 授權，讓應用程式能夠安全地獲取用戶的某些資源，而不需要直接存取用戶的憑證（如密碼）。
