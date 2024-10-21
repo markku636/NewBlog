@@ -95,7 +95,7 @@ function relayRequestHeaders(proxyReq: any, req: any, res: any) {
 }
 ```
 ### 解決過去NEXT JS Redis Connect pool 釋放不掉的問題
-頁面的渲染我們用到了大量的Redis ，原本用 node-redis，因為 Connect pool 釋放不掉，Redis 三不五時就需要手動重啟Redis，用Jemeter 做了次壓力測試後，後來換成 IO redis 套件，就再也沒這個問題了。
+頁面的渲染我們用到了大量的Redis ，原本用 node-redis，因為 Connect pool 釋放不掉，Redis 三不五時就需要手動重啟Redis，請同事用Jmeter 做了次壓力測試後，後來換成 IO redis 套件，就再也沒這個問題了。
 
 ### 後端 (Dotnet core)
 
