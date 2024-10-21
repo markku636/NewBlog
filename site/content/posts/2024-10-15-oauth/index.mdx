@@ -48,7 +48,7 @@ slug: practice-oauth-with-nestjs
 
 ## 補充: 
 ### 1. OAuth 有好幾種模式 type ，順便整理一下
-* 授權碼模式 Code - 多打一次 request。
+* 授權碼模式 Code - 在這種模式下，授權碼用於交換訪問令牌，應用程式不會直接接觸到用戶帳密。
 * 憑證式(Client Credentials Grant) - 客戶端憑證模式， 服務A想訪問服務B的API，服務A使用自己的客戶端憑證(服務B發放的)獲取訪問令牌。
 * 隱藏式(Implicit Grant)  -  透過 Javascript ，但因為安全性問題逐漸被廢棄。
 * 密码式(Resource Owner Password Credentials Grant) - :直接和用戶端要帳密，安全性較低現在比較沒在用。
