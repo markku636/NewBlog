@@ -26,7 +26,7 @@ slug: nextjs-performance-issues-in-e-commerce
 ## 問題二、增量渲染頁面(ISR)，庫存不準的問題
 為了讓使用者快速拿到渲染的頁面內容，我們當時採用的是增量渲染 ISR ，但面臨銷售檔期，很容易遇到 Sold out ，明明產品及明細頁都顯示有庫存，但加入購物車就會出現庫存不足。
 
-### 短期解決方案 - 因為找不到根本的解決方案，我撰寫了一個 rebuild page api ，只要在網址加上 ?forceUpdate=true，就會叫此 api，並請後台工程師產品有更新時順便觸發此頁面。
+### 短期解決方案 - 當時因為找不到根本的解決方案，我撰寫了一個 rebuild page api ，只要在網址加上 ?forceUpdate=true，就會叫此 api，並請後台工程師產品有更新時順便觸發此頁面。
 ```
 import { LogLevel } from '@/lib/log/const-logging';
 import { serverSideLog } from '@/lib/log/server-side-log';
@@ -61,7 +61,7 @@ export default async function rebuild(req: NextApiRequest, res: NextApiResponse)
 }
 ```
 ### 長期解決方案
-在更了解了領域知識後，分析庫存資訊，其實不能快取，使用者下加入購物車才發現沒庫存，體驗會糟，但頁面不取快，每次都走伺服器渲染，因為產品種類多，流量一大，頁面就很容易遇到阻塞，或一直拿到舊的頁面。   
+在更了解了領域知識後，分析庫存資訊，其實不能快取，使用者下加入購物車才發現沒庫存，體驗會不好，但頁面不取快，每次都走伺服器渲染，因為產品種類多，流量一大，頁面就很容易遇到阻塞，或一直拿到舊的頁面。   
 
 因此頁面仍維持ISR，將庫存改到用戶端去要，就不會遇到沒庫存和畫面顯示不一致的問題，請後台的工程師協助將即時庫存寫入redis，但庫存部份則改成用戶端渲染時才去要庫存資料。
 
