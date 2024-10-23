@@ -12,7 +12,9 @@ slug: 2021/12/06/frontend-rendering-performance-issue-part-2
 ## 定義問題
 [先前](https://blog.markkulab.net/2021/09/26/frontend-rendering-performance-issue/)有對大資料渲染進行調察研究，得知瞬間大資料的渲染，會造成瀏覽器卡頓不回應，並得出可以透過分時渲染、捲動式渲染、虛擬列表，解決高併發渲染的問題。  
   
-而籃足球比賽比分列表，一遇假日就會有1000~2000 筆的比賽需要同時顯示，且依使用者需求，不能分頁顯示。
+而籃足球比賽比分列表，一遇假日就會有1000~2000 筆的比賽需要同時顯示，且依使用者需求，不能分頁顯示。　　
+
+[像是雷速網站](https://live.leisu.com/)
 
 ## 虛擬捲軸 VS 分段渲染
 ![](https://i.imgur.com/ciO0Rjn.png)
@@ -37,7 +39,6 @@ slug: 2021/12/06/frontend-rendering-performance-issue-part-2
 <VirtualScroller
       :list="news"
       class="news-list-wrapper"
-
       :item-default-height="100"
       :uni-key="'id'"
       :enable-scroll-up="!isLastPage"
@@ -91,7 +92,6 @@ slug: 2021/12/06/frontend-rendering-performance-issue-part-2
 6. 儘量避免和其他有用到捲軸的套件整合 better scroller、vant dialog、 swiper，因為每個套件有自己的生命週期，如果一定整合進來，可能自己擴充組件功能會比較不會衝突  
 
 ## 實作過程遇到的問題
-
 ### 1. 評估過 vue-virtual-scroller and vue-virtual-scroll-list 簡單功能可以套用，但遇到複雜的情境就不好套用。
 原始碼也不易理解及改動，最後決定自己刻了。
  
@@ -112,5 +112,7 @@ slug: 2021/12/06/frontend-rendering-performance-issue-part-2
 ### 7.整合 vue better scroll( 上拉整理、下拉取得資料) 、 swiper 
 上述都是類似虛擬捲軸機制的套件，如果要整合捲軸類型的套件，最好還是自己擴充虛擬捲軸，不然要解決兩個虛擬捲軸機制在裡面衝突。
 
-## 相關程式碼
-待整理
+## 同一系列文章
+* [解決前端渲染大量資料渲染效能問題 - 1](https://blog.markkulab.net/2021/09/26/frontend-rendering-performance-issue/)
+* [解決前端渲染大量資料渲染效能問題 Part's 2- 虛擬捲軸 && 分段渲染](https://blog.markkulab.net/2021/12/06/frontend-rendering-performance-issue-part-2/)
+
