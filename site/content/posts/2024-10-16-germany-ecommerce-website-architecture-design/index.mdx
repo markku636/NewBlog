@@ -126,7 +126,7 @@ function relayRequestHeaders(proxyReq: any, req: any, res: any) {
 過去採用的Session，其實就不易做到橫向擴展，為了能讓後端API，未來伺服器能橫向擴展，降低api 偶合度，我們這次導入了，Token base（JWT）為辨別用戶身份的方式。  
 
 ### 模組化串接金流
-自動讀取 Config 注入相關的金流Service , 並透過界面將定義所有金流需要的界口，並透過 Autofac 將金流解析，達到控制反轉及容易擴充並解耦合，傳入payment code 就能自動抽換不同的金流邏輯。
+自動讀取 Config 注入相關的金流Service , 並透過界面將定義所有金流需要的界口，並透過 Autofac 將金流解析，達到依賴反轉及容易擴充並解耦合，傳入payment code 就能自動抽換不同的金流邏輯。
 ```
    var generalPaymentConfigs = AppSettingsHelper.GetSection<List<GeneralPaymentConfig>>("Payment", "PaymentOptions").Where(x => !x.Disable).ToList();
 
@@ -155,8 +155,29 @@ var params = new Dictionary<string,string>();
 var paymentService = _context.ResolveNamed<IPaymentOptionService>(checkout.PaymentTypeCode);
 paymentService.pay(params);
 ```
-### 暫存訂單 ( 用到抽像 abstract class 讓程式覆用 及 這邊並用了自動注入及命名解析依賴反轉，達到金流模組化  )
+### 暫存訂單 ( 用到抽像類別 abstract class 及物件繼承關係，讓程式可以覆用，只要維護一份程式碼 )
 因為外國的金流，有些導來導去，很機會會發生交易失敗，過去的暫存訂單，會在結帳前暫存，直到真正結帳，才會寫入真的訂單，這就會有兩段類似的邏輯，且因為暫存訂單和訂單的關係，欄位相同。
+
+繼承關係
+```
+[SugarTable("TempOrders")]
+public class TempOrders: Orders
+{   
+}
+```
+抽像類別
+```
+AbstractInsertOrderService
+{
+... 
+public int InsertOrders<T>(Checkout checkout) where T : Orders, new()
+{
+  var order = CreateCustomerInstance<T>(checkout);
+  return _unitOfWork.GetDbClient().Insertable<T>(order).ExecuteReturnIdentity();
+}
+...
+} 
+```
 
 我們都知道，抽像類別是用來讓一系列類別有共用的實作，把暫存訂單和訂單共同的實作抽出來，透過抽像類別把原本兩份程式，透過抽像類別及繼承關係，變成只需要一份程式，讓程式碼開發維護起來更輕鬆。
 
