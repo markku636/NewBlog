@@ -128,9 +128,9 @@ function relayRequestHeaders(proxyReq: any, req: any, res: any) {
 ### 模組化串接金流
 自動讀取 Config 注入相關的金流Service , 並透過界面將定義所有金流需要的界口，並透過 Autofac 將金流解析，達到依賴反轉及容易擴充並解耦合，傳入payment code 就能自動抽換不同的金流邏輯。
 ```
-   var generalPaymentConfigs = AppSettingsHelper.GetSection<List<GeneralPaymentConfig>>("Payment", "PaymentOptions").Where(x => !x.Disable).ToList();
+   var paymentConfigs = AppSettingsHelper.GetSection<List<PaymentConfig>>("Payment", "PaymentOptions").Where(x => !x.Disable).ToList();
 
-   foreach (var item in generalPaymentConfigs)
+   foreach (var item in paymentConfigs)
    {
       var serviceTypeName = item.PaymentCode;
       Type serviceType = assembly.GetType($"MemberSite.Services.{serviceTypeName}Service");
@@ -141,7 +141,7 @@ function relayRequestHeaders(proxyReq: any, req: any, res: any) {
       }
 
       builder.RegisterType(serviceType)
-         .WithProperty("GeneralPaymentConfig", item)
+         .WithProperty("PaymentConfig", item)
          .WithParameter(new ResolvedParameter(
          (pi, ctx) => pi.ParameterType == typeof(IUnitOfWork),
          (pi, ctx) => ctx.Resolve<IUnitOfWork>()))
