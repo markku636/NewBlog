@@ -24,13 +24,13 @@ JWT當初的設計是為了確保在跨組織間安全互相傳遞資料所存�
 ## 風險
 1. Seucrity control by develoepr。<br/>
 
-## Session 相依性
+## 舊有的系統對 Session 相依性
 1. 登入資訊
 1. 登入失敗次數 
 1. IP Block 
 1. 驗證碼
 
-## Cookie相依性
+## 舊有的系統對 Cookie相依性
 1. Sticky Cookie 
 1. Data Cookie
 1. Signal R有用到 Net Forms Authentication (Base on cookie) 
@@ -111,35 +111,14 @@ https://fingerprintjs.com/?fbclid=IwAR1I0nRPyiJJUHosyXa80GwJi45-4tHjxV5uZPnTBks-
 1. JWT參數Config 化
 1. JWT Support Log
 
-
-### 未做的
-1. 前端Session / Cookie 機制抽換
-1. Device Id重新設計(精準度問題、最好導入JWT挷瀏覽器指紋)
-1. DEV測試
-1. QA 完整測試
-
-### 可以做優化的部份
-1. 禁止開F12的功能。 (需留後路)
-1. 登入記錄
-1. 移除其他的cookie data
-
 # 補充
 ## Https 一定安全?
+實際上不見得，下列情境可能會造成 Https 不安全
 1. 使用太舊的加密演算法 
 1. Library實作加密演算法有bug 
 1. CA憑證單位被收買了
 1. Private Key流出
 1. FBI
-
-## 為何不採RSA 加密
-基於效能考量，因為RSA的演算法雖然比較安全，
-但加密效能不如對稱的演算法，
-而我們jwt 的內容不需要讓Cliet 端解密，
-所有的Request都會進redis 驗證，
-所以不管什麼加密方式，Redis沒有，
-驗證也不會通過。
-
-https://dotblogs.com.tw/yc421206/2012/06/27/73097
 
 ## JWT Token 挷定 IP的副作用
 客戶端可能切換網路，手機IP 也會跳動，不適合將Token 綁定IP。
