@@ -165,12 +165,12 @@ public class TempOrders: Orders
 {   
 }
 ```
-抽像類別
+抽像類別 
 ```
 AbstractInsertOrderService
 {
 ... 
-public int InsertOrders<T>(Checkout checkout) where T : Orders, new()
+public int InsertOrders<T>(Checkout checkout) where T : Orders, new() // 泛型約束 (Generic Constraint)
 {
   var order = CreateCustomerInstance<T>(checkout);
   return _unitOfWork.GetDbClient().Insertable<T>(order).ExecuteReturnIdentity();
