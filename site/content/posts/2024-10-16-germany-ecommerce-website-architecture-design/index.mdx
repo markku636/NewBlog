@@ -170,7 +170,6 @@ public class TempOrders: Orders
 AbstractInsertOrderService
 {
 ... 
-
 public T CreateOrderInstance<T>(Checkout checkout) where T : Orders, new()
 {
       return new T()
