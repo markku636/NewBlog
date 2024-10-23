@@ -155,7 +155,7 @@ var params = new Dictionary<string,string>();
 var paymentService = _context.ResolveNamed<IPaymentOptionService>(checkout.PaymentTypeCode);
 paymentService.pay(params);
 ```
-### 暫存訂單 ( 用到抽像 abstract class 讓程式覆用 及 這邊並用了自動注入及命名解析控制反轉  )
+### 暫存訂單 ( 用到抽像 abstract class 讓程式覆用 及 這邊並用了自動注入及命名解析依賴反轉，達到金流模組化  )
 因為外國的金流，有些導來導去，很機會會發生交易失敗，過去的暫存訂單，會在結帳前暫存，直到真正結帳，才會寫入真的訂單，這就會有兩段類似的邏輯，且因為暫存訂單和訂單的關係，欄位相同。
 
 我們都知道，抽像類別是用來讓一系列類別有共用的實作，把暫存訂單和訂單共同的實作抽出來，透過抽像類別把原本兩份程式，透過抽像類別及繼承關係，變成只需要一份程式，讓程式碼開發維護起來更輕鬆。
