@@ -170,6 +170,17 @@ public class TempOrders: Orders
 AbstractInsertOrderService
 {
 ... 
+
+public T CreateOrderInstance<T>(Checkout checkout) where T : Orders, new()
+{
+      return new T()
+      {
+		 Name = checkout.Name,
+         Email = checkout.Email,
+		 ...
+      };
+}
+
 public int InsertOrders<T>(Checkout checkout) where T : Orders, new() // 泛型約束 (Generic Constraint)
 {
   var order = CreateCustomerInstance<T>(checkout);
