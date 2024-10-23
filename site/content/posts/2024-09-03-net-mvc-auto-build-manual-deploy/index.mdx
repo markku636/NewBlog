@@ -32,27 +32,25 @@ slug: net-mvc-auto-build-manual-deploy
 ## 設定 Jenkins 的MS Build 路徑
 MS Build 安裝路徑是
 Visual studio 2019 一起安裝的MSBuild.exe 路徑是
+```
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin
-
+```
 ## 下載[nuget.exe ](https://www.nuget.org/downloads)
 
-下載 Nuget.exe 至 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin 
+下載 Nuget.exe 至 
+```
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin 
+```
 
 ## 下載並安裝 [.NET Framework 4.8 Developer Pack ](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48)
 
-## 撰寫 Pipeline 
-MS Build 安裝路徑
-
-Visual studio 2019 一起安裝的MSBuild.exe 路徑是
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin
-
-## 至 Github repo 設定webhook 當程式commit 時自動建置
+## 首先，至 Github repo 設定webhook 當程式commit 時通知 Jenkins 自動建置
 ![Github webhook setting](github-webhook.png)
 ```
 http://jks.xxx.com/github-webhook/
 ```
-## Jenkins 自動建置 pipeline
-接著，建立Job ，選擇New Item > Pipeline，並設定 Github Project。
+## 接著，Jenkins 設定自動建置 pipeline
+建立Job >選擇New Item > Pipeline，並設定 Github Project。
 
 ![github project setting](github-project-setting.png)
 
