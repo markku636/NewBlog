@@ -28,7 +28,7 @@ slug: 2021/09/26/frontend-rendering-performance-issue
 * 明明是一千筆資料，因為捲軸往下捲才長出捲軸，捲軸 bar 比例顯示比例不正常，也不好捲動
 ![](https://i.imgur.com/dostJfa.png)
 
-### 3.分段渲染 - 依據資料筆數及高度長出，虛擬捲軸Bar，依可視範圍做渲染，超出可視範圍的就不渲染額外的 DOM 了
+### 3.分段渲染 - 依據資料筆數及高度長出，虛擬捲軸Bar，依可視範圍做渲染，超出可視範圍的就不渲染額外的 DOM 了，有整理了一下，如果要分段捲動有那些方法
 1. Clusterize.js 套件
 2. 虛擬滾動(Vue-virtual-scroller) 套件
 3. Vue 虛擬列表元件 [範例連結](https://codesandbox.io/s/virtuallist-1-rp8pi?file=/src/main.js)
@@ -48,8 +48,6 @@ slug: 2021/09/26/frontend-rendering-performance-issue
 * 無限捲動是縮減物件的大小，去除不需要的屬性 ( Limit unnecessary data passing )
 * 過濾掉不需要的資料
 * Render Once - 假設Component其中一個內容不會變更資料，可以用v-once指令，只針對那個內容僅渲染一次。
-
-
 
 ## 參考資料
 [參考資料連結](https://juejin.cn/post/6844903938894872589)  
