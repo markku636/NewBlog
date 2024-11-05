@@ -35,7 +35,7 @@ slug: how-to-build-high-concurrency-website
 
 ## 運維
 * 使用反向代理 - 透過反向代理，可以讓多台服務器來分攤流量及任務。 (QPS < 10k，沒有預算可以用軟體的反向代理 nginx、yarp、但 QPS > 10k, 就得考慮買硬體的負載平衡[F5](https://www.f5.com/glossary/load-balancer))
-* 採用現代化系統運維架構(K8s)，可以依據 request 或資源擴容及縮容。
+* 採用現代化系統運維架構(K8s)，可以依據 QPS 或系統資源擴容及縮容。
 
 ## 安全
 * 使用 Cloudfalre 之類的網站防護的服務，避免一些惡意攻擊。如:[DDoS](https://blog.markkulab.net/2022/01/16/prevent-ddos/)
