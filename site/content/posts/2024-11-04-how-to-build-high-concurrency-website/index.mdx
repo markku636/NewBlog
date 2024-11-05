@@ -20,7 +20,7 @@ slug: how-to-build-high-concurrency-website
 ### 後端
 * 採用成熟熟的程式語言框架，並採用非同步的方式撰寫，讓其 CPU 及 IO 利用率極大化，不需要的資料，就不要傳到前端，可以在一個request 要到，就不需要多個request。
 * 採分散式架構 - 把應用拆解成多個獨立服務，避免一個服務卡住造成系統瓶頸。 (如: 金流模組、物流模組)
-* [可以透過一些程式的演算或方法，來消化瞬間載的效能瓶頸，融斷、隔離、重試、降級、超時、限流(令牌桶、等候室、漏桶)](https://blog.csdn.net/github_38592071/article/details/140196235)
+* [可以透過一些程式的演算或方法，來消化瞬間的效能瓶頸，融斷、隔離、重試、降級、超時、限流(令牌桶、等候室、漏桶)](https://blog.csdn.net/github_38592071/article/details/140196235)
 
 ## 資料庫
 * 可以透過一些資料庫優化的方式改善效能。如:建立索引、反正規化，減少Join、表垂直拆分或使用快取伺服器，將不常變動的資料，不要每次從Db 撈取等。
@@ -31,12 +31,12 @@ slug: how-to-build-high-concurrency-website
 * [確保交易一致性，使用鎖機制](https://ouch1978.github.io/blog/2022/09/21/common-locks-in-programming-world)
 
 ## 快取
-* 後端快取 - 將不常變更的資料，又經常查詢的資料透過快取伺服器，快取起來，或是採用[Redis cluster](https://isdaniel.github.io/redis-cluster-introduce-01/)( Redis Key 連續 比較適合分片)，將資料分片。
 * 前端快取 - 開啟 Client side cahce ，用戶端讓要過的檔案，沒有變更，就不需要重覆在請求。
+* 後端快取 - 將不常變更的資料，又經常查詢的資料透過快取伺服器，快取起來，或是採用[Redis cluster](https://isdaniel.github.io/redis-cluster-introduce-01/)( Redis Key 連續 比較適合分片)，將資料分片。
 
 ## 運維
 * 使用反向代理 - 透過反向代理，可以讓多台服務器來分攤流量及任務。 (QPS < 10k，沒有預算可以用nginx、yarp、QPS > 10k, 有預算可以買負載均衡器[F5](https://www.f5.com/glossary/load-balancer))
-* 採用現代化運維架構(K8s)，可以依據 request 或資源擴容及縮容。
+* 採用現代化系統運維架構(K8s)，可以依據 request 或資源擴容及縮容。
 
 ## 安全
 * 使用 Cloudfalre 之類的網站防護的服務，避免一些惡意攻擊。如:[DDoS](https://blog.markkulab.net/2022/01/16/prevent-ddos/)
