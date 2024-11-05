@@ -34,7 +34,7 @@ slug: how-to-build-high-concurrency-website
 * 後端快取 - 將不常變更的資料，又經常查詢的資料透過快取伺服器，快取起來，或是採用[Redis cluster](https://isdaniel.github.io/redis-cluster-introduce-01/)( Redis Key 連續 比較適合分片)，將資料分片。
 
 ## 運維
-* 使用反向代理 - 透過反向代理，可以讓多台服務器來分攤流量及任務。 (QPS < 10k，沒有預算可以用nginx、yarp、QPS > 10k, 有預算可以買負載均衡器[F5](https://www.f5.com/glossary/load-balancer))
+* 使用反向代理 - 透過反向代理，可以讓多台服務器來分攤流量及任務。 (QPS < 10k，沒有預算可以用軟體的反向代理 nginx、yarp、但 QPS > 10k, 就得考慮買硬體的負載平衡[F5](https://www.f5.com/glossary/load-balancer))
 * 採用現代化系統運維架構(K8s)，可以依據 request 或資源擴容及縮容。
 
 ## 安全
