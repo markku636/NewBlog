@@ -27,7 +27,7 @@ slug: how-to-build-high-concurrency-website
 * 讀寫分離 - 將資料庫讀操作和寫操作分離，使用主從覆制來處理大量讀請求。
 資料庫資寫分離，
 * NoSQL - 海量資料來說，NoSQL 本身的特性容易分區和分片，可以提高性能，如千萬筆的會員資料。
-* 確保交易一致性，要有鎖的機制
+* [確保交易一致性，要有鎖的機制](https://ouch1978.github.io/blog/2022/09/21/common-locks-in-programming-world)
 
 ## 快取
 * 後端快取 - 將不常用，又經常查詢透過 redis 緩存，或是採用redis cluster(key 連續 比較適合)，資料結構及分片。
@@ -46,6 +46,7 @@ slug: how-to-build-high-concurrency-website
 持續整理及補充。
 
 ## 參考
+* [前同事Ouch 大大](https://ouch1978.github.io/)
 * [拓元售票系統](https://aws.amazon.com/tw/solutions/case-studies/tixcraft/?fbclid=IwZXh0bgNhZW0CMTAAAR1OkXmUsFGJZ4x086DzwYbK4Ox1JEuJWDA6umSIx2edlKKucWm4jWU6PGY_aem_aztLGVHLLc9EvEnDe6WTMg)
-* 前同事Ouch 大大
+
 
