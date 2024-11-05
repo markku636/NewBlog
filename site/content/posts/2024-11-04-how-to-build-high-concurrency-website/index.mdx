@@ -34,7 +34,7 @@ slug: how-to-build-high-concurrency-website
 * 前端快取 - 開啟 Client side cahce ，用戶端讓要過的檔案，沒有變更，就不需要重覆在請求。
 
 ## 運維
-* 使用反向代理 - 透過多台服務器來分攤流量。 (沒有預算可以用nginx、yarp、有預算可以買負載均衡器[F5](https://www.f5.com/glossary/load-balancer))
+* 使用反向代理 - 透過反向代理，可以讓多台服務器來分攤流量及任務。 (沒有預算可以用nginx、yarp、有預算可以買負載均衡器[F5](https://www.f5.com/glossary/load-balancer))
 * 採用現代化運維架構(K8s)，可以依據 request 或資源擴容及縮容。
 
 ## 安全
