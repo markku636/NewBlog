@@ -18,7 +18,7 @@ slug: how-to-build-high-concurrency-website
 2. 使用 CDN ，減少主伺服器的 IO 壓力。
 
 ### 後端優化
-* 採用成熟熟的程式語言框架，並採用非同步的方式撰寫，讓其 CPU 及 IO 利用率極大化。
+* 採用成熟熟的程式語言框架，並採用非同步的方式撰寫，讓其 CPU 及 IO 利用率極大化，不需要的資料，就不要傳到前端，可以在一個request 要到，就不需要多個request。
 * 分散式架構 - 把應用拆解成多個獨立服務，避免一個服務卡住造成系統瓶頸。 (如: 金流模組、物流模組、)
 * [可以透過一些程式的技巧，融斷、隔離、重試、降級、超時、限流(令牌桶、等候室、漏桶) 的方法，來消化瞬間載的效能瓶頸](https://blog.csdn.net/github_38592071/article/details/140196235)
 
@@ -32,7 +32,7 @@ slug: how-to-build-high-concurrency-website
 ## 快取
 * 後端快取 - 將不常用，又經常查詢透過 redis 緩存，或是採用redis cluster(key 連續 比較適合)，資料結構及分片。
 [Redis Cluster](https://isdaniel.github.io/redis-cluster-introduce-01/)
-* 前端快取 - 開啟 Client side cahce ，讓其要過的檔案，就不需要重覆在要。
+* 前端快取 - 開啟 Client side cahce ，讓要過的檔案，就不需要重覆在請求。
 
 ## DevOps
 * 反向代理(負載均衡器) - 透過多台服務器來分攤流量。 (沒有預算可以用nginx、yarp、有預算可以買負載均衡器F5 )
