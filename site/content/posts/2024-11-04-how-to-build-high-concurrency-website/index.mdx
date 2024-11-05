@@ -30,12 +30,12 @@ slug: how-to-build-high-concurrency-website
 * [確保交易一致性，要有鎖的機制](https://ouch1978.github.io/blog/2022/09/21/common-locks-in-programming-world)
 
 ## 快取
-* 後端快取 - 將不常用，又經常查詢透過 redis 緩存，或是採用[Redis cluster](https://isdaniel.github.io/redis-cluster-introduce-01/)(key 連續 比較適合)，資料結構及分片。
-* 前端快取 - 開啟 Client side cahce ，讓要過的檔案，就不需要重覆在請求。
+* 後端快取 - 將不常變更的資料，又經常查詢透過緩存，或是採用[Redis cluster](https://isdaniel.github.io/redis-cluster-introduce-01/)(key 連續 比較適合分片)。
+* 前端快取 - 開啟 Client side cahce ，用戶端讓要過的檔案，沒有變更，就不需要重覆在請求。
 
-## DevOps
+## 運維
 * 使用反向代理 - 透過多台服務器來分攤流量。 (沒有預算可以用nginx、yarp、有預算可以買負載均衡器[F5](https://www.f5.com/glossary/load-balancer))
-* 採用 K8s 架構，可以依據 request 或資源擴容及縮容。
+* 採用現代化運維架構(K8s)，可以依據 request 或資源擴容及縮容。
 
 ## 安全
 * [使用 Cloudfalre 之類的服務，避免DDoS 攻擊](https://blog.markkulab.net/2022/01/16/prevent-ddos/)
