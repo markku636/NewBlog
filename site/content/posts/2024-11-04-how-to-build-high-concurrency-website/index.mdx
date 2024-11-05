@@ -14,13 +14,13 @@ slug: how-to-build-high-concurrency-website
 整理一下大流量的網站，該如何設計，高併發網站，看起來大多的共通性都是把大拆小 "拆"。
 
 ### 優化前端網站
-1. [前端網站優化最佳化圖型、JS、CSS、延遲載入、頁面靜態化](https://blog.markkulab.net/enhance-nextjs-performance/) 
+1. [前端網站優化最佳化圖型、JS、CSS、延遲載入、頁面靜態化](https://blog.markkulab.net/enhance-nextjs-performance/)。
 2. 使用 CDN ，減少主伺服器的 IO 壓力。
 
 ### 後端優化
 * 採用成熟熟的程式語言框架，並採用非同步的方式撰寫，讓其 CPU 及 IO 利用率極大化，不需要的資料，就不要傳到前端，可以在一個request 要到，就不需要多個request。
 * 分散式架構 - 把應用拆解成多個獨立服務，避免一個服務卡住造成系統瓶頸。 (如: 金流模組、物流模組、)
-* [可以透過一些程式的技巧，融斷、隔離、重試、降級、超時、限流(令牌桶、等候室、漏桶) 的方法，來消化瞬間載的效能瓶頸](https://blog.csdn.net/github_38592071/article/details/140196235)
+* [可以透過一些程式的技巧，融斷、隔離、重試、降級、超時、限流(令牌桶、等候室、漏桶) 的方法，來消化瞬間載的效能瓶頸。](https://blog.csdn.net/github_38592071/article/details/140196235)
 
 ## 資料庫
 * 可以將資料庫進行分片（Sharding），將數據分散到多個數據庫上進行處理。
