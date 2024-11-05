@@ -1,0 +1,51 @@
+---
+featured: true
+title:   整理一下，如何打造高併發的網站
+date:  2024-11-04 20:01:35 +0800
+thumbnail:  how-to-build-high-concurrency-website.png
+category:  Fontend  
+tags:   ['architecture-design','concurrency-website']
+description : 整理一下，如何打造高併發的網站
+author : Mark Ku
+slug: how-to-build-high-concurrency-website
+
+---
+## 前言
+整理一下大流量的網站，該如何設計，高併發網站，看起來大多的共通性都是 "拆"。
+
+### 優化前端網站
+1. 前端網站優化[最佳化圖型、JS、CSS、延遲載入、頁面靜態化](https://blog.markkulab.net/enhance-nextjs-performance/) 
+2. 使用 CDN ，減少主伺服器的 IO 壓力。
+
+### 後端優化
+* 採用成熟熟的程式語言框架，並採用非同步的方式撰寫，讓其 CPU 及 IO 利用率極大化。
+* 分散式架構 - 把應用拆解成多個獨立服務，避免一個服務卡住造成系統瓶頸。 (如: 金流模組、物流模組、)
+* [可以透過一些程式的技巧，等候室、令牌桶、融斷、隔離、重試、降級、超時、限流的方法，來消化瞬間載的效能瓶頸](https://blog.csdn.net/github_38592071/article/details/140196235)
+
+## 資料庫
+* 可以將資料庫進行分片（Sharding），將數據分散到多個數據庫上進行處理。
+* 讀寫分離 - 將資料庫讀操作和寫操作分離，使用主從覆制來處理大量讀請求。
+資料庫資寫分離，
+* NoSQL - 海量資料來說，NoSQL 本身的特性容易分區和分片，可以提高性能，如千萬筆的會員資料。
+* 確保交易一致性，要有鎖的機制
+
+## 快取
+* 後端快取 - 將不常用，又經常查詢透過 redis 緩存，或是採用redis cluster(key 連續 比較適合)，資料結構及分片。
+[Redis Cluster] (https://isdaniel.github.io/redis-cluster-introduce-01/)
+* 前端快取 - 開啟 Client side cahce ，讓其要過的檔案，就不需要重覆在要。
+
+## DevOps
+* 反向代理(負載均衡器) - 透過多台服務器來分攤流量。 (沒有預算可以用nginx、yarp、有預算可以買負載均衡器F5 )
+* 採用 K8s 架構，可以依據 request 或資源擴容及縮容。
+
+## 安全
+* [使用 WAF 避免DDoS 攻擊](https://blog.markkulab.net/2022/01/16/prevent-ddos/)
+* [採用 CSRF 避免一些攻擊](https://www.telerik.com/blogs/protecting-nextjs-applications-cross-site-request-forgery-csrf-attacks)
+
+## 最後
+持續整理及補充。
+
+## 參考
+* [拓元售票系統](https://aws.amazon.com/tw/solutions/case-studies/tixcraft/?fbclid=IwZXh0bgNhZW0CMTAAAR1OkXmUsFGJZ4x086DzwYbK4Ox1JEuJWDA6umSIx2edlKKucWm4jWU6PGY_aem_aztLGVHLLc9EvEnDe6WTMg)
+* 前同事Ouach 大大
+
