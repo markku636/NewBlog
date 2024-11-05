@@ -26,8 +26,8 @@ slug: how-to-build-high-concurrency-website
 * 可以將資料庫進行分片（Sharding）或分庫，將數據分散到多個數據庫上進行處理。
 * 讀寫分離 - 將資料庫讀操作和寫操作分離，使用主從覆制來處理大量讀請求。
 資料庫資寫分離，
-* NoSQL - 海量資料來說，NoSQL 本身的特性容易分區和分片，可以提高性能，如千萬筆的會員資料。
-* [確保交易一致性，要有鎖的機制](https://ouch1978.github.io/blog/2022/09/21/common-locks-in-programming-world)
+* 使用 NoSQL 資料庫：NoSQL 能有效地分區、分片，並具備水平擴展特性，特別適合處理大規模數據，例如會員資料。
+* [確保交易一致性，使用鎖機制](https://ouch1978.github.io/blog/2022/09/21/common-locks-in-programming-world)
 
 ## 快取
 * 後端快取 - 將不常變更的資料，又經常查詢的資料透過快取伺服器，快取起來，或是採用[Redis cluster](https://isdaniel.github.io/redis-cluster-introduce-01/)(key 連續 比較適合分片)，將資料分片。
