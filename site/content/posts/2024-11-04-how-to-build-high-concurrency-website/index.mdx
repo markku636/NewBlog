@@ -23,6 +23,7 @@ slug: how-to-build-high-concurrency-website
 * [可以透過一些程式的演算或方法，來消化瞬間載的效能瓶頸，融斷、隔離、重試、降級、超時、限流(令牌桶、等候室、漏桶)](https://blog.csdn.net/github_38592071/article/details/140196235)
 
 ## 資料庫
+* 建立索引，反正規化減少join ，表垂直拆分，或使用快取伺服器，不常變動的資料，不要每次從Db 撈取等。
 * 可以將資料庫進行分片（Sharding）或分庫，將數據分散到多個數據庫上進行處理。
 * 讀寫分離 - 將資料庫讀操作和寫操作分離，使用主從覆制來處理大量讀請求。
 資料庫資寫分離，
@@ -34,7 +35,7 @@ slug: how-to-build-high-concurrency-website
 * 前端快取 - 開啟 Client side cahce ，用戶端讓要過的檔案，沒有變更，就不需要重覆在請求。
 
 ## 運維
-* 使用反向代理 - 透過反向代理，可以讓多台服務器來分攤流量及任務。 (沒有預算可以用nginx、yarp、有預算可以買負載均衡器[F5](https://www.f5.com/glossary/load-balancer))
+* 使用反向代理 - 透過反向代理，可以讓多台服務器來分攤流量及任務。 (QPS < 10k，沒有預算可以用nginx、yarp、QPS > 10k, 有預算可以買負載均衡器[F5](https://www.f5.com/glossary/load-balancer))
 * 採用現代化運維架構(K8s)，可以依據 request 或資源擴容及縮容。
 
 ## 安全
