@@ -34,7 +34,7 @@ slug: how-to-build-high-concurrency-website
 * 後端快取 - 對於不常變更、但頻繁查詢的資料，可利用快取伺服器進行快取，或採用 [Redis Cluster](https://isdaniel.github.io/redis-cluster-introduce-01/) 進行資料分片（適合 Redis Key 連續的場景）。
 
 ## 運維
-* 負載平衡器 - 負載平衡的原理，主要就是透過反向代理機制，可以讓多台服務器來分攤流量及任務。 (QPS < 10k，沒有預算可以用軟體的反向代理 nginx、yarp、但 QPS > 10k, 就得考慮買硬體的負載平衡[F5](https://www.f5.com/glossary/load-balancer))
+* 負載平衡器 - 負載平衡的核心原理是透過反向代理機制，將流量和任務分攤至多台伺服器上。如果 QPS 小於 10k，建議使用軟體反向代理（例如 nginx 或 yarp），因為硬體負載平衡設備的晶片經過額外設計，可以承載更高的流量負荷。當 QPS 超過 10k 時，就需要考慮採購硬體負載平衡器，例如 [F5](https://www.f5.com/glossary/load-balancer)。
 * 採用現代化系統運維架構(K8s)，可以依據 QPS 或系統資源擴容及縮容。
 * 服務監控 (Healthy Check)。 如: [Uptime-kuma](https://blog.markkulab.net/2021/12/11/application-monitor-uptime-kuma/)
 * 可觀測性。 如: [signoz](https://www.cnblogs.com/hacker-linner/p/17581720.html)
