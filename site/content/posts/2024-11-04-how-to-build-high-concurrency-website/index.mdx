@@ -36,9 +36,9 @@ slug: how-to-build-high-concurrency-website
 ## 運維
 * 負載平衡器 - 負載平衡的核心原理是透過反向代理機制，將流量和任務分攤至多台伺服器上。如果 QPS 小於 10k，建議使用軟體反向代理（例如 nginx 或 yarp），因為硬體負載平衡設備的晶片經過額外設計，可以承載更高的流量負荷。當 QPS 超過 10k 時，就需要考慮採購硬體負載平衡器，例如 [F5](https://www.f5.com/glossary/load-balancer)。
 * 採用現代化系統運維架構(K8s)，可以依據 QPS 或系統資源擴容及縮容。
-* 服務監控 (Healthy Check)。 如: [Uptime-kuma](https://blog.markkulab.net/2021/12/11/application-monitor-uptime-kuma/)
-* 可觀測性。 如: [signoz](https://www.cnblogs.com/hacker-linner/p/17581720.html)
-* 日誌服務器Log Server。如: grafana、seq
+* 服務監控 (Health Check) - 及時偵測並回應服務異常，確保服務穩定運行。例如：[Uptime-Kuma](https://blog.markkulab.net/2021/12/11/application-monitor-uptime-kuma/)  
+* 應用服務可觀測性 - 提供應用性能的可視化與分析，方便問題診斷與效能優化。例如：[Signoz](https://www.cnblogs.com/hacker-linner/p/17581720.html)
+* 日誌服務器 (Log Server) - 集中管理與分析日誌，便於查找與追溯問題來源。例如：Grafana、SEQ
 
 ## 安全
 * 使用 Cloudfalre 之類的網站防護的服務，避免一些惡意攻擊。如:[DDoS](https://blog.markkulab.net/2022/01/16/prevent-ddos/)
