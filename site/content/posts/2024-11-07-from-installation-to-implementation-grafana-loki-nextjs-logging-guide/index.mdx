@@ -11,7 +11,7 @@ slug: from-installation-to-implementation-grafana-loki-nextjs-logging-guide
 
 ---
 ## 前言
-因為我們有多個國家的網站，原本使用 Seq 作為 log server，但因為同時間只能有一個人登入，每個國家都需要各自的容器服務，為了簡化運維，我打算將 log server 換成 Grafana，並在學習 K8s 時發現 Grafana、Loki 和 Prometheus 成為常見的標配。
+因為有多個國家的網站，原本使用 Seq 作為 log server，但因為同時間只能有一個人登入，每個國家都需要各自的容器服務，為了簡化運維，打算將 log server 換成 Grafana，並在學習 K8s 時發現 Grafana、Loki 和 Prometheus 成為常見的標配。
 
 ## 首先，讓我們解一下什麼是 Grafana 
 Grafana 是一款開源的資料視覺化和監控平台，讓你可以輕鬆建立互動式儀表板，從多種數據來源即時監控系統狀態，主要是由以下三大服務組成。
