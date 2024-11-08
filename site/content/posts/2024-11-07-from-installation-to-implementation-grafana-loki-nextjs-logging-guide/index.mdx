@@ -161,8 +161,8 @@ clientLog("An error occurred", LogLevel.Error, { page: "checkout", userId: 12345
 server {
     listen 80;
     location /loki/ {
-        proxy_pass http://localhost:3100; # Loki 实例地址
-        proxy_set_header Authorization "Bearer YOUR_TOKEN"; # 设置令牌
+        proxy_pass http://localhost:3100; # Loki Url
+        proxy_set_header Authorization "Bearer YOUR_TOKEN"; # 令牌
         # 可根据需求限制访问的 IP、路径等
         if ($http_authorization != "Bearer YOUR_TOKEN") {
             return 403; # 拒绝访问
