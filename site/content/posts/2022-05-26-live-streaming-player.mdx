@@ -173,10 +173,10 @@ handleFull() {
         >
       </div>
       <div v-if="error || isLiveClose" class="empty-room-wrapper">
-        <p class="empty-title">主播暂不在播哦</p>
-        <p class="empty-tip">关注主播可收到开播提醒</p>
+        <p class="empty-title">主播暫不在播哦</p>
+        <p class="empty-tip">關注主播可收到開播提醒</p>
         <div v-if="recommendList.data" class="empty-recommend">
-          <p class="recommend-title">为你推荐</p>
+          <p class="recommend-title">為你推薦</p>
           <ul class="recommend-list">
             <li v-for="room in recommendList.data" :key="room.id" class="recommend-item">
               <router-link :to="{path: '/liveroom', query: {id: room.id}}" target="_blank" />
@@ -255,17 +255,17 @@ handleFull() {
     </div>
   </div>
   <div v-else>
-    <div class="flex justify-center align-center" :style="videoClassObject">
-      暂无视频
+    <div class="flex justify-center align-center no-video" :style="videoClassObject">
+      暫無視頻
     </div>
   </div>
 </template>
 
 <script>
-
-const Hls = require('hls.js')
 import { Slider } from 'ant-design-vue'
 import { ResolutionType } from '@/config/index'
+import { liveRoomPage } from '@/api/liveRoom'
+const Hls = require('hls.js')
 export default {
   components: { Slider },
   props: {
@@ -315,7 +315,6 @@ export default {
   },
   data() {
     return {
-
       videoLoaded: false,
       sliderV: 0,
       seekArr: [0.5, 1, 1.25, 1.5, 2],
@@ -346,7 +345,6 @@ export default {
       isFloatingVideo: false,
       openResolution: false,
       currentResolution: ResolutionType.ChineseStandard
-
     }
   },
   computed: {
@@ -374,12 +372,8 @@ export default {
 
       return { height: this.height + 'px' || '100%', width: this.width + 'px' || '100%' }
     }
-
   },
-  watch: {
-
-  },
-
+  watch: {},
   mounted() {
     if (!this.hasStreaming) { return }
 
@@ -419,7 +413,6 @@ export default {
 
       if (!this.isVideoLoaded) {
         const videoSrc = this.currentStream.url
-
         const isMp4 = this.currentStream.url.indexOf('mp4') > -1
 
         if (Hls.isSupported() && !isMp4) {
@@ -439,7 +432,7 @@ export default {
         video.load()
 
         video.oncanplay = function() {
-          console.log('准备就绪')
+          console.log('準備就緒')
         }
 
         if (this.isVideoOnDemand) {
@@ -598,7 +591,6 @@ export default {
         this.showControl = false
       }, 3000)
     },
-
     videoError() {
       if (!this.disBaberrage) return
       this.loading = false
@@ -606,7 +598,7 @@ export default {
       this.player.pause()
       this.player.removeAttribute('src')
       this.player.load()
-      this.$Request.LiveRoom.liveRoomPage({
+      liveRoomPage({
         isOnlyTop: true,
         pageIndex: 1,
         pageSize: 3
@@ -706,7 +698,7 @@ export default {
     color: #FFF;
     transform: translate(-50%, -50%);
 
-    /deep/.ant-spin-dot-item {
+    ::v-deep.ant-spin-dot-item {
       background-color: #227FFF;
       opacity: 0.5;
     }
@@ -877,10 +869,10 @@ export default {
         .sound-btn {
           position: relative;
           margin-right: 15px;
-          background-image: url("~assets/images/video-player/sound_n.png");
+          background-image: url("~assets/images/video-player/sound-n.png");
 
           &.muted {
-            background-image: url("~assets/images/video-player/mute_n.png");
+            background-image: url("~assets/images/video-player/mute-n.png");
           }
 
           .open-layer {
@@ -906,19 +898,19 @@ export default {
           }
 
           &:hover {
-            background-image: url("~assets/images/video-player/sound_s.png");
+            background-image: url("~assets/images/video-player/sound-s.png");
 
             &.muted {
-              background-image: url("~assets/images/video-player/mute_s.png");
+              background-image: url("~assets/images/video-player/mute-s.png");
             }
           }
         }
 
         .full-btn {
-          background-image: url("~assets/images/video-player/full_n.png");
+          background-image: url("~assets/images/video-player/full-n.png");
 
           &:hover {
-            background-image: url("~assets/images/video-player/full_s.png");
+            background-image: url("~assets/images/video-player/full-s.png");
             animation: icon_scale 0.4s ease both;
           }
         }
@@ -930,24 +922,24 @@ export default {
       width: 24px;
       height: 24px;
       background-size: 24px 24px;
-      background-image: url("~assets/images/video-player/play_n.png");
+      background-image: url("~assets/images/video-player/play-n.png");
       cursor: pointer;
 
       &.paused {
         background-image: url("~assets/images/video-player/paused.png");
 
         &:hover {
-          background-image: url("~assets/images/video-player/paused_s.png");
+          background-image: url("~assets/images/video-player/paused-s.png");
         }
       }
 
       &:hover {
-        background-image: url("~assets/images/video-player/play_s.png");
+        background-image: url("~assets/images/video-player/play-s.png");
       }
     }
 
     .progress-bar {
-      /deep/.ant-slider {
+      ::v-deep.ant-slider {
         margin: 0;
         height: 8px;
 
@@ -1048,11 +1040,7 @@ export default {
 
   &--popout {
     position: fixed;
-    right: 0;
-    // top: 0;
-    // width: 450px;
-    // height: 300px;
-    // bottom: 20;
+    right: 0;    
     z-index: 10;
     max-width: 100%;
     animation: popin 0.5s ease-in-out forwards;
@@ -1069,6 +1057,11 @@ export default {
       }
     }
   }
+}
+
+.no-video {
+  color: white;
+  background-color: $text-black;
 }
 
 </style>
