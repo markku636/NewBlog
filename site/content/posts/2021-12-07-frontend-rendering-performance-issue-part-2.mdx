@@ -38,38 +38,648 @@ slug: 2021/12/06/frontend-rendering-performance-issue-part-2
 ```
 <template>
   <div
-
     id="virtual-list"
-    ref="part-render-container"
+    ref="scroller"
     class="virtual-scroll-list-container"
-    :style="{ height: minListHeight + 'px' }"
+    @scroll="scrollEvent($event)"
+    @touchstart="touchstartHandle"
+    @touchmove="touchmoveHandle"
+    @touchend="touchendHandle"
   >
-
+    <div
+      class="virtual-scroll-list-phantom"
+      :style="{ 'min-height': minListHeight + (enableScrollUp ? 40 : 0)+ 'px' }"
+    />
     <div
       ref="actualContentRef"
       class="virtual-scroll-list"
-      :visibleCount="visibleCount"
-      :buffer-item="bufferSize"
+      :style="{ transform: getTransform }"
     >
-      <div
-        v-for="(item, index) in list"
-        :key="item[uniKey]"
-        :[uniKey]="item[uniKey]"
-        :index="index"
-        :class="[{ visiable: checkVisible(index) }, itemClass]"
-        :style="{ 'min-height': cachedPositions[index].height + 'px' }"
-      >
-        <transition name="fade">
-
-          <slot
-            v-if="checkVisible(index)"
-            :index="index"
-            :uniKey="uniKey"
-            :item="item"
-            :height="cachedPositions[index].height"
-          />
-        </transition>
+      <div v-show="isShow.isRefresh" ref="refresh" class="refresh">
+        <div class="flex justify-center align-center">
+          <span class="circle-rotate " />
+          <span>
+            重新整理
+          </span>
+        </div>
       </div>
+      <slot
+        v-for="item in visibleData"
+        :start="start"
+        :index="getCache(item[uniKey]).index"
+        :end="end"
+        :uniKey="uniKey"
+        :item="item"
+        :height="getCache(item[uniKey]).height"
+      />
+      <div v-show="isShow.isLoading" class="load m-t-4">
+        <div class="flex justify-center align-center">
+          <span class="circle-rotate " />
+          <span>
+            加載中
+          </span>
+        </div>
+      </div>
+      <span v-if="!isChatMode" class="finished-text">
+        <slot name="finishedText">沒有更多內容</slot>
+      </span>
+    </div>
+  </div>
+</template>
+
+<script>
+import { scrollElementToBottom, debounce } from '@/utils'
+
+export default {
+  name: 'VirtualList',
+  props: {
+    // 所有列表數據
+    list: {
+      type: Array,
+      default: () => []
+    },
+    // 每項預設的高度
+    itemDefaultHeight: {
+      type: Number,
+      default: 200
+    },
+    // 唯一值
+    uniKey: {
+      type: String,
+      default: function() {
+        return 'seq'
+      },
+      required: false
+    },
+    // 可視範圍外多渲染幾筆
+    bufferSize: {
+      type: Number,
+      default: 0
+    },
+    isChatMode: {
+      type: Boolean,
+      required: false,
+      default: function() {
+        return false
+      }
+    },
+    enableScrollDown: {
+      // 開啟上拉功能  refresh
+      type: Boolean,
+      required: false,
+      default: function() {
+        return false
+      }
+    },
+    enableScrollUp: {
+      // 開啟下拉功能 loading
+      type: Boolean,
+      required: false,
+      default: function() {
+        return false
+      }
+    },
+    autoLoadMore: {
+      // 自動捲到最底就刷新 / 捲到定點，在上拉才刷新
+      type: Boolean,
+      required: false,
+      default: function() {
+        return true
+      }
+    }
+  },
+  data() {
+    return {
+      // scrollTop: 0, // 卷軸位址
+      lastScrollTop: 0, // 紀錄最後卷軸位址
+      isScrolling: false,
+      isLoadMoreEnd: false,
+
+      // 列表預估總高度
+      minListHeight: 0,
+      // 可視區域高度
+      screenHeight: 0,
+      // 起始索引
+      start: 0,
+      // 結束索引
+      end: null,
+      // 快取高度
+      cachedPositions: [],
+      // 每一項只記算一次動態高度
+      calculateOnce: true,
+      // 是不是己捲動到最下面
+      autoScrollLoaded: false,
+
+      firstRender: false,
+
+      refreshLoginStatus: 'normal', // 組件當前狀態：正常瀏覽模式normal，下拉刷新模式refresh，上拉加載模式loading
+      isShow: {
+        // 加載動劃控制開關
+        isRefresh: false,
+        isLoading: false
+      },
+      startPos: {
+        // 手指初始按壓位置
+        pageY: 0,
+        pageX: 0
+      },
+      dis: {
+        // 手移動距離
+        pageY: 0,
+        pageX: 0
+      },
+      last: {
+        pageY: 0,
+        pageX: 0
+      }
+
+    }
+  },
+  computed: {
+    // 預期可視範圍可顯示的列表數
+    visibleCount() {
+      return Math.ceil(this.screenHeight / this.itemDefaultHeight)
+    },
+    // 偏移量對應的style
+    getTransform() {
+      const currentCachedPositions = this.cachedPositions[this.start - 1]
+
+      return `translate3d(0,${
+        this.start >= 0 && currentCachedPositions
+          ? currentCachedPositions.bottom
+          : 0
+      }px,0)`
+    },
+    // 獲取可視範圍的資料筆數
+    visibleData() {
+      if (this.cachedPositions.length === 0) {
+        return []
+      }
+
+      return this.list.slice(this.start, this.end + 1)
+    }
+  },
+  watch: {
+    list: {
+      handler(val) {
+        if (val) {
+          this.init()
+        }
+
+        this.isLoadMoreEnd = false
+      },
+      immediate: false,
+      deep: true
+    }
+  },
+  mounted() {
+    this.init()
+  },
+  // activated生命鉤子在keep-alive被激活時調用
+  activated() {
+  // 如果曾滾動過,則還原位置
+    if (this.lastScrollTop) {
+      const page = this.$refs.scroller
+      page.scrollTop = this.lastScrollTop
+    }
+  },
+
+  updated() {
+    // 當每一次 component 更新時重新計算一下，目前渲染出來的項目高度，放進 cache 計算
+    const that = this
+
+    if (that.$refs.actualContentRef.childElementCount > 0) {
+      const childNodes = that.$refs.actualContentRef.childNodes
+
+      that.hasLastNode = false
+
+      childNodes.forEach((node, index) => {
+        if (!node || !node.id || node.id.indexOf('-') === -1) {
+          return
+        }
+
+        const elementIdArray = node.id.split('-')
+
+        if (elementIdArray.length === 2) {
+          const elementId = Number(elementIdArray[1])
+
+          if (elementId) {
+            const currentCachedPositions = that.cachedPositions.find(
+              (x) => x.id === elementId
+            )
+
+            if (currentCachedPositions) {
+              if (currentCachedPositions.isLast === true) {
+                that.hasLastNode = true
+              }
+            }
+            // 每個 item的高度只會重算一次
+            if (
+              that.calculateOnce &&
+              currentCachedPositions.updated &&
+              currentCachedPositions.updated === true
+            ) {
+              return
+            }
+
+            const rect = node.getBoundingClientRect()
+            const { height } = rect
+
+            const oldHeight = currentCachedPositions.height
+            const dValue = oldHeight - height
+
+            if (dValue) {
+              currentCachedPositions.bottom -= dValue
+              currentCachedPositions.top -= dValue
+              currentCachedPositions.height = height
+              currentCachedPositions.dValue = dValue
+              currentCachedPositions.updated = true
+              that.minListHeight -= dValue
+
+              for (
+                let i = currentCachedPositions.index;
+                i < that.cachedPositions.length;
+                i++
+              ) {
+                const cacheItem = that.cachedPositions[i]
+
+                if (cacheItem) {
+                  cacheItem.top -= dValue
+                  cacheItem.bottom -= dValue
+                }
+              }
+            }
+          }
+        }
+      })
+
+      if (that.isChatMode) {
+        that.$nextTick(function() {
+          if (that.firstRender === false) {
+            that.firstRender = true
+            that.$refs.scroller.scrollTop = that.$refs.scroller.scrollHeight
+          } else if (that.autoScrollLoaded === false) {
+            scrollElementToBottom('virtual-list')
+            if (that.hasLastNode) {
+              that.autoScrollLoaded = true
+            }
+          }
+        })
+      }
+    }
+  },
+
+  methods: {
+    init() {
+      this.autoScrollLoaded = false
+      this.initCachedPositions()
+      this.initPosition()
+      this.screenHeight = this.$el.clientHeight || this.$el.parentElement.clientHeight
+      this.scrollEvent()
+
+      // 給 list 預設的高度
+      this.minListHeight = this.list.length * this.itemDefaultHeight
+    },
+    touchstartHandle(e) {
+      // 記錄起始位置 和 組件距離window頂部的高度
+      this.startPos.pageY = e.touches[0].pageY
+      this.startPos.pageX = e.touches[0].pageX
+      // 內容頁在可視視窗最頂端或者在指定的位置（父級元素的頂部）
+    },
+    touchmoveHandle(e) {
+      const disY = e.touches[0].pageY - this.startPos.pageY
+      const disX = e.touches[0].pageX - this.startPos.pageX
+      // for android 預設下拉刷新的問題
+      if (this.isAndroid) {
+        this.preventAndriodRefreshEevnt(e)
+      }
+
+      this.last.pageY = e.changedTouches[0].pageY
+      this.last.pageX = e.changedTouches[0].pageX
+
+      if (disX > 100 && !this.isScrolling) {
+        this.dis.pageX = disX
+        this.$emit('scrollRight')
+        this.refreshLoginStatus = 'right'
+      } else if (disX < -100 && !this.isScrolling) {
+        this.$emit('scrollLeft')
+        this.refreshLoginStatus = 'left'
+      } else {
+        if (this.$refs.scroller.scrollTop <= 0 && disY > 100) {
+          this.dis.pageY = disY
+          this.refreshLoginStatus = 'refresh'
+          this.refreshMove(disY, e)
+        } else if (disY < 100) {
+          /* //觸發上拉加載 */
+          if (this.isShow.isLoading) return
+          this.refreshLoginStatus = 'loading'
+          this.loadingMove(disY)
+        }
+      }
+    },
+
+    preventAndriodRefreshEevnt(e) {
+      // 阻止 android 原生事件
+      var direction = e.changedTouches[0].pageY > this.last.pageY ? 1 : -1
+
+      const scrollTop = this.$refs.scroller.scrollTop
+
+      if (direction > 0 && scrollTop <= 0) {
+        e.preventDefault()
+      }
+    },
+    loadingMove(dis) {
+      // 計算內容頁底部距離可視視窗頂部的距離
+      if (this.enableScrollUp && !this.autoLoadMore) {
+        const disToTop = this.$refs.actualContentRef.getBoundingClientRect()
+          .bottom
+
+        // 計算可視視窗的高度
+        const clientHeight = document.documentElement.clientHeight
+        if (disToTop <= clientHeight) {
+          if (this.refreshLoginStatus === 'loading' && this.dis.pageY < 0) {
+            this.isShow.isLoading = true
+          }
+        }
+      }
+    },
+    refreshMove(dis, e) {
+      if (this.enableScrollDown) {
+        if (this.isShow.isRefresh) return
+        if (this.refreshLoginStatus === 'refresh' && this.dis.pageY > 0) {
+          // 下拉刷新成立條件
+
+          this.isShow.isRefresh = true
+          // 下拉到一定距離後，內容頁不隨touchmove移動
+          this.$refs.actualContentRef.style.transform = `translateY(${
+            dis < 8 ? dis : 8
+          }px)`
+
+          // for android 預設下拉刷新的問題
+          if (this.isAndroid) {
+            e.preventDefault()
+          }
+        }
+      }
+    },
+
+    touchendHandle(e) {
+      if (this.refreshLoginStatus === 'left' || this.refreshLoginStatus === 'right') {
+        this.isShow.isRefresh = false
+        this.isShow.isLoading = false
+      }
+
+      this.refreshLoginStatus === 'refresh' && this.refreshToucnend(e)
+      this.refreshLoginStatus === 'loading' && this.loadingTouchend(e)
+    },
+    refreshToucnend(e) {
+      // 加上限定條件，防止不在刷新狀態，後面的代碼執行
+      if (!this.isShow.isRefresh) return
+      // 必須下拉一定距離，才進行異步加載數據
+      this.dis.pageY > 10 && (this.$emit('scrollDown'))
+
+      // 松手後加載動劃消失，並且內容頁回到原位置
+      this.isShow.isRefresh = false
+      this.$refs.actualContentRef.style.transform = `translateY(0px)`
+      this.refreshLoginStatus = 'normal'
+    },
+    loadingTouchend(e) {
+      // 加上限定條件，防止不在刷新狀態，後面的代碼執行
+      if (!this.isShow.isLoading) return
+
+      if (this.isLoadMoreEnd === false) {
+        this.$emit('scrollUp')
+
+        this.isLoadMoreEnd = true
+      }
+      this.isShow.isLoading = false
+      this.refreshLoginStatus = 'normal'
+    },
+
+    getCache(uniId) {
+      const cache = this.cachedPositions.find(x => x.id === uniId)
+      return cache
+    },
+
+    initPosition() {
+      if (this.isChatMode) {
+        this.end = this.list.length
+
+        var range = this.visibleCount + this.bufferSize
+
+        if (this.end - range < 0) {
+          this.start = 0
+        } else {
+          this.start = this.end - range
+        }
+      } else {
+        this.start = 0
+        this.end = this.start + this.visibleCount + this.bufferSize
+      }
+    },
+    // 依照預設每一筆資料都給計算 bottom 及給預設高度
+    initCachedPositions() {
+      const { itemDefaultHeight } = this
+      this.cachedPositions = []
+      for (let i = 0; i < this.list.length; ++i) {
+        this.cachedPositions[i] = {
+          id: this.list[i][this.uniKey],
+          index: i,
+          height: itemDefaultHeight,
+          top: i * itemDefaultHeight,
+          bottom: (i + 1) * itemDefaultHeight,
+          dValue: 0,
+          isLast: i + 1 === this.list.length
+
+        }
+      }
+    },
+    scrollEvent(e) {
+      // 當前滾動位置
+      const scrollTop = this.$refs.scroller.scrollTop
+
+      // 綁定事件,滾動時,儲存位置到this.scrollTop
+      this.lastScrollTop = scrollTop
+
+      // 處理滑動不可以切換tab
+      this.isScrolling = true
+      var scroll
+      clearTimeout(scroll)
+      scroll = setTimeout(() => {
+        this.isScrolling = false
+      }, 100)
+
+      let index = 0
+      // 此時的開始索引
+      const currentCachePostion = this.cachedPositions.filter(
+        (x) => scrollTop < x.bottom
+      )[0]
+
+      if (currentCachePostion) {
+        index = currentCachePostion.index
+      }
+
+      if (index === 0) {
+        this.start = 0
+        this.end = index + this.visibleCount + this.bufferSize
+      }
+      // debugger
+      // 此時的結束索引
+      this.start = index - this.bufferSize
+      this.end = index + this.visibleCount + this.bufferSize
+
+      if (this.list.length > 0 && this.end >= this.list.length) {
+        // 自動加載
+        if (this.enableScrollUp && this.autoLoadMore) {
+          this.isShow.isLoading = true
+          this.loadingTouchend(e)
+        }
+
+        this.end = Math.max(this.list.length, this.visibleCount)
+        this.start = Math.min(this.end - this.visibleCount - this.bufferSize, 0)
+      }
+
+      if (this.start < 0) this.start = 0 // 起始筆
+    },
+    debounceScroll(e) {
+      debounce(() => { this.scrollEvent(e) }, 16.6) // 60Hz
+    }
+  }
+}
+</script>
+
+<style scoped lang="scss">
+.virtual-scroll-list-container {
+  position: relative;
+  overflow: auto;
+  height: 100%;
+  -webkit-overflow-scrolling: touch;
+  // scroll-behavior: smooth;
+}
+
+// .virtual-scroll-list-container::-webkit-scrollbar {
+//   display: none;
+// }
+
+.virtual-scroll-list-phantom {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: -1;
+}
+
+.virtual-scroll-list {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 998;
+}
+
+/*
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: darkgrey;
+}
+
+::-webkit-scrollbar-thumb {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.2);
+} */
+
+.circle-rotate {
+  position: relative;
+  border: 10px solid #CCC;
+  border-right-color: transparent;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: loadingAnimation 0.75s infinite;
+}
+
+@keyframes loadingAnimation {
+  0% {
+    transform: translateX(-50%) rotate(0deg);
+  }
+
+  100% {
+    transform: translateX(-50%) rotate(360deg);
+  }
+}
+
+.finished-text {
+  display: block;
+  padding: 24px 0 32px 0;
+  font-size: 22px;
+  text-align: center;
+  color: $text-grey-darken;
+}
+
+.disable-hover {
+  pointer-events: none;
+}
+
+</style>
+```
+使用方法
+```
+<VirtualScroller
+      :list="news"
+      class="news-list-wrapper"
+      :item-default-height="100"
+      :uni-key="'id'"
+      :enable-scroll-up="!isLastPage"
+      :auto-load-more="true"
+      :enable-scroll-down="true"
+      :buffer-size="4"
+      @scrollDown="scrollDown"
+      @scrollUp="scrollUp"
+    >
+      <template #default="slotScope">
+        <NewsCard
+          :id="'news-' + slotScope.item[slotScope.uniKey]"
+          :key="'news-' + slotScope.item[slotScope.uniKey]"
+          :start="slotScope.start"
+          :end="slotScope.end"
+          :index="slotScope.index"
+          :h="slotScope.height"
+          :news="slotScope.item"
+          :sport-id="slotScope.item.sportId"
+        />
+      </template>
+</VirtualScroller>
+```
+
+### 分段捲軸
+```
+<template>
+  <div
+    ref="part-render-container"
+    class="part-render-scroll-list-container"
+    :style="{ height: minListHeight +'px' }"
+  >
+
+    <div
+      v-for="(item, index) in list"
+      :key="item[uniKey]"
+      :[uniKey]="item[uniKey]"
+      :index="index"
+      class="part-render-item"
+      :class="[{ visiable: checkVisible(index) }, itemClass]"
+      :style="{ 'min-height': cachedPositions[index].height + 'px' }"
+    >
+      <transition-group name="fade">
+        <slot
+          v-if="checkVisible(index)"
+          :index="index"
+          :uniKey="uniKey"
+          :item="item"
+          :height="cachedPositions[index].height"
+        />
+      </transition-group>
     </div>
   </div>
 </template>
@@ -78,6 +688,13 @@ slug: 2021/12/06/frontend-rendering-performance-issue-part-2
 export default {
   name: 'VirtualList',
   props: {
+    scrollElementId: { // 沒傳預設抓 body
+      type: String,
+      required: false,
+      default: function() {
+        return ''
+      }
+    },
     // 所有列表數據
     list: {
       type: Array,
@@ -126,7 +743,10 @@ export default {
       currentScrollTop: 0,
       currentEleTop: 0,
       currentEleBottom: 0,
-      screenHeight: 0
+      screenHeight: 0,
+      scrollElement: null,
+      isBodyScroller: false // 是不是 body 的捲軸
+
     }
   },
   computed: {
@@ -135,11 +755,11 @@ export default {
       return Math.ceil(this.screenHeight / this.itemDefaultHeight)
     },
 
-    // 可提前渲染的範圍
-    availableShow() {
-      const availableShow = this.currentScrollTop + this.screenHeight > this.currentEleTop && this.currentScrollTop - this.screenHeight < this.currentEleBottom
+    // 己進入預渲染的範圍
+    isEnterPreload() {
+      const isEnterPreload = this.currentScrollTop + this.screenHeight > this.currentEleTop && this.currentScrollTop - this.screenHeight < this.currentEleBottom
 
-      return true
+      return isEnterPreload
     }
 
   },
@@ -148,8 +768,7 @@ export default {
       handler(val) {
         if (
           val &&
-          val.length > 0 &&
-          val.length !== this.cachedPositions.length
+          val.length > 0
         ) {
           // 給 list 預設的高度
           this.minListHeight = this.list.length * this.itemDefaultHeight
@@ -179,11 +798,18 @@ export default {
 
     this.end = this.start + this.visibleCount + this.bufferSize
 
-    window.addEventListener('scroll', this.handleScroll)
+    this.isBodyScroller = this.scrollElementId.length === 0
+
+    if (this.isBodyScroller) {
+      window.addEventListener('scroll', this.handleScroll)
+    } else {
+      this.getScrollElement().addEventListener('scroll', this.handleScroll, false)
+    }
   },
 
   updated() {
     // 當每一次 component 更新時重新計算一下，目前渲染出來的項目高度，放進 cache 計算
+
     const that = this
     const el = this.$el
 
@@ -204,18 +830,19 @@ export default {
           return
         }
 
-        currentCachedPositions.updated === true
+        currentCachedPositions.updated = true
 
         if (currentCachedPositions) {
-          const rect = node.getBoundingClientRect()
+          // slot 只能放一筆
+          const rect = node.children[0].getBoundingClientRect()
           const { height } = rect
 
           const oldHeight = currentCachedPositions.height
           const dValue = oldHeight - height
 
           if (dValue) {
-            currentCachedPositions.bottom = rect.bottom
-            currentCachedPositions.top = rect.top
+            currentCachedPositions.bottom -= dValue
+            currentCachedPositions.top -= dValue
             currentCachedPositions.height = height
             currentCachedPositions.dValue = dValue
             that.minListHeight -= dValue
@@ -229,7 +856,25 @@ export default {
       this.recalculateCurrentEleBoundary()
     }
   },
+  beforeDestroy() {
+    if (this.isBodyScroller) {
+      window.removeEventListener('scroll', this.handleScroll)
+    } else {
+      this.getScrollElement().removeEventListener('scroll', this.handleScroll, false)
+    }
+  },
   methods: {
+    getScrollElement() {
+      const scrollElement = document.getElementById(this.scrollElementId)
+      if (this.isBodyScroller) {
+        return document.documentElement || document.body
+      } else {
+        if (!scrollElement) {
+          console.log('找不到捲軸物件')
+        }
+        return document.getElementById(this.scrollElementId)
+      }
+    },
     // 重算快取 Cache 的 上邊界 & 下邊界
     recalculateCache(index, dValue) {
       for (let i = index; i < this.cachedPositions.length; i++) {
@@ -244,12 +889,13 @@ export default {
     // 重新計算上邊界和下邊界的距離
     recalculateCurrentEleBoundary() {
       var rect = this.$el.getBoundingClientRect()
-      this.currentEleTop = rect.top + window.scrollY
-      this.currentEleBottom = rect.top + window.scrollY + rect.height
+
+      this.currentEleTop = rect.top + this.currentScrollTop
+      this.currentEleBottom = rect.top + this.currentScrollTop + rect.height
     },
 
     checkVisible(nowIndex) {
-      if (this.availableShow) {
+      if (this.isEnterPreload) {
         return (
           nowIndex >= this.start &&
         nowIndex <= Math.min(this.end, this.list.length)
@@ -259,8 +905,7 @@ export default {
       }
     },
     handleScroll() {
-      this.currentScrollTop =
-        document.documentElement.scrollTop || document.body.scrollTop
+      this.currentScrollTop = this.getScrollElement().scrollTop
 
       let index = 0
 
@@ -289,8 +934,6 @@ export default {
         this.end = this.list.length - 1
         this.start = this.end - this.visibleCount - this.bufferSize
       }
-
-      console.log(this.start + ' , ' + this.end)
     },
 
     // 依照預設每一筆資料都給計算 bottom 及給預設高度
@@ -314,66 +957,17 @@ export default {
 </script>
 
 <style scoped>
-.virtual-scroll-list-container {
-  position: relative;
-
-  /* overflow: auto; */
-  height: 100%;
-  -webkit-overflow-scrolling: touch;
+.part-render-scroll-list-container {
+  box-sizing: border-box;
 }
 
-.virtual-scroll-list {
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
+.part-render-item {
+  box-sizing: border-box;
 }
-
-/*
-::-webkit-scrollbar {
-    width: 10px;
-}
-
-::-webkit-scrollbar-track {
-    background-color: darkgrey;
-}
-
-::-webkit-scrollbar-thumb {
-    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.2);
-} */
 </style>
 
 ```
-使用方法
-```
-<VirtualScroller
-      :list="news"
-      class="news-list-wrapper"
-      :item-default-height="100"
-      :uni-key="'id'"
-      :enable-scroll-up="!isLastPage"
-      :auto-load-more="true"
-      :enable-scroll-down="true"
-      :buffer-size="4"
-      @scrollDown="scrollDown"
-      @scrollUp="scrollUp"
-    >
-      <template #default="slotScope">
-        <NewsCard
-          :id="'news-' + slotScope.item[slotScope.uniKey]"
-          :key="'news-' + slotScope.item[slotScope.uniKey]"
-          :start="slotScope.start"
-          :end="slotScope.end"
-          :index="slotScope.index"
-          :h="slotScope.height"
-          :news="slotScope.item"
-          :sport-id="slotScope.item.sportId"
-        />
-      </template>
-</VirtualScroller>
-```
-
-### 分段捲軸
+使用方式
 ```
 <PartRenderingScroller :scroll-element-id="'schedule-container'" :list="early.early" :item-default-height="100" uni-key="matchId" class="schedule-list p-l-20 p-r-20" :buffer-size="50">
             <template #default="slotScope">
