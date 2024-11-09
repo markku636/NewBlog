@@ -1,7 +1,7 @@
 ---
 featured: true
 title:  用 Google Cloud Platform 搭建內網穿透伺服器 ( Frp Server ) 
-date:   2021-07-22 01:01:01 +0800
+date:   2024-11-19 01:01:01 +0800
 thumbnail:  reverse-proxy.webp
 category: Cloud
 tags:   ['frp','frp-c','reverse proxy']
@@ -128,17 +128,13 @@ requestHeaders.set.x-from-where = "frp"
 最後將VM建在台灣節點，聽說Google的機房在嘉義，網速超級快，也很穩定，一個月差不多150元台幣左右，就能擁有反向代理及一個固定IP，其實蠻滑算的
 ![](https://i.imgur.com/G28BhNe.webp)
 
-## 費用
-第一個月 300  
-第二個月 200  
 
 ## 如果你需要重開機自動啟動，則需要額外註冊成服務
 ### 在 /lib/systemd/system/ 增加設定檔
 
 ```
 sudo vim /lib/systemd/system/frps.service
-
-````
+```
 
 ### 參考下面的設定檔格式修改
 ```
@@ -157,8 +153,7 @@ WantedBy=multi-user.target
 ```
 
 ### 啟動服務
-
-````
+```
 sudo systemctl daemon-reload  // reload service
 sudo systemctl stop frps.service //停止 FRP Server 服務
 sudo systemctl start frps.service //啟動 FRP Server 服務
@@ -177,14 +172,74 @@ linux 測試防火牆有沒有開
 ```
 nc -zv 127.0.0.1 7000
 ```
-
 ## GCP 必須關閉防火牆
 ![](disable-gcp-firewall.png)
 ## 補充
 P.S. 記得 GCP 防火牆輸入要記得開，否則外網連不到。
 
+## 此時，己將Frpc 架設完成
 
-## GCP 免費計劃
+## 接著找一台 Ubuntu 主機來，安裝frpc
+### 建立資料夾
+```
+sudo mkdir -p /etc/frp
+```
+### 下載 FRP 0.61.0 並解壓到 
+```
+cd /etc/frp
+sudo wget https://github.com/fatedier/frp/releases/download/v0.61.0/frp_0.61.0_linux_amd64.tar.gz
+sudo tar -zxvf frp_0.61.0_linux_amd64.tar.gz --strip-components=1
+```
+
+### 建立frpc.toml設定檔
+```
+sudo vim /etc/frp/frpc.toml
+```
+frpc.toml
+```
+serverAddr = "your server"
+serverPort = 7000
+auth.token = "your token"
+transport.poolCount = 10000
+
+[[proxies]]
+name = "jks"
+type = "https"
+customDomains = ["jks.letgo.com.tw"]
+[proxies.plugin]
+type = "https2http"
+localAddr = "127.0.0.1:8080"
+crtPath = "/var/frpc/letgo/fullchain.crt"
+keyPath = "/var/frpc/letgo/cert.key"
+hostHeaderRewrite = "jks.letgo.com.tw"
+requestHeaders.set.x-from-where = "frp"
+```
+
+### 測試
+```
+/etc/frp/frpc -c /etc/frp/frpc.toml
+```
+
+### 建立開機後自動啟動
+```
+sudo vim /lib/systemd/system/frpc.service
+```
+### 建立自動啟動的設定檔
+```
+[Unit]
+Description=FRP Client
+After=network.target
+Wants=network.target
+
+[Service]
+Restart=on-failure
+RestartSec=5
+ExecStart=/etc/frp/frpc -c /etc/frp/frpc.toml
+
+[Install]
+WantedBy=multi-user.target
+```
+## 補充 - GCP 免費計劃
 [免費計劃連結](https://cloud.google.com/free/docs/gcp-free-tier/?hl=zh-CN#compute)
 
 在免費試用期結束後，我們還是可以在限制的用量內免費使用特定產品。例如最常見的 Google Compute Engine 就提供了以下免費條件：  

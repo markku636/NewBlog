@@ -1,7 +1,7 @@
 ---
 featured: true
-title:  透過frp-c 容器應用，簡單建立、高效能的內網穿透服務
-date:   2021-06-01 01:01:01 +0800
+title:  QNAP 透過frp-c 容器應用，簡單建立、高效能的內網穿透服務
+date:   2021/05/31 01:01:01 +0800
 thumbnail:  reverse-proxy.webp
 category: Infra
 tags:   ['frp','frp-c','reverse proxy']
@@ -12,7 +12,7 @@ slug: 2021/05/31/frpc
 # 透過frp-c 容器應用，簡單建立、高效能的內網穿透服務
 
 ## 解決問題
-因為是租屋處，想要架站，房東不方便提供給我 IP 分享器的權限，試過第三方主機，都很慢也很貴，且ngrok 又有流量限制，而 ngrok 其實就是一種反向代理的應用。
+因為是租屋處，想要架站，無法取得 IP 分享器的權限，試過第三方主機，都很慢也很貴，且ngrok 又有流量限制，而 ngrok 其實就是一種反向代理的應用。
 
 ## 何謂反向代理
 反向代理 - 其實是"代理伺服器"代理了"目標伺服器"，去和"客戶端"進行資料交換。 其目的是
@@ -41,69 +41,25 @@ Frp 則是一種熱門反向代理服務，可以將內網的服務通過免費�
 4. 將容器網路模式設定成 Host
 ![](https://i.imgur.com/3pcVjya.webp)
 
-5. 設定 frpc 的設定檔 ( \\qnapnas\Container\data\frpc\ 建立 frpc.ini)
+5. 設定 frpc 的設定檔 ( \\qnapnas\Container\data\frpc\ 建立 frpc.toml)
 
 ```
-[common]
-protocol = tcp
-server_addr = frp1.freefrp.net
-server_port = 7000
-token = freefrp.net
+serverAddr = "your server"
+serverPort = 7000
+auth.token = "your token"
+transport.poolCount = 10000
 
-
-[Qnas] 
-
-type = http 
-
-local_ip = 192.168.31.5
-
-local_port = 8080
-
-use_gzip = true
-
-use_encryption = true
-
-pool_count = 20
-
-privilege_mode = true
-
-subdomain = markku666
-
-custom_domains = 
-
-[SQL] 
-type = tcp
-
-local_ip = 127.0.0.1
-
-local_port = 1433
-
-remote_port = 14333
-
-[Redis] 
-type = tcp
-
-local_ip = 127.0.0.1
-
-local_port = 63799
-
-remote_port = 63799
-
-[Jekyll]
-
-local_ip = 127.0.0.1
-
-local_port = 49183
-
-remote_port = 49183
-
-[ShopCart]
-
-local_ip = 127.0.0.1
-
-local_port = 888
-
-remote_port = 48888
+[[proxies]]
+name = "jks"
+type = "https"
+customDomains = ["jks.letgo.com.tw"]
+[proxies.plugin]
+type = "https2http"
+localAddr = "127.0.0.1:8080"
+crtPath = "/var/frpc/letgo/fullchain.crt"
+keyPath = "/var/frpc/letgo/cert.key"
+hostHeaderRewrite = "jks.letgo.com.tw"
+requestHeaders.set.x-from-where = "frp"
 ```
 
 6.此時你就能透過此 frpc 映射 nas 上的服務<br/>
