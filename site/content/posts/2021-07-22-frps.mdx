@@ -49,15 +49,15 @@ sudo apt-get install bison ed gawk gcc libc6-dev make golang-go vim
 接著你必須到FRP的Github上查看最新frps ，並下載他
 
 ```
-wget https://github.com/fatedier/frp/releases/download/v0.60.0/frp_0.60.0_linux_amd64.tar.gz
+wget https://github.com/fatedier/frp/releases/download/v0.61.0/frp_0.61.0_linux_amd64.tar.gz
 ```
 
 解壓縮檔案並重新命名資料夾為 frp
 
 ```
-tar -zxvf frp_0.60.0_linux_amd64.tar.gz
+tar -zxvf frp_0.61.0_linux_amd64.tar.gz
 sudo mkdir /var/frps
-sudo mv frp_0.60.0_linux_amd64/* /var/frps/
+sudo mv frp_0.61.0_linux_amd64/* /var/frps/
 cd /var/frps
 ```
 
@@ -97,6 +97,7 @@ serverAddr = "35.223.172.254"
 serverPort = 7000
 auth.token = "your token"
 transport.poolCount = 10000
+
 [[proxies]]
 name = "test-tcp"
 type = "tcp"
@@ -124,7 +125,7 @@ requestHeaders.set.x-from-where = "frp"
 ```
 
 ## 完工
-訪問 https://shop.markkulab.net/ 聽說台灣 Google 的機房在嘉義，網站變超級快，也不會因為三不時就掛了，如果一個月不用100台幣，我會應該會持續付費下去。
+最後將VM建在台灣節點，聽說Google的機房在嘉義，網速超級快，也很穩定，一個月差不多150元台幣左右，就能擁有反向代理及一個固定IP，其實蠻滑算的
 ![](https://i.imgur.com/G28BhNe.webp)
 
 ## 費用
@@ -165,7 +166,6 @@ sudo systemctl restart frps.service //重啟 FRP Server 服務
 sudo systemctl disable frps.service //開機時不要啟動 FRP Server 服務
 sudo systemctl enable frps.service //開機時自動啟動 FRP Server 服務
 sudo systemctl status frps.service //查看FRP Server 狀態
-
 ```
 
 ## 測試防火牆有沒有關
