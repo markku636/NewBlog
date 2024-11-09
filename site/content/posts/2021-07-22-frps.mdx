@@ -18,10 +18,8 @@ slug: 2021/07/21/frps
 ## 登入 GCP 的後台 > 虛擬機器 (VM) 執行個體
 ![](https://i.imgur.com/LNph6ly.webp)
 
-
 ## 選擇地區為台灣，作業系統 Ubuntu ，選擇 f1-micro，預估費用一個月只要約 15X 元台幣，算是蠻實惠的。  
 ![](https://i.imgur.com/qtpWIMy.png)
-
 
 ## 主機建立好時，在菜單選單中找到 VPC 網路，將主機的ＩＰ改成靜態，這樣就ＩＰ就不會跑掉了。
 ![](https://i.imgur.com/PukFeHZ.webp)
@@ -172,7 +170,7 @@ linux 測試防火牆有沒有開
 ```
 nc -zv 127.0.0.1 7000
 ```
-## GCP 必須關閉防火牆
+## GCP 必須關閉防火牆，並在修改 instance 裡的 Network tags 才會生效。
 ![](disable-gcp-firewall.png)
 ## 補充
 P.S. 記得 GCP 防火牆輸入要記得開，否則外網連不到。
