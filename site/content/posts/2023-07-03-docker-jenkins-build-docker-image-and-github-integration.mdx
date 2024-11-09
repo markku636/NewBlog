@@ -24,8 +24,9 @@ New-Item -ItemType Directory -Path $workspacePath -Force | Out-Null
 ```
 ### 執行以下指令，Docker 運行 Jenkins 容器，並將 workspace 掛載到本地磁碟
 ```
-docker run -d -p 8080:8080  -p 50000:50000 -v ${workspacePath}:/var/jenkins_home/workspace  -v /var/run/docker.sock:/var/run/docker.sock --name jenkins --restart=always jenkins/jenkins:lts 
+docker run -d -p 8080:8080  -p 50000:50000 -v ${hostWorkspacePath}:/var/jenkins_home/workspace  -v /var/run/docker.sock:/var/run/docker.sock --name jenkins --restart=always jenkins/jenkins:lts 
 ```
+P.S. hostWorkspacePath 為宿主主機的資料夾路徑
 ### 看到這畫面，要進去容器拿這密碼
 
 ![](https://i.imgur.com/uy3OV4o.png)
@@ -55,6 +56,7 @@ apt-get update && apt-get -y install apt-transport-https ca-certificates curl gn
 usermod -aG docker jenkins 
 usermod -aG root jenkins
 chmod 777 /var/run/docker.sock
+chown -R jenkins:jenkins ${hostWorkspacePath}
 ```
 
 ## Jenkins Github 全域憑證設定
