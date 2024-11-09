@@ -174,7 +174,6 @@ cd /etc/frp
 sudo wget https://github.com/fatedier/frp/releases/download/v0.61.0/frp_0.61.0_linux_amd64.tar.gz
 sudo tar -zxvf frp_0.61.0_linux_amd64.tar.gz --strip-components=1
 ```
-
 ### 建立frpc.toml設定檔
 ```
 sudo vim /etc/frp/frpc.toml
@@ -198,12 +197,10 @@ keyPath = "/var/frpc/letgo/cert.key"
 hostHeaderRewrite = "jks.letgo.com.tw"
 requestHeaders.set.x-from-where = "frp"
 ```
-
 ### 測試
 ```
 /etc/frp/frpc -c /etc/frp/frpc.toml
 ```
-
 ### 建立開機後自動啟動
 ```
 sudo vim /lib/systemd/system/frpc.service
