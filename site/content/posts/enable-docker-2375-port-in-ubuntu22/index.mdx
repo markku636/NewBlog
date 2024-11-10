@@ -57,7 +57,7 @@ sudo vim /lib/systemd/system/docker.service
 ```
 ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock -H fd:// -H tcp://0.0.0.0:2375
 ```
-![change execstart setting](change-exec-start-setting.png)
+![change execstart setting](change-exec-start-settings.png)
 重新啟動
 ```
 sudo systemctl daemon-reload  // reload service
@@ -77,9 +77,3 @@ docker -H 192.168.50.50:2375 ps
 [test result](test.png)
 ## 最後
 我做了一些實驗，發現透過 2375 端口指令建立的容器無法在 Docker Desktop 中看到。如果要使用 Docker Desktop，可能會與原本的 Docker 環境產生衝突。看來，Docker 和 Docker Desktop 不適合混合使用。
-
-
-
-
-
-
