@@ -79,10 +79,9 @@ sudo ./frps -c ./frps.toml
 ## 在到 DNS 主機中設定域名
 ![](https://i.imgur.com/wxhxp8T.webp)
 
-挷定 DNS 將 proxy.markkulab.net 指向 FRPS 主機
+首先將挷定 DNS 將 proxy.markkulab.net 指向 FRPS 主機外部IP
 ![](https://i.imgur.com/Br3Kpe1.webp)
-11221
-挷定 CNAME，這樣訪問者訪問 blog.markkulab.net frps 就會指到指定用戶端映射的網站
+接著，挷定 CNAME，這樣訪問者訪問 blog.markkulab.net frps 就會指到指定用戶端映射的網站
 ![](https://i.imgur.com/WHDoSYy.webp)
 
 ![](https://i.imgur.com/7iCNmjK.webp)
@@ -219,7 +218,7 @@ ExecStart=/etc/frp/frpc -c /etc/frp/frpc.toml
 [Install]
 WantedBy=multi-user.target
 ```
-### 啟動服務
+### 啟動服務 
 ```
 sudo systemctl daemon-reload  // reload service
 sudo systemctl stop frpc.service //停止 FRP Server 服務
