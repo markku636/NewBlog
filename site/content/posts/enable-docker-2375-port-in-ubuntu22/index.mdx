@@ -54,7 +54,6 @@ sudo docker run hello-world
 ```
 ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock -H fd:// -H tcp://0.0.0.0:2375
 ```
-
 ![change execstart setting](change-exec-start-setting.png.png)
 重新啟動
 ```
@@ -72,7 +71,6 @@ sudo ufw allow 2375
 docker -H 192.168.50.50:2375 info
 docker -H 192.168.50.50:2375 ps
 ```
-## 接著依序[參考官方文件](https://docs.docker.com/desktop/setup/install/linux/ubuntu/)，就能在ubuntu 安裝 docker desktop 
-
-![Finish](finish.png)
-
+[test result](test.png)
+## 最後
+做了些實驗，Docker 透過 2375 指令建的容器，在Docker desktop 看不到，如果要用 Docker desktop 可能會和原本的 Docker 有衝突，看起來，Docker 和 DockerDesktop 不能混用。
