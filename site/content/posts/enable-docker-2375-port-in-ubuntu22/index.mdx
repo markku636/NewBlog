@@ -54,7 +54,7 @@ sudo docker run hello-world
 ```
 ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock -H fd:// -H tcp://0.0.0.0:2375
 ```
-![change execstart setting](change-exec-start-setting.png.png)
+![change execstart setting](change-exec-start-setting.png)
 重新啟動
 ```
 sudo systemctl daemon-reload  // reload service
