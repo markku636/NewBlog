@@ -49,8 +49,11 @@ sudo systemctl start docker
 sudo docker run hello-world
 
 ```
-修改這行，在後面加上 -H fd:// -H tcp://0.0.0.0:2375
-
+修改 Docker 的自動啟動設定
+```
+sudo vim /lib/systemd/system/docker.service
+```
+修改 ExecStart 這行，在後面加上 -H fd:// -H tcp://0.0.0.0:2375
 ```
 ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock -H fd:// -H tcp://0.0.0.0:2375
 ```
