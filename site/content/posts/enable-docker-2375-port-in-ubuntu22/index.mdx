@@ -75,6 +75,6 @@ sudo ufw allow 2375
 docker -H 192.168.50.50:2375 info
 docker -H 192.168.50.50:2375 ps
 ```
-[test result](test.png)
+![test result](test.png)
 ## 最後
 我做了一些實驗，發現透過 2375 端口指令建立的容器無法在 Docker Desktop 中看到。如果要使用 Docker Desktop，可能會與原本的 Docker 環境產生衝突。看來，Docker 和 Docker Desktop 不適合混合使用。
