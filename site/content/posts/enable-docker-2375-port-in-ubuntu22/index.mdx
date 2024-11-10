@@ -13,7 +13,7 @@ slug: enable-docker-2375-port-in-ubuntu22
 在 Ubuntu 先裝了 Docker desktop ，Docker，發現遠端訪問及佈署 ( 2375 port ) 怎麼調整，一直都跑不起來，將其全部移除後再裝。
 
 ## Windows Docker desktop 和 Linux Docker desktop 的差異
-在 Windows 的 Docker desktop 可以輕鬆透過Docker desktop 勾選 "Expose daemon on tcp://localhost:2375 without TLS" 來啟用2375 port來管理遠端的 Docker 伺服器，但在Linux 版本是沒有這個設定的，如果先裝了 Docker desktop 可能會遇到和我一樣的狀況。
+在 Windows 的 Docker desktop 可以輕鬆透過Docker desktop 勾選 "Expose daemon on tcp://localhost:2375 without TLS" 來啟用2375 port來管理遠端的 Docker 伺服器，但在Linux 版本是沒有這個設定的，如果先裝了 Docker desktop 可能會遇到和我一樣找不到 dockerd 的狀況。
 ![linux docker desktop settings](linux-docker-desktop-settings.png)
 
 ## 環境說明
