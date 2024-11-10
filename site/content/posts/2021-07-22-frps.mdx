@@ -219,6 +219,16 @@ ExecStart=/etc/frp/frpc -c /etc/frp/frpc.toml
 [Install]
 WantedBy=multi-user.target
 ```
+### 啟動服務
+```
+sudo systemctl daemon-reload  // reload service
+sudo systemctl stop frpc.service //停止 FRP Server 服務
+sudo systemctl start frpc.service //啟動 FRP Server 服務
+sudo systemctl restart frpc.service //重啟 FRP Server 服務
+sudo systemctl disable frpc.service //開機時不要啟動 FRP Server 服務
+sudo systemctl enable frpc.service //開機時自動啟動 FRP Server 服務
+sudo systemctl status frpc.service //查看FRP Server 狀態
+```
 ## 最後
 最後將VM建在台灣節點，聽說Google的機房在嘉義，網速超級快，也很穩定，一個月差不多150元台幣左右，就能擁有反向代理及一個固定IP，其實蠻滑算的
 ![](https://i.imgur.com/G28BhNe.webp)
