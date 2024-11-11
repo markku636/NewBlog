@@ -264,11 +264,12 @@ spec:
     targetPort: 3001
     nodePort: 30000
 ```
-## 移除控制平面污點 (單節點環境)  ?
+## 移除控制平面污點 (單節點環境) 
 ```
 kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 ```
 ## Final Result 
+此時訪問localhost:30000，就能看到這畫面
 ![final result](final-result.png)
 
 ## 重新安裝 Kubernetes (如需重置)
