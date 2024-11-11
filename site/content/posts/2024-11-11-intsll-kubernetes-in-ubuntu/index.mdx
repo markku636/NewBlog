@@ -272,7 +272,7 @@ kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 此時訪問localhost:30000，就能看到這畫面
 ![final result](final-result.png)
 
-## 重新安裝 Kubernetes (如需重置)
+## 補充 - 如果服務安裝失敗或重新安裝 Kubernetes
 ```
 sudo kubeadm reset -f
 sudo rm -rf ~/.kube
