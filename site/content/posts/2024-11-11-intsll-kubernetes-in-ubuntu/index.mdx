@@ -158,7 +158,7 @@ sudo systemctl daemon-reload && sudo systemctl restart docker
 sudo kubeadm init
 ```
 
-初始化成功後，設定 kubectl 使用者：
+初始化成功後，依提提示，複製kubectl設定到使用者：
 ```bash
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
