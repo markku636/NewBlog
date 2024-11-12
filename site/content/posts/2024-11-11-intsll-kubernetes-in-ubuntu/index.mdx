@@ -297,6 +297,7 @@ spec:
 ```
 kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 ```
+這條指令主要用於解決 Kubernetes 中控制平面（Control Plane）節點的資源調度問題。預設情況下，Kubernetes 會為控制平面節點（通常是 master 節點）設置「污點」（Taint），以防止一般的工作負載（Pod）被排程到這些節點上。這是為了確保控制平面節點能夠專注於管理集群並保持穩定。
 ## Final Result 
 此時訪問localhost:30000，就能看到這畫面
 ![final result](final-result.png)
