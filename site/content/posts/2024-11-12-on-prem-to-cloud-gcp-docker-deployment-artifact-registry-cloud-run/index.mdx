@@ -34,10 +34,9 @@ slug: on-prem-to-cloud-gcp-docker-deployment-artifact-registry-cloud-run
 (New-Object Net.WebClient).DownloadFile("https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe", "$env:Temp\GoogleCloudSDKInstaller.exe")
 & $env:Temp\GoogleCloudSDKInstaller.exe
 ```
-2. Windows 安裝過程，會跳出安裝視窮，依據提示，下一步到底即可   
-
-3. 安裝完成後會詢問是否登入（同等於 `gcloud auth login`）
-   ![gcp cli sign](gcp-cli-sign.png)
+2. Windows 安裝過程，會跳出安裝視窮，依據提示，下一步到底即可。
+3. 安裝完成後會詢問是否要登入及選擇那個Google專案( 當然你也可以打指令登入， ex: `gcloud auth login`）
+![gcp cli sign](gcp-cli-sign.png)
 
 ### 建立 Artifact Registry
 
