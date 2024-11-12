@@ -26,7 +26,34 @@ sudo apt-get upgrade
 sudo apt-get install -y net-tools git
 ```
 
-- 設定時間同步至 `asia.pool.ntp.org`
+- 使用Chrony設定時間同步
+Chrony 提供了更快的同步和更高的精度，且資源使用更少。  
+
+安裝 Chrony
+```bash
+sudo apt update
+sudo apt install chrony
+```
+修改 Chrony設定
+```bash
+sudo vim /etc/chrony/chrony.conf
+```
+```config
+pool 0 asia.pool.ntp.org iburst
+pool 1.pool.ntp.org iburst
+pool 2.pool.ntp.org iburst
+pool 3.pool.ntp.org iburst
+pool 4.pool.ntp.org iburst
+```
+重新啟動及測試
+```bash
+sudo systemctl start chrony
+sudo systemctl enable chrony
+chronyc sources -v // 還可以查看連線的 NTP 伺服器列表及其同步狀態
+timedatectl status //  確認系統時間狀態
+sudo chronyc -a makestep // 立刻同步時間
+chronyc tracking // 4. 檢查 Chrony 同步狀態
+```
 - 關閉防火牆：
 ```bash
   # 允許 Kubernetes API server 通信
