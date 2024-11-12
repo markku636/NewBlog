@@ -44,10 +44,10 @@ slug: on-prem-to-cloud-gcp-docker-deployment-artifact-registry-cloud-run
 進入 Artifact Registry，並取得 Registry 的 URL。
 
 1. 建立存放區
-   ![建立存放區](create-artifact-registry.png)
+![建立存放區](create-artifact-registry.png)
 
 2. 依照預設設定微調 > 建立
-   ![artifact registry settings](artifact-registry-settings.png)
+![artifact registry settings](artifact-registry-settings.png)
 
 3. 選取建立好的 Registry >  Setup instructions > 複製指令
 ![get lcoal's set up command](get-local-registry-set-up-command.png)
@@ -59,7 +59,7 @@ slug: on-prem-to-cloud-gcp-docker-deployment-artifact-registry-cloud-run
 gcloud auth configure-docker asia-east1-docker.pkg.dev
 ```
    
-   ![設定完的畫面](already-set-up-artifact-registry.png)
+![設定完的畫面](already-set-up-artifact-registry.png)
 
 ### 建置與驗證 Docker 映像檔
 首先，用指令切換到可容器化的專案，並事先建立好 Dockerfile
