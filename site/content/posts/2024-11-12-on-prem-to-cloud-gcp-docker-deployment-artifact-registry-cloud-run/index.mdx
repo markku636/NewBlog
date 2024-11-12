@@ -53,7 +53,7 @@ slug: on-prem-to-cloud-gcp-docker-deployment-artifact-registry-cloud-run
 ![get lcoal's set up command](get-local-registry-set-up-command.png)
 **注意：** Windows 使用者請移除 `\`，使指令變為單行。
 
-4. 在本地端配置 Google Artifact Registry：
+4. 在本地端設定 Google Artifact Registry：
 
 ```powershell
 gcloud auth configure-docker asia-east1-docker.pkg.dev
@@ -92,10 +92,10 @@ docker push asia-east1-docker.pkg.dev/gcr-my-project01/my-registry/ec:v2
 1. 在 Cloud Run 中選擇「+Deploy Container」
 ![manual deploy google cloud run step 1](manual-deploy-google-cloud-run-step1.png)
 
-2. 依照畫面指示完成配置
+2. 依照畫面指示完成設定
 ![manual deploy google cloud run step 2](manual-deploy-google-cloud-run-step2.png)
 
-3. 進入 Cloud Run，配置 Container(s)、Volumes、Networking、Security 等參數，並設定 Container port 為 80。
+3. 進入 Cloud Run，設定 Container(s)、Volumes、Networking、Security 等參數，並設定 Container port 為 80。
 ![manual deploy google cloud run step 3](manual-deploy-google-cloud-run-step3.png)
 
 #### 自動化部署
