@@ -30,10 +30,10 @@ slug: on-prem-to-cloud-gcp-docker-deployment-artifact-registry-cloud-run
 
 1. 下載並安裝 [Google Cloud CLI](https://cloud.google.com/sdk/docs/install-sdk)
 
-   ```powershell
-   (New-Object Net.WebClient).DownloadFile("https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe", "$env:Temp\GoogleCloudSDKInstaller.exe")
-   & $env:Temp\GoogleCloudSDKInstaller.exe
-   ```
+```powershell
+(New-Object Net.WebClient).DownloadFile("https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe", "$env:Temp\GoogleCloudSDKInstaller.exe")
+& $env:Temp\GoogleCloudSDKInstaller.exe
+```
 2. Windows 安裝過程，會跳出安裝視窮，依據提示，下一步到底即可   
 
 3. 安裝完成後會詢問是否登入（同等於 `gcloud auth login`）
@@ -55,9 +55,9 @@ slug: on-prem-to-cloud-gcp-docker-deployment-artifact-registry-cloud-run
 
 4. 在本地端配置 Google Artifact Registry：
 
-   ```powershell
-   gcloud auth configure-docker asia-east1-docker.pkg.dev
-   ```
+```powershell
+gcloud auth configure-docker asia-east1-docker.pkg.dev
+```
    
    ![設定完的畫面](already-set-up-artifact-registry.png)
 
@@ -65,15 +65,15 @@ slug: on-prem-to-cloud-gcp-docker-deployment-artifact-registry-cloud-run
 首先，用指令切換到可容器化的專案，並事先建立好 Dockerfile
 1. 使用以下指令建置 Docker 映像檔：
 
-   ```powerhsell
-   docker build -t asia-east1-docker.pkg.dev/gcr-my-project01/my-registry/ec:v2 .
-   ```
+```powerhsell
+docker build -t asia-east1-docker.pkg.dev/gcr-my-project01/my-registry/ec:v2 .
+```
 
 2. 運行映像檔進行本地端測試：
 
-   ```powerhsell
-   docker run -d -p 8888:80 asia-east1-docker.pkg.dev/gcr-my-project01/my-registry/ec:v2
-   ```
+```powerhsell
+docker run -d -p 8888:80 asia-east1-docker.pkg.dev/gcr-my-project01/my-registry/ec:v2
+```
 3. 訪問 localhost:8888 測試容器服務，有沒有異常      
 ![local container testing](local-container-testing.png)
 
@@ -90,21 +90,21 @@ slug: on-prem-to-cloud-gcp-docker-deployment-artifact-registry-cloud-run
 #### 手動部署
 
 1. 在 Cloud Run 中選擇「+Deploy Container」
-   ![manual deploy google cloud run step 1](manual-deploy-google-cloud-run-step1.png)
+![manual deploy google cloud run step 1](manual-deploy-google-cloud-run-step1.png)
 
 2. 依照畫面指示完成配置
-   ![manual deploy google cloud run step 2](manual-deploy-google-cloud-run-step2.png)
+![manual deploy google cloud run step 2](manual-deploy-google-cloud-run-step2.png)
 
 3. 進入 Cloud Run，配置 Container(s)、Volumes、Networking、Security 等參數，並設定 Container port 為 80。
-   ![manual deploy google cloud run step 3](manual-deploy-google-cloud-run-step3.png)
+![manual deploy google cloud run step 3](manual-deploy-google-cloud-run-step3.png)
 
 #### 自動化部署
 
 使用下列指令自動部署至 Cloud Run：
 
-   ```bash
-   gcloud run deploy my-service --image=asia-east1-docker.pkg.dev/gcr-my-project01/my-registry/ec:v2 --platform managed --allow-unauthenticated --region=asia-east1 --port=80
-   ```
+```bash
+gcloud run deploy my-service --image=asia-east1-docker.pkg.dev/gcr-my-project01/my-registry/ec:v2 --platform managed --allow-unauthenticated --region=asia-east1 --port=80
+```
 
 * 補充- [Gcloud run deploy 參數文件](https://cloud.google.com/sdk/gcloud/reference/run/deploy)
 
