@@ -20,7 +20,7 @@ slug: intsll-kubernetes-in-ubuntu
 
 
 執行以下指令進行系統更新與安裝：
-```
+```bash
 sudo apt-get update
 sudo apt-get upgrade
 sudo apt-get install -y net-tools git
@@ -28,33 +28,33 @@ sudo apt-get install -y net-tools git
 
 - 設定時間同步至 `asia.pool.ntp.org`
 - 關閉防火牆：
-```
+```bash
   # 允許 Kubernetes API server 通信
-  ufw allow 6443/tcp   # Kubernetes API server
+  sudo ufw allow 6443/tcp   # Kubernetes API server
 
   # etcd 集群通訊
-  ufw allow 2379/tcp   # etcd client communication
-  ufw allow 2380/tcp   # etcd server-to-server communication
+  sudo ufw allow 2379/tcp   # etcd client communication
+  sudo ufw allow 2380/tcp   # etcd server-to-server communication
 
   # kubelet API
-  ufw allow 10250/tcp  # Kubelet API
-  ufw allow 10255/tcp  # Read-only Kubelet API (可選)
-  ufw allow 10248
+  sudo ufw allow 10250/tcp  # Kubelet API
+  sudo ufw allow 10255/tcp  # Read-only Kubelet API (可選)
+  sudo ufw allow 10248
 
   # Controller manager 和 scheduler
-  ufw allow 10251/tcp  # kube-scheduler
-  ufw allow 10252/tcp  # kube-controller-manager
+  sudo ufw allow 10251/tcp  # kube-scheduler
+  sudo ufw allow 10252/tcp  # kube-controller-manager
 
   # Kubernetes DNS (CoreDNS)
-  ufw allow 53/tcp     # DNS TCP
-  ufw allow 53/udp     # DNS UDP
+  sudo ufw allow 53/tcp     # DNS TCP
+  sudo ufw allow 53/udp     # DNS UDP
 
   # NodePort services (範圍可自定義，預設 30000-32767)
-  ufw allow 30000:32767/tcp  # NodePort services
+  sudo ufw allow 30000  # NodePort services
 
   # 啟用防火牆
-  ufw enable
-  ufw status verbose
+  sudo ufw enable
+  sudo ufw status verbose
 ```
 
 - 關閉 OS 的 Swap，避免記憶體不足時關閉容器：
@@ -65,17 +65,17 @@ sudo apt-get install -y net-tools git
 
 ## 安裝 Kubernetes 主程式
 ### 新增核心參數
-```
+```bash
 sudo tee /etc/modules-load.d/containerd.conf <<EOF
 overlay
 br_netfilter
 EOF
 ```
-```
+```bash
 sudo modprobe overlay
 sudo modprobe br_netfilter
 ```
-```
+```bash
 sudo tee /etc/sysctl.d/kubernetes.conf <<EOF
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
@@ -83,13 +83,13 @@ net.ipv4.ip_forward = 1
 EOF
 ```
 載入配置變更：
-```
+```bash
 sudo sysctl --system
 ```
 
 ## 安裝 Containerd 運行環境
 Containerd 是一個輕量級的容器運行環境，管理容器的啟動、停止等基本功能。
-```
+```bash
 sudo apt install -y curl gnupg2 software-properties-common apt-transport-https ca-certificates
 
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/docker.gpg
@@ -106,7 +106,7 @@ sudo systemctl enable containerd
 ```
 
 ## 安裝 Kubernetes 元件
-```
+```bash
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl gpg
 
@@ -125,11 +125,11 @@ sudo apt-mark hold kubelet kubeadm kubectl
 sudo vim /etc/default/kubelet
 ```
 添加以下參數：
-```
+```bash
 KUBELET_EXTRA_ARGS="--cgroup-driver=cgroupfs"
 ```
 重新載入：
-```
+```bash
 sudo systemctl daemon-reload && sudo systemctl restart kubelet
 ```
 
@@ -154,12 +154,12 @@ sudo systemctl daemon-reload && sudo systemctl restart docker
 ```
 
 ## 初始化 kubeadm
-```
+```bash
 sudo kubeadm init
 ```
 
 初始化成功後，設定 kubectl 使用者：
-```
+```bash
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
@@ -167,27 +167,27 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ![kubeadm init result](kubeadm-init-result.png)
 
 ## 安裝 Pod 網路
-```
+```bash
 kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
 ```
 
 ## 加入 Worker 節點
 在 Worker 節點上執行：
-```
+```bash
 kubeadm join 192.168.50.50:6443 --token <TOKEN> --discovery-token-ca-cert-hash sha256:<HASH>
 ```
 
 
 
 ## 確認集群狀態
-```
+```bash
 kubectl get nodes
 ```
 ![kubectl get nodes](kubectl-get-node.png)
 
 ## 建立第一個 Kubernetes 容器
 準備 Persistent Volume 路徑：
-```
+```bash
 mkdir /var/docker-pvc
 sudo chmod 777 /var/docker-pvc
 ```
@@ -273,7 +273,7 @@ kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 ![final result](final-result.png)
 
 ## 補充 - 如果服務安裝失敗或重新安裝 Kubernetes
-```
+```bash
 sudo kubeadm reset -f
 sudo rm -rf ~/.kube
 sudo rm -rf /etc/kubernetes /var/lib/etcd /var/lib/kubelet /var/lib/kubeadm /etc/cni /opt/cni
