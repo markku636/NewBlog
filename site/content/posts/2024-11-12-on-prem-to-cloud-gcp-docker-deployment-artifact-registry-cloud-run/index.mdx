@@ -62,19 +62,19 @@ gcloud auth configure-docker asia-east1-docker.pkg.dev
 ![設定完的畫面](already-set-up-artifact-registry.png)
 
 ### 建置與驗證 Docker 映像檔
-首先，用指令切換到可容器化的專案，並事先建立好 Dockerfile
-1. 使用以下指令建置 Docker 映像檔：
+1. 首先，用指令切換到可容器化的專案，並事先建立好 Dockerfile
+2. 使用以下指令建置 Docker 映像檔：
 
 ```powerhsell
 docker build -t asia-east1-docker.pkg.dev/gcr-my-project01/my-registry/ec:v2 .
 ```
 
-2. 運行映像檔進行本地端測試：
+3. 運行映像檔進行本地端測試：
 
 ```powerhsell
 docker run -d -p 8888:80 asia-east1-docker.pkg.dev/gcr-my-project01/my-registry/ec:v2
 ```
-3. 訪問 localhost:8888 測試容器服務，有沒有異常      
+4. 訪問 localhost:8888 測試容器服務，有沒有異常      
 ![local container testing](local-container-testing.png)
 
 ### 推送映像到 Artifact Registry
