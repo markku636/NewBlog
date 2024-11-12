@@ -23,7 +23,7 @@ slug: on-prem-to-cloud-gcp-docker-deployment-artifact-registry-cloud-run
 ### 環境說明
 - 作業系統：Windows 11，並在本地端安裝好 Docker Desktop
 - 可容器化的專案，並事先建立好 Dockerfile
-- GCP 專案 ID：gcr-my-project01 [連結](https://console.cloud.google.com/welcome/new?cloudshell=true)
+- GCP 專案 ID：gcr-my-project01 [取得專案ID連結](https://console.cloud.google.com/welcome/new?cloudshell=true)
 - Google Artifact Registry 主機位置：asia-east1-docker.pkg.dev(Artifact Registry > 選勾 Registry > 設定操作說明)
 
 ### 安裝 Google Cloud CLI
@@ -79,9 +79,9 @@ docker run -d -p 8888:80 asia-east1-docker.pkg.dev/gcr-my-project01/my-registry/
 
 ### 推送映像到 Artifact Registry
 
-   ```powerhsell
-   docker push asia-east1-docker.pkg.dev/gcr-my-project01/my-registry/ec:v2
-   ```
+```powerhsell
+docker push asia-east1-docker.pkg.dev/gcr-my-project01/my-registry/ec:v2
+```
 此時就能在你的registry 看到你剛推送的docker image
 ![check registry](check-registry.png)
 
