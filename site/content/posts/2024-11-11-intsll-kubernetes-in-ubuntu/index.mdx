@@ -171,8 +171,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
 ```
 
-## 加入 Worker 節點
-在 Worker 節點上執行：
+## 依據提示，在其他台，執行以下指令可以加入其他 子(Worker) 節點
 ```bash
 kubeadm join 192.168.50.50:6443 --token <TOKEN> --discovery-token-ca-cert-hash sha256:<HASH>
 ```
