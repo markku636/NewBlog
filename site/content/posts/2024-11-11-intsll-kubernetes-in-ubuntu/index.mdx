@@ -121,7 +121,7 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 ## 初始化 Kubernetes Master 節點
 編輯 kubelet 設定檔：
-```
+```bash
 sudo vim /etc/default/kubelet
 ```
 添加以下參數：
@@ -176,8 +176,6 @@ kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/
 ```bash
 kubeadm join 192.168.50.50:6443 --token <TOKEN> --discovery-token-ca-cert-hash sha256:<HASH>
 ```
-
-
 
 ## 確認集群狀態
 ```bash
