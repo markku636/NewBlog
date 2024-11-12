@@ -85,7 +85,7 @@ docker push asia-east1-docker.pkg.dev/gcr-my-project01/my-registry/ec:v2
 ![check registry](check-registry.png)
 
 ### Google Cloud Run 部署
-
+Google Cloud Run 支援透過網頁UI手動部署及用指令腳本部署
 #### 手動部署
 
 1. 在 Cloud Run 中選擇「+Deploy Container」
@@ -97,7 +97,7 @@ docker push asia-east1-docker.pkg.dev/gcr-my-project01/my-registry/ec:v2
 3. 進入 Cloud Run，設定 Container(s)、Volumes、Networking、Security 等參數，並設定 Container port 為 80。
 ![manual deploy google cloud run step 3](manual-deploy-google-cloud-run-step3.png)
 
-#### 自動化部署
+#### 指令腳本部署
 
 使用下列指令自動部署至 Cloud Run：
 
