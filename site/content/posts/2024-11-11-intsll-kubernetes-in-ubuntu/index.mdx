@@ -162,7 +162,7 @@ sudo systemctl daemon-reload && sudo systemctl restart kubelet
 ```
 
 編輯 Docker 設定檔：
-```
+```bash
 sudo vim /etc/docker/daemon.json
 ```
 添加以下內容：
@@ -177,7 +177,7 @@ sudo vim /etc/docker/daemon.json
 }
 ```
 重啟 Docker：
-```
+```bash
 sudo systemctl daemon-reload && sudo systemctl restart docker
 ```
 
@@ -204,11 +204,12 @@ kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/
 kubeadm join 192.168.50.50:6443 --token <TOKEN> --discovery-token-ca-cert-hash sha256:<HASH>
 ```
 
-## 檢查節點狀態
+## 檢查所有節點狀態
 ```bash
 kubectl get nodes
 ```
-```檢查節點狀態
+檢查節點狀態詳細
+```bash
 kubectl describe node master-node
 ```
 
@@ -220,8 +221,7 @@ kubectl describe node master-node
 mkdir /var/docker-pvc
 sudo chmod 777 /var/docker-pvc
 ```
-
-### 部署配置檔 `deployment.yaml`
+### 部署配置檔 `deployment.yaml` ( Windows 不用指定Persistent Volumes 位置，但linux 一定要 ex: hostPath: path: /var/docker-pvc)
 ```yaml
 apiVersion: v1
 kind: PersistentVolume
