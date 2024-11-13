@@ -12,7 +12,14 @@ slug: deploy-nextjs-app-to-google-kubernetes-service
 ## 前言
 先前[有透過 Cloud Run 運行容器應用](https://blog.markkulab.net/on-prem-to-cloud-gcp-docker-deployment-artifact-registry-cloud-run/)，也有試著在[地端架了Kubernetes](https://blog.markkulab.net/enable-docker-2375-port-in-ubuntu22/)，這篇來談 GKS (google kubernetes engine)，目前市面上的雲服務，都是基於 Kubernetes 的雲端架構服務，如:AWS、AKS、GKE，因此 Kubernetes的基礎知識就顯得很重要，但Kubernetes 的官方文件也真的很多東西，只好邊實作邊學習。
 
-## 環境準備
+## Cloud Run vs GKE 
+以下是 Google Cloud Run 和 Google Kubernetes Engine 的比較：
+
+**簡要結論**  
+- **Google Cloud Run**：適合單一容器應用，簡單快速部署，低維護，適合小型應用、API、微服務等。
+- **Google Kubernetes Engine**：提供叢集和高可用性支持，適合需要多容器協作、具備自動擴展和高容錯的應用場景。
+
+## 預先準備
 1. 確保本地已安裝 Docker 和 Google Cloud CLI。
 2. 啟用 GCP 的 Kubernetes API。
    ![enable kubernetes api](enable-kubernetes-api.png)
@@ -39,10 +46,10 @@ Clusters 有兩種模式
 - **GKE Autopilot：**  
   - 自動管理基礎設施，使用者只需專注於應用部署和工作負載。
   - 系統會根據需求自動調整資源，並按使用量計費。
-  - 適合希望簡化管理的團隊，無需手動配置節點。
+  - 適合希望簡化管理的團隊，無需手動設定節點。
 
 - **GKE Standard：**  
-  - 需手動配置節點資源和管理叢集，提供更高的靈活性。
+  - 需手動設定節點資源和管理叢集，提供更高的靈活性。
   - 使用者可進行更深入的自訂控制，但管理負擔較高。
   - 適合需要細節控制和自訂設定的使用者。  
 
@@ -69,7 +76,7 @@ gcloud container clusters create-auto blog-autopilot-cluster --region asia-east1
    ![select docker image](select-docker-image.png)
 4. 設定內外部連接埠。
    ![change mapping port](change-mapping-port.png)
-5. 查看 YAML 配置後點擊 Deploy。
+5. 查看 YAML 設定後點擊 Deploy。
    ![check yaml file](check-yaml.png)
 
 ### 使用腳本指令部署
