@@ -39,7 +39,7 @@ docker push asia-east1-docker.pkg.dev/gcr-my-project01/my-registry/blog:v2
 ```
 
 ## 建立 Kubernetes Clusters
-Clusters 有兩種模式
+Google 的 Clusters 有兩種模式
 - **GKE Autopilot：**  
   - 自動管理基礎設施，使用者只需專注於應用部署和工作負載。
   - 系統會根據需求自動調整資源，並按使用量計費。
@@ -54,7 +54,7 @@ Clusters 有兩種模式
 ### Kubernetes Engine > Cluster > Create
 ![create cluster](create-cluster.png)
 
-### 使用指令建立
+### 使用腳本指令建立Cluster
 ** 標準 (Standard)**
 ```bash
 gcloud container clusters create blog-cluster --num-nodes 2 --machine-type n1-standard-1 --zone asia-east1-a
