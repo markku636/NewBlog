@@ -9,17 +9,17 @@ description : 從地端到雲端：使用 Google Kubernetes Service 部署你的
 author : Mark Ku
 slug: deploy-nextjs-app-to-google-kubernetes-service
 ---
-### 前言
+## 前言
 先前[有透過 Cloud Run 運行容器應用](https://blog.markkulab.net/on-prem-to-cloud-gcp-docker-deployment-artifact-registry-cloud-run/)，也有試著在[地端架了Kubernetes](https://blog.markkulab.net/enable-docker-2375-port-in-ubuntu22/)，這篇來談 GKS (google kubernetes service)，目前市面上的雲服務，都是基於 Kubernetes 的雲端架構服務，如:AWS、AKS、GKS，因此 Kubernetes的基礎知識就顯得很重要，但Kubernetes 的官方文件也真的很多東西，只好邊實作邊學習。
 
-### 環境準備
+## 環境準備
 1. 確保本地已安裝 Docker 和 Google Cloud CLI。
 2. 啟用 GCP 的 Kubernetes API。
    ![enable kubernetes api](enable-kubernetes-api.png)
 3. 在 GCP 中建立 Google Artifact Registry。
 4. Google Cloud CLI 登入及設定好專案。
 
-### 首先，初始化 Next.js 專案
+## 首先，初始化 Next.js 專案
 ```bash
 npx create-next-app@latest nextjs-blog --use-npm --example "https://github.com/vercel/next-learn/tree/main/basics/learn-starter"
 cd nextjs-blog
@@ -34,7 +34,7 @@ docker run -d -p 8888:80 asia-east1-docker.pkg.dev/gcr-my-project01/my-registry/
 docker push asia-east1-docker.pkg.dev/gcr-my-project01/my-registry/blog:v2
 ```
 
-### 建立 Kubernetes Clusters
+## 建立 Kubernetes Clusters
 Clusters 有兩種模式
 - **GKE Autopilot：**  
   - 自動管理基礎設施，使用者只需專注於應用部署和工作負載。
@@ -47,10 +47,10 @@ Clusters 有兩種模式
   - 適合需要細節控制和自訂設定的使用者。  
 
 可以使用網頁或腳本指令建立 Kubernetes clusters。
-#### Kubernetes Engine > Cluster > Create
+### Kubernetes Engine > Cluster > Create
 ![create cluster](create-cluster.png)
 
-#### 使用指令建立
+### 使用指令建立
 ** 標準 (Standard)**
 ```bash
 gcloud container clusters create blog-cluster --num-nodes 2 --machine-type n1-standard-1 --zone asia-east1-a
@@ -60,8 +60,8 @@ gcloud container clusters create blog-cluster --num-nodes 2 --machine-type n1-st
 ```bash
 gcloud container clusters create-auto blog-autopilot-cluster --region asia-east1
 ```
-### 部署應用
-#### 使用網頁部署容器
+## 部署應用
+### 使用網頁部署容器
 1. 回到 GCP 後台，選擇 Kubernetes Engine > Workloads > Deploy。
 2. 設定伺服器節點與部署名稱。
    ![deployment by web ui](deployment-by-web-ui.png)
@@ -72,7 +72,7 @@ gcloud container clusters create-auto blog-autopilot-cluster --region asia-east1
 5. 查看 YAML 配置後點擊 Deploy。
    ![check yaml file](check-yaml.png)
 
-#### 使用腳本指令部署
+### 使用腳本指令部署
 **連線至叢集**：從 Cloud Shell 使用 kubectl 操作。
 ![use kubectl in cloud shell](use-kubectl-in-cloud-shell.png)
 ```bash
@@ -127,20 +127,19 @@ kubectl expose deployment nextjs-blog-deployment --type="LoadBalancer"
 ```bash
 kubectl expose deployment nextjs-blog-deployment --name=nextjs-blog-service --port=80 --target-port=3000 --type=LoadBalancer
 ```
-[相關文件](https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/)
+[指定連接埠相關文件](https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/)
 
-
-### 部署完成後訪問服務
+#### 部署完成後訪問服務
 點選服務進行訪問。
 ![deployment finish](deployment-finish)
 訪問 Next.js 網站：
 ![check accessible](check-accessible.png)
 
-### 其他操作
+#### 其他操作
 若需要額外的連接埠映射，可使用下方Expose 按鈕：
 ![manual expose](manual-expose.png)
 
-### 參考資料
+## 參考資料
 [How to deploy NextJS app to Kubernetes Cluster in GCP with Custom Domain?](https://walkthrough.so/pblc/FHQPWEGGWSPT/how-to-deploy-nextjs-app-to-kubernetes-cluster-in-gcp-with-custom-domain?sn=7)
 
 
