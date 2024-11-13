@@ -12,10 +12,7 @@ slug: deploy-nextjs-app-to-google-kubernetes-service
 ## 前言
 先前[有透過 Cloud Run 運行容器應用](https://blog.markkulab.net/on-prem-to-cloud-gcp-docker-deployment-artifact-registry-cloud-run/)，也有試著在[地端架了Kubernetes](https://blog.markkulab.net/enable-docker-2375-port-in-ubuntu22/)，這篇來談 GKS (google kubernetes engine)，目前市面上的雲服務，都是基於 Kubernetes 的雲端架構服務，如:AWS、AKS、GKE，因此 Kubernetes的基礎知識就顯得很重要，但Kubernetes 的官方文件也真的很多東西，只好邊實作邊學習。
 
-## Cloud Run vs GKE 
-以下是 Google Cloud Run 和 Google Kubernetes Engine 的比較：
-
-**簡要結論**  
+## Cloud Run vs Google Kubernetes Engine 
 - **Google Cloud Run**：適合單一容器應用，簡單快速部署，低維護，適合小型應用、API、微服務等。
 - **Google Kubernetes Engine**：提供叢集和高可用性支持，適合需要多容器協作、具備自動擴展和高容錯的應用場景。
 
