@@ -115,19 +115,18 @@ spec:
         - containerPort: 3000
 ```
 
-應用 Deployment：
+運行應用：
 ```bash
 kubectl apply -f nextjs-blog-deployment.yaml
 kubectl get deploy nextjs-blog
 ```
 
 **網路設定 - Load Balancer**
-**自動建立外部服務、 Load Balancer 設定、挷定外部 IP **
+* 自動建立外部服務、 Load Balancer 設定、挷定外部 IP 
 ```bash
 kubectl expose deployment nextjs-blog-deployment --type="LoadBalancer"
 ```
-
-**也可以指定連接埠的方式建立**
+* 或也可以指定連接埠的方式建立*
 ```bash
 kubectl expose deployment nextjs-blog-deployment --name=nextjs-blog-service --port=80 --target-port=3000 --type=LoadBalancer
 ```
