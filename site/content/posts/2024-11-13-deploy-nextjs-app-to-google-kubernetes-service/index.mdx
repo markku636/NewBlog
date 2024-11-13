@@ -49,15 +49,15 @@ docker push asia-east1-docker.pkg.dev/gcr-my-project01/my-registry/blog:v2
 
 ## 建立 Kubernetes Clusters
 Google 的 Clusters 有兩種模式
-- **GKE Autopilot：**  
-  - 自動管理基礎設施，使用者只需專注於應用部署和工作負載。
-  - 系統會根據需求自動調整資源，並按使用量計費。
-  - 適合希望簡化管理的團隊，無需手動設定節點。
-
-- **GKE Standard：**  
+- **Standard Cluster：**  
   - 需手動設定節點資源和管理叢集，提供更高的靈活性。
   - 使用者可進行更深入的自訂控制，但管理負擔較高。
   - 適合需要細節控制和自訂設定的使用者。  
+
+- **Autopilot Cluster：**  
+  - 自動管理基礎設施，使用者只需專注於應用部署和工作負載。
+  - 系統會根據需求自動調整資源，並按使用量計費。
+  - 適合希望簡化管理的團隊，無需手動設定節點。
 
 可以使用網頁或腳本指令建立 Kubernetes clusters。
 ### Kubernetes Engine > Cluster > Create
