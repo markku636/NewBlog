@@ -28,7 +28,7 @@ gcloud config set project [PROJECT_ID]
 ```
 5. gcloud 安裝 kubectl 元件
 ```
-gcloud components install kubectl
+gcloud components install kubectl  gke-gcloud-auth-plugin
 gcloud components update
 ```
 
@@ -87,7 +87,10 @@ gcloud container clusters create-auto blog-autopilot-cluster --region asia-east1
 
 ### 使用腳本指令部署
 **連線至叢集**：從 Cloud Shell 使用 kubectl 操作。
+
 ![use kubectl in cloud shell](use-kubectl-in-cloud-shell.png)
+可從 CloudShell 執行kubectl腳本指令，或複製連線指令到地端執行這個連線
+![use kubectl in cloud shell](use-kubectl-in-cloud-shell-2.png)
 ```bash
 kubectl get nodes
 ```
