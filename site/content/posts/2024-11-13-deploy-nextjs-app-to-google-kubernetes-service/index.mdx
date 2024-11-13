@@ -150,6 +150,60 @@ kubectl expose deployment nextjs-blog-deployment --name=nextjs-blog-service --po
 若需要額外的連接埠映射，可使用下方Expose 按鈕：
 ![manual expose](manual-expose.png)
 
+## 補充 - 在 Kubernetes 中，要更新部署以使用新的映像檔版本，通常可以使用以下幾種方法
+### 1. 使用 `kubectl set image` 更新映像檔
+這種方式適合快速更新映像檔版本：
+```bash
+kubectl set image deployment/<deployment-name> <container-name>=<new-image>:<new-tag>
+```
+例如：
+```bash
+kubectl set image deployment/my-app my-container=my-app-image:v2
+```
+
+### 2. 更新 Deployment YAML 文件並重新應用
+如果管理配置是基於 YAML 文件，您可以更新文件中的映像檔標籤，然後重新應用該文件：
+```yaml
+# my-app-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+      - name: my-container
+        image: my-app-image:v2  # 更新映像檔標籤
+```
+重新應用更新過的 YAML 文件：
+```bash
+kubectl apply -f my-app-deployment.yaml
+```
+
+### 3. 使用 `kubectl rollout restart` 重新啟動 Deployment
+如果映像檔標籤已經更新（例如，如果您用相同標籤推送了一個新版本），可以使用重新啟動來強制刷新：
+```bash
+kubectl rollout restart deployment/<deployment-name>
+```
+
+### 4. 使用 `kubectl patch` 更新映像檔
+這種方式可以直接通過命令行進行部分更新：
+```bash
+kubectl patch deployment <deployment-name> -p '{"spec":{"template":{"spec":{"containers":[{"name":"<container-name>","image":"<new-image>:<new-tag>"}]}}}}'
+```
+例如：
+```bash
+kubectl patch deployment my-app -p '{"spec":{"template":{"spec":{"containers":[{"name":"my-container","image":"my-app-image:v2"}]}}}}'
+```
+### 驗證更新
+無論採用哪種方法，可以使用以下命令來檢查更新是否成功：
+```bash
+kubectl rollout status deployment/<deployment-name>
+```
+這些方法都會觸發滾動更新，以保持服務不中斷的情況下逐步替換舊版本的容器。
+
 ## 參考資料
 [How to deploy NextJS app to Kubernetes Cluster in GCP with Custom Domain?](https://walkthrough.so/pblc/FHQPWEGGWSPT/how-to-deploy-nextjs-app-to-kubernetes-cluster-in-gcp-with-custom-domain?sn=7)
 
