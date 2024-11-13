@@ -117,13 +117,13 @@ kubectl apply -f nextjs-blog-deployment.yaml
 kubectl get deploy nextjs-blog
 ```
 
-**網路配置 - Load Balancer**
-**自動建立 Load Balancer 外部 IP 和防火牆規則**
+**網路設定 - Load Balancer**
+**自動建立外部服務、 Load Balancer 設定、挷定外部 IP **
 ```bash
 kubectl expose deployment nextjs-blog-deployment --type="LoadBalancer"
 ```
 
-**指定連接埠建立 Load Balancer 外部 IP 和防火牆規則**
+**也可以指定連接埠的方式建立**
 ```bash
 kubectl expose deployment nextjs-blog-deployment --name=nextjs-blog-service --port=80 --target-port=3000 --type=LoadBalancer
 ```
