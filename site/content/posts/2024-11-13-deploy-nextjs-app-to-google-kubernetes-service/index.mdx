@@ -64,12 +64,12 @@ Google 的 Clusters 有兩種模式
 ![create cluster](create-cluster.png)
 
 ### 使用腳本指令建立Cluster
-** 標準 (Standard)**
+** 標準叢集 (Standard Cluster)**
 ```bash
 gcloud container clusters create blog-cluster --num-nodes 2 --machine-type n1-standard-1 --zone asia-east1-a
 ```
 
-**GKE Autopilot**
+** 自動叢集(Autopilot Cluster)**
 ```bash
 gcloud container clusters create-auto blog-autopilot-cluster --region asia-east1
 ```
