@@ -150,11 +150,10 @@ kubectl expose deployment nextjs-blog-deployment --name=nextjs-blog-service --po
 訪問 Next.js 網站：
 ![check accessible](check-accessible.png)
 
-#### 其他操作
-若需要額外的連接埠映射，可使用下方Expose 按鈕：
+#### 若需要額外的連接埠映射，也可使用下方Expose 按鈕：
 ![manual expose](manual-expose.png)
 
-## 補充 - 在 Kubernetes 中，要更新的映像檔版本，通常可以使用以下幾種方法
+## 補充 - 在 Kubernetes 中，要更新的映像檔，通常可以使用以下幾種方法
 ### 1. 使用 `kubectl set image` 更新映像檔
 這種方式適合快速更新映像檔版本：
 ```bash
