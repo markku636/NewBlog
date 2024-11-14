@@ -179,6 +179,7 @@ sudo vim /etc/docker/daemon.json
 重啟 Docker：
 ```bash
 sudo systemctl daemon-reload && sudo systemctl restart docker
+sudo systemctl enable kubelet && sudo systemctl restart kubelet
 ```
 
 ## 初始化 kubeadm
