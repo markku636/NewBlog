@@ -140,9 +140,9 @@ export default function () {
 
 當 CPU 壓力達到 150% 時，系統自動擴展至 3 個 Pods 分擔負載。
 ![test restul 2](test-result-2.png) 
-
-當 CPU 壓力下降後，Pods 會回到設定的最小數量。
+當 CPU 壓力達到 超過200% 時，系統自動擴展至當初設置的 5 個 Pods 分擔負載。
 ![test restul 3](test-result-3.png)
+當 CPU 壓力下降後，Pods 會回到設定的最小 Pod 數量。
 ![test restul 4](test-result-4.png)
 
 ## 心得
