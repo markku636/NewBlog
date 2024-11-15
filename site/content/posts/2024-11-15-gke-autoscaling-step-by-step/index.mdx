@@ -36,7 +36,7 @@ Google Kubernetes Engine (GKE) 相較於自建 Kubernetes，提供了更便捷�
 
 ![kubectl get hpa in cloud shell](cannot-get-cpu-usage-rate.png)
 
-## 常用指令
+## 首先，我們須需了解 Kubernetes 水平擴展所需要用到的指令
 ### 查詢容器應用的資源使用情況
 以下指令可檢視節點或 Pod 的 CPU 和記憶體使用率：
 ```bash
@@ -57,9 +57,10 @@ kubectl scale deployment nextjs-blog-deployment --replicas=5
 kubectl get pods
 ```
 
-## 設定 Deployment 的水平擴展功能
+## 接著，我們必須設定 Deployment 的水平擴展功能
+一共有三種設定水平擴展做法，yaml 、指令、網頁UI。
 
-### 使用 YAML 檔定義
+### 1.使用 YAML 檔定義
 建立 YAML 檔並執行以下指令：
 ```bash
 kubectl apply -f nextjs-blog-hpa.yaml
@@ -94,14 +95,14 @@ spec:
 - `maxReplicas`：最大擴展至 5 個 Pod。
 - `metrics`：當 CPU 使用率超過 50% 時觸發擴展。
 
-### 使用指令設定水平擴展
+### 2. 使用指令設定水平擴展
 ```bash
 kubectl autoscale deployment nextjs-blog-deployment --cpu-percent=50 --min=1 --max=5
 ```
-### 使用 GKE 網頁介面設定
+### 3. 使用 GKE 網頁介面設定
 ![Set up HorizontalPodAutoscaler](configre-horizontaal-pod-autoscaler.png)
 
-## 壓測工具 - Grafana K6
+## 接著我們來給剛壓測
 這次使用 Grafana 的壓測工具 K6，具備高度靈活性。
 
 ### K6 Docker 版本
@@ -131,7 +132,7 @@ export default function () {
 }
 ```
 
-## 測試結果
+## 最後，測試結果
 當容器 CPU 使用率瞬間達到 102% 時，可能因擴展速度過快，容器尚未完全啟動。
 ![test restul 1](test-result-1.png) 
 
