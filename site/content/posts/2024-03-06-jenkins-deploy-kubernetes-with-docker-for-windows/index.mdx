@@ -82,10 +82,10 @@ kubectl config view // 同等於訪問 C:\Users\Mark\.kube\config
 ### 在Jenkins 容器中中安裝 kubectl
 ```
 docker exec -it -uroot jenkins bash // 進入jenkins 容器中
- curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.29.1/bin/linux/amd64/kubectl // 下載 kubectl
- chmod +x ./kubectl // 給予權限
- sudo mv ./kubectl /usr/local/bin/kubectl // 複製到系統環境資料夾
- kubectl version --client // 查詢版本
+curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.29.1/bin/linux/amd64/kubectl // 下載 kubectl
+chmod +x ./kubectl // 給予權限
+mv ./kubectl /usr/local/bin/kubectl // 複製到系統環境資料夾
+kubectl version --client // 查詢版本
 ```
 P.S. Docker Desktop 和 Jenkins 容器的 kubectl 版本最好一致
 
