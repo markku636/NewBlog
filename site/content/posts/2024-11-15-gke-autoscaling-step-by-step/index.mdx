@@ -105,7 +105,7 @@ kubectl autoscale deployment nextjs-blog-deployment --cpu-percent=50 --min=1 --m
 ![Set up HorizontalPodAutoscaler](configre-horizontaal-pod-autoscaler.png)
 
 ## 接著，我們來測試先前設定好水平擴展的設定
-這次使用 Grafana 的壓測工具 K6，具備高度靈活性。
+這次使用 Grafana 的壓測工具 K6
 
 ### K6 Docker 版本
 ```bash
@@ -121,17 +121,20 @@ import { check, sleep } from 'k6';
 
 export const options = {
   stages: [
-    { duration: '30s', target: 3000 },
-    { duration: '1m30s', target: 3000 },
+    { duration: '30s', target: 3000 },  // 負載測試從 0 個虛擬使用者增加到 20 個，並持續30 秒 
+    { duration: '1m30s', target: 3000 }, 3000 // 維持 3000 個虛擬使用者持續 1 分 30 秒
     { duration: '20s', target: 0 },
-  ],
+  ]
 };
-
+// options 第一階段模擬快速增加負載，第二階段保持穩定負載，第三階段緩慢減少負載。
 export default function () {
-  const res = http.get('https://httpbin.test.k6.io/');
+  const res = http.get('http://your-domain/');
   check(res, { 'status was 200': (r) => r.status == 200 });
   sleep(1);
-}
+```
+在 Google Cloud Shell 執行 Watch 每兩秒印出即時的cpu 消耗
+```bash
+ watch -n 2 'date && kubectl get hpa'
 ```
 
 ## 最後，測試結果
