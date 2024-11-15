@@ -25,7 +25,7 @@ slug: gke-autoscaling-step-by-step
 如果服務涉及**本地狀態**（如資料庫或未經設計的 Session 網頁應用），可能會因一致性問題導致無法進行水平擴展，在這種情況下，可以考慮使用**垂直擴展** (Vertical Pod Autoscaler, VPA)，提升單一 Pod 的資源能力以承擔更高負載。
 
 ## GKE 的優勢
-Google Kubernetes Engine (GKE) 相較於自建 Kubernetes，提供了更便捷的管理功能。例如，GKE 不需要額外安裝 `metrics-server`，即可直接監控容器的 CPU 和記憶體使用情況，大幅降低了初期設定的難度。
+Google Kubernetes Engine (GKE) 相較於自建 Kubernetes，提供了更方便的管理功能。例如，GKE 不需要額外安裝 `metrics-server`，即可直接監控容器的 CPU 和記憶體使用情況，大幅降低了初期設定的難度。
 
 ## 在設定水平擴容及縮容時，建立 Cluster 遇到的問題
 [上篇文章提到，GKE 提供兩種叢集模式：](https://blog.markkulab.net/deploy-nextjs-app-to-google-kubernetes-service/)
