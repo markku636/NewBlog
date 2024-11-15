@@ -9,11 +9,12 @@ description : 從地端到雲端：從設定到壓測：一步步實現 Google K
 author : Mark Ku
 slug: gke-autoscaling-step-by-step
 ---
-
 ## 什麼是水平擴展 ?
-在組織中，即使一個人能力再強，最多也只能持續高效工作約 16 小時，如果工作負載過重，這個人可能會無法承受，此時，則需要聘請更多的人來分擔工作，這就是一種橫向擴展的概念。  
+[接續上一篇文章了解如何部署Next js 應用程式到Google Kubernetes Engine](https://blog.markkulab.net/deploy-nextjs-app-to-google-kubernetes-service/)，我們這篇來談談 Google Kubernetes Engine 水平擴容及縮容。　　
+
+如在日常生活中，即使一個人能力再強，最多也只能持續高效工作約 16 小時，如果工作負載過重，這個人可能會無法承受，此時，則需要聘請更多的人來分擔工作，這就是一種橫向擴展的概念。  
   
-但在技術領域中，無論一台伺服器的性能多麼強大，它的處理能力也有極限，當負載超過伺服器的能力時，單靠升級硬體（垂直擴展）可能不足以解決問題，而採用水平擴容（Scaling Out） 就成為更有效的解決方案。
+套用在技術領域中，無論一台伺服器的性能多麼強大，它的處理能力也有極限，當負載超過伺服器的能力時，單靠升級硬體（垂直擴展）可能不足以解決問題，此時就適合導入水平擴容的機制（Scaling Out）。  
 
 ## 什麼是 Kubernetes Pods？
 在 Kubernetes 中，Pods 是部署的最小單位，負責承載容器化應用程序及其運行環境。
