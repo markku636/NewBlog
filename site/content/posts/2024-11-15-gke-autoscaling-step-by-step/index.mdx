@@ -132,7 +132,7 @@ export default function () {
 // Windows 腳本
 cat script.js | docker run --rm -i grafana/k6 run -
 ```
-同時在 Google Cloud Shell 執行 Watch 每兩秒印出即時的cpu 消耗，就能夠驗證自動水平擴展的功能是不是有成功設定。
+並同時在 Google Cloud Shell 執行下面指令， Watch指令每兩秒印出即時的cpu 消耗，就能夠驗證自動水平擴展的功能是不是有成功設定。
 ```bash
  watch -n 2 'date && kubectl get hpa'
 ```
