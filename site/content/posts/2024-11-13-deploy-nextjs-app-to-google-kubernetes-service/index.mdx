@@ -207,6 +207,12 @@ kubectl rollout status deployment/<deployment-name>
 ```
 這些方法都會觸發滾動更新，以保持服務不中斷的情況下逐步替換舊版本的容器。
 
+## 補充 - Next js 如果要支援多台伺服器時，要額外[設定generateBuildId](https://dev.to/writech/how-to-deploy-nextjs-on-multiple-servers-5db1)，確保每個應用都拿到一致性的檔案。
+
+```
+/_next/static/<build-ID>/<static-file>
+```
+
 ## 參考資料
 [How to deploy NextJS app to Kubernetes Cluster in GCP with Custom Domain?](https://walkthrough.so/pblc/FHQPWEGGWSPT/how-to-deploy-nextjs-app-to-kubernetes-cluster-in-gcp-with-custom-domain?sn=7)
 
