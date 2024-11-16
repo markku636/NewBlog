@@ -54,7 +54,7 @@ React 的setState 是非同步的，但透過 promise 特性讓所有的非同�
 ![](https://i.imgur.com/DVHTtjy.png)
 ## 減少 Google map api 使用量
 每當使用者輸入郵遞區號，我們的系統會頻繁地調用Google Map API，重覆挷定事件及離開時，沒釋放事件，導致API的使用量劇增，為了節省成本，我們優化了系統，採取Redis Cache技術來緩存常用數據。這項策略不僅顯著降低了Google Map API的使用次數，大大節省了我們的 Google api 的費用。
-
+![](google-map-cost.png)
 ## 最後
 經過以上的步驟，我們成功地重構了我們的購物車網站，並解決了我們遇到的問題，這半年的學習與實踐經驗，不僅讓我深入理解React，也使我對程式開發有了更深的認識。我期待著未來的挑戰，並將我所學的知識應用到新的專案中。
 
