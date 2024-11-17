@@ -169,13 +169,7 @@ pipeline {
 				sh "docker rmi --force $registry:latest"
 			}
 		}
-		
-		stage("Delete deployment") {
-			steps {				
-                sh 'kubectl delete deployment <your-deployment-name> --ignore-not-found=true'				
-			}
-		}				
-		
+			
         stage("Deply") {
              steps {
                     withKubeConfig([credentialsId: 'k8s-secret', serverUrl: 'https://host.docker.internal:6443']) {                     
