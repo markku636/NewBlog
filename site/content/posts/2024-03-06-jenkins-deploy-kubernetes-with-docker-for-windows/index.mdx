@@ -128,8 +128,7 @@ pipeline {
         imageName = "${imageShortName}${tag}"
         containerName = "${imageShortName}-1"
         containerUrl = "192.168.50.49:2376"
-        dockerfile = "./Dockerfile"
-        port = "30000:80"
+        dockerfile = "./Dockerfile"        
         registry = "192.168.50.49:5000/next-ec"				
 		
     }   
