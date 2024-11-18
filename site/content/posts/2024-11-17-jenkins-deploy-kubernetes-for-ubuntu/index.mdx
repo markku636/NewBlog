@@ -122,7 +122,7 @@ pipeline {
 
     environment {
         tag = ':latest'
-        imageShortName = 'de-next-ap'
+        imageShortName = 'k8s-next-ec'
         imageName = "${imageShortName}${tag}"
         containerName = "${imageShortName}-1"
         containerUrl = "192.168.50.49:2376"
@@ -153,7 +153,7 @@ pipeline {
 		stage("Deploying to Registry Server") {
 			steps {
 				script {
-					docker.withRegistry("http://192.168.50.49:5000", "") {
+					docker.withRegistry("http://192.168.50.50:5000", "") {
 						dockerImage.push()
 					}
 				}
@@ -176,7 +176,7 @@ pipeline {
 		
         stage("Deply") {
              steps {
-                    withKubeConfig([credentialsId: 'k8s-secret', serverUrl: 'https://host.docker.internal:6443']) {                     
+                    withKubeConfig([credentialsId: 'k8s-secret', serverUrl: 'https://192.168.50.50:6443']) {                     
                      sh 'kubectl apply -f ./next-js-deployment.yaml'
                     }
                 
@@ -206,7 +206,7 @@ spec:
     spec:
       containers:
       - name: nextjs
-        image: 192.168.50.50:5000/next-ec:latest
+        image: 192.168.50.50:5000/k8s-next-ec:latest
         ports:
         - containerPort: 80
         resources:
