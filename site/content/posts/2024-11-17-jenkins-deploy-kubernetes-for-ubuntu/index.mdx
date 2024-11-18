@@ -58,8 +58,8 @@ kubectl apply -f dashboard-adminuser.yaml
 
 ### get admin token 
 ```
-kubectl -n kubernetes-dashboard create token admin-user
-kubectl create token admin-user --duration=876000h
+kubectl -n kubernetes-dashboard create token admin-user  --duration=876000h
+
 ```
 ### 啟動Proxy 
 ```
@@ -82,7 +82,8 @@ curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.29.1/bin/l
 chmod +x ./kubectl // 給予權限
 mv ./kubectl /usr/local/bin/kubectl // 複製到系統環境資料夾
 kubectl version --client // 查詢版本
-```P.S. Unbuntu 和 Jenkins 容器的 kubectl 版本最好一致
+```
+P.S. Unbuntu 和 Jenkins 容器的 kubectl 版本最好一致
 
 ### 複製 kubectl 設定至 Jenkins 容器中 (需要逐行執行)
 ```bash
