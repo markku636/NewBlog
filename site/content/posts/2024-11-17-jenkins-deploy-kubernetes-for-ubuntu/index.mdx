@@ -187,7 +187,7 @@ pipeline {
 
 ## 在 Github next-ec 專案裡建立 Kubernetes 的 YAML 佈署設定檔(next-js-deployment.yaml) 
 ```yaml
-apiVersion: v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nextjs-deployment
@@ -227,7 +227,7 @@ spec:
   - protocol: TCP
     port: 80
     targetPort: 80
-    nodePort: 30099
+    nodePort: 30055
 
 ```
 
