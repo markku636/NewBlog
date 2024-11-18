@@ -18,17 +18,17 @@ slug: jenkins-deploy-nextjs-to-ubuntu-kubernetes
 * 一套Jenkins 
 * Next JS 專案，裡面並寫好 yaml 檔
 
-## 安裝Dashboard 及產生 ServiceAccount 及 取得Token (這個token 是要拿去給jenkins 用的)
-### 安裝 Dashboard
-```
+## 首先，要先安裝 Kubernetes Dashboard及產生 ServiceAccount 及 取得Token (這個token 是要拿去給jenkins 用的)
+### 安裝 Kubernetes Dashboard
+```bash
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
 ```
 ### 建立 admin user 
-```
+```bash
 sudo vim dashboard-adminuser.yaml
 ```
 ### 建立 admin user
-```
+```yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -75,7 +75,7 @@ http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kube
 參考先前撰寫的[文章](https://blog.markkulab.net/docker-jenkins-build-docker-image-and-github-integration/) 
 
 ### 在Jenkins 容器中中安裝 kubectl
-```
+```bash
 docker exec -it -uroot jenkins bash // 進入jenkins 容器中
 curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.29.1/bin/linux/amd64/kubectl // 下載 kubectl
 chmod +x ./kubectl // 給予權限
@@ -84,7 +84,7 @@ kubectl version --client // 查詢版本
 ```P.S. Unbuntu 和 Jenkins 容器的 kubectl 版本最好一致
 
 ### 複製 kubectl 設定至 Jenkins 容器中 (需要逐行執行)
-```
+```bash
 docker exec -it -uroot jenkins /bin/bash 
 mkdir -p /.kube
 exit 
@@ -186,7 +186,7 @@ pipeline {
 ```
 
 ## 在 Github next-ec 專案裡建立 Kubernetes 的 YAML 佈署設定檔(next-js-deployment.yaml) 
-```
+```yaml
 apiVersion: v1
 kind: Deployment
 metadata:
@@ -237,6 +237,6 @@ spec:
 ## 補充 - 如果遇到權限不足，出現以下錯誤
 
 ERROR: permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Head "http://%2Fvar%2Frun%2Fdocker.sock/_ping": dial unix /var/run/docker.sock: connect: permission denied
-```
+```bash
 sudo chmod 777 /var/run/docker.sock
 ```
