@@ -14,8 +14,8 @@ slug: jenkins-deploy-nextjs-to-ubuntu-kubernetes
 [先前有研究 Windows Desktop 上的 Kubernetes 整合 jenkins](https://blog.markkulab.net/jenkins-deploy-kubernetes-with-docker-for-windows/)，這次來試著用Jenkins 整合 Linux 的 Kubernetes。 
 
 ## 預先準備 
-* Ubuntu 上安裝 Kubernetes
-* 一套Jenkins 
+* Ubuntu 上己安裝 Docker、 Kubernetes、 Registy 
+* Jenkins 
 * Next JS 專案，裡面並寫好 yaml 檔
 
 ## 首先，要先安裝 Kubernetes Dashboard及產生 ServiceAccount 及 取得Token (這個token 是要拿去給jenkins 用的)
