@@ -59,6 +59,7 @@ kubectl apply -f dashboard-adminuser.yaml
 ### get admin token 
 ```
 kubectl -n kubernetes-dashboard create token admin-user
+kubectl create token admin-user --duration=876000h
 ```
 ### 啟動Proxy 
 ```
@@ -204,7 +205,7 @@ spec:
         app: nextjs
     spec:
       containers:
-      - name: nextjs
+      - name: nextjs50
         image: 192.168.50.50:5000/k8s-next-ec:latest
         ports:
         - containerPort: 80
