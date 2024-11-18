@@ -52,12 +52,12 @@ subjects:
 ```
 
 ### create service account 
-```
+```bash
 kubectl apply -f dashboard-adminuser.yaml
 ```
 
 ### get admin token 
-```
+```bash
 kubectl -n kubernetes-dashboard create token admin-user  --duration=876000h
 
 ```
@@ -167,13 +167,7 @@ pipeline {
 
 				sh "docker rmi --force $registry:latest"
 			}
-		}
-		
-		stage("Delete deployment") {
-			steps {				
-                sh 'kubectl delete deployment <your-deployment-name> --ignore-not-found=true'				
-			}
-		}				
+		}					
 		
         stage("Deply") {
              steps {
