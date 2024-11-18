@@ -57,7 +57,7 @@ kubectl proxy
 訪問此目錄
 http://127.0.0.1:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login
 ```
-### 建立 Token 
+### 首先我們來，建立 Token (這個token 是要拿去給jenkins 用的)
 ```
 kubectl describe secrets -n kube-system (kubectl get secrets -n kube-system | Select-String "dashboard" | ForEach-Object { $_ -split " " | Select-Object -First 1 })
 ```

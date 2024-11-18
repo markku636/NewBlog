@@ -1,0 +1,243 @@
+---
+featured: true
+title: 使用Jenkins 部署 Next.js 至 Ubuntu 的 Kubernetes
+date:   2024-11-17 01:01:35 +0800
+thumbnail:  jenkins-deploy-nextjs-to-ubuntu-kubernetes.png
+category:  DevOps
+tags:   ['Kubernetes','docker','ubuntu','jenkins']
+description : 使用Jenkins 部署 Next.js 至 Ubuntu 的 Kubernetes
+author : Mark Ku
+slug: jenkins-deploy-nextjs-to-ubuntu-kubernetes
+---
+
+# 前言 
+[先前有研究 Windows Desktop 上的 Kubernetes 整合 jenkins](https://blog.markkulab.net/jenkins-deploy-kubernetes-with-docker-for-windows/)，這次來試著用Jenkins 整合 Linux 的 Kubernetes。 
+
+## 預先準備 
+* Ubuntu 上安裝 Kubernetes
+* 一套Jenkins 
+* Next JS 專案，裡面並寫好 yaml 檔
+
+## 安裝Dashboard 及產生 ServiceAccount 及 取得Token (這個token 是要拿去給jenkins 用的)
+### 安裝 Dashboard
+```
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+```
+### 建立 admin user 
+```
+sudo vim dashboard-adminuser.yaml
+```
+### 建立 admin user
+```
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: admin-user
+    namespace: kubernetes-dashboard
+```
+
+### create service account 
+```
+kubectl apply -f dashboard-adminuser.yaml
+```
+
+### get admin token 
+```
+kubectl -n kubernetes-dashboard create token admin-user
+```
+### 啟動Proxy 
+```
+kubectl proxy
+```
+
+### 此時訪問以下連結即可登入Dashboard
+```
+http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login 
+```
+![doshboard](doshboard.png)
+
+### 安裝 Jenkins 
+參考先前撰寫的[文章](https://blog.markkulab.net/docker-jenkins-build-docker-image-and-github-integration/) 
+
+### 在Jenkins 容器中中安裝 kubectl
+```
+docker exec -it -uroot jenkins bash // 進入jenkins 容器中
+curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.29.1/bin/linux/amd64/kubectl // 下載 kubectl
+chmod +x ./kubectl // 給予權限
+mv ./kubectl /usr/local/bin/kubectl // 複製到系統環境資料夾
+kubectl version --client // 查詢版本
+```P.S. Unbuntu 和 Jenkins 容器的 kubectl 版本最好一致
+
+### 複製 kubectl 設定至 Jenkins 容器中 (需要逐行執行)
+```
+docker exec -it -uroot jenkins /bin/bash 
+mkdir -p /.kube
+exit 
+docker cp ~/.kube/config jenkins:/root/.kube 
+```
+
+### Jenkins 透過 Kubernetes CLI 連線 kubernetes 
+1. 要想把jenkins關聯到Kubernetes中需要安裝幾個最件，打開  系統管理 > 套件管理
+* Kubernetes plugin
+* Kubernetes CLI Plugin
+![install kubernetes plugin](install-kubernetes-plugin.png)
+2. [set up cloud](http://localhost:8080/configureClouds/)
+![set up cloud](set-cloud.png)
+3. set Disable https certificate check => true
+![disable http certificate check](disable-http-certificate-check.png)
+4. Kubernetes URL => 
+Ubuntu 透過可以 kubectl cluster-info 查出 Url
+![disable http certificate check](kubectl cluster-info.png.png)
+```
+https://192.168.50.50:6443  // 192.168.50.50是我家的Ubuntu 內網的主機IP
+```
+5. Jenkins URL
+Jenkins URL:http://host.docker.internal:8080/
+Jenkins tunnel:https://192.168.50.50:50000
+6. Credentials =>
+![add public key to jenkins](add-public-key-to-jenkins.png)
+7. Copy dashboard token to here
+![Copy dashboard token to here](copy-dashboard-token-to-here.png)
+
+### 撰寫 Jenkins pipeline 
+```
+properties([pipelineTriggers([githubPush()])])
+pipeline {
+    agent any 
+
+    environment {
+        tag = ':latest'
+        imageShortName = 'de-next-ap'
+        imageName = "${imageShortName}${tag}"
+        containerName = "${imageShortName}-1"
+        containerUrl = "192.168.50.49:2376"
+        dockerfile = "./Dockerfile"
+        port = "30000:80"
+        registry = "192.168.50.49:5000/next-ec"				
+		
+    }   
+   
+    stages {
+        stage("GitHub Pull") {
+             steps {
+                git branch: 'main', 
+                credentialsId: '946a703f-dff7-4138-84b2-0aba700dedca', 
+                url:  'git@github.com:markku636/ec.git/'
+            }
+            
+        }
+		
+        stage("Building Docker Image") {
+			steps {
+				script {
+					dockerImage = docker.build "$registry:latest"
+				}
+			}
+		}
+		
+		stage("Deploying to Registry Server") {
+			steps {
+				script {
+					docker.withRegistry("http://192.168.50.49:5000", "") {
+						dockerImage.push()
+					}
+				}
+			}
+		}
+		
+		stage("Cleaning Up") {
+			steps {
+				sleep(time: 3, unit: "SECONDS")
+
+				sh "docker rmi --force $registry:latest"
+			}
+		}
+		
+		stage("Delete deployment") {
+			steps {				
+                sh 'kubectl delete deployment <your-deployment-name> --ignore-not-found=true'				
+			}
+		}				
+		
+        stage("Deply") {
+             steps {
+                    withKubeConfig([credentialsId: 'k8s-secret', serverUrl: 'https://host.docker.internal:6443']) {                     
+                     sh 'kubectl apply -f ./next-js-deployment.yaml'
+                    }
+                
+             }
+        }    			        
+    }
+}
+```
+
+## 在 Github next-ec 專案裡建立 Kubernetes 的 YAML 佈署設定檔(next-js-deployment.yaml) 
+```
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: nextjs-deployment
+  labels:
+    app: nextjs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nextjs
+  template:
+    metadata:
+      labels:
+        app: nextjs
+    spec:
+      containers:
+      - name: nextjs
+        image: 192.168.50.50:5000/next-ec:latest
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nextjs-service
+spec:
+  type: NodePort
+  selector:
+    app: nextjs
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30099
+
+```
+
+此時執行 Jenkins 執行建置，應該己經可以看到成功。
+![Jenkins 執行結果](final.png)
+
+## 補充 - 如果遇到權限不足，出現以下錯誤
+
+ERROR: permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Head "http://%2Fvar%2Frun%2Fdocker.sock/_ping": dial unix /var/run/docker.sock: connect: permission denied
+```
+sudo chmod 777 /var/run/docker.sock
+```
