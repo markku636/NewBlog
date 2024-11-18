@@ -115,7 +115,7 @@ Jenkins tunnel:https://192.168.50.50:50000
 ![Copy dashboard token to here](copy-dashboard-token-to-here.png)
 
 ### 撰寫 Jenkins pipeline 
-```
+```groovy
 properties([pipelineTriggers([githubPush()])])
 pipeline {
     agent any 
