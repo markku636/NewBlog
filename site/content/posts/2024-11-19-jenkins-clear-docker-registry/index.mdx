@@ -1,11 +1,11 @@
 ---
 featured: true
-title:  透過 Jenkins pipeline 自動清除 Docker registry
+title:  透過 Jenkins pipeline 排程自動清除 Docker registry
 date:  2024-11-19 01:01:35 +0800
 thumbnail:  jenkins.png
 category:  DevOps 
 tags:   ['jenkins','docker registry']
-description : 透過 Jenkins pipeline 自動清除 Docker registry
+description : 透過 Jenkins pipeline 排程自動清除 Docker registry
 author : Mark Ku
 slug: jenkins-clear-docker-registry
 ---
@@ -34,7 +34,7 @@ docker update --restart=always registry
 P.S. 想要什麼時間可以問chatgpt。
 ## 安裝Plugin  - Pipeline Utility Steps
 
-## 撰寫Jenkins pipeline
+## 新增 Pipeline Job ，並撰寫Jenkins pipeline
 ```
 pipeline {
     agent any
