@@ -126,8 +126,7 @@ pipeline {
         tag = ':latest'
         imageShortName = 'k8s-next-ec'
         imageName = "${imageShortName}${tag}"
-        containerName = "${imageShortName}-1"
-        containerUrl = "192.168.50.49:2376"
+        containerName = "${imageShortName}-1"        
         dockerfile = "./Dockerfile"        
         registryUrl = "192.168.50.50:5000"
         registry = "${registryUrl}/${imageShortName}"
