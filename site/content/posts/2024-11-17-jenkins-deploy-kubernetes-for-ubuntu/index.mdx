@@ -129,46 +129,47 @@ pipeline {
         containerName = "${imageShortName}-1"
         containerUrl = "192.168.50.49:2376"
         dockerfile = "./Dockerfile"        
-        registry = "192.168.50.49:5000/next-ec"				
-		
+        registryUrl = "192.168.50.50:5000"
+        registry = "${registryUrl}/${imageShortName}"
+        
     }   
    
     stages {
         stage("GitHub Pull") {
              steps {
                 git branch: 'main', 
-                credentialsId: '946a703f-dff7-4138-84b2-0aba700dedca', 
+                credentialsId: 'e85233ad-a3c5-448b-a6ea-9f53e4f9b3f1', 
                 url:  'git@github.com:markku636/ec.git/'
             }
             
         }
-		
-        stage("Building Docker Image") {
+        
+          stage("Building Docker Image") {
 			steps {
 				script {
-					dockerImage = docker.build "$registry:latest"
+					dockerImage = docker.build "$registry${tag}"
 				}
 			}
 		}
 		
 		stage("Deploying to Registry Server") {
 			steps {
-				script {
-					docker.withRegistry("http://192.168.50.50:5000", "") {
-						dockerImage.push()
+			    script {
+				    docker.withRegistry("","") {
+					  dockerImage.push("latest")
 					}
-				}
+			    }
 			}
 		}
-		
-		stage("Cleaning Up") {
-			steps {
-				sleep(time: 3, unit: "SECONDS")
+        
+        stage("Cleaning Up") {
+            steps {
+                sleep(time: 3, unit: "SECONDS")
 
-				sh "docker rmi --force $registry:latest"
-			}
-		}					
-		
+                sh "docker rmi --force $registry:latest"
+            }
+        }                   
+        
         stage("Deply") {
              steps {
                     withKubeConfig([credentialsId: 'k8s-secret', serverUrl: 'https://192.168.50.50:6443']) {                     
@@ -177,7 +178,7 @@ pipeline {
                     }
                 
              }
-        }    			        
+        }                         
     }
 }
 ```
