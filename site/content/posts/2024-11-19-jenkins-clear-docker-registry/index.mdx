@@ -70,7 +70,7 @@ pipeline {
                                 echo "Processing tag: $tag for repository: $repository"
 
                                 try {
-                         s           // Fetch manifest and digest
+                                    // Fetch manifest and digest
                                     def manifestResponse = httpRequest(
                                         url: "http://${env.REGISTRY}/v2/${repository}/manifests/${tag}",
                                         customHeaders: [[name: 'Accept', value: 'application/vnd.docker.distribution.manifest.v2+json']],
