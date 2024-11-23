@@ -23,7 +23,7 @@ Ingress 是 Kubernetes 集群中的一個關鍵組件，主要負責簡化和管
 
 在 GKE 中，**Service** 提供的是 **L4 層負載均衡**，無法處理 HTTP 協定的內容，儘管可以透過 DNS 或 CNAME 指向負載平衡的外部IP，並將 Cloudflare 的 SSL 設定為「彈性」來挷定域名，但 Service 無法根據 HTTP 協定或請求內容、路徑來重定向或設定規則。
 
-**Ingress** 則提供了 **L7 層負載均衡**，能理解 HTTP 協定，並且可以通過 Ingress 規則設定，根據 **Path 或域名** 判斷如何將請求轉發到特定的 Service。
+但**Ingress** 則提供了 **L7 層負載均衡**，能理解 HTTP 協定，並且可以通過 Ingress 規則設定，根據 **Path 或域名** 判斷如何將請求轉發到特定的 Service。
 
 舉例來說
 ```
