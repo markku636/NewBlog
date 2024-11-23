@@ -27,7 +27,7 @@ Ingress 是 Kubernetes 集群中的一個關鍵組件，主要負責簡化和管
 
 舉例來說
 ```
-www.letgo.com.tw => Service A => Cluster => Pods => Container
+用戶在網址列輸入www.letgo.com.tw => Ingress => Service A => Cluster => Pods => Container
 ```
 
 Ingress 類似於 [Nginx 的域名解析](https://blog.markkulab.net/nginx-https-forwarding/)及流量轉導功能，但功能上更加聚焦於流量管理（Nginx 還提供緩存等網站功能）。透過 Ingress 的域名解析和路徑轉導，讓我們可以輕鬆實現流量分流。
