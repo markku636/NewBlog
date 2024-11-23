@@ -21,7 +21,7 @@ slug: jenkins-nextjs-deploy-gke
 ---
 
 ## 前言
-接續先前[用指令部署 GKE](https://blog.markkulab.net/deploy-nextjs-app-to-google-kubernetes-service/)，這次打算透過 Jenkins 自動化部署GKE。
+接續先前[用指令部署 GKE](https://blog.markkulab.net/deploy-nextjs-app-to-google-kubernetes-service/)，這次打算透過 Jenkins 實現自動化部署GKE。
 
 ## 事先準備
 在開始之前，請確保以下環境及資源已準備就緒：
@@ -30,6 +30,7 @@ slug: jenkins-nextjs-deploy-gke
 3. **Docker**：用於容器化應用程式。
 4. **Google Artifact Registry**：事先在 GCP 中建立好 Artifact Registry 。
 5. **Next.js 專案**：專案中需包含已撰寫的 K8s YAML 設定檔。
+6. **Github 設定好 webhook ，當有程式異動自動trigger Jenkins Build **
 
 ## 安裝 Google Cloud CLI
 1. **依據官方教學安裝 Google Cloud CLI**：參考 [Google 官方文件](https://cloud.google.com/sdk/docs/install) 進行安裝。
