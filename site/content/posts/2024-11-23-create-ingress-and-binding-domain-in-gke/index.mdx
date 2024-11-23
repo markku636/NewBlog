@@ -1,0 +1,73 @@
+---
+featured: true
+title: 從地端到雲端：搞定 Google Kubernetes Engine Ingress 設定、憑證上傳與域名綁定
+date:  2024-11-13 01:01:35 +0800
+thumbnail:  ingress.png
+category:  Cloud  
+tags:   ['Google Cloud','Docker','ingress','kubernetes','GKE','google kubernetes engine']
+description : 從地端到雲端：搞定 Google Kubernetes Engine Ingress 設定、憑證上傳與域名綁定
+author : Mark Ku
+slug: create-ingress-and-binding-domain-in-gke
+---
+## 什麼是 Ingress ?
+Ingress 是 Kubernetes 集群中的一個關鍵組件，用於簡化和管理外部到內部服務的訪問。原則上，Kubernetes 集群屬於一個 **private 網路空間**，外部無法直接訪問集群內的服務或 Pod。因此，需要透過 **Service (LTM)** 或 **Ingress** 來將流量導入集群內部的服務。
+
+## Service(LTM) vs Ingress
+
+在 GKE 中，**Service** 提供的是 **L4 層負載均衡**，無法處理 HTTP 協定的內容。儘管可以透過 DNS 或 CNAME 指向 Cluster IP 並將 Cloudflare 的 SSL 設定為「彈性」挷定域名，但 Service 無法根據 HTTP 協定或請求內容、路徑來重定向或設定規則。
+
+**Ingress** 則提供了 **L7 層負載均衡**，能理解 HTTP 協定，並且可以通過 Ingress 規則設定，根據 **Path 或域名** 判斷如何將請求轉發到特定的 Service。
+
+舉例來說
+```
+www.letgo.com.tw => Service A => Cluster => Pods => Container
+```
+
+Ingress 類似於 [Nginx 的域名解析](https://blog.markkulab.net/nginx-https-forwarding/)及流量轉導功能，但功能上更加聚焦於流量管理（Nginx 還提供緩存等網站功能）。透過 Ingress 的域名解析和路徑轉導，讓我們可以輕鬆實現流量分流。
+
+範例：  
+```
+/blog  => Service A  
+/store => Service B
+```
+
+## 建立Ingress 
+建立 Ingress 有三種方式：透過網頁介面、指令操作，或撰寫 YAML 設定檔。在開始之前，必須先建立 Deployment 和 Service，且需特別注意，此 Service 類型必須設為 ClusterIP，而非 LoadBalancer。本篇範例將示範如何透過網頁介面來建立 Ingress。
+
+1. 回到GCP的Google Kubernetes Engine > Gateways, Services & Ingress > 點擊 SERVICE 頁籤 > 選取你的 Service。
+![create ingress by service](create-ingress-by-service.png)
+
+2. 輸入 ingress name
+![image](create-ingress-by-service-2.png)
+
+P.S. 選擇 External 類型，會自動生成一個獨立的 IP 地址。  
+
+3. 輸入域名及挷定先前建立的服務(Service)
+![enter domain name and select service](enter-domain-name-and-select-service.png)
+P.S. 先前建立的 Service Type 必須為 Cluster IP
+
+#### 2. 設定 Cloudflare 憑證  
+![set up certificate](set-up-certificate.png)
+
+#### 3. 取得憑證，以Cloudfalre為例，想將域名指向 Ingress IP，以參考以下方法取得Cloudflare 憑證 
+登入Cloudflare 後台，SSL/TLS > Overview > Configure > SSL/TLS encryption > Full   
+![ssl encryption](ssl-encryption.png)
+SSL/TLS > Origin Server > Create Certificate > Create > Create 
+![get certificate](get-certificate.png)
+
+補充  
+* 用戶端憑證聚焦於從用戶端到伺服器的認證和加密。 
+* 原始伺服器憑證則是 Cloudflare 與您的後端伺服器間的加密保障。
+
+Ingress 建立完，會產生一組獨立的 IP ，此時就能透過 DNS 將域名指向Ingress 的外部 IP  
+![get ingress-real ip](get-ingress-real-ip.png)
+
+#### 接新增A記錄在DNS 中，並指向先前建立Ingress 真實IP  
+![create a record in dns](create-a-record-in-dns.png)
+
+此時，就將你的網站挷定了 https  
+![result](result.png)
+
+
+
+
