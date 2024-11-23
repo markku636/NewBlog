@@ -21,7 +21,7 @@ Ingress 是 Kubernetes 集群中的一個關鍵組件，主要負責簡化和管
 
 ## Service(LTM) vs Ingress
 
-在 GKE 中，**Service** 提供的是 **L4 層負載均衡**，無法處理 HTTP 協定的內容。儘管可以透過 DNS 或 CNAME 指向 Cluster IP 並將 Cloudflare 的 SSL 設定為「彈性」挷定域名，但 Service 無法根據 HTTP 協定或請求內容、路徑來重定向或設定規則。
+在 GKE 中，**Service** 提供的是 **L4 層負載均衡**，無法處理 HTTP 協定的內容，儘管可以透過 DNS 或 CNAME 指向負載平衡的外部IP，並將 Cloudflare 的 SSL 設定為「彈性」來挷定域名，但 Service 無法根據 HTTP 協定或請求內容、路徑來重定向或設定規則。
 
 **Ingress** 則提供了 **L7 層負載均衡**，能理解 HTTP 協定，並且可以通過 Ingress 規則設定，根據 **Path 或域名** 判斷如何將請求轉發到特定的 Service。
 
@@ -80,3 +80,4 @@ Ingress 建立完，會產生一組獨立的 IP ，此時就能透過 DNS 將域
 * [Azure DevOps 部署到 GKE (2) — Load Balancer VS Ingress](https://medium.com/chouhsiang/azure-devops-%E9%83%A8%E7%BD%B2%E5%88%B0-gke-2-gke-service-ingress-99bfc79884ad)
 * [Kubernetes 那些事 — Ingress 篇（一）](https://medium.com/andy-blog/kubernetes-%E9%82%A3%E4%BA%9B%E4%BA%8B-ingress-%E7%AF%87-%E4%B8%80-92944d4bf97d)
 * [Azure DevOps 部署到 GKE (8) —整合Cloudflare](https://medium.com/chouhsiang/azure-devops-%E9%83%A8%E7%BD%B2%E5%88%B0-gke-7-%E6%95%B4%E5%90%88cloudflare-7864906a5b2a)
+*  Mickey 和David 大大
