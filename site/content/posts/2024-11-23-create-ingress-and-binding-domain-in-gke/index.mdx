@@ -17,7 +17,7 @@ slug: create-ingress-and-binding-domain-in-gke
 ---
 
 ## 什麼是 Ingress ?
-Ingress 是 Kubernetes 集群中的一個關鍵組件，用於簡化和管理外部流量請求到內部服務的訪問。原則上，Kubernetes 集群屬於一個 **private 網路空間**，外部無法直接訪問集群內的服務或 Pod。因此，需要透過 **Service (LTM)** 或 **Ingress** 來將流量導入集群內部的服務。
+Ingress 是 Kubernetes 集群中的一個關鍵組件，主要負責簡化和管理外部流量請求到內部服務的訪問，原則上，Kubernetes 集群屬於一個 **private 網路空間**，外部無法直接訪問集群內的服務或 Pod。因此，需要透過 **Service (LTM)** 或 **Ingress** 來將流量導入集群內部的服務。
 
 ## Service(LTM) vs Ingress
 
