@@ -76,8 +76,45 @@ Ingress 建立完，會產生一組獨立的 IP ，此時就能透過 DNS 將域
 ![result](result.png)
 
 
+## 補充 - 用指令上傳憑證及透過設定檔(yaml)建立ingress 
+
+用 kubectl上傳指令 (憑證像前面一樣，從Cloudfalre 取得 )
+
+```
+kubectl create secret tls letgo.com.tw --cert letgo.cert.pem --key  letgo.cert.key
+```
+建立 ingress.yaml
+```
+---
+apiVersion: "networking.k8s.io/v1"
+kind: "Ingress"
+metadata:
+  name: "k8s-next-ec-service-ingress"
+  namespace: "default"
+spec:
+  tls:
+  - secretName: "letgo.com.tw"
+  rules:
+  - http:
+      paths:
+      - path: ""
+        backend:
+          service:
+            name: "k8s-next-ec-service"
+            port:
+              number: 3000
+        pathType: "ImplementationSpecific"
+    host: "gke-1.letgo.com.tw"
+status:
+  loadBalancer: {}
+```
+kubectl apply -f ./ingress.yaml
+
 ## 參考資料
+*  Mickey 和David 大大的指點
+* [採用 Ingress 機制的 Gateway API 更加便利？](https://www.youtube.com/watch?v=nO_aD-2sOMk)
 * [Azure DevOps 部署到 GKE (2) — Load Balancer VS Ingress](https://medium.com/chouhsiang/azure-devops-%E9%83%A8%E7%BD%B2%E5%88%B0-gke-2-gke-service-ingress-99bfc79884ad)
 * [Kubernetes 那些事 — Ingress 篇（一）](https://medium.com/andy-blog/kubernetes-%E9%82%A3%E4%BA%9B%E4%BA%8B-ingress-%E7%AF%87-%E4%B8%80-92944d4bf97d)
 * [Azure DevOps 部署到 GKE (8) —整合Cloudflare](https://medium.com/chouhsiang/azure-devops-%E9%83%A8%E7%BD%B2%E5%88%B0-gke-7-%E6%95%B4%E5%90%88cloudflare-7864906a5b2a)
-*  Mickey 和David 大大
+
+
