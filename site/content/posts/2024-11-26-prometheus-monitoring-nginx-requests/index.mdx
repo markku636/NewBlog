@@ -30,7 +30,7 @@ Prometheus 和 Grafana 是 Kubernetes 生態系統中的常見組合，這篇文
 
 ## 了解 Nginx 的 `stub_status`
 
-在啟動 Prometheus 監控之前，讓我們先了解 Nginx 的 `stub_status` 模組，它提供了關於 Nginx 運行狀態的基本指標。
+在啟動 Prometheus 容器應用前，讓我們先了解 Nginx 的 `stub_status` 模組，它提供了關於 Nginx 運行狀態的基本指標，Prometheus 主要是透過，stub_status 獲取 nginx 上的資訊。
 
 ### 設定 Dockerfile
 
