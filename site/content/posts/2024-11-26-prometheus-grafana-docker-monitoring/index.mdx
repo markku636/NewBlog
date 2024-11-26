@@ -1,0 +1,129 @@
+---
+featured: true
+title: cAdvisor + Prometheus + Grafana：打造容器資源監控系統
+date: 2024-11-25T01:01:35+08:00
+thumbnail: prometheus-grafana-docker-monitoring.png
+category: Cloud
+tags:
+  - Docker Monitoring
+  - cAdvisor
+  - Prometheus
+  - Grafana
+  - Container Monitoring
+  - Resource Usage
+  - Kubernetes
+  - Cloud Native
+  - Visualization
+  - Server Metrics
+  - Open Source Tools
+  - DevOps
+  - Observability
+  - Metrics Collection
+  - Dashboard
+description: cAdvisor + Prometheus + Grafana：打造容器資源監控系統
+author: Mark Ku
+slug: prometheus-grafana-docker-monitoring
+---
+## 前言
+
+在[先前的文章](https://blog.markkulab.net/prometheus-monitoring-nginx-requests/)中，我們展示了如何使用 Prometheus 來監控 Nginx 的效能。隨著容器化技術的普及，監控 Docker 容器的資源使用情況同樣重要。本篇文章將介紹如何使用 **cAdvisor**（Container Advisor）結合 Prometheus 和 Grafana，來全面監控 Docker 容器的 CPU、記憶體、磁碟和網路等資源。
+
+## 什麼是 cAdvisor？
+**cAdvisor** 是 Google 開發的開源工具，用於即時監控容器的資源使用情況及性能數據。相較於基本的 Docker 命令（如 `docker stats`），cAdvisor 提供了更詳細的數據，且可與 Prometheus 無縫整合。
+
+## 安裝和部署 cAdvisor
+
+首先，我們需要啟動 cAdvisor 容器來收集 Docker 資源數據。
+
+### 啟動 cAdvisor 容器
+
+使用以下指令啟動 cAdvisor 容器：
+
+```bash
+docker run \
+  --volume=/:/rootfs:ro \
+  --volume=/var/run:/var/run:rw \
+  --volume=/sys:/sys:ro \
+  --volume=/var/lib/docker/:/var/lib/docker:ro \
+  --publish=8884:8080 \
+  --detach=true \
+  --name=cadvisor \
+  google/cadvisor:latest
+```
+
+這將在本地端口 **8884** 上啟動 cAdvisor。
+
+### 訪問 cAdvisor
+
+啟動後，打開瀏覽器，訪問 [http://localhost:8884](http://localhost:8884) 檢查 cAdvisor 的儀表板，如下圖所示：
+
+![cAdvisor 儀表板](https://hackmd.io/_uploads/HyB44kmQ1g.png)
+
+## 設定 Prometheus 監控 cAdvisor
+
+接下來，修改 Prometheus 的設定文件，增加對 cAdvisor 的監控任務。
+
+### 參考之前 [Github Repo 的設定檔](https://github.com/markku636/Prometheus) 
+
+
+複製 Prometheus 採集器的的設定檔 `prometheus.yaml` 修改成 "prometheus-with-cadvisor.yaml"，並在設定文件中新增以下內容：
+
+```yaml
+- job_name: "cadvisor"
+  static_configs:
+    - targets: ["cadvisor:8080"]  # cAdvisor 的服務地址和埠號
+```
+複製部署的設定檔 `deployment.yaml` 修改成 `deployment-with-cadvisor.yaml`
+
+```
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8884:8080" # cAdvisor 預設埠號
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro    
+```
+建立及運行容器
+```
+docker-compose -f ./deployment-with-cadvisor.yaml up -d
+
+```
+
+## 驗證設定
+檢查 Prometheus 的 Target 頁面（[http://localhost:9090/targets](http://localhost:9090/targets)），確認 cAdvisor 的目標是否被正常發現並抓取數據：
+
+![Target 檢查](https://hackmd.io/_uploads/HJxb_kmXkl.png)
+
+
+
+## 使用 Grafana 可視化數據
+
+**Grafana** 提供了強大的數據可視化功能，以下是如何將 cAdvisor 的數據集成到 Grafana 儀表板中的步驟：
+
+### 下載 Grafana 模板
+
+從 [Grafana 官方模板](https://grafana.com/grafana/dashboards/16314-docker-container-os-node-node-exporter-cadvisor/)下載針對 cAdvisor 優化的儀表板模板。
+
+### 匯入 Dashboard 模板
+
+進入 Grafana 儀表板，點擊 "Import"，將下載的 JSON 文件上傳至 Grafana。
+
+![匯入 Dashboard](https://hackmd.io/_uploads/ByC_1g7X1e.png)
+
+導入完成後，您將看到即時的容器監控數據，包括 CPU、記憶體、磁碟和網路使用情況。
+
+## 總結
+
+透過 cAdvisor、Prometheus 和 Grafana 的結合，我們可以實現對 Docker 容器資源的全面監控，從而幫助我們更高效地管理和優化容器化應用。
+
+
+### 相關連結
+
+- [Prometheus 官方文檔](https://prometheus.io/docs/)
+- [Grafana 官方模板市場](https://grafana.com/grafana/dashboards/)
+- [Prometheus 和 Grafana Docker 範例](https://yunlzheng.gitbook.io/prometheus-book/part-ii-prometheus-jin-jie/exporter/commonly-eporter-usage/use-prometheus-monitor-container)
+
