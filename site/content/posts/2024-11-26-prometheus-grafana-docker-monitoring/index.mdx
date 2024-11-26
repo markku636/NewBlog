@@ -26,7 +26,7 @@ slug: prometheus-grafana-docker-monitoring
 ---
 ## 前言
 
-在[先前的文章](https://blog.markkulab.net/prometheus-monitoring-nginx-requests/)中，我們展示了如何使用 Prometheus 來監控 Nginx 的效能。隨著容器化技術的普及，監控 Docker 容器的資源使用情況同樣重要。本篇文章將介紹如何使用 **cAdvisor**（Container Advisor）結合 Prometheus 和 Grafana，來全面監控 Docker 容器的 CPU、記憶體、磁碟和網路等資源。
+[在先前的文章中，我們展示了如何使用 Prometheus 來監控 Nginx 的效能](https://blog.markkulab.net/prometheus-monitoring-nginx-requests/)，隨著容器化技術的普及，監控 Docker 容器的資源使用情況同樣重要。本篇文章將介紹如何使用 **cAdvisor**（Container Advisor）結合 Prometheus 和 Grafana，來全面監控 Docker 容器的 CPU、記憶體、磁碟和網路等資源。
 
 ## 什麼是 cAdvisor？
 **cAdvisor** 是 Google 開發的開源工具，用於即時監控容器的資源使用情況及性能數據。相較於基本的 Docker 命令（如 `docker stats`），cAdvisor 提供了更詳細的數據，且可與 Prometheus 無縫整合。
