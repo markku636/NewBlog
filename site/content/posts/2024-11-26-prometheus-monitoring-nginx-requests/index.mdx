@@ -75,15 +75,15 @@ docker run -d -p 8881:80 --name nginx-prometheus-exporter my-nginx:latest
 
 ### 解析 Nginx 狀態信息
 
-1. **Active connections: 2**  
+**Active connections: 2**  
    目前有 2 個活動連線。
 
-2. **server accepts handled requests: 2 2 2**  
+**server accepts handled requests: 2 2 2**  
    - **2**：已接受的連線數。  
    - **2**：已成功處理的連線數。  
    - **2**：總請求數（可能大於連線數，因為每個連線可以處理多個請求）。
 
-3. **Reading: 0 Writing: 1 Waiting: 1**  
+**Reading: 0 Writing: 1 Waiting: 1**  
    - **Reading: 0**：正在讀取請求的連線數。  
    - **Writing: 1**：正在傳送響應的連線數。  
    - **Waiting: 1**：空閒等待新請求的連線數（使用 HTTP Keep-Alive）。
