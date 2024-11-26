@@ -57,7 +57,7 @@ docker run \
 
 啟動後，打開瀏覽器，訪問 [http://localhost:8884](http://localhost:8884) 檢查 cAdvisor 的儀表板，如下圖所示：
 
-![cAdvisor 儀表板](https://hackmd.io/_uploads/HyB44kmQ1g.png)
+![cAdvisor 儀表板](cAdvisor.png)
 
 ## 設定 Prometheus 監控 cAdvisor
 
@@ -96,9 +96,7 @@ docker-compose -f ./deployment-with-cadvisor.yaml up -d
 ## 驗證設定
 檢查 Prometheus 的 Target 頁面（[http://localhost:9090/targets](http://localhost:9090/targets)），確認 cAdvisor 的目標是否被正常發現並抓取數據：
 
-![Target 檢查](https://hackmd.io/_uploads/HJxb_kmXkl.png)
-
-
+![Prometheus Target](prometheus -target.png)
 
 ## 使用 Grafana 可視化數據
 
@@ -112,14 +110,13 @@ docker-compose -f ./deployment-with-cadvisor.yaml up -d
 
 進入 Grafana 儀表板，點擊 "Import"，將下載的 JSON 文件上傳至 Grafana。
 
-![匯入 Dashboard](https://hackmd.io/_uploads/ByC_1g7X1e.png)
+![匯入 Dashboard](dashboard.png)
 
 導入完成後，您將看到即時的容器監控數據，包括 CPU、記憶體、磁碟和網路使用情況。
 
 ## 總結
 
 透過 cAdvisor、Prometheus 和 Grafana 的結合，我們可以實現對 Docker 容器資源的全面監控，從而幫助我們更高效地管理和優化容器化應用。
-
 
 ### 相關連結
 

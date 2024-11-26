@@ -89,10 +89,8 @@ docker run -d -p 8881:80 --name nginx-prometheus-exporter my-nginx:latest
    - **Waiting: 1**：空閒等待新請求的連線數（使用 HTTP Keep-Alive）。  
 P.S.當前伺服器負載較輕，共有 2 個連線，其中 1 個正在處理請求，1 個處於等待新請求的狀態。
 
-
-
 ## 容器應用說明
-grafana ( 報表呈示 ) ＞ prometheus-exporter ( 主動爬取資料 ) > nginx/nginx-prometheus-exporter (將這些數據暴露給 Prometheus的工具 ) > nginx status  ( 網站服務器，提供網頁伺服器的狀態 )
+grafana ( 報表呈現 ) ＞ prometheus-exporter ( 主動爬取資料 ) > nginx/nginx-prometheus-exporter (將這些數據暴露給 Prometheus的工具 ) > nginx status  ( 網站服務器，提供網頁伺服器的狀態 )
 
 ## 建立及啟動相關容器應用
 
