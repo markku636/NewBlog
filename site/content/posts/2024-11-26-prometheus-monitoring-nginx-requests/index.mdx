@@ -34,7 +34,7 @@ Prometheus 和 Grafana 是 Kubernetes 生態系統中的常見組合，這篇文
 
 ### 設定 Dockerfile
 
-首先，創建一個 Dockerfile，基於 Nginx 映像檔進行自訂配置：
+首先，創建一個 Dockerfile，基於 Nginx 映像檔進行自訂設定：
 
 ```dockerfile
 FROM nginx
@@ -43,7 +43,7 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 ### 建立 `nginx.conf`
 
-接著，編寫 `nginx.conf` 配置文件來啟用 Nginx 的狀態頁面，這將暴露供 Prometheus 爬取：
+接著，編寫 `nginx.conf` 設定文件來啟用 Nginx 的狀態頁面，這將暴露供 Prometheus 爬取：
 
 ```nginx
 server {
@@ -151,9 +151,9 @@ services:
       - "3007:3000"
 ```
 
-### 設置 Prometheus 配置
+### 設置 Prometheus 設定
 
-編寫 `prometheus.yaml` 來配置 Prometheus 如何抓取數據。
+編寫 `prometheus.yaml` 來設定 Prometheus 如何抓取數據。
 
 ```yaml
 global:

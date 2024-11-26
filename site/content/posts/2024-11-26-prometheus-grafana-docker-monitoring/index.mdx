@@ -93,8 +93,8 @@ docker-compose -f ./deployment-with-cadvisor.yaml up -d
 
 ```
 
-## 驗證設定
-檢查 Prometheus 的 Target 頁面（[http://localhost:9090/targets](http://localhost:9090/targets)），確認 cAdvisor 的目標是否被正常發現並抓取數據：
+## 驗證Prometheus設定
+檢查 Prometheus 的採集器 Target 頁面[http://localhost:9090/targets](http://localhost:9090/targets)，確認 cAdvisor 是否被正常發現並抓取數據：
 
 ![Prometheus Target](prometheus -target.png)
 
@@ -104,7 +104,7 @@ docker-compose -f ./deployment-with-cadvisor.yaml up -d
 
 ### 下載 Grafana 模板
 
-從 [Grafana 官方模板](https://grafana.com/grafana/dashboards/16314-docker-container-os-node-node-exporter-cadvisor/)下載針對 cAdvisor 優化的儀表板模板。
+從 [Grafana 官方模板](https://grafana.com/grafana/dashboards/16314-docker-container-os-node-node-exporter-cadvisor/)下載針對 cAdvisor 儀表板。
 
 ### 匯入 Dashboard 模板
 
