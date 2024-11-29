@@ -88,7 +88,7 @@ timedatectl status //  確認系統時間狀態
 - 關閉 OS 的 Swap，避免記憶體不足時關閉容器：
 ```bash
 sudo swapoff -a
-cat /etc/fstab
+sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 ```
 
 ## 安裝 Kubernetes 主程式
