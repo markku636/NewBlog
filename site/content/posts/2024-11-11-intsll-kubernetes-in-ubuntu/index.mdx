@@ -219,7 +219,7 @@ kubectl describe node master-node
 ## 建立第一個 Kubernetes 容器
 準備 Persistent Volume 路徑：
 ```bash
-mkdir /var/docker-pvc
+sudo mkdir /var/docker-pvc
 sudo chmod 777 /var/docker-pvc
 ```
 ### 部署配置檔 `deployment.yaml` ( Windows 不用指定Persistent Volumes 位置，但linux 一定要 ex: hostPath: path: /var/docker-pvc)
@@ -294,6 +294,11 @@ spec:
     targetPort: 3001
     nodePort: 30000
 ```
+佈署應用
+```
+kubectl apply -f ./deployment.yaml
+```
+
 ## 移除控制平面污點 (單節點環境) 
 ```
 kubectl taint nodes --all node-role.kubernetes.io/control-plane-
