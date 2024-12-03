@@ -232,6 +232,12 @@ sudo mkdir /var/docker-pvc
 sudo chmod 777 /var/docker-pvc
 ```
 ### 部署配置檔 `deployment.yaml` ( Windows 不用指定Persistent Volumes 位置，但linux 一定要 ex: hostPath: path: /var/docker-pvc)
+
+建立 Kubernetes 部署檔
+```
+sudo vim deployment.yaml
+```
+
 ```yaml
 apiVersion: v1
 kind: PersistentVolume
