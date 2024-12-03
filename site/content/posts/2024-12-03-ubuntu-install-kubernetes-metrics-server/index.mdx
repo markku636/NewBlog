@@ -70,12 +70,29 @@ kubectl top po -A
 kubectl edit deployment -n kube-system metrics-server
 ```
 
-這會打開一個編輯器，你可以根據需要修改 YAML 配置。
+這會打開一個編輯器，你可以根據需要修改 YAML 配置，
+
+在 args 裡加上一欄
+
+```
+- --kubelet-insecure-tls
+```
+加入檢查憑證的設定
+```
+spec:
+  containers:
+  - args:
+    - --cert-dir=/tmp
+    - --secure-port=4443
+    - --kubelet-insecure-tls
+    - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+    - --kubelet-use-node-status-port
+    image: k8s.gcr.io/metrics-server/metrics-server:v0.4.1
+    imagePullPolicy: IfNotPresent
+```
 
 ### 更新後，重啟metrics，並確認部署狀態
-
-修改完成後，使用以下命令來確保修改已經應用並且沒有錯誤：
-
+使用以下命令來確保修改已經應用並且沒有錯誤
 ```bash
 kubectl rollout status deployment metrics-server -n kube-system
 ```
