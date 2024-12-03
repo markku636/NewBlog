@@ -152,10 +152,7 @@ sudo apt-mark hold kubelet kubeadm kubectl
 ```
 
 ## 初始化 Kubernetes Master 節點
-編輯 kubelet 設定檔：
-```bash
-sudo vim /etc/default/kubelet
-```
+
 重新載入：
 ```bash
 sudo systemctl daemon-reload && sudo systemctl restart kubelet
