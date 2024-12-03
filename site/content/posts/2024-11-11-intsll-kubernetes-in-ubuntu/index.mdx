@@ -156,29 +156,9 @@ sudo apt-mark hold kubelet kubeadm kubectl
 ```bash
 sudo vim /etc/default/kubelet
 ```
-添加以下參數：
-```bash
-KUBELET_EXTRA_ARGS="--cgroup-driver=cgroupfs"
-```
 重新載入：
 ```bash
 sudo systemctl daemon-reload && sudo systemctl restart kubelet
-```
-
-編輯 Docker 設定檔：
-```bash
-sudo vim /etc/docker/daemon.json
-```
-添加以下內容：
-```json
-{
-  "exec-opts": ["native.cgroupdriver=systemd"],
-  "log-driver": "json-file",
-  "log-opts": {
-    "max-size": "100m"
-  },
-  "storage-driver": "overlay2"
-}
 ```
 reload change
 ```
