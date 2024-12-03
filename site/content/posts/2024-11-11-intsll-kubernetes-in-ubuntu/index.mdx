@@ -153,15 +153,11 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 ## 初始化 Kubernetes Master 節點
 
-重新載入：
+重新載入
 ```bash
 sudo systemctl daemon-reload && sudo systemctl restart kubelet
-```
-reload change
-```
 sudo sysctl --system
 ```
-
 重啟 Docker：
 ```bash
 sudo systemctl daemon-reload && sudo systemctl restart docker
