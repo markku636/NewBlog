@@ -22,6 +22,13 @@ slug: ubuntu-install-kubernetes-metrics-server
 
 在 Kubernetes 中，`Metrics Server` 是一個重要的組件，它提供集群資源使用情況的即時度量數據。這些度量數據對於管理和調整 Pod、節點資源的使用情況至關重要。本文將介紹如何安裝、配置以及查看 Metrics Server 的數據。
 
+
+## Kubernetes 主要有兩種 Metrics 
+
+* 核心指標 (Core metrics)：在 Kubelet、cAdvisor 獲取相關數據，再由metrics-server提供给給橫向展展控制器 HPA 及其他服務使用。
+* 自定義指標 (Custom Metrics)：Prometheus蒐集到的數據指標。
+
+
 ## 1. 安裝 Metrics Server
 
 首先，我們需要安裝 `Metrics Server`。它的安裝配置非常簡單，可以直接通過 Kubernetes 的 YAML 文件進行部署。請運行以下命令來下載並應用最新版本的 Metrics Server 部署配置：
