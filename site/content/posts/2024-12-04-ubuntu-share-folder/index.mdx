@@ -1,0 +1,133 @@
+---
+featured: true
+title: Ubuntu 上的 Kubernetes 安裝  Metrics Server
+date: 2024-12-03T01:01:35+08:00
+thumbnail: ubuntu.png
+category: DevOps
+tags:
+  - Kubernetes
+  - Metrics Server
+  - Cluster Management
+  - Resource Monitoring
+  - Kubernetes Metrics  
+  - Infrastructure  
+  - Linux
+  - DevOps  
+description: Ubuntu 上的 Kubernetes 安裝  Metrics Server
+author: Mark Ku
+slug: ubuntu-install-kubernetes-metrics-server
+---
+
+## 在 Ubuntu 上分享資料夾，讓 Windows 11 存取
+
+### **步驟 1：安裝並設定 Samba**
+Samba 是用於在 Linux 和 Windows 系統之間共享文件的工具。
+
+1. **安裝 Samba**
+   ```bash
+   sudo apt update
+   sudo apt install samba -y
+   ```
+
+2. **啟動並設置 Samba 開機自啟**
+   ```bash
+   sudo systemctl start smbd
+   sudo systemctl enable smbd
+   ```
+
+3. **開啟防火牆以允許 Samba**
+   ```bash
+   sudo ufw allow samba
+   ```
+
+4. **建立 Samba 用戶**
+   - 新增一個用戶（如果已存在則跳過）：
+     ```bash
+     sudo useradd -M -s /sbin/nologin username
+     ```
+   - 設置 Samba 密碼：
+     ```bash
+     sudo smbpasswd -a username
+     sudo smbpasswd -e username
+     ```
+
+### **步驟 2：設置共享資料夾**
+1. **創建共享資料夾**
+   ```bash
+   mkdir -p /home/yourusername/shared
+   sudo chmod 777 /home/yourusername/shared
+   ```
+
+2. **編輯 Samba 配置文件**
+   - 打開配置文件：
+     ```bash
+     sudo nano /etc/samba/smb.conf
+     ```
+   - 在文件末尾添加共享設置：
+     ```
+     [SharedFolder]
+     path = /home/yourusername/shared
+     browsable = yes
+     writable = yes
+     read only = no
+     guest ok = yes
+     create mask = 0777
+     directory mask = 0777
+     ```
+
+3. **保存並退出配置文件**
+   - 按 `Ctrl+O` 保存，`Ctrl+X` 退出。
+
+4. **重啟 Samba 服務**
+   ```bash
+   sudo systemctl restart smbd
+   ```
+
+### **步驟 3：在 Windows 11 存取共享資料夾**
+1. **檢查 Ubuntu 的 IP 地址**
+   ```bash
+   ip a
+   ```
+   記下類似 `192.168.x.x` 的 IP 地址。
+
+2. **連接共享資料夾**
+   - 在 Windows 11 上打開檔案總管。
+   - 在地址欄輸入：
+     ```
+     \\<Ubuntu_IP>\SharedFolder
+     ```
+     例如：
+     ```
+     \\192.168.1.100\SharedFolder
+     ```
+
+3. **測試連接**
+   如果一切正常，應該可以看到共享資料夾的內容。
+
+### **故障排除小技巧**
+1. **手動開放 Samba 所需端口**
+   ```bash
+   sudo ufw allow proto tcp from any to any port 137,138,139,445
+   sudo ufw status
+   ```
+
+2. **檢查 Samba 配置文件和目錄權限**
+   - 確認 `/etc/samba/smb.conf` 的共享設置正確。
+   - 檢查共享資料夾的權限：
+     ```bash
+     ls -ld /home/yourusername/shared
+     ```
+     如果需要，調整權限：
+     ```bash
+     sudo chmod 777 /home/yourusername/shared
+     ```
+
+3. **查看 Samba 日誌**
+   ```bash
+   sudo tail -f /var/log/samba/log.smbd
+   ```
+
+4. **使用 IP 地址而非主機名**
+   在 Windows 中使用 `\\<IP 地址>\shared` 以避免
+
+
