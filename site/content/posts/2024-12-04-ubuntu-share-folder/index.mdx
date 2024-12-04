@@ -1,24 +1,21 @@
 ---
 featured: true
-title: Ubuntu 上的 Kubernetes 安裝  Metrics Server
+title: 在 Ubuntu 上設置 Samba 來共享資料夾，讓 Windows 11 用戶可以存取
 date: 2024-12-03T01:01:35+08:00
 thumbnail: ubuntu.png
-category: DevOps
+category: Infra
 tags:
-  - Kubernetes
-  - Metrics Server
-  - Cluster Management
-  - Resource Monitoring
-  - Kubernetes Metrics  
-  - Infrastructure  
+  - Ubuntu
+  - Samba
+  - Windows
+  - File Sharing
+  - Network Configuration
   - Linux
-  - DevOps  
-description: Ubuntu 上的 Kubernetes 安裝  Metrics Server
+  - DevOps
+description: 在 Ubuntu 上設置 Samba 來共享資料夾，讓 Windows 11 用戶可以存取
 author: Mark Ku
-slug: ubuntu-install-kubernetes-metrics-server
+slug: ubuntu-samba-windows11-folder-sharing
 ---
-
-## 在 Ubuntu 上分享資料夾，讓 Windows 11 存取
 
 ### **步驟 1：安裝並設定 Samba**
 Samba 是用於在 Linux 和 Windows 系統之間共享文件的工具。
@@ -128,6 +125,5 @@ Samba 是用於在 Linux 和 Windows 系統之間共享文件的工具。
    ```
 
 4. **使用 IP 地址而非主機名**
-   在 Windows 中使用 `\\<IP 地址>\shared` 以避免
-
+   在 Windows 中使用 `\<IP 地址>\shared` 以避免遇到名稱解析問題。
 
