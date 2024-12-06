@@ -51,19 +51,19 @@ Samba 是用於在 Linux 和 Windows 系統之間共享文件的工具。
 ### **步驟 2：設置共享資料夾**
 1. **創建共享資料夾**
    ```bash
-   mkdir -p /home/yourusername/shared
-   sudo chmod 777 /home/yourusername/shared
+   mkdir -p /var/shared
+   sudo chmod 777 /var/shared
    ```
 
 2. **編輯 Samba 配置文件**
    - 打開配置文件：
      ```bash
-     sudo nano /etc/samba/smb.conf
+     sudo vim /etc/samba/smb.conf
      ```
    - 在文件末尾添加共享設置：
      ```
-     [SharedFolder]
-     path = /home/yourusername/shared
+     [shared]
+     path = /var/shared
      browsable = yes
      writable = yes
      read only = no
@@ -112,11 +112,11 @@ Samba 是用於在 Linux 和 Windows 系統之間共享文件的工具。
    - 確認 `/etc/samba/smb.conf` 的共享設置正確。
    - 檢查共享資料夾的權限：
      ```bash
-     ls -ld /home/yourusername/shared
+     ls -ld /var/shared
      ```
      如果需要，調整權限：
      ```bash
-     sudo chmod 777 /home/yourusername/shared
+     sudo chmod 777 /var/shared
      ```
 
 3. **查看 Samba 日誌**
