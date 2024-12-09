@@ -76,6 +76,11 @@ apt-get update
 apt-get install -y docker-ce-cli
 ```
 
+### 給予 Jenkins 資料夾權限
+```
+sudo chown -R jenkins:jenkins /var/jenkins_home/workspace
+sudo chmod -R 775 /var/jenkins_home/workspace
+```
 ### 接著，產生ssh key，一直按 Enter 就好
 ```
 ssh-keygen -t rsa -C "root" 
@@ -204,6 +209,6 @@ cat /var/jenkins_home/secrets/initialAdminPassword
 
 ## 如果權限不足
 ```
-chown 777 jenkins:jenkins ${hostWorkspacePath}
+chmod 777 jenkins:jenkins ${hostWorkspacePath}
 chmod 777 /var/run/docker.sock
 ```
