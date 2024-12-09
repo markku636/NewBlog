@@ -54,6 +54,7 @@ Microsoft 提供了[在 Linux 容器中運行 MSSQL 的教學](https://learn.mic
 ### 啟動並執行 MSSQL
 ```bash
 docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=qwertyyy" \
+   --restart always \
    -p 1433:1433 --name sql1 --hostname sql1 \
    -v /var/shared/:/var/opt/mssql/backup \
    -d \
