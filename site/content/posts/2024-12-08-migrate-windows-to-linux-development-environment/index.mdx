@@ -60,10 +60,12 @@ docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=qwertyyy" \
    -d \
    mcr.microsoft.com/mssql/server:2022-latest
 ```
-📌 **注意**：備份資料夾映射到 `/var/shared/`，備份檔案可透過 SSMS 還原。
+📌 **注意**：備份資料夾映射到 `/var/shared/`，備份檔案可透過 SQL Server Management Studio (SSMS) 還原。
 
-### 使用 SSMS 還原資料庫
-SSMS 僅提供 Windows 版本，因此還原操作需在 Windows 上執行。
+### 使用 [SQL Server Management Studio (SSMS) ](https://learn.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver16)還原資料庫
+SQL Server Management Studio (SSMS) 僅提供 Windows 版本，因此還原操作需在 Windows 上執行。
+使用SSMS 連線到資料庫，右鍵Restore，接著並在/var/opt/mssql/backup/找到你的備份檔
+![restore db](restore.png)
 
 ## 設定 OpenVPN 連線
 
@@ -110,6 +112,8 @@ WantedBy=multi-user.target
 sudo systemctl enable cloudflared.service
 sudo systemctl start cloudflared.service
 ```
+## 將一些server script 轉成 linux bash 腳本
+就算不熟Linux 指令，透過chatgpt 幫你轉換，其實蠻快速的。
 
 ## 心得
 
