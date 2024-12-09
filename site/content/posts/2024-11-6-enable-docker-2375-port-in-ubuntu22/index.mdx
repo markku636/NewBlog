@@ -66,9 +66,10 @@ sudo systemctl enable docker.service
 sudo systemctl restart docker.service 
 sudo systemctl status docker.service 
 ```
-## 開啟防火牆
+## 允許2375 通過防火牆
 ```
 sudo ufw allow 2375
+...
 ```
 ## 測試 (在別台電腦)
 ```
