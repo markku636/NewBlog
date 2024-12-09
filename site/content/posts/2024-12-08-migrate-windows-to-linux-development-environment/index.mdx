@@ -1,6 +1,6 @@
 ---
 featured: true
-title: 將Windows 開發環境遷移到 Linux 開發環境(Ubuntu)
+title: Windows 到 Linux (Ubuntu) 開發環境遷移筆記
 date: 2024-12-08:01:35+08:00
 thumbnail: migrate-windows-to-linux-development-environment.png
 category: Infra
@@ -17,16 +17,18 @@ tags:
   - Cloudflare
   - OpenVPN
   - UFW
-description: 將Windows 開發環境遷移到 Linux 開發環境(Ubuntu)
+description: Windows 到 Linux (Ubuntu) 開發環境遷移筆記
 author: Mark Ku
 slug: migrate-windows-to-linux-development-environment
 ---
 
-# 為什麼選擇使用 Linux？
+## 為什麼選擇使用 Linux？
 
 目前絕大多數的容器應用程式都是基於 Linux，而 Windows 的 Docker 主要是通過 WSL 虛擬化 Linux Kernel，由於 Windows 作業系統本身會消耗部分資源，加上虛擬化過程的轉換，效能相較於原生 Linux 顯得不足。  
 
-此外，Windows 的穩定性也不如 Linux。Windows 平台上的 Docker 容器經常因更新或機房斷電而出現問題，例如容器遺失或 Docker Engine 損壞等情況。
+此外，Windows 的穩定性也不如 Linux。Windows 平台上的 Docker 容器經常因更新或機房斷電而出現問題，例如容器遺失或 Docker Engine 損壞等情況。    
+
+因此，我決定將台灣的開發環境，先試著遷到到Linux 的開發環境試試，再逐步替換掉生產環境的 Windows 伺服器。
 
 ## [下載](https://ubuntu.com/download/desktop)並安裝帶有 GUI 的 Ubuntu LTS 版本。
 
