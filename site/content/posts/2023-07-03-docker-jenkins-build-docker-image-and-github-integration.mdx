@@ -209,6 +209,16 @@ cat /var/jenkins_home/secrets/initialAdminPassword
 
 ## 如果仍然權限不足，在宿主主機加上這個權限
 ```
+sudo groupadd docker
+sudo usermod -aG docker $USER
+
 chmod 777 jenkins:jenkins ${hostWorkspacePath}
 chmod 777 /var/run/docker.sock
+
+```
+jenkins 容器加上這個
+
+```
+usermod -aG docker jenkins 
+usermod -aG root jenkins
 ```
