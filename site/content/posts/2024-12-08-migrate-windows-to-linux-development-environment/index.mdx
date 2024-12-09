@@ -28,24 +28,24 @@ slug: migrate-windows-to-linux-development-environment
 
 此外，Windows 的穩定性也不如 Linux。Windows 平台上的 Docker 容器經常因更新或機房斷電而出現問題，例如容器遺失或 Docker Engine 損壞等情況。
 
-# 安裝帶有 GUI 的 Ubuntu
+## [下載](https://ubuntu.com/download/desktop)並安裝帶有 GUI 的 Ubuntu LTS 版本。
 
 為了降低學習與移轉門檻，同時便於維護，我們選擇了帶有圖形介面 (GUI) 的 Ubuntu 版本，讓大家能逐步熟悉 Linux 環境。
 
 ![Ubuntu GUI](ubuntu-gui.png)
 
-# 安裝遠端連線工具 - RestDesk
+## 安裝遠端連線工具 - RestDesk
 
 為了方便管理與維護，我們架設了一套類似 TeamViewer 的遠端管理工具 RestDesk。  
 👉 [如何架設 RestDesk](https://blog.markkulab.net/custom-your-remote-tool-like-team-viwer/)
 
-# 使用 Samba 實現與 Windows 11 的檔案共享
+## 使用 Samba 實現與 Windows 11 的檔案共享
 
 由於我們的資料庫是 MSSQL，需要將備份檔案從 Windows 傳到 Linux 上。為此，我們設定了 Samba 共享資料夾以便雙向訪問。
 
 👉 [如何設定 Samba](https://blog.markkulab.net/ubuntu-samba-windows11-folder-sharing/)
 
-# 將 Windows 的 MSSQL 遷移到 Linux 容器
+## 將 Windows 的 MSSQL 遷移到 Linux 容器
 
 Microsoft 提供了[在 Linux 容器中運行 MSSQL 的教學](https://learn.microsoft.com/zh-tw/sql/linux/quickstart-install-connect-docker?view=sql-server-ver16&tabs=cli&pivots=cs1-bash)，以下是主要步驟：
 
@@ -62,19 +62,19 @@ docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=qwertyyy" \
 ### 使用 SSMS 還原資料庫
 SSMS 僅提供 Windows 版本，因此還原操作需在 Windows 上執行。
 
-# 設定 OpenVPN 連線
+## 設定 OpenVPN 連線
 
 由於開發環境需要與其他國家同步資料，我們在 Linux 上配置了 OpenVPN 來實現。  
 👉 [如何設定 OpenVPN](https://blog.markkulab.net/ubuntu-automatically-connect-to-openvpn-startup/)
 
-# 設定防火牆
+## 設定防火牆
 
 允許指定埠號通過防火牆：
 ```bash
 sudo ufw allow 8080
 ```
 
-# 配置 Docker 並啟用 2375 埠號
+## 配置 Docker 並啟用 2375 埠號
 
 在 Ubuntu 上初始安裝 Docker Desktop 時發現無法啟用 2375 埠號以支援遠端管理。解決方法是完全移除 Docker 後重新安裝並正確配置。  
 👉 [詳細設定步驟](https://blog.markkulab.net/enable-docker-2375-port-in-ubuntu22/)
@@ -109,6 +109,6 @@ sudo systemctl enable cloudflared.service
 sudo systemctl start cloudflared.service
 ```
 
-# 心得
+## 心得
 
 逐步將 Windows 替換為 Linux 的過程，不僅提高了系統穩定性與效能，也讓我們深入了解 Linux 的操作邏輯並提升了技術能力。
