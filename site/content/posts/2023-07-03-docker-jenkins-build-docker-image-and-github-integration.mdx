@@ -53,15 +53,9 @@ P.S. hostWorkspacePath 為宿主主機的資料夾路徑
 
 ## 因為我比較熟 docker 指令，用以下指令在 Jenkins 容器中安裝 Docker 
 ```
-chown -R jenkins:jenkins ${hostWorkspacePath}
 docker logs -f jenkins // 獲得 init password 
 docker exec -it -uroot jenkins bash
 apt-get update && apt-get -y install apt-transport-https ca-certificates curl gnupg2 software-properties-common && curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg > /tmp/dkey; apt-key add /tmp/dkey && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable" && apt-get update && apt-get -y install docker-ce
-
-// jenkins 權限不足
-usermod -aG docker jenkins 
-usermod -aG root jenkins
-chmod 777 /var/run/docker.sock
 
 ```
 
@@ -208,21 +202,8 @@ pipeline {
 cat /var/jenkins_home/secrets/initialAdminPassword
 ```
 
-## 常用套件
-* docker 
-* Build User Vars 
-* Build Monitor View 
-* Build Environment Plugin
-* ThinBackup
-* build-failure-analyzer
-* log-parser-plugin
-* SSH
-* Publish Over SSH
-* Msbuild
-* .NET SDK Support
-* DOCKER
-* Office 365 ConnectorVersion
-* PowerShell
-* jenkins container 安裝 docker d
-* docker build step
-
+## 如果權限不足
+```
+chown 777 jenkins:jenkins ${hostWorkspacePath}
+chmod 777 /var/run/docker.sock
+```
