@@ -80,6 +80,7 @@ apt-get install -y docker-ce-cli
 ```
 sudo chown -R jenkins:jenkins /var/jenkins_home/workspace
 sudo chmod -R 775 /var/jenkins_home/workspace
+sudo chown $USER /var/run/docker.sock
 ```
 ### 接著，產生ssh key，一直按 Enter 就好
 ```
@@ -207,13 +208,13 @@ pipeline {
 cat /var/jenkins_home/secrets/initialAdminPassword
 ```
 
-## 如果仍然權限不足，在宿主主機加上這個權限
+## 如果建肁過程，仍然權限不足，在宿主主機加上這個權限
 ```
 sudo groupadd docker
 sudo usermod -aG docker $USER
 
-chmod 777 jenkins:jenkins ${hostWorkspacePath}
-chmod 777 /var/run/docker.sock
+sudo chmod 777 jenkins:jenkins ${hostWorkspacePath}
+sudo chmod 777 /var/run/docker.sock
 
 ```
 jenkins 容器加上這個
