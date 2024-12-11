@@ -64,13 +64,14 @@ Samba 是用於在 Linux 和 Windows 系統之間共享文件的工具。
      ```
      [shared]
      path = /var/shared
-     browsable = yes
+     browsable = no
      writable = yes
      read only = no
-     guest ok = yes
+     guest ok = no
      create mask = 0777
      directory mask = 0777
      ```
+	 P.S.read only 及  guest ok 盡量都設成no ，曾經被蠕蟲塞了一些檔案到samba 
 
 3. **保存並退出配置文件**
    - 按 `Ctrl+O` 保存，`Ctrl+X` 退出。
