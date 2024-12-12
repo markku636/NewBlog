@@ -75,15 +75,6 @@ echo "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -c
 apt-get update
 apt-get install -y docker-ce-cli
 ```
-
-### 給予 Jenkins 資料夾權限
-```
-sudo chown -R jenkins:jenkins /var/jenkins_home/workspace
-sudo chmod -R 775 /var/jenkins_home/workspace
-sudo chown $USER /var/run/docker.sock
-sudo gpasswd -a $USER docker
-newgrp docker
-```
 ### 接著，產生ssh key，一直按 Enter 就好
 ```
 ssh-keygen -t rsa -C "root" 
@@ -104,6 +95,14 @@ cat /root/.ssh/id_rsa
 ![](https://i.imgur.com/JeIwzXP.png)
 
 ### Manage Jenkins > Security > Git Host Key Verification Configuration > No verification
+
+### 到 Jenkins 的宿主主機，賦與相關資料夾
+```
+sudo chmod -R 777 /var/jenkins_home/workspace
+sudo chown $USER /var/run/docker.sock
+sudo gpasswd -a $USER docker
+newgrp docker
+```
 
 ## 建立新的建置工作
 ### 回到 Dashboard > New Item > Pipeline
