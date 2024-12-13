@@ -26,7 +26,7 @@ const CartView = dynamic(() => import('./cartView'));
 * 透過 next/bundle-analyzer 分析工具得知道，那些套件過大，並找到替代的替換 如: Moment.js to Days.js 。
 * 改變套件的引入方式，也會影響JS的打包的大小。 如:lodash
 ```
-import { throttle } from 'lodash/throttle'; // good
+import  throttle from 'lodash/throttle'; // good
 import { throttle } from 'lodash'; // bad
 
 ```
