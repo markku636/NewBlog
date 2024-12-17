@@ -36,6 +36,13 @@ Windows 的 Docker Container 主要是通過 WSL 虛擬化 Linux Kernel，由於
 
 ![Ubuntu GUI](ubuntu-gui.png)
 
+停用自動更新及開啟open ssh server 
+```
+sudo systemctl stop unattended-upgrades
+sudo systemctl disable unattended-upgrades
+sudo apt install openssg-server  # oppen 22 prot
+```
+
 ## 安裝遠端連線工具 - RestDesk
 
 為了方便管理與維護，我們架設了一套類似 TeamViewer 的遠端管理工具 RestDesk。  
@@ -118,3 +125,37 @@ sudo systemctl start cloudflared.service
 ## 心得
 
 逐步將 Windows 替換為 Linux 的過程，不僅提高了系統穩定性與效能，這個過程也對Linux 更為熟悉。
+
+
+## 補充 - Ubuntu 額外的小工具
+燒機工具
+```
+sudo apt install stress-ng
+#!/bin/bash
+
+DURATION="120s"
+
+echo "壓力測試開始...."
+
+#CPU 壓力測試: 使用 4個CPU 核心
+
+echo"CPU壓力測試.."
+
+stress-ng --cpu 4  --cpu-load 100 --timeout $DURATION
+
+# 記憶體壓力測試：創建 10 個進程，每個分配 180M 記憶體
+echo "記憶體壓力測試..."
+stress-ng --vm 20 --vm-bytes 500M --vm-keep --timeout $DURATION
+
+# 磁碟 I/O 壓力測試：創建 5 個進程，每個進程寫入 10G 數據
+echo "磁碟 I/O 壓力測試..."
+stress-ng --hdd 10  --hdd-bytes 20G --timeout $DURATION
+
+echo "壓力測試完成。"
+```
+
+監測工具
+```
+sudo apt install stress-ng
+sudo apt install s-tui
+```
