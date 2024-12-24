@@ -98,7 +98,7 @@ cat /root/.ssh/id_rsa
 
 ### 到 Jenkins 的宿主主機，賦與相關資料夾
 ```
-sudo chmod -R 777 /var/jenkins_home/workspace
+sudo chmod -R 777 /var/jenkins_home/
 sudo chown $USER /var/run/docker.sock
 sudo gpasswd -a $USER docker
 newgrp docker
