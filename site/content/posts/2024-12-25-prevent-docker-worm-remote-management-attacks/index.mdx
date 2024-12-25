@@ -35,7 +35,7 @@ slug: prevent-docker-worm-remote-management-attacks
 - **環境需求**：在兩台機器上安裝 Docker
 
 ## 產生 TLS 憑證的步驟
-### 1. 在 Ubuntu Docker Host 主機上生成 CA 金鑰
+### 1. 在 Ubuntu Docker Host 主機上生成 CA 金鑰，並輸入憑證密碼
 ```bash
 openssl genrsa -aes256 -out ca-key.pem 4096
 ```
