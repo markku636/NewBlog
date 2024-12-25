@@ -120,12 +120,16 @@ systemctl restart docker
 ```
 
 ## 測試
-沒有 tls 憑證，就不允許管理 Docker 
+
+測試原先可以直接不透過憑證管理Docker 的指令
 ```
 docker  -H="tcp://192.168.0.123:2376" ps
+```
+現在沒有 tls 憑證，就不允許管理 Docker 
+```
 Error response from daemon: Client sent an HTTP request to an HTTPS server.
 ```
-擁有 tls 的憑證，就能遠端管理 Docker 
+接著，我們我們帶上 tls 的憑證，就能遠端管理 Docker 
 ```
 docker --tls -H="tcp://192.168.0.123:2376" ps
 ```
