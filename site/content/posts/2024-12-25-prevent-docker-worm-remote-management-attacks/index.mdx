@@ -22,8 +22,8 @@ slug: prevent-docker-worm-remote-management-attacks
 
 ## 找到關鍵問題
 
-經過調查，最後在Docker Host 中發現有多個異常的Ubuntu的容器在運行，進而得知得知，推測，內網可能有人的電腦中了蠕蟲，而蠕蟲透過Docker 的遠端管理連接埠，拉取的官方的Ubuntu Docker 映像檔，並可以連線進容器中做任何的操作，並利用這些惡意容器耗盡主機資源，包括網路、CPU 和硬碟，或偷取資料。
-![docker ps](docker-ps.png)
+經過調查，最後在Docker Host 中多出了幾個異常的Ubuntu的容器在運行，進而推測，內網可能有人的電腦中了蠕蟲，而蠕蟲透過Docker 的遠端管理連接埠，拉取的官方的Ubuntu Docker 映像檔，並可以連線進容器中做任何的操作，並利用這些惡意容器耗盡主機資源，包括網路、CPU 和硬碟，或偷取資料。
+![docker 中跑出不明的容器](docker-ps.png)
 
 ## 如何避免類似問題
 了解蠕蟲如何利用 Docker 權限過大的漏洞後，在找到蠕蟲在那台電腦之前，我決定加上 TLS 憑證來強化安全性，防止開發機的 Docker 被駭客劫持。
