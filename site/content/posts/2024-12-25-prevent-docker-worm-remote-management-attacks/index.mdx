@@ -20,7 +20,7 @@ slug: prevent-docker-worm-remote-management-attacks
 
 即使在防火牆上限制 TCP/IP 300個連線數，但路由器仍然頻繁被打爆，導致辦公室網路多次癱瘓。
 
-## 發現駭客行為
+## 發現蠕蟲
 
 經過調查，最後在Docker Host 中發現有多個異常的Ubuntu的容器在運行，進而得知得知，推測，內網可能有人的電腦中了蠕蟲，蠕蟲透過Docker 的遠端管理連接埠，內網的任何人，都能遠端拉取的官方的 Docker 映像檔，並可以連線進容器中做任何的操作，駭客利用這些惡意容器耗盡主機資源，包括網路、CPU 和硬碟，或偷取資料。
 ![docker ps](docker-ps.png)
