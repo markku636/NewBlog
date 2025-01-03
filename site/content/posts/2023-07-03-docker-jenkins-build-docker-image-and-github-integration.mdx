@@ -200,6 +200,38 @@ pipeline {
 ### 設定這麼久，終於大功告成，自從有了容器化，建置開發環境，越來越簡單及方便遷移。
 ![](https://i.imgur.com/WaHng5f.png)
 
+### 補充 - 解决Linux环境非root用户无法运行docker报错unix:///var/run/docker.sock: connect: permission denied 
+1. **新增服務文件**：
+   ```bash
+   sudo vim /etc/systemd/system/docker-sock-permissions.service
+   ```
+
+2. **添加以下內容**：
+   ```ini
+   [Unit]
+   Description=Set permissions for Docker socket
+   After=docker.service
+
+   [Service]
+   Type=oneshot
+   ExecStart=/bin/chmod 666 /var/run/docker.sock
+   RemainAfterExit=true
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+
+3. **啟用服務**：
+   ```bash
+   sudo systemctl enable docker-sock-permissions.service
+   ```
+
+4. **啟動服務**（或等待下次開機自動執行）：
+   ```bash
+   sudo systemctl start docker-sock-permissions.service
+   ```
+
+
 ## 參考資料
 [參考資料1](https://medium.com/@nestor.panu/building-an-asp-net-6-application-on-docker-based-jenkins-d6c8aaf94756)  
 [參考資料2](https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd=jenkins%20docker%20github&fenlei=256&oq=jenkins%2520docker&rsv_pq=94ae33af001910d3&rsv_t=b7b8i%2Bsui%2B0AJ%2FMYfQlpp%2FhXCfNXIDDSFm5zUnkMf2BWDdx8uxSiQ184PmM&rqlang=cn&rsv_dl=tb&rsv_enter=1&rsv_btype=t&inputT=2203&rsv_sug3=47&rsv_sug1=11&rsv_sug7=100&rsv_sug2=0&rsv_sug4=2374)
