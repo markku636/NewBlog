@@ -107,9 +107,11 @@ chmod 0444 ca.pem server-cert.pem cert.pem
 scp -r mark@192.168.0.123:/var/tls E:\tls
 ```
 
-Windows 用戶可以將憑證放入 `%USERPROFILE%/.docker` 資料夾中，以便自動使用憑證連線。(ca.pem 和 cert.pem 及 key.pem )
+Windows 用戶可以將憑證放入 `%USERPROFILE%/.docker` 資料夾中，以便自動使用憑證連線(ca.pem 和 cert.pem 及 key.pem )，不然則得手動指定憑證。
 
 ![copy certificate](copy-certificate.png)
+
+Linux 用戶可以將憑證放入 `/etc/docker/certs.d`資料夾中，以便自動使用憑證連線。
 
 ### 7. 重啟 Docker 服務
 
@@ -129,6 +131,8 @@ docker  -H="tcp://192.168.0.123:2376" ps
 ```
 Error response from daemon: Client sent an HTTP request to an HTTPS server.
 ```
+
+W
 接著，我們我們帶上 tls 的憑證，就能遠端管理 Docker 
 ```
 docker --tls -H="tcp://192.168.0.123:2376" ps
