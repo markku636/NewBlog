@@ -31,18 +31,20 @@ P.S. 在我們的案例中，上述三項行為都已經發生，並且我們觀
 ## 什麼是 Wireshark
 Wireshark 是一個功能強大的網絡協議分析工具，它通過捕獲和分析封包，提供深入的網絡流量可視化，幫助用戶檢測網絡異常行為並排查問題。  
 
-## 下載並安裝 Wireshark - [連結](https://www.wireshark.org/#downloadLink)
-
 ## 使用 Wireshark 分析網絡流量
-### 1. 首先，選擇網路卡
+
+### 1.下載，並安裝 Wireshark - [連結](https://www.wireshark.org/#downloadLink)
+
+
+### 2. 首先，選擇網路卡
 在 Wireshark 中，首先需要選擇要捕獲流量的網路卡。
 ![select network card](select-network-card.png)
 
-### 2. 開始錄製並排序來源
+### 3. 開始錄製並排序來源
 錄製一段時間的網絡流量後，可以點擊 Source 欄位進行排序，找出異常的流量來源。
 ![click order by source wireshark](click-order-by-source-wireshark.png)
 
-### 3. 找到異常設備
+### 4. 找到異常設備
 最後，你就會某些電腦會有異常的網路行為，會去掃每一個 Port，最後將那台電腦重裝。
 ![final result](final-result.png)
 
