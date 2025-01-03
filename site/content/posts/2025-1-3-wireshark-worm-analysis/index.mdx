@@ -1,16 +1,16 @@
 ---
 featured: true
-title: 使用Wireshark 抓出蠕蟲
+title: 使用Wireshark 抓出辦公室中蠕蟲的電腦
 date:  2025-01-03 02:01:35 +0800
 thumbnail:  wireshark-worm-analysis.png
 category:  Security  
 tags:   ['wireshark','worm','analysis' ]
-description : 使用Wireshark 抓出蠕蟲
+description : 使用Wireshark 抓出辦公室中蠕蟲的電腦
 author : Mark Ku
 slug: wireshark-worm-analysis
 ---
-## 前言
-前情提要，在將windows 開發機轉Linux時發現，因網路分享資料夾(Samba)發現不明exe ，Docker 跑出未知得的容器服務，猜測辦公室的的電腦可能中毒蠕蟲，同事用Wireshark 找到惡意的機器，就順便和他學了一下 Wireshark。
+## 時空背景
+前情提要，在將[windows 開發機轉Linux時發現公司電腦好像有人中了蠕蟲](https://blog.markkulab.net/migrate-windows-to-linux-development-environment/)，Docker 跑出未知得的容器服務，網路分享資料夾(Samba)也發現不明exe ，猜測辦公室的的電腦可能中毒蠕蟲，同事用Wireshark 找到惡意的機器，就順便和他學了一下 Wireshark。
 
 ## 首先，了解什麼是蠕蟲 
 蠕蟲是一種惡意軟體，與病毒類似，但它們的特點是能夠自行複製並在網路中快速傳播，以下是蠕蟲常見的行為特徵：
@@ -20,13 +20,14 @@ slug: wireshark-worm-analysis
 1. 自我複製  
 蠕蟲能夠自我複製，並透過網路傳播到其他設備，通常會利用網路協議（如電子郵件、文件共享、即時通訊、FTP 等）來擴散，有些蠕蟲甚至會主動掃描網路，尋找開放的連接埠或安全漏洞的設備進行感染。  
 
-2. 利用安全漏  
+2. 利用安全漏洞  
 許多蠕蟲會利用操作系統或應用程式中的已知漏洞來入侵設備。  
 
 3. 消耗資源  
 蠕蟲會占用系統資源（如處理器性能、記憶體、網路頻寬等），導致受害設備或整個網路變慢，在某些情況下，這種資源消耗可能會導致網路癱瘓或設備無法運行。  
 
-P.S. 以上三項行為，我們都發生過了。  
+ 以上三項行為，我們都發生過了，得知蠕蟲會利用安全漏洞入侵，代表他會去掃瞄內網的電腦的連接埠，試用用各種連接埠的安全漏洞來入侵。
+
 ## 什麼是 Wireshark
 Wireshark 是一個網絡協議分析工具，通過捕獲和分析封包，提供深入的網絡流量可視化。以下是 Wireshark 的運作原理及其工作方式：
 
