@@ -10,7 +10,7 @@ author : Mark Ku
 slug: wireshark-worm-analysis
 ---
 ## 時空背景
-先前在將 [Windows 開發機轉換為 Linux](https://blog.markkulab.net/migrate-windows-to-linux-development-environment/) 的過程中，發現公司電腦可能中了蠕蟲，因為開發機的 Docker 出現了未知的容器服務，網路共享資料夾（Samba）內也發現了不明的 .exe 檔案，這些跡象讓我們懷疑辦公室的電腦可能遭受蠕蟲攻擊，隨後，同事使用 Wireshark 找到感染來源的惡意設備，我也趁機向他學習了如何使用 Wireshark。
+先前在將 [Windows 開發機轉換為 Linux](https://blog.markkulab.net/migrate-windows-to-linux-development-environment/) 的過程中，發現公司電腦可能中了蠕蟲，因為開發機的 Docker 出現了未知的容器服務，網路共享資料夾（Samba）內也發現了不明的 .exe 檔案，這些跡象讓我們懷疑辦公室的電腦可能遭受蠕蟲感染，隨後，同事使用 Wireshark 找到感染來源的惡意設備，我也趁機向他學習了如何使用 Wireshark。
 
 ## 首先，了解什麼是蠕蟲 
 蠕蟲是一種惡意軟體，與病毒相似，但其特點是能夠自我複製並通過網路快速傳播，以下是蠕蟲的常見行為特徵：  
