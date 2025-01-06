@@ -87,9 +87,7 @@ GA4 的事件分成四大類，我們可以根據需求選擇適合的事件類�
 - 追蹤用戶偏好的登入方式（例如 Google、Facebook、Email）。
 
 ## 接著，我們將 建議事件/自訂事件的參數透過 GTM 傳遞到 GA
-
-### 1. 前端透過gtag 將商品傳遞參數至 GTM
-
+### 1. 在網站前端透過 gtag 將商品傳遞參數至 GTM
 ```
 gtag('event', 'add_to_cart', {
   currency: 'USD', // 幣別
@@ -107,7 +105,9 @@ gtag('event', 'add_to_cart', {
   ],
 });
 ```
-### 2. 設定變數 -> 變數 -> 新增 
+
+
+### 2. 接著，我們先訪問 [Google tag manager](https://tagmanager.google.com/)，設定變數 -> 變數 -> 新增 
 依據傳入參數屬性，逐一建立變數，以傳遞給GA的事件參數
 ![add variable](add-variable.png)
 
