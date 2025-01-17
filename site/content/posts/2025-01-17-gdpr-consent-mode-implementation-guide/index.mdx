@@ -22,13 +22,13 @@ description:  透過 GTM 客製化實現 GDPR 的同意聲明模式 (Consent Mod
 
 ## 前言
 
-如果你經營的網站主要服務歐美市場，而且使用了多個第三方追蹤工具，那就必須注意 GDPR（歐盟《通用資料保護法》）的符合規定要求 ，在 2024 年歐盟《數字市場法》（Digital Markets Act, DMA）上路後，追蹤使用者數據必須在獲得明確同意後才能進行。
+如果你經營的網站主要服務歐美市場，而且使用了多個第三方追蹤工具，那就必須注意 GDPR（歐盟《通用資料保護法》）的符合規定要求 ，[2024 年 3 月 6 日生效的歐盟法律《數位市場法》（Digital Markets Act, DMA）](https://support.google.com/accounts/answer/14202510?hl=zh-Hant#:~:text=%E3%80%8A%E6%95%B8%E4%BD%8D%E5%B8%82%E5%A0%B4%E6%B3%95%E3%80%8B(DMA,%E8%A6%81%E9%80%A3%E7%B5%90%E7%89%B9%E5%AE%9AGoogle%20%E6%9C%8D%E5%8B%99%E3%80%82)上路後，追蹤使用者數據必須在獲得明確同意後才能進行。
 
 本篇文章會教你如何用 Google 標籤管理工具（Google Tag Manager, GTM）來設定 **Consent Mode**，讓網站在使用者按下「同意」後，才能傳送 GA4 電子商務事件的參數傳送到 Facebook Pixel，確保追蹤行為符合GDPR規範。
 
 ## 為什麼需要了解 DMA？
 
-《數字市場法》（Digital Markets Act, DMA）是歐盟為了規範科技巨頭（如 Google、Apple、Meta 等）而推出的法規，2024 年正式生效。  
+《數位市場法》（Digital Markets Act, DMA）是歐盟為了規範科技巨頭（如 Google、Apple、Meta 等）而推出的法規，2024 年正式生效。  
 對於在歐美經營的網站來說，這項法規要求網站必須清楚告知用戶如何使用他們的個人資料，並且獲得他們的同意後才能進行數據追蹤。
 
 ## 這對網站有什麼影響？  
