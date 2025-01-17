@@ -22,9 +22,9 @@ description:  透過 GTM 客製化實現 GDPR 的 Consent Mode 完整教學
 
 ## 前言
 
-如果你經營的網站主要服務歐美市場，而且使用了多個第三方追蹤工具，那就必須注意 GDPR（歐盟《通用資料保護法》）的合規要求 ，在 2024 年歐盟《數字市場法》（Digital Markets Act, DMA）上路後，追蹤使用者數據必須在獲得明確同意後才能進行。
+如果你經營的網站主要服務歐美市場，而且使用了多個第三方追蹤工具，那就必須注意 GDPR（歐盟《通用資料保護法》）的符合規定要求 ，在 2024 年歐盟《數字市場法》（Digital Markets Act, DMA）上路後，追蹤使用者數據必須在獲得明確同意後才能進行。
 
-本篇文章會教你如何用 Google 標籤管理工具（Google Tag Manager, GTM）來設定 **Consent Mode**，讓網站在使用者按下「同意」後，才能傳送 GA4 電子商務事件到 Facebook Pixel，確保追蹤行為符合規範。
+本篇文章會教你如何用 Google 標籤管理工具（Google Tag Manager, GTM）來設定 **Consent Mode**，讓網站在使用者按下「同意」後，才能傳送 GA4 電子商務事件到 Facebook Pixel，確保追蹤行為符符合規定範。
 
 ## 為什麼需要了解 DMA？
 
@@ -34,12 +34,12 @@ description:  透過 GTM 客製化實現 GDPR 的 Consent Mode 完整教學
 這對台灣業者有什麼影響？  
 如果你的網站服務歐美用戶，例如電商或 SaaS 平台，就需要符合這些規範，否則可能面臨高額罰款。
 
-## 如何實現 GDPR 合規的用戶追蹤？
+## 如何實現 GDPR 符合規定的用戶追蹤？
 
 ### 方法選擇
 
 1. **使用現成的 Cookie 管理工具**  
-   現在市面上有很多工具可以幫助你快速實現合規，比如 Cookiebot。這種工具不需要寫程式，價格每年大約 7,000 元新台幣，適合中小型企業。
+   現在市面上有很多工具可以幫助你快速實現符合規定，比如 Cookiebot。這種工具不需要寫程式，價格每年大約 7,000 元新台幣，適合中小型企業。
 
 2. **自行開發**  
    自行開發的方式雖然需要技術支持，但能更靈活地根據需求設計使用者介面和功能。本篇教學會專注於這種方式，透過 GTM 和程式實作來實現。
@@ -112,7 +112,7 @@ export function acceptConsentGranted(isAllow: boolean = false) {
    ![同意後測試結果](test-result-2.png)
 
 ## 結論
-實現 GDPR 合規不僅僅是遵守法律，也是建立用戶信任的基石。通過正確配置 GTM 和實作 **Consent Mode**，你可以在保護用戶隱私的同時，繼續獲取商業所需的數據。
+實現 GDPR 符合規定不僅僅是遵守法律，也是建立用戶信任的基石。通過正確配置 GTM 和實作 **Consent Mode**，你可以在保護用戶隱私的同時，繼續獲取商業所需的數據。
 
 ### 參考資料
 - [Google Consent Mode 官方教學](https://inboundmarketing.com.tw/google-consent-mode-v2/)
