@@ -55,7 +55,7 @@ description:  透過 GTM 客製化實現 GDPR 的同意聲明模式 (Consent Mod
 
 3. 設定 GTM 事件模板，確保事件能正確傳送。
     ![追蹤代碼範例](gtm-tracking-code-template.png)
-	
+	因為先前有串接GA電子商務事件，因此可以透過 GA 的事件的屬性轉送到 Facebook Pixel。	
 	![Facebook 追蹤代碼範例 - page view ](gtm-facebook-template-page-view.png)
 	![Facebook 追蹤代碼範例 - add cart ](gtm-facebook-template-add-to-cart.png)
 	![Facebook 追蹤代碼範例 - begin checkout ](gtm-facebook-template-begin-checkout.png)
@@ -63,7 +63,7 @@ description:  透過 GTM 客製化實現 GDPR 的同意聲明模式 (Consent Mod
 
 ### 前端實作：傳遞同意事件
 
-當使用者按下「同意」按鈕時，可以用以下程式碼將同意事件和屬性值傳遞到 **data layer**：
+當使用者按下「同意」按鈕時，可以用以下程式碼將同意事件和屬性透過 data layer值傳遞到GTM 
 
 ```typescript
 export function acceptConsentGranted(isAllow: boolean = false) {
@@ -80,6 +80,7 @@ export function acceptConsentGranted(isAllow: boolean = false) {
     });
 }
 ```
+P.S. dataLayer 是 gtag.js 的基礎，gtag.js 的運作基於 dataLayer，
 
 ### 在 GTM 中完成設定
 
