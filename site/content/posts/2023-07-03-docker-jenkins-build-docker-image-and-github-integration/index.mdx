@@ -13,10 +13,10 @@ slug: docker-jenkins-build-docker-image-and-github-integration
 先前用 [Powershell 遠端建置測試機的 DockerDesktop](https://blog.markkulab.net/remote-build-docker-image-with-powershell/)，開發人員一多後，發現太麻煩了，最後還是弄了Jenkins，並整合 Github 憑證及遠端佈署 DockerDesktop
 
 ## 開發環境說明
-![](deployment-process.png)
+開發者 Push Commit 後，Github 會知 Jenkins 執行Job，並將 Github Repo 拉下來，並自動建置，最後佈署到最終的 Windows Docker Desktop 主機。
+![兩種常見的Jenkins 佈署Docker 的方式](deployment-process.png)
 P.S. Watch tower 並不會主動建建立容器應用，只會抽換容器應用，第一次得自己手動建立。
 
-預期開發者 Push Commit 後，Jenkins 自動將 Github Repo 拉下來，並自動建置，最後佈署到最終的 Windows Docker Desktop 主機。
 
 ## 首先，建立 Jenkins 環境
 
