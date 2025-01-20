@@ -1,0 +1,246 @@
+---
+featured: true
+title:  整合Windows Docker Desktop、Jenkins in Docker、GitHub SSH憑證與Docker Image建置佈署的開發環境
+date:   2023-07-03 01:01:35 +0800
+thumbnail:  jenkins.png
+category:  DevOps 
+tags:   ['jenkins','docker image build','Docker Desktop','github ssh']
+description : Docker Jenkins + github SSH 憑證 + Build Docker Image 整合筆記
+author : Mark Ku
+slug: docker-jenkins-build-docker-image-and-github-integration
+---
+## 目的
+先前用 [Powershell 遠端建置測試機的 DockerDesktop](https://blog.markkulab.net/remote-build-docker-image-with-powershell/)，開發人員一多後，發現太麻煩了，最後還是弄了Jenkins，並整合 Github 憑證及遠端佈署 DockerDesktop
+
+## 開發環境說明
+![](deployment-process.png)
+P.S. Watch tower 並不會主動建建立容器應用，只會抽換容器應用，第一次得自己手動建立。
+
+預期開發者 Push Commit 後，Jenkins 自動將 Github Repo 拉下來，並自動建置，最後佈署到最終的 Windows Docker Desktop 主機。
+
+## 首先，建立 Jenkins 環境
+
+### 開啟 Powershell ，建立資料夾作為 Jenkins 的工作目錄
+```
+$workspacePath = "C:\jenkins_workspace"
+New-Item -ItemType Directory -Path $workspacePath -Force | Out-Null
+```
+### 執行以下指令，Docker 運行 Jenkins 容器，並將 workspace 掛載到本地磁碟
+```
+docker run -d -p 8080:8080  -p 50000:50000 -v ${hostWorkspacePath}:/var/jenkins_home/workspace  -v /var/run/docker.sock:/var/run/docker.sock --name jenkins --restart=always jenkins/jenkins:lts 
+```
+P.S. hostWorkspacePath 為宿主主機的資料夾路徑
+### 看到這畫面，要進去容器拿這密碼
+
+![](https://i.imgur.com/uy3OV4o.png)
+### 接著，安裝建議的插件
+
+![](https://i.imgur.com/IWKJnTV.png)
+### 等待安裝完成，就能使用 localhost:8080 進入 Jenkins 網頁
+![](https://i.imgur.com/tzP40Nk.png)
+
+### Manage Jenkins　> Plugins　＞Available plugins，安裝常用套件
+* SSH
+* Publish Over SSH
+* Msbuild
+* .NET SDK Support
+* Office 365 Connector Version
+* PowerShell 
+* Docker
+* Docker Pipeline
+* HTTP Request
+* Stage View
+* Pipeline Utility Steps
+* Pipeline: Input Step
+
+
+## 因為我比較熟 docker 指令，用以下指令在 Jenkins 容器中安裝 Docker 
+```
+docker logs -f jenkins // 獲得 init password 
+docker exec -it -uroot jenkins bash
+apt-get update && apt-get -y install apt-transport-https ca-certificates curl gnupg2 software-properties-common && curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg > /tmp/dkey; apt-key add /tmp/dkey && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable" && apt-get update && apt-get -y install docker-ce
+
+```
+
+## Jenkins Github 全域憑證設定
+
+### 首先，透過 docker 指令連入 Jenkins 容器
+```
+docker exec -it -uroot jenkins bash
+```
+
+### 安裝 docker 
+```
+apt-get update
+apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
+curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+echo "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list
+apt-get update
+apt-get install -y docker-ce-cli
+```
+### 接著，產生ssh key，一直按 Enter 就好
+```
+ssh-keygen -t rsa -C "root" 
+```
+### 讀取產生的公鑰，複製到github [SSH and GPG keys](https://github.com/settings/keys) 設定
+```
+cat /root/.ssh/id_rsa.pub
+```
+
+### 讀取產生的私鑰，複製到 Jenkins 全域設定，Manage Jenkins > Credentials > System > Global credentials (unrestricted) > Add credentials  ( -----BEGIN OPENSSH PRIVATE KEY-----也要一起複製) > Create 
+```
+cat /root/.ssh/id_rsa
+```
+![](https://i.imgur.com/eKKkFOm.png)
+
+### Create 後會取得一個 ID 之後會將複製到 pipeline 中
+
+![](https://i.imgur.com/JeIwzXP.png)
+
+### Manage Jenkins > Security > Git Host Key Verification Configuration > No verification
+
+### 到 Jenkins 的宿主主機，賦與相關資料夾
+```
+sudo chmod -R 777 /var/jenkins_home/
+sudo chown $USER /var/run/docker.sock
+sudo gpasswd -a $USER docker
+newgrp docker
+```
+
+## 建立新的建置工作
+### 回到 Dashboard > New Item > Pipeline
+![](https://i.imgur.com/HbhNSug.png)
+
+### 設定 Github hook trigger 
+![](https://i.imgur.com/Dpp0ywG.png)
+
+### 撰寫
+```
+properties([pipelineTriggers([githubPush()])])
+pipeline {
+    agent any 
+
+    environment {
+        tag = ':latest'
+        imageShortName = 'next-ap'
+        imageName = "${imageShortName}${tag}"
+        containerName = "${imageShortName}-1"
+        containerUrl = "192.168.50.49:2375"
+        dockerfile = "./Dockerfile"
+        port = "30000:80"
+    }   
+   
+    stages {
+        stage("GitHub Pull") {
+             steps {
+                git branch: 'main', 
+                credentialsId: 'b2ef50dd-xxxx-xxx-a4ef-xxx', 
+                url:  'git@github.com:markku636/ec.git/'
+            }
+            
+        }
+
+
+        stage('Stop containers') {
+            steps {
+                script {
+                    containerStatus = sh(script: "docker -H=\"${containerUrl}\" ps -a --filter=name=${containerName} -q", returnStdout: true).trim()
+                    if (containerStatus != '') {
+                        echo "Stopping container ${containerName}"
+                        sh "docker -H=\"${containerUrl}\" stop ${containerName}"
+                    } else {
+                        echo "Container ${containerName} does not exist"
+                    }
+                }
+            }
+        }
+
+        stage('Remove containers') {
+            steps {
+                script {
+                    containerStatus = sh(script: "docker -H=\"${containerUrl}\" ps -a --filter=name=${containerName} -q", returnStdout: true).trim()
+                    if (containerStatus != '') {
+                        echo "Removing container ${containerName}"
+                        sh "docker -H=\"${containerUrl}\" rm -f ${containerName}"
+                    } else {
+                        echo "Container ${containerName} does not exist"
+                    }
+                }
+            }
+        }
+
+        stage('Remove image') {
+            steps {
+                script {
+                    existingImages = sh(script: "docker -H=\"${containerUrl}\" images --filter=reference='${imageName}' -q", returnStdout: true).trim()
+                    if (existingImages != '') {
+                        echo "[Removing image] Removing the existing image.."
+                        sh "docker -H=\"${containerUrl}\" rmi -f '${imageName}'"
+                    } else {
+                        echo "[Removing image] The image does not exist"
+                    }
+                }
+            }
+        }
+        
+        stage('Build image remotely') {
+            steps {
+                sh 'docker -H="${containerUrl}" build -t "${imageName}" . -f "${dockerfile}"'
+            }
+        }
+
+        stage('Create and start container application') {
+            steps {
+                sh 'docker -H="${containerUrl}" run -d --name "${containerName}" --restart=always -p "${port}" "${imageShortName}"'
+            }
+        }
+        
+    }
+}
+
+```
+
+### 設定這麼久，終於大功告成，自從有了容器化，建置開發環境，越來越簡單及方便遷移。
+![](https://i.imgur.com/WaHng5f.png)
+
+### 補充 - 解决Linux环境非root用户无法运行docker报错unix:///var/run/docker.sock: connect: permission denied 
+1. **新增服務文件**：
+   ```bash
+   sudo vim /etc/systemd/system/docker-sock-permissions.service
+   ```
+
+2. **添加以下內容**：
+   ```ini
+   [Unit]
+   Description=Set permissions for Docker socket
+   After=docker.service
+
+   [Service]
+   Type=oneshot
+   ExecStart=/bin/chmod 666 /var/run/docker.sock
+   RemainAfterExit=true
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+
+3. **啟用服務**：
+   ```bash
+   sudo systemctl enable docker-sock-permissions.service
+   ```
+
+4. **啟動服務**（或等待下次開機自動執行）：
+   ```bash
+   sudo systemctl start docker-sock-permissions.service
+   ```
+
+
+## 參考資料
+[參考資料1](https://medium.com/@nestor.panu/building-an-asp-net-6-application-on-docker-based-jenkins-d6c8aaf94756)  
+[參考資料2](https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd=jenkins%20docker%20github&fenlei=256&oq=jenkins%2520docker&rsv_pq=94ae33af001910d3&rsv_t=b7b8i%2Bsui%2B0AJ%2FMYfQlpp%2FhXCfNXIDDSFm5zUnkMf2BWDdx8uxSiQ184PmM&rqlang=cn&rsv_dl=tb&rsv_enter=1&rsv_btype=t&inputT=2203&rsv_sug3=47&rsv_sug1=11&rsv_sug7=100&rsv_sug2=0&rsv_sug4=2374)
+
+## 備忘錄 - 找回 admin 初始密碼
+```
+cat /var/jenkins_home/secrets/initialAdminPassword
+```
+
