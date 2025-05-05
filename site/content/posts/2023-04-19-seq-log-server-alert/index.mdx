@@ -22,24 +22,24 @@ slug: seq-log-server-alert
 SEQ 並沒有內建通知，所以我們需要安裝 Teams 通知套件  
 [SEQ相關套件連結](https://www.nuget.org/packages?q=Tags%3A%22seq-app%22)
 ## 在APPS 的 Package 欄位輸入 "Seq.App.Teams"
-![](https://i.imgur.com/3lBLEwg.png)
+![](3lBLEwg.png)
 ## 選擇 ADD INSTANCE 
-![](https://i.imgur.com/fIpsGDE.png)
+![](fIpsGDE.png)
 ## 輸入 Teams Web hook 
-![](https://i.imgur.com/DeNJQiQ.png)
+![](DeNJQiQ.png)
 ## 接著我們要開始新增Alert，Settings > Add ALERT
-![](https://i.imgur.com/pGKhOhd.png)
+![](pGKhOhd.png)
 ## 設定相關條件，系統依據時間及筆數觸發通知
-![](https://i.imgur.com/N1MZ0wB.png)
+![](N1MZ0wB.png)
 ```
 @Message like '%[Paypal][Build]%' AND @Message like '%[Error]%'
 ```
 ## 最後，在程式埋入 log 條件中的關鍵字，當發生金流錯誤時就會接收到 Teams 的通知了
 
-![](https://i.imgur.com/M2U2DXj.png)
+![](M2U2DXj.png)
 
-![](https://imgur.com/vffL7Yx)
+![](vffL7Yx_d.webp)
 
 ## Seq 也超方便，也可以做成 DashBoard
-![](https://i.imgur.com/rzUT65C.png)
+![](rzUT65C.png)
 
