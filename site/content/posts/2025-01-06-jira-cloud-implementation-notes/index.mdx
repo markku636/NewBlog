@@ -70,11 +70,11 @@ Jira 與 Github 整合後，就能直接在 Jira 中關聯相關程式碼，提�
 #### **專案管理相關**
 - **超期任務**
   ```
-  project = "IBP-US-Web" AND due < now()
+  project = "US-Web" AND due < now()
   ```
 - **過去 30 天完成的任務**
   ```
-  project = "IBP-US-Web" and resolved >= startOfDay(-30d)
+  project = "US-Web" and resolved >= startOfDay(-30d)
   ```
 - **狀態最近變更的任務**
   ```
