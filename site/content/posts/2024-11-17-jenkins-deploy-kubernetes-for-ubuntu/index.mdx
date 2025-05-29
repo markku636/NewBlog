@@ -234,8 +234,39 @@ spec:
 ## 補充 - 如果遇到權限不足，出現以下錯誤
 
 ERROR: permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Head "http://%2Fvar%2Frun%2Fdocker.sock/_ping": dial unix /var/run/docker.sock: connect: permission denied
+短解
 ```bash
 sudo chmod 777 /var/run/docker.sock
+```
+
+長解
+
+```
+sudo nano /etc/systemd/system/docker-sock-permission.service
+```
+
+```
+[Unit]
+Description=Set permission on /var/run/docker.sock
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/chmod 777 /var/run/docker.sock
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+
+```
+重新載入 systemd 並啟用服務
+```
+sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
+sudo systemctl enable docker-sock-permission.service
+sudo systemctl start docker-sock-permission.service
+sudo systemctl status docker-sock-permission.service
 ```
 
 ## 參考

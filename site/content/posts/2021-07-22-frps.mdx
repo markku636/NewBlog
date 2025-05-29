@@ -46,15 +46,15 @@ sudo apt-get install bison ed gawk gcc libc6-dev make golang-go vim
 接著你必須到FRP的Github上查看最新frps ，並下載他
 
 ```
-wget https://github.com/fatedier/frp/releases/download/v0.61.0/frp_0.61.0_linux_amd64.tar.gz
+wget https://github.com/fatedier/frp/releases/download/v0.62.1/frp_0.62.1_linux_amd64.tar.gz
 ```
 
 解壓縮檔案並重新命名資料夾為 frp
 
 ```
-tar -zxvf frp_0.61.0_linux_amd64.tar.gz
+tar -zxvf frp_0.62.1_linux_amd64.tar.gz
 sudo mkdir /var/frps
-sudo mv frp_0.61.0_linux_amd64/* /var/frps/
+sudo mv frp_0.62.1_linux_amd64/* /var/frps/
 cd /var/frps
 ```
 
@@ -166,11 +166,11 @@ nc -zv 127.0.0.1 7000
 ```
 sudo mkdir -p /etc/frp
 ```
-### 下載 FRP 0.61.0 並解壓到 
+### 下載 FRP 0.62.1 並解壓到 
 ```
 cd /etc/frp
-sudo wget https://github.com/fatedier/frp/releases/download/v0.61.0/frp_0.61.0_linux_amd64.tar.gz
-sudo tar -zxvf frp_0.61.0_linux_amd64.tar.gz --strip-components=1
+sudo wget https://github.com/fatedier/frp/releases/download/v0.62.1/frp_0.62.1_linux_amd64.tar.gz
+sudo tar -zxvf frp_0.62.1_linux_amd64.tar.gz --strip-components=1
 ```
 ### 建立frpc.toml設定檔
 ```
