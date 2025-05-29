@@ -38,6 +38,12 @@ slug: on-prem-to-cloud-gcp-docker-deployment-artifact-registry-cloud-run
 3. 安裝完成後會詢問是否要登入及選擇那個Google專案( 當然你也可以打指令登入， ex: `gcloud auth login`）
 ![gcp cli sign](gcp-cli-sign.png)
 
+```
+gcloud auth login
+gcloud projects list
+gcloud config set project PROJECT_ID
+```
+
 ### 建立 Artifact Registry
 
 進入 Artifact Registry，並取得 Registry 的 URL。
