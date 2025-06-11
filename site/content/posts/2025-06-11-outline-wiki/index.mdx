@@ -1,0 +1,188 @@
+---
+featured: true
+title: 一款免費開源類似於 Notion 類知識庫系統 — Outline Wiki 使用與備份全攻略
+date: 2025-06-11 01:01:35 +0800
+thumbnail: outline-knowledge-base-system.png
+category: Management
+tags: ['outline', 'knowledge base system']
+description: 一款免費開源類似於 Notion 類知識庫系統 — Outline Wiki 使用與備份全攻略
+author: Mark Ku
+slug: outline-wiki-knowledge-base-system
+---
+
+## 背景介紹
+
+在追求高效資料與知識共享的過程中，許多企業和團隊面臨工具選擇的挑戰。我們曾嘗試多種知識庫工具，但從工程師的反饋看來，這些工具仍有不少限制。經過多方尋找，最終發現 Outline 是一款非常適合團隊協作的知識庫解決方案。
+
+---
+
+## 什麼是 Outline？
+
+[**Outline**](https://www.getoutline.com/) 是一款簡潔且功能強大的知識庫管理工具，介面與使用體驗類似 Notion。它支援 Markdown 編輯、全文檢索、以及多種第三方登入方式，非常適合企業或團隊搭建共享知識庫。Outline 是開源軟體，功能完整，專為團隊打造，能大幅提升知識管理與協作效率。
+
+---
+
+## 架設指南（使用 Docker Compose 範例）
+
+以下為使用 Docker Compose 快速架設 Outline 的範例設定：
+
+```yaml
+version: '3'
+
+services:
+  outline:
+    image: outlinewiki/outline:latest
+    ports:
+      - "27777:3000"
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/outline
+      - REDIS_URL=redis://redis:6379
+      - SECRET_KEY=你的隨機字串
+      - UTILS_SECRET=你的隨機字串
+      - URL=http://localhost:27777
+      - NODE_ENV=production
+      - FORCE_HTTPS=false
+      - PORT=3000
+      - AWS_ACCESS_KEY_ID=minio
+      - AWS_SECRET_ACCESS_KEY=minio123
+      - AWS_REGION=us-east-1
+      - AWS_S3_UPLOAD_BUCKET_URL=http://localhost:9000
+      - AWS_S3_UPLOAD_BUCKET_NAME=uploads
+      - AWS_S3_FORCE_PATH_STYLE=true
+      - AWS_S3_ACL=private
+      - AWS_S3_UPLOAD_MAX_SIZE=26214400
+      - PGSSLMODE=disable
+      - OIDC_CLIENT_ID=你的OIDC客戶端ID
+      - OIDC_CLIENT_SECRET=你的OIDC客戶端密鑰
+      - OIDC_AUTH_URI=https://github.com/login/oauth/authorize
+      - OIDC_TOKEN_URI=https://github.com/login/oauth/access_token
+      - OIDC_SCOPES=read:user user:email
+      - OIDC_USERINFO_URI=https://api.github.com/user
+      - OIDC_USERNAME_CLAIM=name
+      - OIDC_DISPLAY_NAME=GitHub
+    depends_on:
+      - postgres
+      - redis
+      - minio
+
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=outline
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6
+    volumes:
+      - redis_data:/data
+
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+```
+
+啟動服務指令：
+
+```bash
+docker-compose up -d
+```
+
+P.S. 如果無法上傳 Create Bucket > "uplaods"  
+
+```
+http://localhost:9001/
+```
+
+---
+
+## 🚪 登入方式說明
+
+Outline 不支援帳密登入，僅支援多種第三方帳號登入，以下為主要選項及注意事項：
+
+* **Google 登入**
+  需使用 Google Workspace（企業帳號），不支援個人 Gmail 帳號。
+
+* **GitHub 登入**
+  需先在 GitHub 授權 Outline 應用：[GitHub 應用授權設定](https://github.com/settings/applications/3037670)
+
+* **Microsoft 登入**
+  僅支援 Azure AD（企業帳號），不支援個人 Microsoft 帳號。
+
+---
+
+## 💾 資料備份要點
+
+Outline 主要包含兩部分資料：
+
+1. **PostgreSQL 資料庫**：儲存頁面內容、使用者資訊及版本歷史
+2. **MinIO 儲存空間**：存放所有使用者上傳的圖片及檔案，相當於本地端的 Amazon S3
+
+---
+
+## 訪問
+```
+http://localhost:27777/
+```
+![編輯畫面](screenshot.png)
+
+## ✅ 備份
+
+### Step 1：備份 PostgreSQL 資料庫
+
+```bash
+docker exec -t $(docker ps -qf name=postgres) pg_dump -U postgres outline > outline_backup.sql
+```
+
+> **注意：**
+>
+> * 匯出檔案為 SQL 格式，會存放於執行目錄。
+> * 若容器名稱非 `postgres`，請使用 `docker ps` 查詢並替換。
+
+---
+
+### Step 2：備份 MinIO 資料
+
+```bash
+docker run --rm -v minio_data:/volume -v $(pwd):/backup alpine tar czf /backup/minio_backup.tar.gz -C /volume .
+```
+
+> **注意：**
+>
+> * 會將 MinIO volume 內所有檔案壓縮為 `.tar.gz`。
+> * `minio_data` 為 MinIO 的 volume 名稱，請依實際情況調整。
+
+---
+
+## ♻️ 還原流程
+
+### 還原 PostgreSQL 資料庫
+
+```bash
+cat outline_backup.sql | docker exec -i $(docker ps -qf name=postgres) psql -U postgres -d outline
+```
+
+### 還原 MinIO 資料
+
+```bash
+docker run --rm -v minio_data:/volume -v $(pwd):/backup alpine sh -c "cd /volume && tar xzf /backup/minio_backup.tar.gz"
+```
+
+---
+
+這樣內容就完全聚焦在 Outline，且移除了 Wiki.js 的所有字眼。需要我幫你調整封面圖片命名或其他細節嗎？
