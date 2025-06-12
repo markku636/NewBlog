@@ -119,10 +119,10 @@ Outline 不支援帳密登入，僅支援多種第三方帳號登入，以下為
   需使用 Google Workspace（企業帳號），不支援個人 Gmail 帳號。
 
 * **GitHub 登入**
-  需先在 GitHub 授權 Outline 應用：[GitHub 應用授權設定](https://github.com/settings/applications/3037670)
+  支援個人Github 帳號：[GitHub 應用授權設定](https://github.com/settings/applications/3037670)
 
 * **Microsoft 登入**
-  僅支援 Azure AD（企業帳號），不支援個人 Microsoft 帳號。  
+  支援 Azure AD（企業帳號）及個人 Microsoft 帳號。  
   [參考資料](https://medium.com/chouhsiang/%E9%96%8B%E7%99%BC%E4%BB%8B%E6%8E%A5azure-ad-1-sso-86d90cdba13)
 
 ---
@@ -136,6 +136,7 @@ docker exec -it outline-wiki-minio-1 sh
 
 # 2. 設定 mc 別名
 mc alias set myminio http://localhost:9000 account password
+
 
 # 3. 設定 uploads bucket 為匿名可讀
 mc anonymous set download myminio/uploads
