@@ -127,6 +127,26 @@ Outline 不支援帳密登入，僅支援多種第三方帳號登入，以下為
 
 ---
 
+## 修正MinIO 圖片無法正常顯示問題
+### 3. 文章圖片無法上傳，登入 MinIO Web UI，手動建立  Blcket "uploads"
+### 4. 大頭照無法顯示
+```
+# 1. 進入 Minio 容器
+docker exec -it outline-wiki-minio-1 sh
+
+# 2. 設定 mc 別名
+mc alias set myminio http://localhost:9000 minio minio123
+
+# 3. 設定 uploads bucket 為匿名可讀
+mc anonymous set download myminio/uploads
+
+# 4. 檢查設定是否成功
+mc anonymous get myminio/uploads
+
+# 5. 離開容器
+exit
+```
+
 ## 💾 資料備份要點
 
 Outline 主要包含兩部分資料：
