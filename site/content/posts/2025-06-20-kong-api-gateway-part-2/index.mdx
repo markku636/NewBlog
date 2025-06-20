@@ -1,0 +1,213 @@
+---
+featured: true
+title: 打造高效 API 管理平台：客製化 Kong API Gateway 套件開發 - Part 2
+date: 2025-06-20 01:01:35 +0800
+thumbnail: kong-api-gateway-part2-custom-plugin.png
+category: API Management
+tags: ['kong', 'api gateway', 'plugin development', 'lua', 'docker', 'custom plugin']
+description: 深入探討 Kong API Gateway 自訂套件開發，從基礎概念到實戰應用，包含 handler.lua 和 schema.lua 的完整開發流程，以及套件部署與測試的最佳實踐。
+author: Mark Ku
+slug: kong-api-gateway-part2-custom-plugin
+---
+
+## 撰寫套件腳本
+
+在 Kong 的**自訂套件開發**中，`handler.lua` 和 `schema.lua` 是兩個**核心檔案**，負責定義套件的**邏輯行為**與**設定結構**。
+
+- **handler.lua**：寫套件的「行為邏輯」，定義套件怎麼攔截或處理 API 請求和回應
+- **schema.lua**：定義套件的「設定格式」，告訴 Kong 套件需要哪些參數、型態和規則
+
+### 撰寫 handler.lua
+
+```lua
+-- 導入必要的 Kong 模組
+local kong_meta = require "kong.meta"
+local cjson = require "cjson.safe"
+
+-- 定義套件的基本資訊
+-- PRIORITY: 執行優先級，數字越大優先級越高
+-- VERSION: 套件版本號
+local CustomHandler = {
+  PRIORITY = 990,
+  VERSION = "1.0",
+}
+
+-- 套件的主要處理函數
+-- 在 access 階段執行，用於處理請求前的邏輯
+function CustomHandler:access(plugin_conf)
+  kong.log(">>>>>>>> 套件開始執行 <<<<<<<<")
+
+  -- 從套件配置中提取參數
+  kong.log(">>>>>>>>> 步驟1: 載入配置參數 <<<<<<<<<")
+  local METHOD = plugin_conf.method
+  local HEADERS = plugin_conf.headers
+  local BODY = plugin_conf.body
+  kong.log(">>>>>>>>> 配置載入完成 <<<<<<<<<")
+
+  -- 記錄配置資訊到日誌
+  kong.log(">>>>>>>>> 步驟2: 記錄配置資訊 <<<<<<<<<")
+  kong.log(">>>>>>>>> 請求方法 = ", cjson.encode(METHOD), "<<<<<<<<<")
+  kong.log(">>>>>>>>> 請求頭部 = ", cjson.encode(HEADERS), "<<<<<<<<<")
+  kong.log(">>>>>>>>> 請求體 = ", cjson.encode(BODY), "<<<<<<<<<")
+  kong.log(">>>>>>>>> 配置記錄完成 <<<<<<<<<")
+  
+  -- access 階段不需要返回值，請求會繼續向下處理
+  -- 如果需要修改請求，可以在這裡設定 header 或其他屬性
+end
+
+return CustomHandler
+```
+
+### 撰寫 schema.lua
+
+```lua
+local typedefs = require "kong.db.schema.typedefs"
+
+return {
+  name = "log-traffic",
+  fields = {
+    { protocols = typedefs.protocols_http },
+    { config = {
+        type = "record",
+        -- 此處根據 handler.lua 檔案中的配置，來新增指定欄位
+        fields = {
+          { method = { type = "string", default = "GET"} },
+          { headers = {
+            type = "map",
+            keys = typedefs.header_name {
+              match_none = {
+                {
+                  pattern = "^[Hh][Oo][Ss][Tt]$",
+                  err = "cannot contain 'Host' header",
+                },
+                {
+                  pattern = "^[Cc][Oo][Nn][Tt][Ee][Nn][Tt]%-[Ll][Ee][nn][Gg][Tt][Hh]$",
+                  err = "cannot contain 'Content-Length' header",
+                },
+              },
+            },
+            values = {
+              type = "string",
+              referenceable = true,
+            },
+          }},
+          { body = {
+            type = "map",
+            keys = {
+              type = "string",
+              referenceable = true,
+            },
+            values = {
+              type = "string",
+              referenceable = true,
+            },
+          }},
+        },
+      },
+    },
+  },
+}
+```
+
+## 部署自訂套件
+
+Kong 官方建議將自訂 Plugin 放在 Kong 的 Lua 路徑下，或是 Docker 映像檔的 `/usr/local/share/lua/5.1/kong/plugins/` 目錄。不過，在開發階段，放在專案資料夾內管理即可，部署時再複製到正確位置或用 Docker volume 掛載。
+
+### 複製套件到容器
+
+```bash
+docker cp log-traffic kong:/usr/local/share/lua/5.1/kong/plugins
+```
+
+### 進入 Kong 容器
+
+```bash
+docker exec -it -u root kong /bin/sh
+```
+
+### 安裝編輯器
+
+```bash
+apt update && apt install -y vim
+```
+
+### 編輯套件清單
+
+```bash
+vim /usr/local/share/lua/5.1/kong/constants.lua
+```
+
+在 plugin 清單裡加上自己的套件名稱 `"log-traffic"`
+
+![編輯配置](edit-config.png.png)
+
+### 設定 Kong 配置
+
+| 檔案位置 | 說明 |
+|---------|------|
+| `/etc/kong/kong.conf.default` | 預設範本，不能直接修改 |
+| `/etc/kong/kong.conf` | 正式用的設定檔（自己從 default 複製來的） |
+
+新建/修改 `/etc/kong/kong.conf`：
+
+```bash
+vim /etc/kong/kong.conf
+```
+
+加入以下設定：
+
+```bash
+plugins = bundled,log-traffic  # 指定了要載入的套件 
+# lua_package_path = /kong/plugins/?.lua;; # 指定了自訂套件的目錄
+```
+
+## 重啟 Docker 容器
+
+```bash
+docker restart kong
+```
+
+### 檢查客製套件是否載入成功
+
+重啟後，檢查客製的套件是不是有在支援清單中：
+
+<http://localhost:8001/plugins/enabled>
+
+![啟用的套件清單](edit-config.png)
+
+### 將套件套用在服務或路由上
+
+套用到服務：
+
+```bash
+POST http://localhost:8001/services/{service}/plugins
+Content-Type: application/json
+
+{
+  "name": "log-traffic"
+}
+```
+
+套用到路由：
+
+```bash
+POST http://localhost:8001/routes/{route}/plugins
+Content-Type: application/json
+
+{
+  "name": "log-traffic"
+}
+```
+
+查看已套用的套件：<http://localhost:8001/plugins/>
+
+### 驗證功能
+
+查看 Docker 日誌來確認套件是否正常運作：
+
+```bash
+docker logs kong
+```
+
+![Docker 日誌輸出](docker-logs.png)
+
