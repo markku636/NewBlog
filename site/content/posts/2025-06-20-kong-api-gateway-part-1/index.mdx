@@ -196,10 +196,10 @@ http://localhost:8000/blog -> https://blog.markkulab.net/
 範例：
 
 ```bash
-POST /consumers
-{ "username": "gold" }
+curl -i -X POST http://localhost:8001/consumers \
+  --data "username=gold"
 
-POST /consumers/gold/key-auth
+curl -i -X POST http://localhost:8001/consumers/gold/key-auth
 
 POST /consumers/gold/plugins
 {
@@ -218,7 +218,6 @@ API 請求時帶上 key：
 GET /your-api
 apikey: <your-key>
 ```
-
 
 ---
 
