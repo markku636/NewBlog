@@ -12,10 +12,7 @@ slug: kong-api-gateway-part1-setup
 
 ## Kong 是什麼？
 
-Kong 是一套基於 Nginx 和 OpenResty 的高效能 API Gateway，核心以 Lua 編寫，具備反向代理、API 管理與插件擴充等功能。Kong 可搭配 PostgreSQL 作為設定儲存，也支援無資料庫（DB-less）模式，透過靜態 YAML 或 JSON 檔直接載入配置。
-
-**DB-less 模式說明**：Kong 在啟動時從設定檔載入所有設定（如路由、服務、插件），不需資料庫即可運行，適合部署在 CI/CD 環境中。
-
+Kong 是一套基於 Nginx 和 OpenResty 的高效能 API Gateway，核心以 Lua 編寫，具備反向代理、API 管理與套件擴充等功能，Kong 可搭配 PostgreSQL 作為設定儲存，也支援無資料庫（DB-less）模式，透過靜態 YAML 或 JSON 檔直接載入設定。
 
 ---
 
@@ -26,7 +23,6 @@ Kong 是一套基於 Nginx 和 OpenResty 的高效能 API Gateway，核心以 Lu
 * 支援多環境與版本部署
 * API 使用統計與計費
 * 安全驗證（API Key、JWT、OAuth2 等）
-
 
 ---
 
