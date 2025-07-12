@@ -1,0 +1,110 @@
+---
+featured: true
+title: OpenResty 與 Kong：高效能 Web 平台與 API Gateway 初探
+slug: openresty-kong-api-gateway
+category: DevOps
+thumbnail: openresty-kong.png
+date: 2025-07-13 01:01:00 +0800
+tags: ['OpenResty', 'Kong', 'Nginx', 'API Gateway', '除錯', 'DevOps']
+description: 介紹 OpenResty 與 Kong，從高效能 Web 平台到 API Gateway，還有實用的容器除錯技巧，讓你快速上手、輕鬆維運。
+author: Mark Ku
+---
+
+# OpenResty 與 Kong：高效能 Web 平台與 API Gateway 初探
+
+現在做網站、API，大家都很在意效能跟彈性。OpenResty 就是用 Nginx 加上 Lua 腳本，讓你不只做靜態代理，還能很彈性地處理各種需求。Kong 則是直接用 OpenResty 打造的 API Gateway，很多新創或大公司都在用。這篇就用比較口語的方式，帶你快速認識 OpenResty 跟 Kong，還有怎麼在容器裡 debug。
+
+## OpenResty 是什麼？
+
+簡單說，OpenResty 就是 Nginx 加上 Lua，可以寫腳本擴充功能。你想要 API Gateway、反向代理、甚至做 WAF（Web 防火牆）都沒問題。
+
+### OpenResty 有什麼厲害的？
+
+- **超高效能**：Nginx 本來就快，加上 Lua 腳本，彈性又快。
+- **擴充超方便**：Lua 腳本改一改就能 reload，不用重編譯。
+- **生態圈很大**：很多現成 Lua 模組，像認證、快取、API 管理都找得到。
+- **彈性應用**：API Gateway、反向代理、WAF、日誌收集都能搞定。
+
+### 適合誰？
+- 想要高效能 API Gateway 或反向代理的團隊
+- 想用 Lua 快速擴充 Nginx 的工程師
+- 做微服務、DevOps 的朋友
+
+## OpenResty 可以拿來做什麼？
+
+- API Gateway
+- 動態網站
+- 反向代理、負載平衡
+- WAF（Web 防火牆）
+- 日誌、監控收集
+
+## Kong：OpenResty 打造的 API Gateway
+
+Kong 就是用 OpenResty 做底層，然後把 API 管理、認證、流量控管都模組化。你要加功能就裝 plugin，超方便。
+
+### Kong 有什麼特色？
+- **插件化**：功能都用 plugin，想加什麼就加什麼。
+- **高效能**：底層就是 OpenResty/Nginx，速度沒話說。
+- **分散式、雲原生**：K8s、Docker 都能跑，彈性很大。
+- **社群活躍**：遇到問題，網路上很多人可以討論。
+
+### Kong 跟 OpenResty 的關係？
+Kong 就是把 OpenResty 的彈性發揮到極致，讓你不用自己寫 Lua，也能很快搞定 API Gateway 需求。
+
+## 除錯 OpenResty 跟 Kong 怎麼做？
+
+1. **看 Error Log**
+   - 路徑通常在 `/usr/local/openresty/nginx/logs/error.log` 或 `/var/log/nginx/error.log`
+   - 適合：初步排查問題
+2. **開 Debug Log**
+   - Kong：`kong.conf` 設 `log_level = debug`
+   - OpenResty：`nginx.conf` 設 `error_log ... debug;`
+   - 適合：想看更細的執行流程
+3. **Lua 腳本加 log**
+   - `ngx.log(ngx.ERR, "Debug info: ", cjson.encode(var))`
+   - 適合：追蹤變數、流程
+4. **API 測試**
+   - 用 Postman/curl 打 API 看回應
+   - 適合：驗證 plugin、路由、認證
+5. **Plugin 配置順序**
+   - Kong 的 plugin 有順序，搞錯會怪怪的
+6. **官方文件/社群**
+   - OpenResty: https://openresty.org/
+   - Kong: https://docs.konghq.com/
+
+### 容器（Docker）裡怎麼遠端 debug？
+
+1. **進容器看日誌**
+   ```bash
+   docker exec -it openresty-container /bin/sh
+   tail -f /usr/local/openresty/nginx/logs/error.log
+   ```
+2. **直接看容器 log**
+   ```bash
+   docker logs -f openresty-container
+   ```
+3. **掛本地目錄**
+   ```bash
+   docker run -v /your/local/logs:/usr/local/openresty/nginx/logs ... openresty
+   ```
+4. **抓封包看流量**
+   ```bash
+   sudo tcpdump -i docker0 port 8080
+   ```
+5. **VSCode Remote - Containers**
+   - 直接用 VSCode 編輯、debug 容器裡的檔案，超方便
+
+#### 常見錯誤排查小撇步
+- nginx.conf 寫錯（可以用 `nginx -t` 測）
+- 容器網路沒通
+- Lua 腳本有 bug 或少裝套件
+- Plugin 順序搞錯
+
+---
+
+## 結語
+
+OpenResty 讓 Nginx 變超強，Kong 又把 API Gateway 做到極致。你只要有 API 管理、流量控管、認證需求，這兩套工具真的很值得玩玩看。遇到問題多看 log、多用社群，debug 也不難！
+
+有問題歡迎留言討論，大家一起進步！
+
