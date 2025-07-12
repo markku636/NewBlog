@@ -1,0 +1,74 @@
+---
+featured: true
+title: Oracle Cloud 永久免費Linux 主機
+slug: oracle-cloud-free-solutions
+category: Cloud
+thumbnail: oracle-cloud-free-linux.png
+date: 2025-06-01 01:01:00 +0800
+tags: ['oracle cloud', '免費雲端', 'frps', 'rest api', '架站', 'linux', '雲端主機', 'vm']
+description: 深入解析 Oracle Cloud 永久免費層，教你如何用 0 元打造 frps 穿透、REST API 測試環境、個人網站等多元雲端應用，附申請、建置、常見問題與最佳實戰案例。
+author: Cursor
+---
+
+## Oracle Cloud 永久免費層：0 元打造雲端解決方案
+
+Oracle Cloud 提供業界少見的「永久免費層」（Always Free Tier），不僅能申請雲端主機，還能用於多種應用場景，對於開發者、學生、SOHO 族、小型企業來說，是最划算的雲端入門選擇。
+
+### 免費資源亮點
+- 2 台 VM.Standard.E2.1.Micro（1 OCPU/1GB RAM，x86）
+- 4 OCPU/24GB RAM 的 Arm VM（A1.Flex，可彈性分配）
+- 100GB 區塊儲存、10GB 物件儲存
+- 10TB/月外部流量
+- 免費資料庫、負載平衡、監控等
+
+> 這些資源「永久免費」，只要帳號不違規就能一直用！
+
+---
+
+## 申請 Oracle Cloud 免費帳號教學
+
+1. 前往 [Oracle Cloud 官網](https://www.oracle.com/cloud/free/) 點「Start for free」
+2. 填寫基本資料、驗證 Email、設定密碼
+3. 輸入信用卡（僅驗證，不會扣款，建議用實體卡）
+4. 完成手機驗證，等待審核（通常 5-30 分鐘）
+
+> 若遇到信用卡驗證失敗，請換卡或確認卡片支援國際交易。
+
+---
+
+## 免費的 Linux 可以做些什麼? 
+### 1. 架設 frps 內網穿透伺服器
+- 免費 VM 非常適合架設 [frps](https://github.com/fatedier/frp) 伺服器，讓家中/公司內網服務可被外部安全存取
+- 步驟：
+  1. VM 安裝 frps
+  2. 設定防火牆開放對應 port
+  3. 客戶端（frpc）連回 Oracle VM
+- 適合遠端桌面、NAS、IoT、Web 服務等穿透需求
+
+### 2. RestDesktop 遠端桌面服務
+- 利用免費 VM 架設遠端桌面（如 RestDesktop、Windows RDP、VNC 等）服務
+- RestDesktop 是一種遠端連線軟體，適合遠端桌面操作、遠端協作、技術支援等場景
+- 步驟：
+  1. 在 VM 上安裝 RestDesktop 或其他遠端桌面伺服器（如 xrdp、VNC、NoMachine 等）
+  2. 設定防火牆開放對應遠端桌面連線埠（如 3389、5900 等）
+  3. 從本地端使用 RestDesktop 客戶端或對應軟體連線 Oracle VM
+- 適合遠端辦公、遠端教學、跨地區協作等需求
+
+### 3. 架設個人網站/部落格
+- 安裝 Nginx/Apache + WordPress、Hugo、Gatsby 等
+- 免費 SSL 憑證（Let's Encrypt）
+- 適合個人作品集、部落格、Landing Page
+
+### 4. 其他應用
+- VPN/Proxy 伺服器（自用科學上網）
+- Nextcloud 私有雲
+- 小型爬蟲、Bot、定時任務
+- 學習 Linux/自動化部署/CI/CD
+
+---
+
+## 結語：Oracle Cloud 免費層，雲端應用無限可能
+
+Oracle Cloud 永久免費層不僅能省下主機費，更能滿足多元開發、測試、學習、架站、內網穿透等需求，只要善用資源，0 元也能玩出專業級雲端解決方案！
+
+有任何問題或想法，歡迎留言討論，一起交流更多應用實戰！ 

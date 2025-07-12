@@ -212,6 +212,87 @@ docker logs kong
 
 ![Docker log 輸出](docker-logs.png)
 
+## 常見開發與除錯技巧
+
+### 1. Plugin 熱重載（Hot Reload）技巧
+
+Kong 本身不支援 Lua Plugin 的熱重載，每次修改 Plugin 內容後都需要重啟 Kong 容器。開發時建議：
+
+- 使用 Docker volume 掛載 plugin 目錄，這樣只要重啟容器就能載入新程式碼。
+- 可以寫一個簡單的 shell script，自動重啟 Kong 並 tail log，提升開發效率。
+
+### 2. Plugin 日誌與除錯
+
+- 使用 `kong.log.inspect()` 可以更方便地輸出 table 結構，便於除錯。
+- 也可以用 `print()`，但建議還是用 `kong.log` 相關 API，這樣 log 會出現在 Kong 的標準日誌中。
+
+範例：
+```lua
+kong.log.inspect(plugin_conf)
+```
+
+### 3. Plugin 生命週期（Lifecycle）
+
+Kong Plugin 支援多個執行階段（phase），常見有：
+
+- `access`：處理請求前
+- `header_filter`：處理回應 header
+- `body_filter`：處理回應 body
+- `log`：請求結束後
+
+你可以根據需求實作不同階段的函數，例如：
+
+```lua
+function CustomHandler:header_filter(conf)
+  kong.response.set_header("X-My-Plugin", "active")
+end
+```
+
+### 4. Plugin 測試
+
+- 建議用 Postman 或 curl 測試 API，觀察 plugin 是否正確攔截與處理請求。
+- 可以用 Kong 的 Admin API 查詢 plugin 狀態與日誌。
+
+### 5. Plugin 配置參數驗證
+
+- schema.lua 可以設定參數的預設值、必填、型態、正則驗證等，減少錯誤發生。
+- 若參數驗證失敗，Kong 會自動回傳 400 錯誤。
+
+## 進階應用
+
+### 1. 與資料庫互動
+
+如果 plugin 需要存取資料庫，可以使用 Kong 提供的 DAO（Data Access Object）API，例如存取 Postgres：
+
+```lua
+local dao = kong.db.your_custom_table
+local row, err = dao:select({ id = some_id })
+```
+
+### 2. 外部 API 呼叫
+
+可以用 Lua 的 http client（如 `resty.http`）在 plugin 內呼叫外部 API：
+
+```lua
+local http = require "resty.http"
+local httpc = http.new()
+local res, err = httpc:request_uri("https://api.example.com", { method = "GET" })
+```
+
+## 常見問題 FAQ
+
+**Q: Plugin 沒有生效怎麼辦？**  
+A:  
+- 檢查 plugin 是否有加到 `/usr/local/share/lua/5.1/kong/plugins/` 目錄
+- 檢查 `/etc/kong/kong.conf` 是否有加到 plugins 列表
+- 檢查 schema.lua 與 handler.lua 是否語法正確
+- 查看 Kong 日誌，尋找錯誤訊息
+
+**Q: 如何管理多個自訂 Plugin？**  
+A:  
+- 建議每個 plugin 一個資料夾，方便維護
+- 可以寫 Makefile 或 shell script 自動部署到 Docker
+
 ## 相關資源
 * [官方範例客製套件範本](https://github.com/Kong/kong-plugin.git)
 * [開源的套件網站 - Lua Rock](https://luarocks.org/)
