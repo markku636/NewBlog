@@ -12,11 +12,11 @@ author: Mark Ku
 
 # OpenResty 與 Kong：高效能 Web 平台與 API Gateway 初探
 
-現在做網站、API，大家都很在意效能跟彈性。OpenResty 就是用 Nginx 加上 Lua 腳本，讓你不只做靜態代理，還能很彈性地處理各種需求。Kong 則是直接用 OpenResty 打造的 API Gateway，很多新創或大公司都在用。這篇就用比較口語的方式，帶你快速認識 OpenResty 跟 Kong，還有怎麼在容器裡 debug。
+現在做網站、API，大家都很在意效能跟彈性，OpenResty 就是用 Nginx 加上 Lua 腳本，讓你不只做靜態代理，還能很彈性地處理各種需求，Kong 則是直接用 OpenResty 打造的 API Gateway，很多新創或大公司都在用。這篇就用比較口語的方式，帶你快速認識 OpenResty 跟 Kong，還有怎麼在容器裡 debug。
 
 ## OpenResty 是什麼？
 
-簡單說，OpenResty 就是 Nginx 加上 Lua，可以寫腳本擴充功能。你想要 API Gateway、反向代理、甚至做 WAF（Web 防火牆）都沒問題。
+簡單說，OpenResty 就是 Nginx 加上 Lua，可以寫腳本擴充功能，你想要 API Gateway、反向代理、甚至做 WAF（Web 防火牆）都沒問題。
 
 ### OpenResty 有什麼厲害的？
 
@@ -40,10 +40,10 @@ author: Mark Ku
 
 ## Kong：OpenResty 打造的 API Gateway
 
-Kong 就是用 OpenResty 做底層，然後把 API 管理、認證、流量控管都模組化。你要加功能就裝 plugin，超方便。
+Kong 就是用 OpenResty 做底層，然後把 API 管理、認證、流量控管都模組化，你要加功能就裝 plugin，超方便。
 
 ### Kong 有什麼特色？
-- **插件化**：功能都用 plugin，想加什麼就加什麼。
+- **套件化**：功能都用 plugin，想加什麼就加什麼。
 - **高效能**：底層就是 OpenResty/Nginx，速度沒話說。
 - **分散式、雲原生**：K8s、Docker 都能跑，彈性很大。
 - **社群活躍**：遇到問題，網路上很多人可以討論。
