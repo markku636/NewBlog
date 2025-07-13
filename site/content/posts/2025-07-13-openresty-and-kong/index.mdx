@@ -55,7 +55,7 @@ Kong 就是把 OpenResty 的彈性發揮到極致，讓你不用自己寫 Lua，
 
 1. **看 Error Log**
    - 路徑通常在 `/usr/local/openresty/nginx/logs/error.log` 或 `/var/log/nginx/error.log`
-   - 適合：初步排查問題
+   - 適合：初步除錯問題
 2. **開 Debug Log**
    - Kong：`kong.conf` 設 `log_level = debug`
    - OpenResty：`nginx.conf` 設 `error_log ... debug;`
@@ -94,7 +94,7 @@ Kong 就是把 OpenResty 的彈性發揮到極致，讓你不用自己寫 Lua，
 5. **VSCode Remote - Containers**
    - 直接用 VSCode 編輯、debug 容器裡的檔案，超方便
 
-#### 常見錯誤排查小撇步
+#### 常見錯誤除錯小撇步
 - nginx.conf 寫錯（可以用 `nginx -t` 測）
 - 容器網路沒通
 - Lua 腳本有 bug 或少裝套件

@@ -6,7 +6,7 @@ category: DevOps
 thumbnail: vscode-lua-debug-openresty.png
 date: 2025-07-13 06:01:00 +0800
 tags: ['Lua', '除錯', 'VSCode', 'OpenResty', 'EmmyLua', 'DevOps']
-description: 教你如何在 VSCode 下針對 Lua 進行斷點除錯，並介紹必裝套件與常見排查技巧，OpenResty 實戰流程完整公開。
+description: 教你如何在 VSCode 下針對 Lua 進行斷點除錯，並介紹必裝套件與常見除錯技巧，OpenResty 實戰流程完整公開。
 author: Mark Ku
 ---
 
@@ -270,11 +270,11 @@ http {
 
 ---
 
-## Lua 除錯常見技巧與排查
+## Lua 除錯常見技巧與除錯
 
 1. **看 Error Log**  
    `/usr/local/openresty/nginx/logs/error.log`  
-   初步排查問題必看。
+   初步除錯問題必看。
 2. **開 Debug Log**  
    - OpenResty：`nginx.conf` 設 `error_log ... debug;`
 3. **Lua 腳本加 log**  
