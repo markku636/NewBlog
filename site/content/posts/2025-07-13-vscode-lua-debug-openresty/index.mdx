@@ -218,55 +218,9 @@ location /lua {
 
 ---
 
-## 完整 nginx.conf 範例
-
-以下為本專案的 nginx.conf 範例，已包含 myapp.lua 路由與 /get-country 範例，適合直接用於 OpenResty + Lua 除錯環境：
-
-```nginx
-worker_processes  1;
-events {
-    worker_connections  1024;
-}
-http {
-    lua_package_path "/usr/local/openresty/lualib/?.lua;/usr/local/openresty/nginx/lua/?.lua;;";
-    server {
-        listen 80;
-        server_name localhost;
-
-        location /lua {
-            default_type 'text/plain';
-            content_by_lua_file /usr/local/openresty/nginx/lua/myapp.lua;
-        }
-
-        location /get-country {
-            default_type 'text/plain';
-            content_by_lua_block {
-                local cjson = require 'cjson'
-                local geo = require 'resty.maxminddb'
-                if not geo.initted() then
-                    geo.init("/usr/local/openresty/nginx/lua/GeoLite2-City.mmdb")
-                end
-                local res,err = geo.lookup(ngx.var.arg_ip or ngx.var.remote_addr) --support ipv6 e.g. 2001:4860:0:1001::3004:ef68
-
-                if not res then
-                    ngx.log(ngx.ERR,'failed to lookup by ip ,reason:',err)
-                end
-                ngx.say("full :",cjson.encode(res))
-                if ngx.var.arg_node then
-                   ngx.say("node name:",ngx.var.arg_node," ,value:", cjson.encode(res[ngx.var.arg_node] or {}))
-                end
-            }
-        }
-
-        access_log /usr/local/openresty/nginx/logs/access.log;
-        error_log  /usr/local/openresty/nginx/logs/error.log;
-    }
-} 
-```
-
 > 當用戶端（如瀏覽器或 curl）請求 http://localhost:8080/lua 時，Nginx 會將該請求交給 myapp.lua 處理，並將結果回傳給用戶端。你也可以依需求調整路由。
 
-![除錯](screenshot.png)
+![除錯畫面](screenshot.png)
 
 ---
 
