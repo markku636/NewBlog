@@ -1,0 +1,437 @@
+---
+featured: true
+title: APISIX API Gateway：開源實測與 Kong 比較
+slug: apisix-openresty-gateway
+category: DevOps
+thumbnail: apisix.png
+date: 2025-07-17 06:01:00 +0800
+tags: ['APISIX', 'Kong', 'API Gateway', 'OpenResty', 'DevOps', 'etcd', 'Rate Limiting']
+description: 深入介紹 APISIX API Gateway 的架構、功能、與 Kong 的比較，並分享實際測試與進階應用技巧。
+author: Mark Ku
+---
+
+# APISIX API Gateway：開源實測與 Kong 比較
+
+## 為什麼選擇 APISIX？
+
+在使用 Kong 免費版時，遇到 Service 與 Route 綁定、Consumer Group 受限等問題，因此開始研究 APISIX 作為替代方案。APISIX 由 Apache 基金會管理，社群活躍、功能彈性，且支援 Route Only 模式、Consumer Group、熱更新、多語言插件等，是現代 API Gateway 的強力選擇。
+
+---
+
+## APISIX 與 Kong 規格比較
+
+| 項目 | **APISIX** | **Kong (OSS)** |
+|----|----|----|
+| 開源授權 | Apache 2.0 | Apache 2.0 |
+| 架構核心 | NGINX + LuaJIT（基於 OpenResty） | NGINX + LuaJIT（基於 OpenResty） |
+| 配置儲存 | etcd | PostgreSQL |
+| 配置方式 | REST API / etcd / YAML / Dashboard | REST API / YAML / Kong Manager（企業版） |
+| 插件機制 | 熱更新插件，支援 Lua/Go/Java | Lua 插件、重啟加載 |
+| 性能 | 高吞吐、低延遲，支援動態路由 | 穩定但相對保守 |
+| 熱更新支援 | ✅ 無需重啟即可新增/修改插件 | ❌ 需 reload 或 restart |
+| Dashboard UI | ✅（開源） | ❌（需企業版 Kong Manager） |
+| Kubernetes 支援 | ✅ 原生 Ingress Controller | ✅（Kong Ingress Controller） |
+| 多語言插件 | ✅ Lua / Go / Java / Wasm | ❌ 僅 Lua |
+| Consumer Group | ✅（內建支援） | ❌（Kong OSS 不支援） |
+| 插件數量（開源） | 60+ | 約 30+ |
+| Rate Limit 機制 | 內建限流、彈性強，支援分布式限流 | 有限，但需 Redis/Cassandra |
+| 安全性插件 | ✅（JWT、key-auth、IP 限制、WAF） | ✅（JWT、ACL 等） |
+| API 文檔產生 | ✅（內建） | ❌（需手動整合） |
+| 支援 gRPC / WebSocket | ✅ 原生支援 | 🔶 Kong 要用 plugin 支援 |
+| 社群活躍度 | 高（中國社群強、快速更新） | 穩定（全球用戶多） |
+| 商業支持 | API7.ai（APISIX） | Kong Inc（企業版） |
+| 運維複雜度 | 稍高（etcd需維護） | 較簡單（PostgreSQL） |
+
+---
+
+## Kong vs APISIX 路由設定簡化比較
+
+### 實務情境
+
+假設你想要將 `/wms/api/item/1` 轉址到 `http://172.22.112.1:1080/api/item/1`，以下分別用 Kong 與 APISIX 實現：
+
+#### Kong 設定流程
+
+1. 建立 Service：
+
+```bash
+POST http://localhost:8001/services
+Content-Type: application/json
+
+{
+  "name": "wms",
+  "url": "http://localhost:1081/"
+}
+```
+
+2. 建立 Route：
+
+```bash
+POST http://localhost:8001/routes
+Content-Type: application/json
+
+{
+  "name": "wms-api-item-1",
+  "paths": ["~/wms/(?<path>api/item/1)$"],
+  "strip_path": true,
+  "path_handling": "v1",
+  "service": {
+    "name": "wms"
+  },
+  "tags": ["wms"]
+}
+```
+
+3. 建立 request-transformer 插件來改寫路徑：
+
+```bash
+POST http://localhost:8001/plugins
+Content-Type: application/json
+
+{
+  "name": "request-transformer",
+  "service": {
+    "name": "wms"
+  },
+  "tags": ["wms"],
+  "config": {
+    "replace": {
+      "uri": "/$(uri_captures[\"path\"])"
+    }
+  }
+}
+```
+
+> Kong 需要 3 次 API Call，且路徑改寫需額外插件，設定較繁瑣。
+
+#### APISIX 設定流程
+
+APISIX 支援 Route Only 模式，直接一次 API Call 完成：
+
+```bash
+PUT http://127.0.0.1:9180/apisix/admin/routes/api-0001
+X-API-KEY: <your-api-key>
+Content-Type: application/json
+
+{
+  "uri": "/wms/api/item/1",
+  "name": "/wms/api/item/1",
+  "priority": 10,
+  "methods": ["GET", "POST", "PUT", "DELETE"],
+  "plugins": {
+    "proxy-rewrite": {
+      "regex_uri": ["^/wms/(.*)", "/$1"]
+    }
+  },
+  "upstream": {
+    "type": "roundrobin",
+    "nodes": {
+      "172.22.112.1:1080": 1
+    }
+  }
+}
+```
+
+> APISIX 只需 1 次 API Call，內建 proxy-rewrite 處理路徑改寫，設定極簡。
+
+#### 設定複雜度比較
+
+| 項目             | Kong                | APISIX             |
+|------------------|---------------------|--------------------|
+| 需要建立 Service | ✅                  | ❌                 |
+| 需要建立 Route   | ✅                  | ✅                 |
+| API Call 次數    | 3                   | 1                  |
+| 設定複雜度       | 較高                | 極簡               |
+
+**小結：**
+- Kong：需建立 Service、Route、外掛插件，API Call 至少 3 次，設定較繁瑣。
+- APISIX：只需一次 API Call，直接設定 Route 並內建 proxy-rewrite，設定極為簡單。
+
+---
+
+## 路由動態條件（動態匹配）
+
+APISIX 支援多種動態條件來決定路由規則，不僅僅是根據 URI，還可以根據 HTTP Method、Header、Query 參數、Host 等進行靈活匹配，滿足複雜的 API 管理需求。
+
+### 常見動態條件
+
+- **HTTP Method**：可限定 GET、POST、PUT、DELETE 等。
+- **Header**：根據自訂 Header 內容分流。
+- **Query 參數**：根據 URL 查詢參數分流。
+- **Host**：根據請求 Host 進行路由。
+- **Remote Addr**：根據來源 IP 分流。
+
+### 範例：根據 Header 路由
+
+```json
+PUT http://127.0.0.1:9180/apisix/admin/routes/dynamic-header
+X-API-KEY: <your-api-key>
+Content-Type: application/json
+
+{
+  "uri": "/api/v1/resource",
+  "methods": ["GET"],
+  "name": "dynamic-header-route",
+  "priority": 20,
+  "vars": [
+    ["http_x-user-type", "==", "admin"]
+  ],
+  "upstream": {
+    "type": "roundrobin",
+    "nodes": {
+      "10.0.0.1:8080": 1
+    }
+  }
+}
+```
+> 上例會將帶有 `X-User-Type: admin` header 的請求，導向指定 upstream。
+
+### 範例：根據 Query 參數路由
+
+```json
+PUT http://127.0.0.1:9180/apisix/admin/routes/dynamic-query
+X-API-KEY: <your-api-key>
+Content-Type: application/json
+
+{
+  "uri": "/api/v1/resource",
+  "methods": ["GET"],
+  "name": "dynamic-query-route",
+  "priority": 10,
+  "vars": [
+    ["arg_version", "==", "beta"]
+  ],
+  "upstream": {
+    "type": "roundrobin",
+    "nodes": {
+      "10.0.0.2:8080": 1
+    }
+  }
+}
+```
+> 上例會將帶有 `?version=beta` 的請求，導向不同 upstream。
+
+---
+
+### 小結
+
+APISIX 的路由條件設計非常彈性，能根據多種請求屬性做動態分流，適合需要多層次流量管理的場景。
+
+## APISIX 特色與實測
+
+- **Route Only 模式**：不需先建立 Service，直接設定 Route，簡化流程。
+- **Consumer Group**：雖無 UI，但可用 API 操作，靈活分群管理。
+- **熱更新插件**：無需重啟即可新增/修改插件。
+- **多語言插件**：支援 Lua、Go、Java、Wasm。
+- **高彈性配置**：RESTful API、etcd、YAML 均可。
+
+### Route Only 實測
+
+以 /wms/api/item/1 轉址為例：
+
+```bash
+PUT http://127.0.0.1:9180/apisix/admin/routes/api-0001
+X-API-KEY: <your-api-key>
+Content-Type: application/json
+
+{
+  "uri": "/wms/api/item/1",
+  "name": "/wms/api/item/1",
+  "priority": 10,
+  "methods": ["GET", "POST", "PUT", "DELETE"],
+  "plugins": {
+    "proxy-rewrite": {
+      "regex_uri": ["^/wms/(.*)", "/$1"]
+    }
+  },
+  "upstream": {
+    "type": "roundrobin",
+    "nodes": {
+      "172.22.112.1:1080": 1
+    }
+  }
+}
+```
+
+---
+
+## Consumer Group 與限流方案
+
+APISIX 支援 Consumer Group，雖無 UI，但可用 API 建立與管理，並可搭配 Plugin Config 實現分群限流：
+
+```bash
+PUT http://localhost:9180/apisix/admin/consumer_groups/free
+X-API-KEY: <your-api-key>
+Content-Type: application/json
+
+{
+  "plugins": {}
+}
+```
+
+建立限流 Plugin Config：
+
+```bash
+PUT http://localhost:9180/apisix/admin/plugin_configs/free_ratelimit
+X-API-KEY: <your-api-key>
+Content-Type: application/json
+
+{
+  "plugins": {
+    "key-auth": {},
+    "limit-count": {
+      "count": 100,
+      "time_window": 1,
+      "rejected_code": 429,
+      "key": "consumer_name",
+      "policy": "local",
+      "group": "daily"
+    }
+  }
+}
+```
+
+建立 Consumer 並套用群組：
+
+```bash
+PUT http://localhost:9180/apisix/admin/consumers/mark
+X-API-KEY: <your-api-key>
+Content-Type: application/json
+
+{
+  "username": "mark",
+  "plugins": {
+    "key-auth": {
+      "key": "mark-api-key"
+    }
+  },
+  "consumer_group": "standard"
+}
+```
+P.S. 一個 consumer 只能有一個 consumer group
+
+## 限頻次
+
+在APISIX 在限流（頻次控制）方面，特別支援類似 Kong 付費版才有的「動態模板 key」功能。你可以在 key 欄位中使用多個變數（如 IP、consumer、header 等）組合，實現更細緻的分群限流。
+
+例如：
+
+```bash
+PUT /apisix/admin/plugin_configs/pc_free
+{
+  "plugins": {
+    "limit-count": {
+      "count": 100,
+      "time_window": 86400,
+      "rejected_code": 429,
+      "key": "$remote_addr|$consumer_name|$http_x_user_group",
+      "policy": "redis",
+      "redis_host": "192.168.201.101",
+      "redis_port": 6379,
+      "redis_password": "",
+      "redis_database": 0     
+    }
+  }
+}
+```
+
+> 上例會根據來源 IP、consumer 名稱、以及 header `X-User-Group` 的組合，動態計算每個分群的頻次，並將限流資料存放於 Redis。這種彈性分群限流的能力，Kong 需企業版才支援，APISIX 開源版即內建。
+
+---
+
+## Plugin Config 與套件綁定層級
+
+APISIX 支援多層級插件綁定：
+
+| 層級 | 綁定方式 | 描述 |
+|----|----|----|
+| Global Rule | /apisix/admin/global_rules | 全域規則，優先權最高 |
+| Consumer | /apisix/admin/consumers/{username} | 特定使用者 |
+| Consumer Group | /apisix/admin/consumer_groups/{groupname} | 分群管理 Consumer |
+| Route | /apisix/admin/routes/{id} | 特定 API 路由 |
+| Service | /apisix/admin/services/{id} | 多個 Route 共用 |
+
+Plugin Config 可重複使用，讓 Route/Service 引用 plugin_config_id，提升維運效率。
+
+---
+
+## API 分組與查詢
+
+APISIX 支援 labels，可為 Route、Consumer、Service 加上 group 標籤，方便查詢與管理：
+
+```json
+{
+  "uri": "/wms/api/item/1",
+  "labels": {
+    "group": "wms"
+  },
+  "name": "get-wms-item-1"
+}
+```
+
+查詢 group 為 wms 的 route：
+
+```bash
+GET /apisix/admin/routes?label=group==wms
+```
+
+---
+
+## 全域插件與監控
+
+可用 Global Rule 套用全域插件，如 request-id、prometheus、udp-logger 等：
+
+```bash
+PUT http://127.0.0.1:9180/apisix/admin/global_rules/1
+X-API-KEY: <your-api-key>
+Content-Type: application/json
+
+{
+  "plugins": {
+    "key-auth": {"_meta": {"disable": false}},
+    "request-id": {"_meta": {"disable": false}},
+    "prometheus": {"_meta": {"disable": false}},
+    "udp-logger": {
+      "host": "192.168.0.1",
+      "port": 5000,
+      "custom_fields": {"client_ip": "$remote_addr"}
+    }
+  }
+}
+```
+P.S. APISIX 比較特別的是，支援多筆的Global rules(額外的特殊用途)，但Dashboard 只能管理一筆，在大部分情況下，維持一筆 global_rule（如 /global_rules/1）就足夠，把所有 plugin 寫在同一筆中。
+
+啟用 Prometheus 監控：
+
+```bash
+PUT http://localhost:9180/apisix/admin/plugins/prometheus
+X-API-KEY: <your-api-key>
+Content-Type: application/json
+
+{
+  "enabled": true
+}
+```
+
+---
+
+## APISIX 限制
+使用KONG 或 APISIX 都各有各的限制，若需更複雜的流量分組，可能皆需自訂 plugin，或極大程度的客製
+- 一個 consumer 只能有一個 consumer group
+- 一個 route 只能有一個 plugin config
+- Route uri 不能重複
+- 一個Route 只能套用一個plugin 
+- plugin_config 可依 group 或動態條件切換
+
+---
+
+## Docker-compose 及相關設定
+在架設過程，因為官方文件寫的不是很清楚，在版本對不起來出錯，花了好一段時間才把環境架起來，相關設定就分享在我的Github 
+![Apisix docker compsoe github reppo](https://github.com/markku636/apisix)
+
+
+
+## 心得
+
+APISIX 以開源、彈性、熱更新、多語言插件等優勢，成為現代 API Gateway 的強力選擇。雖然部分功能需透過 API 操作、維運複雜度略高，但對於需要高彈性、分群限流、動態路由的場景，APISIX 提供了極佳的解決方案，
+了解其限制，就會知道該提供什麼樣的解決方案，但在特定領域的 api gateway ，求如果過於複雜，即便走到付費版，可能也無法符合需求，就得走客製。
