@@ -168,13 +168,15 @@ plugins = bundled,log-traffic  # 指定了要載入的套件
 docker restart kong
 ```
 
+### 修改 vim /usr/local/share/lua/5.1/kong/constants.lua ，並加上自己的客製套件的名稱  “log-traffic”
+
+![啟用的套件清單](edit-config.png)
+
 ### 檢查客製套件是否載入成功
 
 重啟後，檢查客製的套件是不是有在支援清單中：
 
 <http://localhost:8001/plugins/enabled>
-
-![啟用的套件清單](edit-config.png)
 
 ### 將套件套用在服務或路由上
 
