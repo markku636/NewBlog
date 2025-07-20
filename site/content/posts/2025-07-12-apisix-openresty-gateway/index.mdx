@@ -1,6 +1,6 @@
 ---
 featured: true
-title: APISIX API Gateway：實測心得與 Kong 比較，開源也能這麼強！
+title: 更彈性且開源的 APISIX API Gateway：實測心得與 Kong 比較
 slug: apisix-openresty-gateway
 category: DevOps
 thumbnail: apisix.png
@@ -10,7 +10,6 @@ description: 用了 Kong 免費版踢到鐵板後，轉戰 APISIX 的實戰心�
 author: Mark Ku
 ---
 
-# APISIX API Gateway：實測心得與 Kong 比較，開源也能這麼強！
 
 ## 為什麼會想試試 APISIX？
 
@@ -19,6 +18,13 @@ author: Mark Ku
 結果不試還好，一試就回不去了。APISIX 是 Apache 基金會在維護的，社群超活躍，而且功能彈性到爆炸！支援 Route Only 模式、Consumer Group、熱更新、多語言套件等等，根本就是現代 API Gateway 的夢幻逸品啊！
 
 ---
+
+## Docker-compose 及相關設定檔
+
+在架設的過程中，因為官方文件寫得不是很清楚，版本對不起來一直出錯，我花了好一段時間才把環境搞起來，相關的設定檔我都放在 GitHub 上了，有需要的朋友可以直接拿去用：
+
+[Apisix docker compose GitHub repo](https://github.com/markku636/apisix)
+
 
 ## APISIX vs Kong 規格大PK
 
@@ -430,12 +436,6 @@ Content-Type: application/json
 - plugin_config 不可以 group 或動態條件切換，但可以透過動態路由條件
 
 ---
-
-## Docker-compose 及相關設定檔
-
-在架設的過程中，因為官方文件寫得不是很清楚，版本對不起來一直出錯，我花了好一段時間才把環境搞起來。相關的設定檔我都放在 GitHub 上了，有需要的朋友可以直接拿去用：
-
-[Apisix docker compose GitHub repo](https://github.com/markku636/apisix)
 
 ## 心得分享
 
