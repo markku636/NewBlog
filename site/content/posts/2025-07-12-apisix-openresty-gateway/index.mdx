@@ -426,8 +426,8 @@ Content-Type: application/json
 - 一個 consumer 只能加入一個 consumer group
 - 一個 route 只能套用一個 plugin config
 - Route uri 不能重複
-- 一個 Route 只能套用一個 plugin 
-- plugin_config 可以依 group 或動態條件切換
+- 一個 Route 對同一種pluing只能套一個 plugin 
+- plugin_config 不可以 group 或動態條件切換，但可以透過動態路由條件
 
 ---
 
@@ -443,4 +443,4 @@ Content-Type: application/json
 
 雖然有些功能需要透過 API 操作，維運複雜度稍微高一點，但對於需要高彈性、分群限流、動態路由的場景來說，APISIX 真的提供了很棒的解決方案。
 
-了解這些限制之後，就知道該提供什麼樣的解決方案。但在特定領域的 API Gateway 需求如果太複雜的話，即使用到付費版，可能也無法完全符合需求，最後還是得走客製化這條路。
+了解這些限制之後，就知道該提供什麼樣的解決方案。但在特定領域的 API Gateway 需求如果太複雜的話，即使用到付費版，除非需求上可以退讓，不然最後還是得走客製化這條路。
