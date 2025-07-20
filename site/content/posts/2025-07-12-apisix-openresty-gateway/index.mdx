@@ -12,9 +12,7 @@ author: Mark Ku
 
 ## 為什麼會想試試 APISIX？
 
-在使用 Kong 免費版的過程中，發現一些限制：Service 跟 Route 必須綁定、Consumer Group 功能受限等等，讓開發流程不夠順暢。後來了解到 APISIX 這個開源方案，決定實際測試看看。
-
-經過實測後發現 APISIX 確實表現不錯，它是 Apache 基金會維護的項目，社群相當活躍，功能也很彈性，支援 Route Only 模式、Consumer Group、熱更新、多語言套件等等，是很值得考慮的現代 API Gateway 選擇。
+在使用 Kong 免費版的過程中，發現一些限制像Service 跟 Route 必須綁定 Service、不提供Consumer Group 功能受限等等，後來了解到 APISIX 這個開源方案，決定實際測試看看，經過實測後發現 APISIX 確實表現不錯，它是 Apache 基金會維護的項目，社群相當活躍，功能也很彈性，支援 Route Only 模式、Consumer Group、熱更新、多語言套件等等，是很值得考慮使用的 API Gateway 。
 
 ---
 
@@ -43,7 +41,7 @@ author: Mark Ku
 | 多語言套件 | ✅ Lua / Go / Java / Wasm 都行 | ❌ 只能用 Lua |
 | Consumer Group | ✅ 內建支援，使用方便 | ❌ 免費版不支援 |
 | 套件數量 | 60+ 個，持續增加中 | 50+ 個 |
-| 限流機制 | 相當彈性，支援分散式架構 | 基本功能完整，也支援 Redis |
+| 限流機制 | 相當彈性，支援分散式架構 | 基本功能完整，也支援 Redis分散式架構 |
 | 安全性套件 | ✅ JWT、key-auth、IP 限制、WAF 等功能完整 | ✅ JWT、ACL 等等 |
 | API 文檔自動生成 | ✅ 內建功能 | ❌ 需自行實作 |
 | gRPC / WebSocket | ✅ 原生支援，無需額外設定 | 🔶 需安裝 plugin |
