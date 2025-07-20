@@ -23,10 +23,10 @@ slug: uptime-kuma-mariadb-restful-api
 - 想要自訂、加功能也很彈性
 
 ---
-
+Node.js + SQLite（透過 ）
 ## Uptime Kuma 架構簡介
 
-- **後端**：Node.js + SQLite（也可以換成 MariaDB，效能更好）
+- **後端**：Node.js + SQLite ，採用 sequelize ORM（也可以換成 MariaDB，效能更好）
 - **前端**：Vue.js 製作的網頁介面
 - **通訊**：用 WebSocket 即時更新監控狀態
 - **特色**：自架超簡單、輕量、彈性高，想怎麼玩都可以
@@ -75,7 +75,7 @@ services:
       - UPTIME_KUMA_DB_PORT=3306
       - UPTIME_KUMA_DB_NAME=kuma
       - UPTIME_KUMA_DB_USERNAME=kuma
-      - UPTIME_KUMA_DB_PASSWORD=kuma_pass
+      - UPTIME_KUMA_DB_PASSWORD=G7p9x2Qw!s
     depends_on:
       mariadb:
         condition: service_healthy
@@ -85,16 +85,16 @@ services:
   mariadb:
     image: mariadb:10.11
     environment:
-      - MYSQL_ROOT_PASSWORD=root_pass
+      - MYSQL_ROOT_PASSWORD=R4t8z1Lm@v
       - MYSQL_DATABASE=kuma
       - MYSQL_USER=kuma
-      - MYSQL_PASSWORD=kuma_pass
+      - MYSQL_PASSWORD=G7p9x2Qw!s
     volumes:
       - mariadb-data:/var/lib/mysql
     ports:
       - "3307:3306"
     healthcheck:
-      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-proot_pass"]
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-pR4t8z1Lm@v"]
       timeout: 10s
       retries: 10
       interval: 10s
@@ -105,8 +105,8 @@ services:
     environment:
       - KUMA_SERVER=http://kuma:3001
       - KUMA_USERNAME=admin
-      - KUMA_PASSWORD=Abc-1234
-      - ADMIN_PASSWORD=admin
+      - KUMA_PASSWORD=G7p9x2Qw!s
+      - ADMIN_PASSWORD=F5n3c7Vb$e
     depends_on:
       - kuma
     ports:
@@ -145,6 +145,8 @@ curl -X POST 'http://localhost:8000/api/monitors' \
   }'
 ```
 
+## 驗證資料庫
+![verify db](verify-db.png)
 ---
 
 ## 結論
