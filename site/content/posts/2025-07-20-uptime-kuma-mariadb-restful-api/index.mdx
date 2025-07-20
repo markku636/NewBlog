@@ -16,7 +16,7 @@ slug: uptime-kuma-mariadb-restful-api
 
 ## 為什麼選 Uptime Kuma（省錢、開源）
 
-- 商業監控軟體一年動輒幾好幾萬
+- 商業監控軟體一年動輒好幾萬
 - Uptime Kuma 完全開源、免費，功能也很夠用
 - 架設超簡單，自己用 Docker 跑就好
 - 社群活躍，遇到問題很容易找到解答
@@ -35,29 +35,31 @@ slug: uptime-kuma-mariadb-restful-api
 
 ## 遇到的效能瓶頸（簡述）
 
-- SQLite 預設資料庫，監控數量一多（1000 個監控左右)就會卡
+- SQLite 預設資料庫，監控數量一多（800 個監控左右）就會卡
 - 換成 MariaDB，效能直接提升，穩定很多
 
 ---
 
+## 為什麼需要 Uptimekuma RESTful API？
+
+有時候想要客製 public status page 或自動化管理監控，這時就需要 RESTful API 來幫忙。
+
+---
+
+## 如何開啟 RESTful API
+
+Uptime Kuma 官方本來沒有提供 RESTful API，只有網頁操作和 WebSocket 通訊。不過你可以用第三方的 `medaziz11/uptimekuma_restapi` 容器（上面 docker-compose.yml 已經有加），就能用 HTTP 輕鬆自動化管理監控。
+
 ### 這個 API 套件的原理是什麼？
 
-Uptime Kuma 官方本來沒有提供 RESTful API，只有網頁操作和 WebSocket 通訊。
-`medaziz11/uptimekuma_restapi` 這個第三方套件的原理是：
-- 它會自動用你設定的管理員帳號密碼，去登入 Uptime Kuma 的網頁後台
-- 然後「模擬人類操作」去呼叫內部的 WebSocket API，把這些功能包裝成 RESTful API
-- 你只要對這個容器發送 HTTP 請求（像上面 curl 範例），它就會幫你轉成 Uptime Kuma 能懂的指令
+- 套件會自動用你設定的管理員帳號密碼，登入 Uptime Kuma 的網頁後台
+- 「模擬人類操作」呼叫內部 WebSocket API，把這些功能包裝成 RESTful API
+- 你只要對這個容器發送 HTTP 請求（像下面 curl 範例），它就會幫你轉成 Uptime Kuma 能懂的指令
 - 所以你不用自己寫 WebSocket 程式，也不用研究 Uptime Kuma 的內部 API
 
 > 這種做法有點像「自動幫你點網頁按鈕」，但用 API 方式對外開放，讓自動化和整合變得超簡單！
 
 ---
-
-## 如何開啟 API（只留最常用的 API 範例）
-
-Uptime Kuma 官方沒有 RESTful API，但可以用第三方的 medaziz11/uptimekuma_restapi 容器（上面 docker-compose.yml 已經有加）。
-只要 Uptime Kuma 跑起來、API 服務也啟動，下面這兩個指令最常用：
-
 
 ## Docker Compose 範例
 
@@ -120,6 +122,9 @@ volumes:
 
 > 帳號密碼要和 docker-compose 設定一致，API 服務才會正常連線！
 
+---
+
+## 最常用的 RESTful API 指令
 
 ### 1. 查詢所有監控
 
@@ -140,6 +145,7 @@ curl -X POST 'http://localhost:8000/api/monitors' \
   }'
 ```
 
+---
 
 ## 結論
 
