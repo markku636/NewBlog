@@ -1,58 +1,62 @@
 ---
 featured: true
-title: APISIX API Gateway：開源實測與 Kong 比較
+title: APISIX API Gateway：實測心得與 Kong 比較，開源也能這麼強！
 slug: apisix-openresty-gateway
 category: DevOps
 thumbnail: apisix.png
 date: 2025-07-17 06:01:00 +0800
 tags: ['APISIX', 'Kong', 'API Gateway', 'OpenResty', 'DevOps', 'etcd', 'Rate Limiting']
-description: 深入介紹 APISIX API Gateway 的架構、功能、與 Kong 的比較，並分享實際測試與進階應用技巧。
+description: 用了 Kong 免費版踢到鐵板後，轉戰 APISIX 的實戰心得！從架設到比較，告訴你為什麼這個開源方案讓人驚艷。
 author: Mark Ku
 ---
 
-# APISIX API Gateway：開源實測與 Kong 比較
+# APISIX API Gateway：實測心得與 Kong 比較，開源也能這麼強！
 
-## 為什麼選擇 APISIX？
+## 為什麼會想試試 APISIX？
 
-在使用 Kong 免費版時，遇到 Service 與 Route 綁定、Consumer Group 受限等問題，因此開始研究 APISIX 作為替代方案。APISIX 由 Apache 基金會管理，社群活躍、功能彈性，且支援 Route Only 模式、Consumer Group、熱更新、多語言插件等，是現代 API Gateway 的強力選擇。
+說實話，一開始用 Kong 免費版的時候真的有點痛苦，Service 跟 Route 要綁在一起、Consumer Group 又有限制，搞得我很阿雜。後來聽說 APISIX 不錯，想說反正都是開源的，不如來試試看！
+
+結果不試還好，一試就回不去了。APISIX 是 Apache 基金會在維護的，社群超活躍，而且功能彈性到爆炸！支援 Route Only 模式、Consumer Group、熱更新、多語言套件等等，根本就是現代 API Gateway 的夢幻逸品啊！
 
 ---
 
-## APISIX 與 Kong 規格比較
+## APISIX vs Kong 規格大PK
+
+來看看這兩個到底差在哪裡：
 
 | 項目 | **APISIX** | **Kong (OSS)** |
 |----|----|----|
 | 開源授權 | Apache 2.0 | Apache 2.0 |
-| 架構核心 | NGINX + LuaJIT（基於 OpenResty） | NGINX + LuaJIT（基於 OpenResty） |
-| 配置儲存 | etcd | PostgreSQL / DB-less 模式 |
-| 配置方式 | REST API / etcd / YAML / Dashboard | REST API / YAML / Kong Manager（企業版） |
-| 插件機制 | 熱更新插件，支援 Lua/Go/Java | Lua 插件、支援熱更新 |
-| 性能 | 高吞吐、低延遲，支援動態路由 | 穩定但相對保守 |
-| 熱更新支援 | ✅ 無需重啟即可新增/修改插件 | ✅ 支援聲明式配置熱更新 |
-| Dashboard UI | ✅（開源） | 🔶（有第三方開源方案如 Konga） |
-| Kubernetes 支援 | ✅ 原生 Ingress Controller | ✅（Kong Ingress Controller） |
-| 多語言插件 | ✅ Lua / Go / Java / Wasm | ❌ 僅 Lua |
-| Consumer Group | ✅（內建支援） | ❌（Kong OSS 不支援） |
-| 插件數量（開源） | 60+ | 50+ |
-| Rate Limit 機制 | 內建限流、彈性強，支援分布式限流 | 有限，但需 Redis/Cassandra |
-| 安全性插件 | ✅（JWT、key-auth、IP 限制、WAF） | ✅（JWT、ACL 等） |
-| API 文檔產生 | ✅（內建） | ❌（需手動整合） |
-| 支援 gRPC / WebSocket | ✅ 原生支援 | 🔶 Kong 要用 plugin 支援 |
-| 社群活躍度 | 高（中國社群強、快速更新） | 穩定（全球用戶多） |
-| 商業支持 | API7.ai（APISIX） | Kong Inc（企業版） |
-| 運維複雜度 | 稍高（etcd需維護） | 較簡單（PostgreSQL） |
+| 核心技術 | NGINX + LuaJIT（OpenResty 底） | NGINX + LuaJIT（OpenResty 底） |
+| 設定檔放哪 | etcd | PostgreSQL / DB-less 模式 |
+| 怎麼設定 | REST API / etcd / YAML / Dashboard | REST API / YAML / Kong Manager（要錢） |
+| 套件系統 | 熱更新，支援 Lua/Go/Java | Lua 套件、也能熱更新 |
+| 效能表現 | 快到飛起，動態路由超讚 | 穩定但比較保守 |
+| 熱更新 | ✅ 不用重開機就能加套件 | ✅ 也支援熱更新，但沒這麼彈性(kong reload)，APISIX 在自動化程度上稍微勝出一些。 |
+| 管理介面 | ✅ 開源就有超棒的 Dashboard | 🔶 第三方有 Konga 可以用 |
+| K8s 支援 | ✅ 原生 Ingress Controller | ✅ Kong Ingress Controller |
+| 多語言套件 | ✅ Lua / Go / Java / Wasm 都行 | ❌ 只能用 Lua |
+| Consumer Group | ✅ 內建就有，超方便 | ❌ 免費版沒有 QQ |
+| 套件數量 | 60+ 個，而且持續增加中 | 50+ 個 |
+| 限流機制 | 超彈性，分散式架構都支援 | 有但沒那麼強，也支援 Redis |
+| 安全性套件 | ✅ JWT、key-auth、IP 限制、WAF 應有盡有 | ✅ JWT、ACL 等等 |
+| API 文檔自動生成 | ✅ 內建功能，讚！ | ❌ 要自己想辦法 |
+| gRPC / WebSocket | ✅ 原生支援，不用額外設定 | 🔶 要裝 plugin |
+| 社群活躍度 | 超高！中國那邊更新很快 | 穩定，全球用戶多 |
+| 商業支持 | API7.ai | Kong Inc |
+| 維護複雜度 | 稍微高一點（要顧 etcd） | 比較簡單（用 PostgreSQL） |
 
 ---
 
-## Kong vs APISIX 路由設定簡化比較
+## Kong vs APISIX 路由設定大比拚
 
-### 實務情境
+### 實際情況
 
-假設你想要將 `/wms/api/item/1` 轉址到 `http://172.22.112.1:1080/api/item/1`，以下分別用 Kong 與 APISIX 實現：
+假設你想要把 `/wms/api/item/1` 轉到 `http://172.22.112.1:1080/api/item/1`，來看看兩個怎麼做：
 
-#### Kong 設定流程
+#### Kong 的設定方式（超麻煩）
 
-1. 建立 Service：
+1. 先建 Service：
 
 ```bash
 POST http://localhost:8001/services
@@ -64,7 +68,7 @@ Content-Type: application/json
 }
 ```
 
-2. 建立 Route：
+2. 再建 Route：
 
 ```bash
 POST http://localhost:8001/routes
@@ -82,7 +86,7 @@ Content-Type: application/json
 }
 ```
 
-3. 建立 request-transformer 插件來改寫路徑：
+3. 最後還要加個套件來改路徑：
 
 ```bash
 POST http://localhost:8001/plugins
@@ -102,11 +106,11 @@ Content-Type: application/json
 }
 ```
 
-> Kong 需要 3 次 API Call，且路徑改寫需額外插件，設定較繁瑣。
+> 天啊！Kong 要打 3 次 API，而且改路徑還要額外裝套件，超級麻煩的啦！
 
-#### APISIX 設定流程
+#### APISIX 的設定方式（一招搞定）
 
-APISIX 支援 Route Only 模式，直接一次 API Call 完成：
+APISIX 支援 Route Only 模式，一次 API Call 就搞定：
 
 ```bash
 PUT http://127.0.0.1:9180/apisix/admin/routes/api-0001
@@ -132,32 +136,32 @@ Content-Type: application/json
 }
 ```
 
-> APISIX 只需 1 次 API Call，內建 proxy-rewrite 處理路徑改寫，設定極簡。
+> 看到沒！APISIX 只要 1 次 API Call，內建就有 proxy-rewrite 可以改路徑，設定超級簡潔！
 
 #### 設定複雜度比較
 
 | 項目             | Kong                | APISIX             |
 |------------------|---------------------|--------------------|
-| 需要建立 Service | ✅                  | ❌                 |
-| 需要建立 Route   | ✅                  | ✅                 |
-| API Call 次數    | 3                   | 1                  |
-| 設定複雜度       | 較高                | 極簡               |
+| 要先建 Service嗎 | ✅ 一定要            | ❌ 不用，直接建 Route |
+| 要建 Route      | ✅                  | ✅                 |
+| API Call 次數    | 3 次（超煩）         | 1 次（超爽）        |
+| 設定複雜度       | 有夠複雜             | 簡單到爆           |
 
 ---
 
-## 路由動態條件（動態匹配）
+## 路由動態條件（超級彈性的分流）
 
-APISIX 支援多種動態條件來決定路由規則，不僅僅是根據 URI，還可以根據 HTTP Method、Header、Query 參數、Host 等進行靈活匹配，滿足複雜的 API 管理需求。
+APISIX 最厲害的地方就是可以根據超多條件來決定路由，不只是看 URI，還可以看 HTTP Method、Header、Query 參數、Host 等等，想怎麼分流就怎麼分流！
 
-### 常見動態條件
+### 常見的動態條件
 
-- **HTTP Method**：可限定 GET、POST、PUT、DELETE 等。
-- **Header**：根據自訂 Header 內容分流。
-- **Query 參數**：根據 URL 查詢參數分流。
-- **Host**：根據請求 Host 進行路由。
-- **Remote Addr**：根據來源 IP 分流。
+- **HTTP Method**：可以指定 GET、POST、PUT、DELETE 等等
+- **Header**：根據自訂的 Header 內容來分流
+- **Query 參數**：看 URL 後面的參數來決定
+- **Host**：根據請求的 Host 來分流
+- **Remote Addr**：根據來源 IP 來分流
 
-### 範例：根據 Header 路由
+### 範例：根據 Header 來路由
 
 ```json
 PUT http://127.0.0.1:9180/apisix/admin/routes/dynamic-header
@@ -180,9 +184,9 @@ Content-Type: application/json
   }
 }
 ```
-> 上例會將帶有 `X-User-Type: admin` header 的請求，導向指定 upstream。
+> 這樣設定的話，只有帶著 `X-User-Type: admin` header 的請求，才會被導到指定的 upstream。
 
-### 範例：根據 Query 參數路由
+### 範例：根據 Query 參數來路由
 
 ```json
 PUT http://127.0.0.1:9180/apisix/admin/routes/dynamic-query
@@ -205,25 +209,29 @@ Content-Type: application/json
   }
 }
 ```
-> 上例會將帶有 `?version=beta` 的請求，導向不同 upstream。
+> 這個設定會把帶有 `?version=beta` 的請求，導到不同的 upstream。
 
 ---
 
 ### 小結
 
-APISIX 的路由條件設計非常彈性，能根據多種請求屬性做動態分流，適合需要多層次流量管理的場景。
+APISIX 的路由條件設計真的超彈性，可以根據各種請求屬性來做動態分流，對於需要多層次流量管理的場景來說，簡直是神器啊！
 
-## APISIX 特色與實測
+## APISIX 的殺手級功能
 
-- **Route Only 模式**：不需先建立 Service，直接設定 Route，簡化流程。
-- **Consumer Group**：雖無 UI，但可用 API 操作，靈活分群管理。
-- **熱更新插件**：無需重啟即可新增/修改插件。
-- **多語言插件**：支援 Lua、Go、Java、Wasm。
-- **高彈性配置**：RESTful API、etcd、YAML 均可。
+實際用過之後，真的要推薦幾個超讚的功能：
+
+- **Route Only 模式**：不用先建 Service，直接設 Route 就好，流程超簡化，省掉一堆設定步驟
+- **Consumer Group**：雖然沒有 UI，但可以用 API 操作，分群管理超靈活（不過一個 Consumer 只能加入一個 Consumer Group）
+- **動態路由**：可以根據 Header、Query 參數、IP 等條件動態分流，想怎麼導流就怎麼導流
+- **限流動態模板 Key**：支援多變數組合限流（IP+Consumer+Header），Kong 付費版才有的功能，APISIX 開源版直接送
+- **熱更新套件**：不用重開機就能加新套件或修改設定，維運超省事，線上服務不中斷
+- **多語言套件**：Lua、Go、Java、Wasm 都支援
+- **超彈性配置**：RESTful API、etcd、YAML
 
 ### Route Only 實測
 
-以 /wms/api/item/1 轉址為例：
+還是用剛剛 /wms/api/item/1 轉址的例子：
 
 ```bash
 PUT http://127.0.0.1:9180/apisix/admin/routes/api-0001
@@ -251,9 +259,9 @@ Content-Type: application/json
 
 ---
 
-## Consumer Group 與限流方案
+## Consumer Group 與限流設定
 
-APISIX 支援 Consumer Group，雖無 UI，但可用 API 建立與管理，並可搭配 Plugin Config 實現分群限流：
+APISIX 的 Consumer Group 功能真的很實用，雖然沒有 UI 介面，但用 API 操作其實也很順手，而且可以搭配 Plugin Config 來做分群限流：
 
 ```bash
 PUT http://localhost:9180/apisix/admin/consumer_groups/free
@@ -265,7 +273,7 @@ Content-Type: application/json
 }
 ```
 
-建立限流 Plugin Config：
+建立限流的 Plugin Config：
 
 ```bash
 PUT http://localhost:9180/apisix/admin/plugin_configs/free_ratelimit
@@ -304,13 +312,13 @@ Content-Type: application/json
   "consumer_group": "standard"
 }
 ```
-P.S. 一個 consumer 只能有一個 consumer group
+> 注意喔！一個 consumer 只能加入一個 consumer group
 
-## 限頻次
+## 限頻次的神奇功能
 
-在APISIX 在限流（頻次控制）方面，特別支援類似 Kong 付費版才有的「動態模板 key」功能。你可以在 key 欄位中使用多個變數（如 IP、consumer、header 等）組合，實現更細緻的分群限流。
+APISIX 在限流這塊真的超強，支援類似 Kong 付費版才有的「動態模板 key」功能。你可以在 key 欄位裡面用多個變數（像是 IP、consumer、header 等等）組合起來，做出超精細的分群限流。
 
-例如：
+舉例來說：
 
 ```bash
 PUT /apisix/admin/plugin_configs/pc_free
@@ -331,29 +339,29 @@ PUT /apisix/admin/plugin_configs/pc_free
 }
 ```
 
-> 上例會根據來源 IP、consumer 名稱、以及 header `X-User-Group` 的組合，動態計算每個分群的頻次，並將限流資料存放於 Redis。這種彈性分群限流的能力，Kong 需企業版才支援，APISIX 開源版即內建。
+> 這個設定會根據來源 IP、consumer 名稱、還有 header `X-User-Group` 的組合，動態計算每個分群的頻次，而且限流資料會存在 Redis 裡。這種彈性分群限流的功能，Kong 要企業版才有，APISIX 開源版就直接送給你！
 
 ---
 
 ## Plugin Config 與套件綁定層級
 
-APISIX 支援多層級插件綁定：
+APISIX 支援多個層級的套件綁定，讓你可以很彈性地管理：
 
-| 層級 | 綁定方式 | 描述 |
+| 層級 | 綁定方式 | 說明 |
 |----|----|----|
 | Global Rule | /apisix/admin/global_rules | 全域規則，優先權最高 |
-| Consumer | /apisix/admin/consumers/{username} | 特定使用者 |
+| Consumer | /apisix/admin/consumers/{username} | 針對特定使用者 |
 | Consumer Group | /apisix/admin/consumer_groups/{groupname} | 分群管理 Consumer |
-| Route | /apisix/admin/routes/{id} | 特定 API 路由 |
-| Service | /apisix/admin/services/{id} | 多個 Route 共用 |
+| Route | /apisix/admin/routes/{id} | 針對特定 API 路由 |
+| Service | /apisix/admin/services/{id} | 多個 Route 可以共用 |
 
-Plugin Config 可重複使用，讓 Route/Service 引用 plugin_config_id，提升維運效率。
+Plugin Config 可以重複使用，讓 Route/Service 直接引用 plugin_config_id，維運效率大大提升！
 
 ---
 
 ## API 分組與查詢
 
-APISIX 支援 labels，可為 Route、Consumer、Service 加上 group 標籤，方便查詢與管理：
+APISIX 支援 labels 功能，可以幫 Route、Consumer、Service 加上 group 標籤，查詢跟管理都超方便：
 
 ```json
 {
@@ -365,7 +373,7 @@ APISIX 支援 labels，可為 Route、Consumer、Service 加上 group 標籤，�
 }
 ```
 
-查詢 group 為 wms 的 route：
+想查詢 group 是 wms 的 route，直接這樣打：
 
 ```bash
 GET /apisix/admin/routes?label=group==wms
@@ -373,9 +381,9 @@ GET /apisix/admin/routes?label=group==wms
 
 ---
 
-## 全域插件與監控
+## 全域套件與監控設定
 
-可用 Global Rule 套用全域插件，如 request-id、prometheus、udp-logger 等：
+可以用 Global Rule 來套用全域套件，像是 request-id、prometheus、udp-logger 等等：
 
 ```bash
 PUT http://127.0.0.1:9180/apisix/admin/global_rules/1
@@ -395,7 +403,7 @@ Content-Type: application/json
   }
 }
 ```
-P.S. APISIX 比較特別的是，支援多筆的Global rules(額外的特殊用途)，但Dashboard 只能管理一筆，在大部分情況下，維持一筆 global_rule（如 /global_rules/1）就足夠，把所有 plugin 寫在同一筆中。
+> 小提醒：APISIX 比較特別的是支援多筆 Global rules（有特殊用途），但 Dashboard 只能管理一筆。一般情況下，維持一筆 global_rule（像是 /global_rules/1）就夠用了，把所有 plugin 寫在同一筆裡面就好。
 
 啟用 Prometheus 監控：
 
@@ -411,21 +419,28 @@ Content-Type: application/json
 
 ---
 
-## APISIX 限制
-使用KONG 或 APISIX 都各有各的限制，若需更複雜的流量分組，可能皆需自訂 plugin，或極大程度的客製
-- 一個 consumer 只能有一個 consumer group
-- 一個 route 只能有一個 plugin config
+## APISIX 的限制（還是要知道一下）
+
+雖然 APISIX 很強，但還是有一些限制要注意。不管是用 KONG 還是 APISIX，都各有各的限制，如果需要更複雜的流量分組，可能都需要自己寫 plugin，或是大幅度客製化：
+
+- 一個 consumer 只能加入一個 consumer group
+- 一個 route 只能套用一個 plugin config
 - Route uri 不能重複
-- 一個Route 只能套用一個plugin 
-- plugin_config 可依 group 或動態條件切換
+- 一個 Route 只能套用一個 plugin 
+- plugin_config 可以依 group 或動態條件切換
 
 ---
 
-## Docker-compose 及相關設定
-在架設過程，因為官方文件寫的不是很清楚，在版本對不起來出錯，花了好一段時間才把環境架起來，相關設定就分享在我的Github 
-[Apisix docker compsoe github reppo](https://github.com/markku636/apisix)
+## Docker-compose 及相關設定檔
 
-## 心得
+在架設的過程中，因為官方文件寫得不是很清楚，版本對不起來一直出錯，我花了好一段時間才把環境搞起來。相關的設定檔我都放在 GitHub 上了，有需要的朋友可以直接拿去用：
 
-APISIX 以開源、彈性、熱更新、多語言插件等優勢，成為現代 API Gateway 的強力選擇。雖然部分功能需透過 API 操作、維運複雜度略高，但對於需要高彈性、分群限流、動態路由的場景，APISIX 提供了極佳的解決方案，
-了解其限制，就會知道該提供什麼樣的解決方案，但在特定領域的 api gateway ，求如果過於複雜，即便走到付費版，可能也無法符合需求，就得走客製。
+[Apisix docker compose GitHub repo](https://github.com/markku636/apisix)
+
+## 心得分享
+
+用了 APISIX 一段時間後，真心覺得這個開源方案太香了！彈性超高、熱更新、多語言套件等等優勢，讓它成為現代 API Gateway 的超強選擇。
+
+雖然有些功能需要透過 API 操作，維運複雜度稍微高一點，但對於需要高彈性、分群限流、動態路由的場景來說，APISIX 真的提供了很棒的解決方案。
+
+了解這些限制之後，就知道該提供什麼樣的解決方案。但在特定領域的 API Gateway 需求如果太複雜的話，即使用到付費版，可能也無法完全符合需求，最後還是得走客製化這條路。
