@@ -1,0 +1,149 @@
+---
+featured: true
+title: Uptime Kuma 省錢實戰：從 SQLite 升級 MariaDB 提升效能，並開啟 RESTful API
+date: 2025-08-20 10:00:00 +0800
+thumbnail: uptime-kuma-with-db.png
+category: DevOps
+tags: ['Uptime Kuma', 'MariaDB', 'RESTful API', 'Docker', '監控', '省錢']
+description: 商業監控軟體一年要幾好幾萬！改用 Uptime Kuma 自架監控系統，不只免費還很好用。這篇教你怎麼升級資料庫、開啟 API，實戰踩雷心得大公開！
+author: Mark Ku
+slug: uptime-kuma-mariadb-restful-api
+---
+
+## 前言：省錢又實用的監控方案
+
+嗨大家！這篇是我自己踩雷後的心得，教你怎麼用 Uptime Kuma 省下大把授權費，還能自己加 API，簡單又實用。
+
+## 為什麼選 Uptime Kuma（省錢、開源）
+
+- 商業監控軟體一年動輒幾好幾萬
+- Uptime Kuma 完全開源、免費，功能也很夠用
+- 架設超簡單，自己用 Docker 跑就好
+- 社群活躍，遇到問題很容易找到解答
+- 想要自訂、加功能也很彈性
+
+---
+
+## Uptime Kuma 架構簡介
+
+- **後端**：Node.js + SQLite（也可以換成 MariaDB，效能更好）
+- **前端**：Vue.js 製作的網頁介面
+- **通訊**：用 WebSocket 即時更新監控狀態
+- **特色**：自架超簡單、輕量、彈性高，想怎麼玩都可以
+
+---
+
+## 遇到的效能瓶頸（簡述）
+
+- SQLite 預設資料庫，監控數量一多（1000 個監控左右)就會卡
+- 換成 MariaDB，效能直接提升，穩定很多
+
+---
+
+### 這個 API 套件的原理是什麼？
+
+Uptime Kuma 官方本來沒有提供 RESTful API，只有網頁操作和 WebSocket 通訊。
+`medaziz11/uptimekuma_restapi` 這個第三方套件的原理是：
+- 它會自動用你設定的管理員帳號密碼，去登入 Uptime Kuma 的網頁後台
+- 然後「模擬人類操作」去呼叫內部的 WebSocket API，把這些功能包裝成 RESTful API
+- 你只要對這個容器發送 HTTP 請求（像上面 curl 範例），它就會幫你轉成 Uptime Kuma 能懂的指令
+- 所以你不用自己寫 WebSocket 程式，也不用研究 Uptime Kuma 的內部 API
+
+> 這種做法有點像「自動幫你點網頁按鈕」，但用 API 方式對外開放，讓自動化和整合變得超簡單！
+
+---
+
+## 如何開啟 API（只留最常用的 API 範例）
+
+Uptime Kuma 官方沒有 RESTful API，但可以用第三方的 medaziz11/uptimekuma_restapi 容器（上面 docker-compose.yml 已經有加）。
+只要 Uptime Kuma 跑起來、API 服務也啟動，下面這兩個指令最常用：
+
+
+## Docker Compose 範例
+
+```yaml
+services:
+  kuma:
+    image: louislam/uptime-kuma:2.0.0-beta.3
+    ports:
+      - "3001:3001"
+    environment:
+      - UPTIME_KUMA_DB_TYPE=mariadb
+      - UPTIME_KUMA_DB_HOSTNAME=mariadb
+      - UPTIME_KUMA_DB_PORT=3306
+      - UPTIME_KUMA_DB_NAME=kuma
+      - UPTIME_KUMA_DB_USERNAME=kuma
+      - UPTIME_KUMA_DB_PASSWORD=kuma_pass
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    volumes:
+      - uptime-kuma:/app/data
+
+  mariadb:
+    image: mariadb:10.11
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_pass
+      - MYSQL_DATABASE=kuma
+      - MYSQL_USER=kuma
+      - MYSQL_PASSWORD=kuma_pass
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-proot_pass"]
+      timeout: 10s
+      retries: 10
+      interval: 10s
+      start_period: 30s
+
+  api:
+    image: medaziz11/uptimekuma_restapi
+    environment:
+      - KUMA_SERVER=http://kuma:3001
+      - KUMA_USERNAME=admin
+      - KUMA_PASSWORD=Abc-1234
+      - ADMIN_PASSWORD=admin
+    depends_on:
+      - kuma
+    ports:
+      - "8000:8000"
+    volumes:
+      - api:/db
+
+volumes:
+  uptime-kuma:
+  mariadb-data:
+  api:
+```
+
+> 帳號密碼要和 docker-compose 設定一致，API 服務才會正常連線！
+
+
+### 1. 查詢所有監控
+
+```bash
+curl -X GET 'http://localhost:8000/api/monitors' -H 'Content-Type: application/json'
+```
+
+### 2. 新增一個監控
+
+```bash
+curl -X POST 'http://localhost:8000/api/monitors' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "friendly_name": "我的網站",
+    "type": "http",
+    "url": "https://example.com",
+    "interval": 300
+  }'
+```
+
+
+## 結論
+
+Uptime Kuma 真的超省錢，自己架設也不難，換成 MariaDB 後效能穩定，還能用 API 自動化管理。推薦給所有想省錢又想自己掌控監控的朋友！
+
+> 小提醒：如果你的監控數量超過 1000 個，可能要改寫源始碼支援多個 Uptime Kuma 實例，把監控分散管理，這樣效能會更穩定，前端也不會卡。
+
