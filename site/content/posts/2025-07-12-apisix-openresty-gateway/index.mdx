@@ -62,7 +62,7 @@ author: Mark Ku
 
 ### 實際情況
 
-假設你想要把 `/wms/api/item/1` 轉到 `http://172.22.112.1:1080/api/item/1`，來看看兩個怎麼做：
+假設你想要把 `/wms/api/item/1` 轉到 `http://172.62.1.1:1080/api/item/1`，來看看兩個怎麼做：
 
 #### Kong 的設定方式（超麻煩）
 
@@ -140,7 +140,7 @@ Content-Type: application/json
   "upstream": {
     "type": "roundrobin",
     "nodes": {
-      "172.22.112.1:1080": 1
+      "172.62.1.1:1080": 1
     }
   }
 }
@@ -261,7 +261,7 @@ Content-Type: application/json
   "upstream": {
     "type": "roundrobin",
     "nodes": {
-      "172.22.112.1:1080": 1
+      "172.62.1.1:1080": 1
     }
   }
 }
