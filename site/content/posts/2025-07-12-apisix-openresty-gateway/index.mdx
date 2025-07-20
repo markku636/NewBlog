@@ -24,16 +24,16 @@ author: Mark Ku
 |----|----|----|
 | 開源授權 | Apache 2.0 | Apache 2.0 |
 | 架構核心 | NGINX + LuaJIT（基於 OpenResty） | NGINX + LuaJIT（基於 OpenResty） |
-| 配置儲存 | etcd | PostgreSQL |
+| 配置儲存 | etcd | PostgreSQL / DB-less 模式 |
 | 配置方式 | REST API / etcd / YAML / Dashboard | REST API / YAML / Kong Manager（企業版） |
-| 插件機制 | 熱更新插件，支援 Lua/Go/Java | Lua 插件、重啟加載 |
+| 插件機制 | 熱更新插件，支援 Lua/Go/Java | Lua 插件、支援熱更新 |
 | 性能 | 高吞吐、低延遲，支援動態路由 | 穩定但相對保守 |
-| 熱更新支援 | ✅ 無需重啟即可新增/修改插件 | ❌ 需 reload 或 restart |
-| Dashboard UI | ✅（開源） | ❌（需企業版 Kong Manager） |
+| 熱更新支援 | ✅ 無需重啟即可新增/修改插件 | ✅ 支援聲明式配置熱更新 |
+| Dashboard UI | ✅（開源） | 🔶（有第三方開源方案如 Konga） |
 | Kubernetes 支援 | ✅ 原生 Ingress Controller | ✅（Kong Ingress Controller） |
 | 多語言插件 | ✅ Lua / Go / Java / Wasm | ❌ 僅 Lua |
 | Consumer Group | ✅（內建支援） | ❌（Kong OSS 不支援） |
-| 插件數量（開源） | 60+ | 約 30+ |
+| 插件數量（開源） | 60+ | 50+ |
 | Rate Limit 機制 | 內建限流、彈性強，支援分布式限流 | 有限，但需 Redis/Cassandra |
 | 安全性插件 | ✅（JWT、key-auth、IP 限制、WAF） | ✅（JWT、ACL 等） |
 | API 文檔產生 | ✅（內建） | ❌（需手動整合） |
@@ -96,7 +96,7 @@ Content-Type: application/json
   "tags": ["wms"],
   "config": {
     "replace": {
-      "uri": "/$(uri_captures[\"path\"])"
+      "uri": "/api/item/1"
     }
   }
 }
@@ -142,10 +142,6 @@ Content-Type: application/json
 | 需要建立 Route   | ✅                  | ✅                 |
 | API Call 次數    | 3                   | 1                  |
 | 設定複雜度       | 較高                | 極簡               |
-
-**小結：**
-- Kong：需建立 Service、Route、外掛插件，API Call 至少 3 次，設定較繁瑣。
-- APISIX：只需一次 API Call，直接設定 Route 並內建 proxy-rewrite，設定極為簡單。
 
 ---
 
