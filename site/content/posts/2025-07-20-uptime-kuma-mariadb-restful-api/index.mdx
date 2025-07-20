@@ -145,7 +145,7 @@ curl -X POST 'http://localhost:8000/api/monitors' \
   }'
 ```
 
-## 驗證資料庫
+## 驗證是否成功遷移到MariaDB資料庫
 ![verify db](verify-db.png)
 ---
 
@@ -153,5 +153,5 @@ curl -X POST 'http://localhost:8000/api/monitors' \
 
 Uptime Kuma 真的超省錢，自己架設也不難，換成 MariaDB 後效能穩定，還能用 API 自動化管理。推薦給所有想省錢又想自己掌控監控的朋友！
 
-> 小提醒：如果你的監控數量超過 1000 個，可能要改寫源始碼支援多個 Uptime Kuma 實例，把監控分散管理，這樣效能會更穩定，前端也不會卡。
+> 小提醒：如果你的監控數量超過 1000 個，Dashbaord 就會開始卡，可能改寫源始碼支援多個 Uptime Kuma 實例，去解決效能上的瓶頸。
 
