@@ -14,8 +14,6 @@ author: Mark Ku
 
 在使用 Kong 免費版的過程中，發現一些限制像Service 跟 Route 必須綁定 Service、不提供Consumer Group 功能受限等等，後來了解到 APISIX 這個開源方案，決定實際測試看看，經過實測後發現 APISIX 確實表現不錯，它是 Apache 基金會維護的項目，社群相當活躍，功能也很彈性，支援 Route Only 模式、Consumer Group、熱更新、多語言套件等等，是很值得考慮使用的 API Gateway 。
 
----
-
 ## 架設 Docker-compose 及相關設定檔
 
 在架設的過程中，由於官方文件不夠詳細，版本相容性也有些問題，花了一些時間才成功建置環境。相關的設定檔已整理並放在 GitHub 上，有需要的朋友可以參考：
@@ -49,7 +47,6 @@ author: Mark Ku
 | 商業支持 | API7.ai | Kong Inc |
 | 維護複雜度 | 稍微高一點（要顧 etcd） | 比較簡單（用 PostgreSQL） |
 
----
 
 ## 實測後發現 Kong 的限制
 1. 免費版沒有Route only mode。
@@ -157,7 +154,6 @@ Content-Type: application/json
 | API Call 次數    | 3 次（較為繁瑣）      | 1 次（相對簡單）     |
 | 設定複雜度       | 較為複雜             | 相對簡單           |
 
----
 
 ## 動態路由條件（彈性分流機制）
 
@@ -331,19 +327,22 @@ PUT /apisix/admin/plugin_configs/pc_free
 {
   "plugins": {
     "limit-count": {
-      "count": 100,
-      "time_window": 86400,
-      "rejected_code": 429,
-      "key": "$remote_addr|$consumer_name|$http_x_user_group",
-      "policy": "redis",
-      "redis_host": "192.168.201.101",
+      "time_window": 60,
+      "count": 100,      
+      "rejected_code": 429,            
+      "key_type": "var_combination",      
+      "key": "standard-1-47|$consumer_name", 
+      "policy": "redis",      
+      "redis_host": "192.168.0.15",
       "redis_port": 6379,
-      "redis_password": "",
-      "redis_database": 0     
+      "redis_timeout": 1000000,
+      "redis_database": 0
     }
   }
 }
 ```
+P.S. 這個實測有問題，應該是有bug
+
 
 > 這個設定會根據來源 IP、consumer 名稱、以及 header `X-User-Group` 的組合，動態計算每個分群的頻次，限流資料儲存在 Redis 中。這種彈性分群限流功能，Kong 需企業版才提供，APISIX 開源版即內建此功能。
 
@@ -434,6 +433,8 @@ Content-Type: application/json
 - Route uri 不能重複
 - 一個 Route 對同一種pluing只能套一個 plugin 
 - plugin_config 不可以 group 或動態條件切換，但可以透過動態路由條件
+- 一個限流設定只能限制單一時間
+- [有些套件在某有些版本 bug](https://github.com/apache/apisix/issues/12431)
 
 ---
 
