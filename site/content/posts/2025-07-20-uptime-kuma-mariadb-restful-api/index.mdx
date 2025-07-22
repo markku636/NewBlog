@@ -53,11 +53,9 @@ Uptime Kuma 官方本來沒有提供 RESTful API，只有網頁操作和 WebSock
 ### 這個 API 套件的原理是什麼？
 
 - 套件會自動用你設定的管理員帳號密碼，登入 Uptime Kuma 的網頁後台
-- 「模擬人類操作」呼叫內部 WebSocket API，把這些功能包裝成 RESTful API
+- 「模擬人操作」呼叫內部 WebSocket API，把這些功能包裝成 RESTful API
 - 你只要對這個容器發送 HTTP 請求（像下面 curl 範例），它就會幫你轉成 Uptime Kuma 能懂的指令
 - 所以你不用自己寫 WebSocket 程式，也不用研究 Uptime Kuma 的內部 API
-
-> 這種做法有點像「自動幫你點網頁按鈕」，但用 API 方式對外開放，讓自動化和整合變得超簡單！
 
 ---
 
