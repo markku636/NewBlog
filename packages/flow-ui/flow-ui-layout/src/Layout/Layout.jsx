@@ -45,14 +45,14 @@ export const Layout = ({ children, pageContext, location }) => (
       <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2396931274355535"
      crossorigin="anonymous"></script>
 
-	  <script type="text/javascript">
-	  (function(w, d, s, u) {
-		w.RocketChat = function(c) { w.RocketChat._.push(c) }; w.RocketChat._ = []; w.RocketChat.url = u;
-		var h = d.getElementsByTagName(s)[0], j = d.createElement(s);
-		j.async = true; j.src = 'https://chat.226network.com/livechat/rocketchat-livechat.min.js?_=201903270000';
-		h.parentNode.insertBefore(j, h);
-	  })(window, document, 'script', 'https://chat.226network.com/livechat');
-	  </script>
+      <script type="text/javascript">
+      {`(function(w, d, s, u) {
+      w.RocketChat = function(c) { w.RocketChat._.push(c) }; w.RocketChat._ = []; w.RocketChat.url = u;
+      var h = d.getElementsByTagName(s)[0], j = d.createElement(s);
+      j.async = true; j.src = 'https://chat.226network.com/livechat/rocketchat-livechat.min.js?_=201903270000';
+      h.parentNode.insertBefore(j, h);
+      })(window, document, 'script', 'https://chat.226network.com/livechat');`}
+      </script>
 
       <link rel='canonical' href='http://https://blog.markkulab.net/' />
       {personSchema()}
