@@ -1,0 +1,1072 @@
+---
+featured: true
+title: 多通路聊天整合實戰：開源聊天軟體 Rocket.Chat Omnichannel 平台部署與應用 
+slug: rocket-chat-omnichannel-integration
+category: DevOps
+thumbnail: rocket-chat  .png
+date: 2025-07-29 06:01:00 +0800
+tags: ['Rocket.Chat', 'Omnichannel', 'Multi-Channel', 'Livechat', 'Customer Service', 'Docker', 'MongoDB', 'DevOps']
+description: 透過 Rocket.Chat 的 Omnichannel 功能，整合網站聊天、WhatsApp、Facebook Messenger、Telegram 等多種通訊管道，打造統一的客戶服務平台。
+author: Mark Ku
+---
+
+## 多通路聊天整合的挑戰
+
+現在客戶都希望能夠透過各種管道跟企業即時溝通，不管是網站聊天、WhatsApp、Facebook Messenger、Telegram 還是傳統的電話客服，每個管道都代表不同的客戶接觸點。但是管理這麼多獨立的通訊系統常常會遇到這些問題：
+
+- **客戶體驗不一致**：不同管道的回應時間和服務品質差很多
+- **客服效率低**：需要在多個平台間切換，工作變得很複雜
+- **資料分散**：客戶對話記錄分散在各個系統中
+- **成本高**：維護多個系統的技術和人力成本很高
+
+## 為什麼選擇 Rocket.Chat Omnichannel？
+
+Rocket.Chat 的 **Omnichannel** 功能就是為了解決這些問題而設計的。它提供了一個統一的平台，讓企業可以：
+
+### 核心優勢
+
+1. **統一管理介面**：所有通訊管道在單一平台中管理
+2. **智能路由**：根據客服專長和負載自動分配對話
+3. **完整對話歷史**：跨管道的客戶互動記錄
+4. **即時分析**：多維度的客服績效分析
+5. **開源自由**：完全掌控資料和客製化需求
+6. **社群支援**：活躍的開源社群提供技術支援和持續創新
+7. **成本效益**：無需支付昂貴的授權費用，降低總擁有成本
+
+### 支援的通訊管道
+
+- **網站 Livechat**：嵌入式聊天視窗
+- **WhatsApp Business API**：官方 WhatsApp 整合
+- **Facebook Messenger**：Facebook 粉絲專頁訊息
+- **Telegram Bot**：Telegram 機器人整合
+- **電子郵件**：傳統郵件轉換為聊天形式
+- **SMS**：簡訊服務整合
+- **自訂 API**：透過 REST API 整合其他系統
+
+### 免費版功能說明
+
+Rocket.Chat 提供 **Starter 方案免費版**，包含智能路由等進階功能：
+
+#### ✅ 免費版可用功能
+- **智能路由**：自動將來電轉發到適當代理人或部門
+- **多隊列處理**：支援多個客服團隊
+- **讀取回執**：顯示訊息已讀狀態
+- **無限推播通知**：無限制的推播功能
+
+#### 🚫 使用限制
+- **最大 50 個使用者**：最多 50 個帳戶能登入
+- **每月最多 100 個活躍聯絡人**：最多處理 100 個不同來客互動者
+
+#### 📊 版本比較
+
+| 功能 | Starter（免費） | Community（開源） |
+|------|----------------|------------------|
+| 智能路由 | ✅ | ❌ |
+| 多隊列處理 | ✅ | ❌ |
+| 讀取回執 | ✅ | ❌ |
+| 推播通知 | 無限 | 限 10,000/月 |
+| 使用者限制 | 50 用戶 | 無限制 |
+| 活躍聯絡人 | 100/月 | 無支援 |
+
+#### 💡 適用場景
+- 小型團隊（50 人以下）
+- 公眾客服需求
+- 原型開發階段
+- 個人或非營利組織
+
+
+## Docker 部署架構
+
+為了確保系統的穩定性和可擴展性，我們採用微服務架構部署 Rocket.Chat：
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  Rocket.Chat    │    │  Rocket.Chat    │    │    MongoDB      │
+│   (App Server)  │◄──►│   (App Server)  │◄──►│   (Database)    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Livechat      │    │  Omnichannel    │    │   Analytics     │
+│   Widget        │    │   Dashboard     │    │   & Reports     │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+### 資料庫配置
+
+我們使用 MongoDB 作為主要資料庫，提供以下優勢：
+
+- **文件導向**：適合儲存複雜的聊天記錄和用戶資料
+- **水平擴展**：支援分片和複製集
+- **高可用性**：自動故障轉移和資料備份
+- **靈活查詢**：支援複雜的聚合查詢和全文搜尋
+
+## Docker Compose 設定
+
+以下是完整的 `docker-compose.yaml` 設定檔：
+
+```yaml
+version: '3.8'
+
+services:
+  rocketchat:
+    image: registry.rocket.chat/rocketchat/rocket.chat:latest
+    restart: always
+    volumes:
+      - ./uploads:/app/uploads
+      - ./custom:/app/custom
+    environment:
+      - PORT=3000
+      - ROOT_URL=https://chat.226network.com
+      - MONGO_URL=mongodb://mongodb:27017/rocketchat
+      - DEPLOY_METHOD=docker
+      - DEPLOY_PLATFORM=linux/amd64
+      # Omnichannel 相關設定
+      - ENABLE_OMNICHANNEL=true
+      - ENABLE_LIVECHAT=true
+      - ENABLE_LIVECHAT_ANALYTICS=true
+      # 效能優化
+      - CACHE_SIZE=100
+      - CACHE_TTL=600
+    ports:
+      - 30047:3000
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+
+  # MongoDB 資料庫
+  mongodb:
+    image: mongo:6.0
+    restart: always
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password123
+      - MONGO_INITDB_DATABASE=rocketchat
+    ports:
+      - "27017:27017"
+    command: mongod --auth
+
+  # 可選：Redis 快取
+  redis:
+    image: redis:6-alpine
+    restart: always
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+volumes:
+  mongodb_data:
+  redis_data:
+```
+
+## 部署步驟
+
+### 1. 準備環境
+
+```bash
+# 建立專案目錄
+mkdir rocket-chat
+cd rocket-chat
+
+# 建立必要的目錄
+mkdir uploads
+mkdir custom
+mkdir mongodb-data
+```
+
+### 2. 啟動服務
+
+```bash
+# 啟動所有服務（包括 MongoDB）
+docker-compose up -d
+
+# 查看服務狀態
+docker-compose ps
+
+# 查看 Rocket.Chat 日誌
+docker-compose logs -f rocketchat
+
+# 查看 MongoDB 日誌
+docker-compose logs -f mongodb
+```
+
+### 3. 初始設定
+
+1. 訪問 `http://localhost:30047`
+2. 建立管理員帳號
+3. 設定組織資訊
+4. 確認 MongoDB 連線狀態
+
+### 4. MongoDB 管理
+
+```bash
+# 連線到 MongoDB 容器
+docker-compose exec mongodb mongosh -u admin -p password123
+
+# 查看資料庫
+show dbs
+
+# 切換到 Rocket.Chat 資料庫
+use rocketchat
+
+# 查看集合
+show collections
+
+# 查看用戶資料
+db.users.find().limit(5)
+```
+
+## Omnichannel 功能配置
+
+### 1. 啟用 Omnichannel 功能
+
+1. 進入管理後台 → **Omnichannel**
+2. 啟用 **Livechat** 功能
+3. 設定 **工作流程** 和 **自動回覆**
+4. 配置 **客服團隊** 和 **專長領域**
+
+### 2. 網站 Livechat 整合
+
+#### 基本嵌入程式碼
+
+```html
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多通路客服系統</title>
+    <style>
+        /* 自訂聊天視窗樣式 */
+        .rocketchat-widget {
+            bottom: 20px !important;
+            right: 20px !important;
+            max-width: 400px !important;
+        }
+        
+        .livechat-room {
+            border-radius: 12px !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+        }
+        
+        .rocketchat-launcher {
+            background: linear-gradient(135deg, #2962FF, #3F51B5) !important;
+            border-radius: 50% !important;
+            box-shadow: 0 4px 12px rgba(41, 98, 255, 0.3) !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Rocket.Chat Livechat Script -->
+    <script type="text/javascript">
+    (function(w, d, s, u) {
+        w.RocketChat = function(c) { w.RocketChat._.push(c) }; 
+        w.RocketChat._ = []; 
+        w.RocketChat.url = u;
+        var h = d.getElementsByTagName(s)[0], j = d.createElement(s);
+        j.async = true; 
+        j.src = 'https://chat.226network.com/livechat/rocketchat-livechat.min.js?_=201903270000';
+        h.parentNode.insertBefore(j, h);
+    })(window, document, 'script', 'https://chat.226network.com/livechat');
+    </script>
+</body>
+</html>
+```
+
+#### 進階自訂功能
+
+```javascript
+// 自訂聊天視窗行為
+RocketChat(function() {
+    this.on('chat-started', function() {
+        console.log('聊天已開始');
+        // 可以觸發其他事件，如 Google Analytics
+        gtag('event', 'livechat_started');
+    });
+    
+    this.on('chat-ended', function() {
+        console.log('聊天已結束');
+        // 收集客戶滿意度調查
+        this.showSurvey();
+    });
+});
+
+// 動態載入聊天視窗
+function loadLivechat() {
+    // 延遲載入，提升頁面載入速度
+    setTimeout(() => {
+        // 載入聊天腳本
+    }, 3000);
+}
+```
+
+
+## Webhook 整合：輕鬆連接各種社群聊天工具
+
+Rocket.Chat 的強大之處在於它提供了完整的 Webhook API，讓你可以很輕易地將各種常見的社群聊天工具整合到統一的 Omnichannel 平台中。透過 Webhook，你可以：
+
+### Webhook 整合的優勢
+
+1. **統一管理**：所有通訊管道都在同一個平台中管理
+2. **即時同步**：訊息可以即時雙向同步
+3. **客製化彈性**：可以根據需求自訂整合邏輯
+4. **成本效益**：不需要購買昂貴的第三方整合服務
+
+### 支援的整合方式
+
+- **Incoming Webhooks**：接收外部系統的訊息
+- **Outgoing Webhooks**：發送訊息到外部系統
+- **REST API**：完整的 API 介面
+- **Real-time API**：即時事件處理
+
+### 常見整合場景
+
+1. **社群媒體**：WhatsApp、Facebook Messenger、Telegram
+2. **企業工具**：Slack、Microsoft Teams、Discord
+3. **客服系統**：Zendesk、Freshdesk、Intercom
+4. **自訂應用**：公司內部系統、CRM 系統
+
+### Webhook 設定範例
+
+#### 建立 Incoming Webhook
+
+```javascript
+// 建立 Incoming Webhook 來接收外部訊息
+const createIncomingWebhook = async (channel, alias, avatar) => {
+    const response = await fetch('/api/v1/webhooks.create', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Auth-Token': AUTH_TOKEN,
+            'X-User-Id': USER_ID
+        },
+        body: JSON.stringify({
+            channel: channel,
+            alias: alias,
+            avatar: avatar
+        })
+    });
+    
+    return response.json();
+};
+
+// 使用範例
+const webhook = await createIncomingWebhook('#general', '客服機器人', 'https://example.com/bot.png');
+console.log('Webhook URL:', webhook.data.webhook.url);
+```
+
+#### 建立 Outgoing Webhook
+
+```javascript
+// 建立 Outgoing Webhook 來發送訊息到外部系統
+const createOutgoingWebhook = async (channel, triggerWords, urls) => {
+    const response = await fetch('/api/v1/webhooks.create', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Auth-Token': AUTH_TOKEN,
+            'X-User-Id': USER_ID
+        },
+        body: JSON.stringify({
+            channel: channel,
+            triggerWords: triggerWords,
+            urls: urls,
+            enabled: true
+        })
+    });
+    
+    return response.json();
+};
+
+// 使用範例
+const outgoingWebhook = await createOutgoingWebhook(
+    '#support', 
+    ['help', 'support'], 
+    ['https://your-api.com/webhook']
+);
+```
+
+#### 處理 Webhook 事件
+
+```javascript
+// 處理來自外部系統的 Webhook 事件
+const handleWebhookEvent = (req, res) => {
+    const { text, channel, alias, avatar, attachments } = req.body;
+    
+    // 驗證 Webhook 來源
+    if (!validateWebhookSource(req)) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    // 轉換為 Omnichannel 格式
+    const omnichannelMessage = {
+        channel: 'webhook',
+        text: text,
+        alias: alias,
+        avatar: avatar,
+        attachments: attachments,
+        timestamp: new Date()
+    };
+    
+    // 發送到指定的 Omnichannel 管道
+    sendToOmnichannel(channel, omnichannelMessage);
+    
+    res.status(200).json({ success: true });
+};
+
+// 驗證 Webhook 來源
+const validateWebhookSource = (req) => {
+    const signature = req.headers['x-signature'];
+    const payload = JSON.stringify(req.body);
+    const expectedSignature = crypto
+        .createHmac('sha256', WEBHOOK_SECRET)
+        .update(payload)
+        .digest('hex');
+    
+    return signature === expectedSignature;
+};
+```
+
+### 3. WhatsApp Business API 整合
+
+#### 設定 WhatsApp Business API
+
+```javascript
+// WhatsApp 整合範例
+const WhatsAppIntegration = {
+    // 設定 Webhook
+    setupWebhook: function(webhookUrl) {
+        return {
+            url: webhookUrl,
+            verify_token: 'your_verify_token',
+            mode: 'subscribe'
+        };
+    },
+    
+    // 處理接收訊息
+    handleIncomingMessage: function(message) {
+        const { from, text, timestamp } = message;
+        
+        // 轉發到 Rocket.Chat Omnichannel
+        this.forwardToOmnichannel({
+            channel: 'whatsapp',
+            customer: from,
+            message: text,
+            timestamp: timestamp
+        });
+    },
+    
+    // 發送訊息
+    sendMessage: function(to, message) {
+        // 透過 WhatsApp Business API 發送
+        return fetch('https://graph.facebook.com/v17.0/YOUR_PHONE_NUMBER_ID/messages', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${YOUR_ACCESS_TOKEN}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                messaging_product: 'whatsapp',
+                to: to,
+                type: 'text',
+                text: { body: message }
+            })
+        });
+    }
+};
+```
+
+### 4. Facebook Messenger 整合
+
+#### Messenger 平台設定
+
+```javascript
+// Facebook Messenger 整合
+const MessengerIntegration = {
+    // 驗證 Webhook
+    verifyWebhook: function(mode, token, challenge) {
+        if (mode === 'subscribe' && token === 'YOUR_VERIFY_TOKEN') {
+            return challenge;
+        }
+        return false;
+    },
+    
+    // 處理 Messenger 訊息
+    handleMessage: function(senderId, message) {
+        // 轉換為 Omnichannel 格式
+        const omnichannelMessage = {
+            channel: 'facebook',
+            customer: senderId,
+            message: message.text,
+            timestamp: Date.now()
+        };
+        
+        // 發送到 Rocket.Chat
+        this.sendToRocketChat(omnichannelMessage);
+    },
+    
+    // 回覆訊息
+    sendReply: function(recipientId, message) {
+        return fetch(`https://graph.facebook.com/v17.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                recipient: { id: recipientId },
+                message: { text: message }
+            })
+        });
+    }
+};
+```
+
+### 5. Telegram Bot 整合
+
+#### Telegram Bot 設定
+
+```javascript
+// Telegram Bot 整合
+const TelegramIntegration = {
+    // 處理 Telegram 更新
+    handleUpdate: function(update) {
+        if (update.message) {
+            const { chat, text, from } = update.message;
+            
+            // 轉換為 Omnichannel 格式
+            const omnichannelMessage = {
+                channel: 'telegram',
+                customer: from.id,
+                customerName: `${from.first_name} ${from.last_name || ''}`,
+                message: text,
+                chatId: chat.id,
+                timestamp: update.message.date * 1000
+            };
+            
+            // 發送到 Rocket.Chat
+            this.sendToOmnichannel(omnichannelMessage);
+        }
+    },
+    
+    // 發送訊息到 Telegram
+    sendMessage: function(chatId, message) {
+        return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                chat_id: chatId,
+                text: message,
+                parse_mode: 'HTML'
+            })
+        });
+    }
+};
+```
+
+## 智能路由與工作流程
+
+### 1. 自動路由設定
+
+```javascript
+// 智能路由規則
+const routingRules = {
+    // 根據關鍵字路由
+    keywordRouting: {
+        '技術支援': 'tech-support',
+        '帳單問題': 'billing',
+        '產品諮詢': 'sales',
+        '投訴': 'complaints'
+    },
+    
+    // 根據客戶等級路由
+    customerTierRouting: {
+        'VIP': 'vip-support',
+        'Premium': 'premium-support',
+        'Standard': 'general-support'
+    },
+    
+    // 根據語言路由
+    languageRouting: {
+        'zh-TW': 'taiwan-team',
+        'en-US': 'english-team',
+        'ja-JP': 'japanese-team'
+    }
+};
+
+// 路由邏輯
+function routeConversation(message, customerInfo) {
+    let department = 'general-support';
+    
+    // 檢查關鍵字
+    for (const [keyword, dept] of Object.entries(routingRules.keywordRouting)) {
+        if (message.toLowerCase().includes(keyword)) {
+            department = dept;
+            break;
+        }
+    }
+    
+    // 檢查客戶等級
+    if (customerInfo.tier && routingRules.customerTierRouting[customerInfo.tier]) {
+        department = routingRules.customerTierRouting[customerInfo.tier];
+    }
+    
+    return department;
+}
+```
+
+### 2. 自動回覆設定
+
+```javascript
+// 自動回覆規則
+const autoReplyRules = {
+    // 歡迎訊息
+    welcome: {
+        trigger: 'chat_started',
+        message: '您好！歡迎使用我們的客服系統。我們會盡快為您服務。',
+        delay: 0
+    },
+    
+    // 忙碌時自動回覆
+    busy: {
+        trigger: 'no_agent_available',
+        message: '目前客服人員忙碌中，請稍候片刻。您的訊息我們會盡快回覆。',
+        delay: 5
+    },
+    
+    // 下班時間回覆
+    afterHours: {
+        trigger: 'outside_business_hours',
+        message: '目前為非營業時間，我們會在明天營業時間內回覆您的訊息。',
+        delay: 0
+    }
+};
+
+// 自動回覆處理
+function handleAutoReply(trigger, customerInfo) {
+    const rule = autoReplyRules[trigger];
+    if (rule) {
+        setTimeout(() => {
+            sendMessage(customerInfo.channel, customerInfo.customerId, rule.message);
+        }, rule.delay * 1000);
+    }
+}
+```
+
+## 資料分析與報表
+
+### 1. 客服績效分析
+
+```javascript
+// 績效分析 API
+const AnalyticsAPI = {
+    // 獲取客服績效
+    getAgentPerformance: async function(agentId, dateRange) {
+        const response = await fetch(`/api/analytics/agent/${agentId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Auth-Token': AUTH_TOKEN
+            },
+            body: JSON.stringify({
+                startDate: dateRange.start,
+                endDate: dateRange.end,
+                metrics: ['response_time', 'satisfaction_score', 'conversations_handled']
+            })
+        });
+        
+        return response.json();
+    },
+    
+    // 管道使用分析
+    getChannelAnalytics: async function(dateRange) {
+        const response = await fetch('/api/analytics/channels', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Auth-Token': AUTH_TOKEN
+            },
+            body: JSON.stringify({
+                startDate: dateRange.start,
+                endDate: dateRange.end
+            })
+        });
+        
+        return response.json();
+    },
+    
+    // 客戶滿意度分析
+    getSatisfactionAnalytics: async function(dateRange) {
+        const response = await fetch('/api/analytics/satisfaction', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Auth-Token': AUTH_TOKEN
+            },
+            body: JSON.stringify({
+                startDate: dateRange.start,
+                endDate: dateRange.end
+            })
+        });
+        
+        return response.json();
+    }
+};
+```
+
+### 2. 即時監控儀表板
+
+```javascript
+// 即時監控
+const RealTimeMonitoring = {
+    // 連接 WebSocket 獲取即時資料
+    connectWebSocket: function() {
+        const ws = new WebSocket('wss://chat.226network.com/websocket');
+        
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            
+            switch(data.type) {
+                case 'omnichannel_status':
+                    this.updateAgentStatus(data);
+                    break;
+                case 'new_conversation':
+                    this.handleNewConversation(data);
+                    break;
+                case 'conversation_ended':
+                    this.handleConversationEnded(data);
+                    break;
+            }
+        };
+    },
+    
+    // 更新客服狀態
+    updateAgentStatus: function(data) {
+        const { agentId, status, currentConversations } = data;
+        
+        // 更新 UI 顯示
+        document.getElementById(`agent-${agentId}-status`).textContent = status;
+        document.getElementById(`agent-${agentId}-conversations`).textContent = currentConversations;
+    },
+    
+    // 處理新對話
+    handleNewConversation: function(data) {
+        const { conversationId, channel, customer, message } = data;
+        
+        // 新增到對話列表
+        this.addConversationToList({
+            id: conversationId,
+            channel: channel,
+            customer: customer,
+            message: message,
+            timestamp: new Date()
+        });
+        
+        // 播放通知音效
+        this.playNotificationSound();
+    }
+};
+```
+
+## 進階功能與整合
+
+### 1. CRM 系統整合
+
+```javascript
+// CRM 整合範例
+const CRMIntegration = {
+    // 同步客戶資料
+    syncCustomerData: async function(customerId) {
+        const customerData = await this.getCustomerFromCRM(customerId);
+        
+        // 更新 Rocket.Chat 客戶資料
+        await this.updateRocketChatCustomer(customerId, {
+            name: customerData.name,
+            email: customerData.email,
+            phone: customerData.phone,
+            tier: customerData.tier,
+            tags: customerData.tags
+        });
+    },
+    
+    // 記錄對話到 CRM
+    logConversationToCRM: async function(conversationId, customerId, messages) {
+        await this.createCRMActivity({
+            type: 'chat_conversation',
+            customerId: customerId,
+            conversationId: conversationId,
+            messages: messages,
+            timestamp: new Date()
+        });
+    },
+    
+    // 獲取客戶歷史記錄
+    getCustomerHistory: async function(customerId) {
+        const history = await this.getCRMHistory(customerId);
+        
+        return history.map(record => ({
+            type: record.type,
+            description: record.description,
+            date: record.date,
+            agent: record.agent
+        }));
+    }
+};
+```
+
+### 2. AI 智能助手整合
+
+```javascript
+// AI 助手整合
+const AIAssistant = {
+    // 智能回覆建議
+    getSmartReplies: async function(message, context) {
+        const response = await fetch('/api/ai/smart-replies', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: message,
+                context: context,
+                language: 'zh-TW'
+            })
+        });
+        
+        return response.json();
+    },
+    
+    // 情感分析
+    analyzeSentiment: async function(message) {
+        const response = await fetch('/api/ai/sentiment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                text: message
+            })
+        });
+        
+        return response.json();
+    },
+    
+    // 自動分類
+    autoCategorize: async function(message) {
+        const response = await fetch('/api/ai/categorize', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: message
+            })
+        });
+        
+        return response.json();
+    }
+};
+```
+
+### 自訂開發與擴展
+
+#### 1. 建立自訂主題
+
+```javascript
+// 自訂主題範例
+const CustomTheme = {
+    name: 'custom-theme',
+    version: '1.0.0',
+    
+    // 自訂樣式
+    styles: {
+        '--rc-color-primary': '#2962FF',
+        '--rc-color-primary-lightest': '#E3F2FD',
+        '--rc-color-primary-light': '#90CAF9',
+        '--rc-color-primary-dark': '#1565C0',
+        '--rc-color-primary-darkest': '#0D47A1'
+    },
+    
+    // 自訂組件
+    components: {
+        'livechat-widget': {
+            template: './components/livechat-widget.html',
+            styles: './components/livechat-widget.css'
+        }
+    }
+};
+
+// 註冊主題
+RocketChat.registerTheme(CustomTheme);
+```
+
+#### 2. 開發自訂 App
+
+```javascript
+// 自訂 App 範例
+class CustomOmnichannelApp {
+    constructor() {
+        this.name = 'custom-omnichannel-app';
+        this.version = '1.0.0';
+        this.description = '自訂 Omnichannel 功能擴展';
+    }
+    
+    // 初始化
+    async initialize() {
+        // 註冊事件監聽器
+        this.registerEventListeners();
+        
+        // 載入自訂功能
+        await this.loadCustomFeatures();
+    }
+    
+    // 註冊事件監聽器
+    registerEventListeners() {
+        // 監聽新對話事件
+        RocketChat.on('omnichannel:conversation:started', (conversation) => {
+            this.handleNewConversation(conversation);
+        });
+        
+        // 監聽訊息事件
+        RocketChat.on('omnichannel:message:received', (message) => {
+            this.processMessage(message);
+        });
+    }
+    
+    // 處理新對話
+    handleNewConversation(conversation) {
+        // 自訂邏輯
+        console.log('新對話開始:', conversation);
+        
+        // 自動分類
+        this.autoCategorize(conversation);
+        
+        // 智能路由
+        this.smartRouting(conversation);
+    }
+    
+    // 處理訊息
+    processMessage(message) {
+        // 情感分析
+        this.analyzeSentiment(message);
+        
+        // 關鍵字檢測
+        this.detectKeywords(message);
+        
+        // 自動回覆
+        this.autoReply(message);
+    }
+}
+
+// 註冊 App
+RocketChat.registerApp(new CustomOmnichannelApp());
+```
+
+#### 3. API 擴展
+
+```javascript
+// 自訂 API 端點
+const CustomAPI = {
+    // 註冊自訂路由
+    registerRoutes: function(app) {
+        // 自訂分析 API
+        app.get('/api/v1/custom/analytics', async (req, res) => {
+            try {
+                const analytics = await this.getCustomAnalytics(req.query);
+                res.json(analytics);
+            } catch (error) {
+                res.status(500).json({ error: error.message });
+            }
+        });
+        
+        // 自訂整合 API
+        app.post('/api/v1/custom/integration', async (req, res) => {
+            try {
+                const result = await this.handleCustomIntegration(req.body);
+                res.json(result);
+            } catch (error) {
+                res.status(500).json({ error: error.message });
+            }
+        });
+    },
+    
+    // 自訂分析功能
+    getCustomAnalytics: async function(params) {
+        // 實作自訂分析邏輯
+        return {
+            totalConversations: 1000,
+            averageResponseTime: 120,
+            satisfactionScore: 4.5,
+            channelDistribution: {
+                website: 40,
+                whatsapp: 30,
+                facebook: 20,
+                telegram: 10
+            }
+        };
+    },
+    
+    // 自訂整合處理
+    handleCustomIntegration: async function(data) {
+        // 實作自訂整合邏輯
+        return {
+            success: true,
+            message: '整合成功',
+            data: data
+        };
+    }
+};
+```
+
+## 總結
+
+Rocket.Chat 的 Omnichannel 功能為企業提供了一個強大的多通路客服解決方案，透過統一的平台管理各種通訊管道，企業可以：
+
+- **提升客戶體驗**：一致的服務品質和快速的回應時間
+- **提高客服效率**：統一介面和智能路由功能
+- **降低營運成本**：減少系統維護和人力成本
+- **獲得深度洞察**：完整的客戶互動數據分析
+- **開源優勢**：完全掌控程式碼，參與活躍的開發者社群
+- **資料庫靈活性**：MongoDB 提供強大的文件儲存和查詢能力
+
+### 免費版 vs 付費版選擇
+
+**Starter 免費版適合**：
+- 小型團隊（50 人以下）
+- 需要智能路由功能
+- 每月活躍聯絡人 100 個以下
+- 預算有限但需要進階功能
+
+**付費版適合**：
+- 大型企業或組織
+- 需要完整 Omnichannel 功能
+- 超過免費版使用限制
+- 企業級技術支援需求
+
+**Community 開源版適合**：
+- 有技術能力可以自架設
+- 只需要基本聊天功能
+- 願意投入技術維護
+- 無使用者數量限制
+
+
+## 相關資源
+- [Rocket.Chat 官方文件](https://docs.rocket.chat/)
+- [Omnichannel 功能指南](https://docs.rocket.chat/guides/omnichannel/)
+- [API 參考文件](https://developer.rocket.chat/)
+- [社群論壇](https://forums.rocket.chat/)
+- [GitHub 專案](https://github.com/RocketChat/Rocket.Chat)
+- [貢獻指南](https://github.com/RocketChat/Rocket.Chat/blob/develop/CONTRIBUTING.md)
+- [開發者文件](https://developer.rocket.chat/)
+- [Discord 社群](https://discord.gg/rocketchat)
+- [Stack Overflow 標籤](https://stackoverflow.com/questions/tagged/rocket.chat)
+- [開源授權 (MIT)](https://github.com/RocketChat/Rocket.Chat/blob/develop/LICENSE)
+
