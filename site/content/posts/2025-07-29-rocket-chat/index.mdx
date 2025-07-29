@@ -92,14 +92,7 @@ Rocket.Chat 提供 **Starter 方案免費版**，包含智能路由等進階功�
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-### 資料庫配置
 
-我們使用 MongoDB 作為主要資料庫，提供以下優勢：
-
-- **文件導向**：適合儲存複雜的聊天記錄和用戶資料
-- **水平擴展**：支援分片和複製集
-- **高可用性**：自動故障轉移和資料備份
-- **靈活查詢**：支援複雜的聚合查詢和全文搜尋
 
 ## Docker Compose 設定
 
@@ -130,14 +123,7 @@ services:
       - CACHE_TTL=600
     ports:
       - 30047:3000
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-          cpus: '1.0'
-        reservations:
-          memory: 1G
-          cpus: '0.5'
+
 
   # MongoDB 資料庫
   mongodb:
@@ -204,24 +190,7 @@ docker-compose logs -f mongodb
 3. 設定組織資訊
 4. 確認 MongoDB 連線狀態
 
-### 4. MongoDB 管理
 
-```bash
-# 連線到 MongoDB 容器
-docker-compose exec mongodb mongosh -u admin -p password123
-
-# 查看資料庫
-show dbs
-
-# 切換到 Rocket.Chat 資料庫
-use rocketchat
-
-# 查看集合
-show collections
-
-# 查看用戶資料
-db.users.find().limit(5)
-```
 
 ## Omnichannel 功能配置
 
