@@ -12,12 +12,13 @@ author: Mark Ku
 
 ## 多通路聊天整合的挑戰
 
-現在客戶都希望能夠透過各種管道跟企業即時溝通，不管是網站聊天、WhatsApp、Facebook Messenger、Telegram 還是傳統的電話客服，每個管道都代表不同的客戶接觸點。但是管理這麼多獨立的通訊系統常常會遇到這些問題：
+現在客戶都希望能夠透過各種管道跟企業即時溝通，**其中網站聊天更是現代企業不可或缺的核心功能**，不管是網站聊天、WhatsApp、Facebook Messenger、Telegram 還是傳統的電話客服，每個管道都代表不同的客戶接觸點。但是管理這麼多獨立的通訊系統常常會遇到這些問題：
 
 - **客戶體驗不一致**：不同管道的回應時間和服務品質差很多
 - **客服效率低**：需要在多個平台間切換，工作變得很複雜
 - **資料分散**：客戶對話記錄分散在各個系統中
 - **成本高**：維護多個系統的技術和人力成本很高
+- **🌐 網站聊天整合困難**：傳統聊天工具難以與網站完美整合，影響客戶體驗
 
 ## 為什麼選擇 Rocket.Chat Omnichannel？
 
@@ -35,7 +36,7 @@ Rocket.Chat 的 **Omnichannel** 功能就是為了解決這些問題而設計的
 
 ### 支援的通訊管道
 
-- **網站 Livechat**：嵌入式聊天視窗
+- **🌐 網站 Livechat**：**核心功能** - 嵌入式聊天視窗，完美整合到您的網站
 - **WhatsApp Business API**：官方 WhatsApp 整合
 - **Facebook Messenger**：Facebook 粉絲專頁訊息
 - **Telegram Bot**：Telegram 機器人整合
@@ -201,6 +202,28 @@ docker-compose logs -f mongodb
 3. 設定 **工作流程** 和 **自動回覆**
 4. 配置 **客服團隊** 和 **專長領域**
 
+## 🚀 網站聊天功能：打造完美的客戶互動體驗
+
+網站聊天功能是 Rocket.Chat Omnichannel 的核心功能之一，它讓您的網站訪客能夠即時與客服團隊溝通，大幅提升客戶滿意度和轉換率。
+
+### 🎯 網站聊天的重要性
+
+#### 為什麼網站聊天如此重要？
+
+1. **即時回應**：訪客無需等待，立即獲得協助
+2. **提升轉換率**：即時解答疑問，減少購物車放棄率
+3. **降低跳出率**：互動式體驗讓訪客停留更久
+4. **收集潛在客戶**：自動收集訪客資訊，建立客戶資料庫
+5. **24/7 服務**：即使非營業時間也能提供基本協助
+
+#### 網站聊天的優勢
+
+- **無縫整合**：一鍵嵌入，完美融入網站設計
+- **響應式設計**：自動適應各種裝置和螢幕尺寸
+- **多語言支援**：支援全球多種語言
+- **智能路由**：自動將訪客轉介給最適合的客服
+- **完整記錄**：所有對話都有完整記錄和分析
+
 ### 2. 網站 Livechat 整合
 
 #### 基本嵌入程式碼
@@ -274,6 +297,243 @@ function loadLivechat() {
         // 載入聊天腳本
     }, 3000);
 }
+```
+
+### 🎨 網站聊天進階功能
+
+#### 1. 智能觸發機制
+
+```javascript
+// 智能觸發聊天視窗
+const SmartChatTrigger = {
+    // 根據頁面停留時間觸發
+    timeBasedTrigger: function() {
+        let timeOnPage = 0;
+        const triggerTime = 30000; // 30秒
+        
+        setInterval(() => {
+            timeOnPage += 1000;
+            if (timeOnPage >= triggerTime && !this.chatTriggered) {
+                this.showChatInvitation();
+                this.chatTriggered = true;
+            }
+        }, 1000);
+    },
+    
+    // 根據滾動行為觸發
+    scrollBasedTrigger: function() {
+        let scrollDepth = 0;
+        const triggerDepth = 0.7; // 70% 滾動深度
+        
+        window.addEventListener('scroll', () => {
+            const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+            if (scrollPercent >= triggerDepth * 100 && !this.chatTriggered) {
+                this.showChatInvitation();
+                this.chatTriggered = true;
+            }
+        });
+    },
+    
+    // 根據退出意圖觸發
+    exitIntentTrigger: function() {
+        document.addEventListener('mouseleave', (e) => {
+            if (e.clientY <= 0 && !this.chatTriggered) {
+                this.showChatInvitation();
+                this.chatTriggered = true;
+            }
+        });
+    },
+    
+    // 顯示聊天邀請
+    showChatInvitation: function() {
+        const invitation = document.createElement('div');
+        invitation.className = 'chat-invitation';
+        invitation.innerHTML = `
+            <div class="invitation-content">
+                <h3>需要協助嗎？</h3>
+                <p>我們的客服團隊隨時為您服務</p>
+                <button onclick="startChat()">開始聊天</button>
+                <button onclick="closeInvitation()">稍後再說</button>
+            </div>
+        `;
+        document.body.appendChild(invitation);
+    }
+};
+
+// 初始化智能觸發
+SmartChatTrigger.timeBasedTrigger();
+SmartChatTrigger.scrollBasedTrigger();
+SmartChatTrigger.exitIntentTrigger();
+```
+
+#### 2. 個人化聊天體驗
+
+```javascript
+// 個人化聊天設定
+const PersonalizedChat = {
+    // 根據訪客行為自訂歡迎訊息
+    customizeWelcomeMessage: function(visitorData) {
+        let welcomeMessage = '您好！歡迎來到我們的網站。';
+        
+        if (visitorData.isReturning) {
+            welcomeMessage = `歡迎回來，${visitorData.name}！很高興再次見到您。`;
+        }
+        
+        if (visitorData.currentPage.includes('product')) {
+            welcomeMessage += ' 需要了解產品詳情嗎？';
+        }
+        
+        if (visitorData.cartValue > 1000) {
+            welcomeMessage += ' 看到您選擇了高價值商品，我們有專屬客服為您服務。';
+        }
+        
+        return welcomeMessage;
+    },
+    
+    // 根據頁面內容自訂客服專長
+    customizeAgentSkills: function(pageContent) {
+        const skills = [];
+        
+        if (pageContent.includes('技術支援')) {
+            skills.push('technical-support');
+        }
+        
+        if (pageContent.includes('訂單')) {
+            skills.push('order-management');
+        }
+        
+        if (pageContent.includes('付款')) {
+            skills.push('payment-support');
+        }
+        
+        return skills;
+    },
+    
+    // 動態調整聊天視窗樣式
+    customizeChatStyle: function(websiteTheme) {
+        const chatWidget = document.querySelector('.rocketchat-widget');
+        
+        if (websiteTheme === 'dark') {
+            chatWidget.style.setProperty('--rc-color-primary', '#FF6B35');
+            chatWidget.style.setProperty('--rc-color-primary-lightest', '#FFF3E0');
+        } else if (websiteTheme === 'minimal') {
+            chatWidget.style.setProperty('--rc-color-primary', '#2E7D32');
+            chatWidget.style.setProperty('--rc-color-primary-lightest', '#E8F5E8');
+        }
+    }
+};
+```
+
+#### 3. 聊天分析與優化
+
+```javascript
+// 聊天分析功能
+const ChatAnalytics = {
+    // 追蹤聊天轉換率
+    trackChatConversion: function() {
+        const chatEvents = {
+            'chat_started': 0,
+            'chat_converted': 0,
+            'chat_abandoned': 0
+        };
+        
+        RocketChat(function() {
+            this.on('chat-started', () => {
+                chatEvents.chat_started++;
+                this.trackEvent('chat_started');
+            });
+            
+            this.on('chat-ended', (result) => {
+                if (result.converted) {
+                    chatEvents.chat_converted++;
+                    this.trackEvent('chat_converted');
+                } else {
+                    chatEvents.chat_abandoned++;
+                    this.trackEvent('chat_abandoned');
+                }
+            });
+        });
+        
+        return chatEvents;
+    },
+    
+    // 分析聊天效果
+    analyzeChatPerformance: function() {
+        const conversionRate = (this.chatEvents.chat_converted / this.chatEvents.chat_started) * 100;
+        const abandonmentRate = (this.chatEvents.chat_abandoned / this.chatEvents.chat_started) * 100;
+        
+        return {
+            conversionRate: conversionRate.toFixed(2) + '%',
+            abandonmentRate: abandonmentRate.toFixed(2) + '%',
+            totalChats: this.chatEvents.chat_started
+        };
+    },
+    
+    // 追蹤事件到分析平台
+    trackEvent: function(eventName, properties = {}) {
+        // Google Analytics
+        if (typeof gtag !== 'undefined') {
+            gtag('event', eventName, properties);
+        }
+        
+        // Facebook Pixel
+        if (typeof fbq !== 'undefined') {
+            fbq('track', eventName, properties);
+        }
+        
+        // 自訂分析
+        this.sendToCustomAnalytics(eventName, properties);
+    }
+};
+```
+
+#### 4. 多語言聊天支援
+
+```javascript
+// 多語言聊天支援
+const MultiLanguageChat = {
+    // 自動偵測語言
+    detectLanguage: function() {
+        const browserLang = navigator.language || navigator.userLanguage;
+        const supportedLanguages = ['zh-TW', 'en-US', 'ja-JP', 'ko-KR'];
+        
+        return supportedLanguages.includes(browserLang) ? browserLang : 'en-US';
+    },
+    
+    // 設定聊天語言
+    setChatLanguage: function(language) {
+        const messages = {
+            'zh-TW': {
+                welcome: '您好！歡迎使用我們的客服系統。',
+                busy: '目前客服忙碌中，請稍候。',
+                offline: '目前為非營業時間，我們會盡快回覆您。'
+            },
+            'en-US': {
+                welcome: 'Hello! Welcome to our customer service.',
+                busy: 'Our agents are currently busy, please wait.',
+                offline: 'We are currently offline, we will reply soon.'
+            },
+            'ja-JP': {
+                welcome: 'こんにちは！カスタマーサービスへようこそ。',
+                busy: '現在エージェントが忙しいです。お待ちください。',
+                offline: '現在オフラインです。すぐに返信いたします。'
+            }
+        };
+        
+        return messages[language] || messages['en-US'];
+    },
+    
+    // 動態切換語言
+    switchLanguage: function(newLanguage) {
+        const messages = this.setChatLanguage(newLanguage);
+        
+        // 更新聊天介面文字
+        this.updateChatInterface(messages);
+        
+        // 通知客服語言變更
+        this.notifyAgentLanguageChange(newLanguage);
+    }
+};
 ```
 
 
@@ -997,14 +1257,23 @@ const CustomAPI = {
 
 ## 總結
 
-Rocket.Chat 的 Omnichannel 功能為企業提供了一個強大的多通路客服解決方案，透過統一的平台管理各種通訊管道，企業可以：
+Rocket.Chat 的 Omnichannel 功能為企業提供了一個強大的多通路客服解決方案，**其中網站聊天功能更是核心亮點**，透過統一的平台管理各種通訊管道，企業可以：
 
+- **🚀 網站聊天核心優勢**：一鍵嵌入、智能觸發、個人化體驗、完整分析
 - **提升客戶體驗**：一致的服務品質和快速的回應時間
 - **提高客服效率**：統一介面和智能路由功能
 - **降低營運成本**：減少系統維護和人力成本
 - **獲得深度洞察**：完整的客戶互動數據分析
 - **開源優勢**：完全掌控程式碼，參與活躍的開發者社群
 - **資料庫靈活性**：MongoDB 提供強大的文件儲存和查詢能力
+
+### 🎯 網站聊天功能的核心價值
+
+1. **即時客戶互動**：訪客無需等待，立即獲得專業協助
+2. **提升轉換率**：即時解答疑問，大幅降低購物車放棄率
+3. **智能客戶服務**：根據訪客行為自動觸發和路由
+4. **完整數據分析**：追蹤聊天效果，持續優化客戶體驗
+5. **多語言支援**：服務全球客戶，打破語言障礙
 
 ### 免費版 vs 付費版選擇
 
