@@ -20,50 +20,34 @@ author: Mark Ku
 
 AI 可以快速產生新的程式碼模組，但當需要把新功能整合進已有的複雜系統時，問題就會浮現。
 
-### 具體例子：電商系統的動態折扣功能
+### 具體例子：購物車折扣功能
 
 ```javascript
-// AI 生成的折扣計算模組
-class DiscountCalculator {
-    calculateDiscount(order, rules) {
-        let totalDiscount = 0;
-        for (const rule of rules) {
-            if (this.evaluateRule(order, rule)) {
-                totalDiscount += rule.discount;
-            }
-        }
-        return totalDiscount;
-    }
-    
-    evaluateRule(order, rule) {
-        // 簡單的規則評估邏輯
-        return order.total >= rule.minAmount;
-    }
+// AI 生成的簡單折扣計算
+function calculateDiscount(total, discountPercent) {
+    return total * (discountPercent / 100);
 }
 ```
 
 **問題所在：**
-- AI 無法理解現有的訂單流程中，折扣計算會影響庫存檢查
-- 沒有考慮到付款驗證時需要重新計算總金額
-- 忽略了多種折扣規則可能產生的衝突
+- AI 沒有考慮到會員等級的不同折扣規則
+- 忽略了商品類別的特殊折扣
+- 沒有處理折扣上限限制
 
 **實際整合時的問題：**
 ```javascript
-// 現有的訂單處理流程
-class OrderProcessor {
-    async processOrder(order) {
-        // 1. 檢查庫存
-        await this.checkInventory(order.items);
+// 現有的購物車系統
+class ShoppingCart {
+    calculateTotal() {
+        let total = this.items.reduce((sum, item) => sum + item.price, 0);
         
-        // 2. 計算折扣（新功能）
-        const discount = this.discountCalculator.calculateDiscount(order, this.discountRules);
-        order.total -= discount; // 這裡可能影響後續的庫存檢查邏輯
+        // AI 的簡單折扣計算可能破壞現有邏輯
+        const discount = calculateDiscount(total, 10); // 固定 10% 折扣
+        total -= discount;
         
-        // 3. 驗證付款
-        await this.validatePayment(order.total); // 總金額已經被修改
-        
-        // 4. 更新庫存
-        await this.updateInventory(order.items); // 可能因為折扣影響庫存計算
+        // 但系統原本有更複雜的折扣邏輯
+        // 例如：會員折扣、商品類別折扣、滿額折扣等
+        return total;
     }
 }
 ```
@@ -72,56 +56,48 @@ class OrderProcessor {
 
 AI 的能力依賴於過往訓練資料，如果問題冷門或涉及全新概念，它往往無法提供完整解法。
 
-### 具體例子：區塊鏈交易驗證演算法
+### 具體例子：密碼驗證功能
 
 ```javascript
-// AI 可能給出的模糊方向
-class TransactionValidator {
-    validateTransaction(transaction) {
-        // AI 只能提供基本的驗證
-        if (this.checkBasicFormat(transaction)) {
-            return this.basicValidation(transaction);
-        }
-        return false;
+// AI 可能給出的基本驗證
+function validatePassword(password) {
+    if (password.length >= 8) {
+        return true;
     }
-    
-    checkBasicFormat(transaction) {
-        // 簡單的格式檢查邏輯
-        return transaction.hash && transaction.signature;
-    }
+    return false;
 }
 ```
 
 **實際需求：**
-- 需要處理多種加密貨幣的複雜驗證規則
-- 必須考慮雙重支付攻擊防護
-- 需要自適應的共識機制驗證
+- 需要檢查密碼複雜度（大小寫、數字、特殊符號）
+- 必須防止常見弱密碼
+- 需要符合公司安全政策
 
 **AI 的限制：**
-- 缺乏區塊鏈技術的專業知識
-- 無法理解不同加密貨幣的差異
+- 缺乏安全領域的專業知識
+- 無法理解不同行業的安全要求
 - 只能提供通用的解決方案框架
 
 ## 3️⃣ 腦容量（Context）有限，難以處理超大型專案
 
 再強大的 AI 也有上下文限制，能同時「記住」的程式碼量有限，超過後就無法全盤理解。
 
-### 具體例子：200,000 行程式碼的金融系統
+### 具體例子：大型電商網站
 
 ```javascript
 // AI 只能看到部分程式碼，無法理解整體架構
-class FinancialSystem {
-    // 這裡可能有數千行複雜的業務邏輯
-    // AI 無法同時處理所有相關模組
+class UserService {
+    // 用戶管理相關功能
+    // AI 無法同時看到所有相關模組
 }
 
-class RiskManagement {
-    // 風險管理模組
+class ProductService {
+    // 商品管理功能
     // AI 可能不知道這個模組與其他模組的互動
 }
 
-class ComplianceEngine {
-    // 合規檢查引擎
+class OrderService {
+    // 訂單處理功能
     // AI 無法理解複雜的業務規則和依賴關係
 }
 ```
@@ -135,95 +111,73 @@ class ComplianceEngine {
 
 AI 在理解系統內部相依性時仍有不足，缺乏人類工程師能從經驗中建立的直覺。
 
-### 具體例子：稅率計算函式的修改
+### 具體例子：價格計算函式的修改
 
 ```javascript
-// 原始稅率計算函式
-class TaxCalculator {
-    calculateTax(amount, region) {
-        const rate = this.getTaxRate(region);
-        const tax = amount * rate;
-        
-        // 同時更新報表模組的統計資料
-        this.updateReportStatistics(amount, tax, region);
-        
-        return tax;
-    }
+// 原始價格計算函式
+function calculatePrice(quantity, unitPrice) {
+    const subtotal = quantity * unitPrice;
     
-    updateReportStatistics(amount, tax, region) {
-        // 這個方法被多個報表模組依賴
-        this.reportEngine.addTransaction(amount, tax, region);
-    }
+    // 同時更新銷售統計
+    updateSalesStats(quantity, subtotal);
+    
+    return subtotal;
 }
 
-// AI 修改後的版本（可能破壞報表功能）
-class TaxCalculator {
-    calculateTax(amount, region) {
-        const rate = this.getTaxRate(region);
-        const tax = amount * rate;
-        
-        // AI 可能移除或修改這行，導致報表錯誤
-        // this.updateReportStatistics(amount, tax, region);
-        
-        return tax;
-    }
+function updateSalesStats(quantity, amount) {
+    // 這個函式被多個報表功能依賴
+    salesReport.addSale(quantity, amount);
+}
+```
+
+**AI 修改後的版本（可能破壞報表功能）：**
+```javascript
+function calculatePrice(quantity, unitPrice) {
+    const subtotal = quantity * unitPrice;
+    
+    // AI 可能移除這行，導致報表錯誤
+    // updateSalesStats(quantity, subtotal);
+    
+    return subtotal;
 }
 ```
 
 **問題後果：**
-- 稅率計算正確，但報表資料不完整
-- 財務報表出現錯誤
-- 審計時發現資料不一致
+- 價格計算正確，但銷售報表資料不完整
+- 統計報表出現錯誤
+- 無法追蹤銷售數據
 
 ## 5️⃣ 記憶缺陷，難以重用已教過的方法
 
 AI 在單次對話中能學習指引，但長期記憶不足，導致無法重用過往解法。
 
-### 具體例子：排序演算法的最佳化
+### 具體例子：陣列排序功能
 
 ```javascript
-// 昨天教會 AI 的最佳化排序演算法
-class OptimizedSorter {
-    sort(array) {
-        // 使用快速排序 + 插入排序的混合策略
-        if (array.length < 10) {
-            return this.insertionSort(array);
-        }
-        
-        const pivot = this.choosePivot(array);
-        const { left, right } = this.partition(array, pivot);
-        
-        return [
-            ...this.sort(left),
-            pivot,
-            ...this.sort(right)
-        ];
-    }
+// 昨天教會 AI 的快速排序
+function quickSort(array) {
+    if (array.length <= 1) return array;
     
-    choosePivot(array) {
-        // 三數取中法選擇樞軸
-        const mid = Math.floor(array.length / 2);
-        const first = array[0];
-        const last = array[array.length - 1];
-        const middle = array[mid];
-        
-        return this.medianOfThree(first, middle, last);
-    }
+    const pivot = array[0];
+    const left = array.slice(1).filter(x => x < pivot);
+    const right = array.slice(1).filter(x => x >= pivot);
+    
+    return [...quickSort(left), pivot, ...quickSort(right)];
 }
+```
 
-// 今天再問類似需求時，AI 可能完全忘記，重新產生一個效率更差的版本
-class BasicSorter {
-    sort(array) {
-        // 簡單的氣泡排序，效率較差
-        for (let i = 0; i < array.length; i++) {
-            for (let j = 0; j < array.length - i - 1; j++) {
-                if (array[j] > array[j + 1]) {
-                    [array[j], array[j + 1]] = [array[j + 1], array[j]];
-                }
+**今天再問類似需求時，AI 可能完全忘記，重新產生一個效率更差的版本：**
+```javascript
+// AI 重新產生的簡單排序
+function simpleSort(array) {
+    for (let i = 0; i < array.length; i++) {
+        for (let j = 0; j < array.length - 1; j++) {
+            if (array[j] > array[j + 1]) {
+                [array[j], array[j + 1]] = [array[j + 1], array[j]];
             }
         }
-        return array;
     }
+    return array;
 }
 ```
 
@@ -231,54 +185,39 @@ class BasicSorter {
 
 許多開發環境中，使用高階模型（例如 GPT-4.5）寫一部分程式碼後，為了省成本改用低階模型接續開發，結果程式碼品質大幅下降。
 
-### 具體例子：API 設計的一致性問題
+### 具體例子：用戶註冊功能
 
 ```javascript
-// 高階模型設計的 API
-class UserService {
-    async createUser(userData) {
-        // 完整的驗證邏輯
-        const validatedData = await this.validateUserData(userData);
-        
-        // 業務邏輯處理
-        const user = await this.userRepository.create(validatedData);
-        
-        // 事件發布
-        await this.eventBus.publish('user.created', { userId: user.id });
-        
-        return user;
+// 高階模型設計的完整版本
+async function createUser(userData) {
+    // 完整的驗證邏輯
+    if (!userData.email || !userData.password || !userData.name) {
+        throw new Error('Missing required fields');
     }
     
-    async validateUserData(data) {
-        const schema = Joi.object({
-            email: Joi.string().email().required(),
-            password: Joi.string().min(8).required(),
-            name: Joi.string().min(2).required()
-        });
-        
-        return await schema.validateAsync(data);
+    // 檢查郵箱格式
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(userData.email)) {
+        throw new Error('Invalid email format');
     }
+    
+    // 創建用戶
+    const user = await saveUser(userData);
+    return user;
 }
+```
 
-// 低階模型維護時可能產生的問題
-class UserService {
-    async createUser(userData) {
-        // 簡化的驗證，可能遺漏重要檢查
-        if (!userData.email || !userData.password) {
-            throw new Error('Missing required fields');
-        }
-        
-        // 直接創建，沒有事件發布
-        const user = await this.userRepository.create(userData);
-        
-        return user;
+**低階模型維護時可能產生的問題：**
+```javascript
+// 簡化版本，遺漏重要檢查
+async function createUser(userData) {
+    // 只檢查基本欄位，沒有格式驗證
+    if (!userData.email || !userData.password) {
+        throw new Error('Missing fields');
     }
     
-    // 可能重複造輪子，而不是重用現有的驗證邏輯
-    async validateEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    }
+    const user = await saveUser(userData);
+    return user;
 }
 ```
 
@@ -286,54 +225,44 @@ class UserService {
 
 除非明確告訴 AI 應遵循哪些架構原則和命名規則，否則每次產出的程式碼風格都可能不同。
 
-### 具體例子：登入功能的架構不一致
+### 具體例子：登入功能
 
 ```javascript
-// 第一次：使用 MVC 架構
-class LoginController {
-    async login(req, res) {
+// 第一次：使用函式式設計
+function loginUser(email, password) {
+    if (!email || !password) {
+        return { success: false, message: 'Email and password required' };
+    }
+    
+    const user = findUserByEmail(email);
+    if (user && verifyPassword(password, user.password)) {
+        return { success: true, user };
+    }
+    
+    return { success: false, message: 'Invalid credentials' };
+}
+```
+
+**第二次：使用類別式設計**
+```javascript
+// 風格完全不同的版本
+class UserAuth {
+    constructor() {
+        this.users = [];
+    }
+    
+    authenticate(email, password) {
         try {
-            const { email, password } = req.body;
-            const user = await this.userService.authenticate(email, password);
-            
-            if (user) {
-                const token = this.authService.generateToken(user);
-                res.json({ success: true, token });
-            } else {
-                res.status(401).json({ success: false, message: 'Invalid credentials' });
+            const user = this.users.find(u => u.email === email);
+            if (user && user.password === password) {
+                return { success: true, user };
             }
+            throw new Error('Invalid credentials');
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            return { success: false, error: error.message };
         }
     }
 }
-
-// 第二次：使用函式式設計
-const loginUser = async (email, password) => {
-    const validateCredentials = (email, password) => {
-        if (!email || !password) {
-            throw new Error('Email and password are required');
-        }
-    };
-    
-    const authenticateUser = async (email, password) => {
-        const user = await findUserByEmail(email);
-        if (user && await verifyPassword(password, user.password)) {
-            return user;
-        }
-        return null;
-    };
-    
-    validateCredentials(email, password);
-    const user = await authenticateUser(email, password);
-    
-    if (user) {
-        const token = generateJWT(user);
-        return { success: true, token };
-    } else {
-        throw new Error('Invalid credentials');
-    }
-};
 ```
 
 ## 上述問題部份可以透過Cursor 指南和 Copilot 指南解決
@@ -351,22 +280,18 @@ Cursor 作為基於 AI 的程式碼編輯器，能夠大幅提升開發效率，
 // .cursorrules 檔案範例
 const cursorRules = {
     project: {
-        name: 'E-commerce Platform',
-        architecture: 'Clean Architecture',
-        language: 'TypeScript',
-        framework: 'Next.js',
-        database: 'PostgreSQL'
+        name: 'My Website',
+        language: 'JavaScript',
+        framework: 'React'
     },
     coding: {
         style: 'camelCase',
-        errorHandling: 'try-catch with custom errors',
-        validation: 'Zod schemas',
-        testing: 'Jest + React Testing Library'
+        errorHandling: 'try-catch',
+        comments: 'JSDoc'
     },
     ai: {
-        context: 'Always consider existing codebase patterns',
-        documentation: 'Include JSDoc comments',
-        testing: 'Generate unit tests for new functions'
+        context: 'Follow existing patterns',
+        testing: 'Include unit tests'
     }
 };
 ```
@@ -383,17 +308,15 @@ const cursorRules = {
 const effectivePrompt = `
 請根據以下專案規範生成程式碼：
 
-專案架構：Clean Architecture
-程式語言：TypeScript
-框架：Next.js
-資料庫：PostgreSQL
+專案：My Website
+程式語言：JavaScript
+框架：React
 
 要求：
-1. 遵循現有的命名規範（camelCase）
-2. 包含完整的錯誤處理
-3. 添加 JSDoc 註解
-4. 生成對應的單元測試
-5. 考慮與現有模組的整合
+1. 使用 camelCase 命名
+2. 包含錯誤處理
+3. 添加註解
+4. 考慮現有程式碼風格
 
 現有相關程式碼：
 ${existingCodeContext}
@@ -413,9 +336,9 @@ GitHub Copilot 作為程式碼補全工具，能夠提供即時的程式碼建�
 // .copilot/settings.json
 {
     "project": {
-        "name": "E-commerce Platform",
+        "name": "My Website",
         "type": "web-application",
-        "stack": ["TypeScript", "Next.js", "PostgreSQL", "Redis"]
+        "stack": ["JavaScript", "React"]
     },
     "coding": {
         "style": {
@@ -424,15 +347,13 @@ GitHub Copilot 作為程式碼補全工具，能夠提供即時的程式碼建�
             "quotes": "single"
         },
         "patterns": {
-            "errorHandling": "try-catch with custom error classes",
-            "validation": "Zod schemas",
-            "async": "async/await with proper error handling"
+            "errorHandling": "try-catch",
+            "comments": "JSDoc"
         }
     },
     "ai": {
-        "context": "Consider existing codebase patterns and conventions",
-        "documentation": "Always include JSDoc comments",
-        "testing": "Generate unit tests for new functionality"
+        "context": "Follow existing patterns",
+        "testing": "Include unit tests"
     }
 }
 ```
@@ -466,29 +387,26 @@ your-project/
 ```javascript
 // 使用 Copilot 時的程式碼註解範例
 /**
- * 創建新用戶帳戶
- * @param {Object} userData - 用戶資料物件
- * @param {string} userData.email - 用戶電子郵件
- * @param {string} userData.password - 用戶密碼
- * @param {string} userData.name - 用戶姓名
- * @returns {Promise<Object>} 創建的用戶物件
- * @throws {ValidationError} 當資料驗證失敗時
- * @throws {DuplicateUserError} 當用戶已存在時
+ * 創建新用戶
+ * @param {Object} userData - 用戶資料
+ * @param {string} userData.email - 電子郵件
+ * @param {string} userData.password - 密碼
+ * @returns {Object} 創建的用戶
  */
-async function createUserAccount(userData) {
-    // Copilot 會根據註解和上下文生成相應的程式碼
-    // 包含驗證、錯誤處理、資料庫操作等
+function createUser(userData) {
+    // Copilot 會根據註解生成相應的程式碼
+    // 包含驗證、錯誤處理等
 }
 
 // 使用 Copilot 生成測試程式碼
 /**
- * 測試用戶帳戶創建功能
+ * 測試用戶創建功能
  * 測試案例：
- * 1. 成功創建新用戶
- * 2. 重複電子郵件應該失敗
- * 3. 無效資料應該拋出驗證錯誤
+ * 1. 成功創建用戶
+ * 2. 重複郵箱應該失敗
+ * 3. 無效資料應該拋出錯誤
  */
-describe('createUserAccount', () => {
+describe('createUser', () => {
     // Copilot 會根據描述生成測試案例
 });
 ```
@@ -502,37 +420,37 @@ describe('createUserAccount', () => {
 const developmentWorkflow = {
     planning: {
         tool: 'Cursor',
-        purpose: '架構設計和程式碼生成',
-        context: '提供完整的專案上下文和需求描述'
+        purpose: '設計和生成程式碼',
+        context: '提供專案需求和上下文'
     },
     implementation: {
         tool: 'Copilot',
-        purpose: '即時程式碼補全和建議',
-        context: '在現有程式碼基礎上進行開發'
+        purpose: '即時程式碼建議',
+        context: '在現有程式碼基礎上開發'
     },
     review: {
         tool: 'Cursor',
-        purpose: '程式碼審查和重構',
-        context: '分析程式碼品質和架構一致性'
+        purpose: '程式碼審查和優化',
+        context: '檢查程式碼品質'
     }
 };
 
 // 使用範例
 const workflowExample = `
-1. 使用 Cursor 進行功能設計：
-   - 提供詳細的需求描述
-   - 包含現有程式碼上下文
-   - 指定架構和設計模式
+1. 使用 Cursor 進行設計：
+   - 描述功能需求
+   - 提供程式碼上下文
+   - 指定架構模式
 
 2. 使用 Copilot 進行實作：
-   - 在現有檔案中編寫程式碼
-   - 利用註解引導 Copilot
+   - 在檔案中編寫程式碼
+   - 利用註解引導
    - 接受或拒絕建議
 
 3. 使用 Cursor 進行優化：
-   - 程式碼重構和優化
-   - 添加測試和文件
-   - 確保程式碼品質
+   - 重構程式碼
+   - 添加測試
+   - 確保品質
 `;
 ```
 
@@ -543,7 +461,7 @@ const workflowExample = `
 const copilotOptimization = {
     problem: 'Copilot 建議的程式碼不符合專案規範',
     solution: {
-        step1: '在檔案頂部添加詳細的註解說明專案規範',
+        step1: '在檔案頂部添加註解說明專案規範',
         step2: '使用一致的命名和程式碼風格',
         step3: '提供足夠的上下文資訊'
     }
