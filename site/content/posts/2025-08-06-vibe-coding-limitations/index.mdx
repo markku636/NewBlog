@@ -336,7 +336,7 @@ const loginUser = async (email, password) => {
 };
 ```
 
-## Cursor 指南和 Copilot 指南
+## 上述問題部份可以透過Cursor 指南和 Copilot 指南解決
 
 ### 1. Cursor 使用指南
 
@@ -406,6 +406,9 @@ GitHub Copilot 作為程式碼補全工具，能夠提供即時的程式碼建�
 
 #### 建立 Copilot 設定檔案
 
+**檔案位置：** 專案根目錄下的 `.copilot` 資料夾  
+**檔名：** `settings.json`
+
 ```javascript
 // .copilot/settings.json
 {
@@ -433,6 +436,30 @@ GitHub Copilot 作為程式碼補全工具，能夠提供即時的程式碼建�
     }
 }
 ```
+
+**建立步驟：**
+1. 在專案根目錄建立 `.copilot` 資料夾
+2. 在 `.copilot` 資料夾內建立 `settings.json` 檔案
+3. 複製上述範例並根據專案需求修改
+4. 儲存檔案後，Copilot 會自動讀取並應用這些設定
+
+#### 專案檔案結構總結
+
+```
+your-project/
+├── .cursorrules                    # Cursor 專案上下文檔案
+├── .copilot/                       # Copilot 設定資料夾
+│   └── settings.json              # Copilot 設定檔案
+├── src/                           # 專案原始碼
+├── tests/                         # 測試檔案
+├── docs/                          # 專案文件
+└── package.json                   # 專案依賴
+```
+
+**重要提醒：**
+- `.cursorrules` 和 `.copilot` 資料夾都應該加入版本控制
+- 這些檔案會影響團隊所有成員的 AI 工具行為
+- 建議在團隊中統一這些設定檔案的格式和內容
 
 #### Copilot 最佳實踐
 
