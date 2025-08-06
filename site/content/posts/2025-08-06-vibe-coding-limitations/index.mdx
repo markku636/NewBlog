@@ -1,0 +1,444 @@
+---
+featured: true
+title: 深入探討 Vibe Coding 限制
+slug: vibe-coding-limitations
+category: AI
+thumbnail: vibe-coding-limitations.png
+date: 2025-08-06 06:01:00 +0800
+tags: ['AI', 'Coding', 'Development', 'Vibe Coding', 'Software Engineering', 'Productivity']
+description: 深入探討 Vibe Coding 的七大限制，包含具體例子和實用見解，幫助開發者更好地理解 AI 輔助編程的現狀與挑戰。
+author: Mark Ku
+---
+
+## Vibe Coding 的興起與挑戰
+
+隨著 AI 程式輔助工具的普及，許多開發者開始嘗試「Vibe coding」——也就是給 AI 一些簡單的描述或方向，讓它自動生成程式碼。雖然這種方式能夠快速生產新的程式碼，但在實際專案開發中仍有不少限制。
+
+**Vibe coding 的核心概念**是透過自然語言描述需求，讓 AI 自動生成對應的程式碼。這種方法在原型開發、快速驗證想法時確實很有用，但在面對複雜的企業級專案時，往往會遇到各種挑戰。
+
+## 1️⃣ 在既有複雜性上疊加功能是挑戰
+
+AI 可以快速產生新的程式碼模組，但當需要把新功能整合進已有的複雜系統時，問題就會浮現。
+
+### 具體例子：電商系統的動態折扣功能
+
+```javascript
+// AI 生成的折扣計算模組
+class DiscountCalculator {
+    calculateDiscount(order, rules) {
+        let totalDiscount = 0;
+        for (const rule of rules) {
+            if (this.evaluateRule(order, rule)) {
+                totalDiscount += rule.discount;
+            }
+        }
+        return totalDiscount;
+    }
+    
+    evaluateRule(order, rule) {
+        // 簡單的規則評估邏輯
+        return order.total >= rule.minAmount;
+    }
+}
+```
+
+**問題所在：**
+- AI 無法理解現有的訂單流程中，折扣計算會影響庫存檢查
+- 沒有考慮到付款驗證時需要重新計算總金額
+- 忽略了多種折扣規則可能產生的衝突
+
+**實際整合時的問題：**
+```javascript
+// 現有的訂單處理流程
+class OrderProcessor {
+    async processOrder(order) {
+        // 1. 檢查庫存
+        await this.checkInventory(order.items);
+        
+        // 2. 計算折扣（新功能）
+        const discount = this.discountCalculator.calculateDiscount(order, this.discountRules);
+        order.total -= discount; // 這裡可能影響後續的庫存檢查邏輯
+        
+        // 3. 驗證付款
+        await this.validatePayment(order.total); // 總金額已經被修改
+        
+        // 4. 更新庫存
+        await this.updateInventory(order.items); // 可能因為折扣影響庫存計算
+    }
+}
+```
+
+## 2️⃣ 冷門且複雜的新問題時，AI 經常答不上來
+
+AI 的能力依賴於過往訓練資料，如果問題冷門或涉及全新概念，它往往無法提供完整解法。
+
+### 具體例子：太空通訊訊號修復演算法
+
+```javascript
+// AI 可能給出的模糊方向
+class SignalRepairAlgorithm {
+    repairSignal(signal) {
+        // AI 只能提供基本的錯誤檢測
+        if (this.detectError(signal)) {
+            return this.basicRepair(signal);
+        }
+        return signal;
+    }
+    
+    detectError(signal) {
+        // 簡單的錯誤檢測邏輯
+        return signal.noiseLevel > threshold;
+    }
+}
+```
+
+**實際需求：**
+- 需要處理太空環境中的特殊干擾
+- 必須考慮訊號延遲和丟包問題
+- 需要自適應的修復策略
+
+**AI 的限制：**
+- 缺乏太空通訊的專業知識
+- 無法理解訊號物理特性
+- 只能提供通用的解決方案框架
+
+## 3️⃣ 腦容量（Context）有限，難以處理超大型專案
+
+再強大的 AI 也有上下文限制，能同時「記住」的程式碼量有限，超過後就無法全盤理解。
+
+### 具體例子：200,000 行程式碼的金融系統
+
+```javascript
+// AI 只能看到部分程式碼，無法理解整體架構
+class FinancialSystem {
+    // 這裡可能有數千行複雜的業務邏輯
+    // AI 無法同時處理所有相關模組
+}
+
+class RiskManagement {
+    // 風險管理模組
+    // AI 可能不知道這個模組與其他模組的互動
+}
+
+class ComplianceEngine {
+    // 合規檢查引擎
+    // AI 無法理解複雜的業務規則和依賴關係
+}
+```
+
+**實際問題：**
+- AI 只能看到當前對話中的程式碼片段
+- 無法理解模組間的複雜依賴關係
+- 缺乏對整體架構的認知
+
+## 4️⃣ 實作複雜功能時聯想力不足，容易「改 A 壞 B」
+
+AI 在理解系統內部相依性時仍有不足，缺乏人類工程師能從經驗中建立的直覺。
+
+### 具體例子：稅率計算函式的修改
+
+```javascript
+// 原始稅率計算函式
+class TaxCalculator {
+    calculateTax(amount, region) {
+        const rate = this.getTaxRate(region);
+        const tax = amount * rate;
+        
+        // 同時更新報表模組的統計資料
+        this.updateReportStatistics(amount, tax, region);
+        
+        return tax;
+    }
+    
+    updateReportStatistics(amount, tax, region) {
+        // 這個方法被多個報表模組依賴
+        this.reportEngine.addTransaction(amount, tax, region);
+    }
+}
+
+// AI 修改後的版本（可能破壞報表功能）
+class TaxCalculator {
+    calculateTax(amount, region) {
+        const rate = this.getTaxRate(region);
+        const tax = amount * rate;
+        
+        // AI 可能移除或修改這行，導致報表錯誤
+        // this.updateReportStatistics(amount, tax, region);
+        
+        return tax;
+    }
+}
+```
+
+**問題後果：**
+- 稅率計算正確，但報表資料不完整
+- 財務報表出現錯誤
+- 審計時發現資料不一致
+
+## 5️⃣ 記憶缺陷，難以重用已教過的方法
+
+AI 在單次對話中能學習指引，但長期記憶不足，導致無法重用過往解法。
+
+### 具體例子：排序演算法的最佳化
+
+```javascript
+// 昨天教會 AI 的最佳化排序演算法
+class OptimizedSorter {
+    sort(array) {
+        // 使用快速排序 + 插入排序的混合策略
+        if (array.length < 10) {
+            return this.insertionSort(array);
+        }
+        
+        const pivot = this.choosePivot(array);
+        const { left, right } = this.partition(array, pivot);
+        
+        return [
+            ...this.sort(left),
+            pivot,
+            ...this.sort(right)
+        ];
+    }
+    
+    choosePivot(array) {
+        // 三數取中法選擇樞軸
+        const mid = Math.floor(array.length / 2);
+        const first = array[0];
+        const last = array[array.length - 1];
+        const middle = array[mid];
+        
+        return this.medianOfThree(first, middle, last);
+    }
+}
+
+// 今天再問類似需求時，AI 可能完全忘記，重新產生一個效率更差的版本
+class BasicSorter {
+    sort(array) {
+        // 簡單的氣泡排序，效率較差
+        for (let i = 0; i < array.length; i++) {
+            for (let j = 0; j < array.length - i - 1; j++) {
+                if (array[j] > array[j + 1]) {
+                    [array[j], array[j + 1]] = [array[j + 1], array[j]];
+                }
+            }
+        }
+        return array;
+    }
+}
+```
+
+## 6️⃣ 模型切換造成品質不穩
+
+許多開發環境中，使用高階模型（例如 GPT-4.5）寫一部分程式碼後，為了省成本改用低階模型接續開發，結果程式碼品質大幅下降。
+
+### 具體例子：API 設計的一致性問題
+
+```javascript
+// 高階模型設計的 API
+class UserService {
+    async createUser(userData) {
+        // 完整的驗證邏輯
+        const validatedData = await this.validateUserData(userData);
+        
+        // 業務邏輯處理
+        const user = await this.userRepository.create(validatedData);
+        
+        // 事件發布
+        await this.eventBus.publish('user.created', { userId: user.id });
+        
+        return user;
+    }
+    
+    async validateUserData(data) {
+        const schema = Joi.object({
+            email: Joi.string().email().required(),
+            password: Joi.string().min(8).required(),
+            name: Joi.string().min(2).required()
+        });
+        
+        return await schema.validateAsync(data);
+    }
+}
+
+// 低階模型維護時可能產生的問題
+class UserService {
+    async createUser(userData) {
+        // 簡化的驗證，可能遺漏重要檢查
+        if (!userData.email || !userData.password) {
+            throw new Error('Missing required fields');
+        }
+        
+        // 直接創建，沒有事件發布
+        const user = await this.userRepository.create(userData);
+        
+        return user;
+    }
+    
+    // 可能重複造輪子，而不是重用現有的驗證邏輯
+    async validateEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+}
+```
+
+## 7️⃣ 風格與設計不一致
+
+除非明確告訴 AI 應遵循哪些架構原則和命名規則，否則每次產出的程式碼風格都可能不同。
+
+### 具體例子：登入功能的架構不一致
+
+```javascript
+// 第一次：使用 MVC 架構
+class LoginController {
+    async login(req, res) {
+        try {
+            const { email, password } = req.body;
+            const user = await this.userService.authenticate(email, password);
+            
+            if (user) {
+                const token = this.authService.generateToken(user);
+                res.json({ success: true, token });
+            } else {
+                res.status(401).json({ success: false, message: 'Invalid credentials' });
+            }
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+}
+
+// 第二次：使用函式式設計
+const loginUser = async (email, password) => {
+    const validateCredentials = (email, password) => {
+        if (!email || !password) {
+            throw new Error('Email and password are required');
+        }
+    };
+    
+    const authenticateUser = async (email, password) => {
+        const user = await findUserByEmail(email);
+        if (user && await verifyPassword(password, user.password)) {
+            return user;
+        }
+        return null;
+    };
+    
+    validateCredentials(email, password);
+    const user = await authenticateUser(email, password);
+    
+    if (user) {
+        const token = generateJWT(user);
+        return { success: true, token };
+    } else {
+        throw new Error('Invalid credentials');
+    }
+};
+```
+
+## 實用的解決策略
+
+### 1. 建立明確的開發規範
+
+```javascript
+// 建立程式碼風格指南
+const codingStandards = {
+    architecture: 'MVC',
+    naming: 'camelCase',
+    errorHandling: 'try-catch',
+    validation: 'Joi schema',
+    documentation: 'JSDoc'
+};
+
+// 提供給 AI 的範例
+class ExampleService {
+    /**
+     * 創建新用戶
+     * @param {Object} userData - 用戶資料
+     * @returns {Promise<Object>} 創建的用戶
+     */
+    async createUser(userData) {
+        try {
+            const validatedData = await this.validateUserData(userData);
+            const user = await this.userRepository.create(validatedData);
+            await this.eventBus.publish('user.created', { userId: user.id });
+            return user;
+        } catch (error) {
+            throw new Error(`Failed to create user: ${error.message}`);
+        }
+    }
+}
+```
+
+### 2. 使用上下文管理工具
+
+```javascript
+// 建立專案上下文檔案
+const projectContext = {
+    architecture: {
+        pattern: 'Clean Architecture',
+        layers: ['Controllers', 'Services', 'Repositories', 'Models']
+    },
+    dependencies: {
+        database: 'PostgreSQL',
+        cache: 'Redis',
+        messageQueue: 'RabbitMQ'
+    },
+    codingStandards: {
+        language: 'TypeScript',
+        framework: 'Express.js',
+        testing: 'Jest'
+    }
+};
+
+// 在每次 AI 對話中提供上下文
+const aiPrompt = `
+請根據以下專案上下文生成程式碼：
+${JSON.stringify(projectContext, null, 2)}
+
+要求：
+1. 遵循 Clean Architecture 模式
+2. 使用 TypeScript
+3. 包含完整的錯誤處理
+4. 添加 JSDoc 註解
+`;
+```
+
+### 3. 建立程式碼模板庫
+
+```javascript
+// 建立常用功能的模板
+const codeTemplates = {
+    service: `
+class {{ServiceName}}Service {
+    constructor({{dependencies}}) {
+        {{constructorBody}}
+    }
+    
+    async {{methodName}}({{parameters}}) {
+        try {
+            {{methodBody}}
+        } catch (error) {
+            throw new Error(\`{{ServiceName}} {{methodName}} failed: \${error.message}\`);
+        }
+    }
+}`,
+    
+    controller: `
+class {{ControllerName}}Controller {
+    async {{methodName}}(req, res) {
+        try {
+            const result = await this.{{serviceName}}Service.{{methodName}}(req.body);
+            res.json({ success: true, data: result });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+}`
+};
+```
+
+## 結論
+
+Vibe coding 雖然能夠快速生成程式碼、加速原型開發，但在面對大型專案、複雜邏輯、長期維護時，AI 仍難以完全取代工程師，人類工程師能夠全盤理解系統架構、具備長期記憶、解決未知問題並保證程式風格一致，這些都是當前 AI 仍無法完全做到的。
+
