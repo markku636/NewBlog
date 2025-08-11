@@ -276,6 +276,34 @@ local http = require "resty.http"
 local httpc = http.new()
 local res, err = httpc:request_uri("https://api.example.com", { method = "GET" })
 ```
+## 本地除錯小計巧
+
+* docker ymal 用到db host 或redis host 都得寫靜態 ip 不能寫docker network 的name ，不然除會斷掉。
+
+```bash
+    host = os.getenv("KONG_PG_HOST") or "192.168.201.101",
+```
+
+* 本地deubg 是抓不到docker yaml 的環境變數的，因此要給預設
+
+```bash
+ return {
+    host = os.getenv("KONG_PG_HOST") or "192.168.201.101",
+    port = tonumber(os.getenv("KONG_PG_PORT")) or 5432,
+    database = os.getenv("KONG_PG_DATABASE") or "kong",
+    user = os.getenv("KONG_PG_USER") or "kong",
+    password = os.getenv("KONG_PG_PASSWORD") or "kong",
+    pool_size = 10,
+    pool_name = "custom_acl_pool"
+  }
+```
+* try catch 
+
+在 Lua（包括 Kong 插件開發）中，pcall(function) 是「protected call」的縮寫，用來安全執行一段可能會出錯的程式碼，避免錯誤直接中斷整個請求流程。
+
+主要用途 捕捉執行時錯誤：如果 function 內部有錯誤（例如資料庫連線失敗、語法錯誤等），pcall 會捕捉這個錯誤，不會讓 Lua 腳本直接崩潰。 回傳錯誤資訊：pcall 會回傳兩個值：success（布林值，表示有無錯誤）和 result（成功時是回傳值，失敗時是錯誤訊息）。 範例
+
+
 
 ## 常見問題 FAQ
 
@@ -294,3 +322,5 @@ A:
 ## 相關資源
 * [官方範例客製套件範本](https://github.com/Kong/kong-plugin.git)
 * [開源的套件網站 - Lua Rock](https://luarocks.org/)
+
+
