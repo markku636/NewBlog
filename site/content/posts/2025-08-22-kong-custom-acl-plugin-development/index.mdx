@@ -1,0 +1,602 @@
+---
+featured: true
+title: Kong Custom ACL 套件開發教學：從零開始打造 API 權限管理系統
+slug: kong-custom-acl-plugin-development
+category: DevOps
+thumbnail: kong-custom-acl-plugin-development.png
+date: 2025-08-20 01:01:00 +0800
+tags: ['Kong', 'API Gateway', 'Custom Plugin', 'Lua', 'PostgreSQL', '權限管理', 'DevOps', '教學']
+description: 跟著步驟學習如何開發 Kong Custom ACL 套件，從基礎概念到完整實作，打造專屬的 API 權限管理系統。
+author: Mark Ku
+---
+
+# Kong Custom ACL 套件開發教學：從零開始打造 API 權限管理系統
+
+## 🎯 學習目標
+
+在這篇教學中，你將學會：
+- 了解 Kong 插件系統的基本概念
+- 設計簡單的權限管理資料庫
+- 開發自訂 ACL 插件
+- 部署和測試插件功能
+
+## 📋 前置準備
+
+在開始之前，請確保你已經安裝：
+- Docker 和 Docker Compose
+- 基本的 Lua 程式設計概念
+- PostgreSQL 資料庫基礎知識
+
+---
+
+## 🚀 第一步：了解專案架構
+
+### 專案結構
+```
+custom-acl/
+├── handler.lua      # 主要邏輯處理
+├── schema.lua       # 配置定義
+├── api.lua          # 管理 API
+├── init.sql         # 資料庫初始化
+├── Dockerfile       # 容器化配置
+└── docker-compose.yml
+```
+
+### 系統流程圖
+```
+用戶請求 → Kong Gateway → Custom ACL 插件 → 檢查權限 → 允許/拒絕
+                ↓
+            PostgreSQL 資料庫
+```
+
+---
+
+## 🗄️ 第二步：設計資料庫結構
+
+### 建立權限管理表
+
+```sql:custom-acl/init.sql
+-- 建立客戶 API 權限表
+CREATE TABLE IF NOT EXISTS customer_api_permissions (
+    id SERIAL PRIMARY KEY,
+    customer_id VARCHAR(100) NOT NULL,
+    service_id VARCHAR(100),
+    route_id VARCHAR(100),
+    api_path VARCHAR(500) NOT NULL,
+    method VARCHAR(10) DEFAULT 'GET',
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    created_by VARCHAR(100) DEFAULT 'system',
+    updated_by VARCHAR(100) DEFAULT 'system'
+);
+
+-- 建立索引提升查詢效能
+CREATE INDEX IF NOT EXISTS idx_customer_permissions_customer_id 
+ON customer_api_permissions(customer_id);
+
+CREATE INDEX IF NOT EXISTS idx_customer_permissions_api_path 
+ON customer_api_permissions(api_path);
+
+CREATE INDEX IF NOT EXISTS idx_customer_permissions_active 
+ON customer_api_permissions(is_active);
+
+-- 插入測試資料
+INSERT INTO customer_api_permissions (customer_id, api_path, method, is_active) VALUES
+('customer_001', '/api/users', 'GET', true),
+('customer_001', '/api/orders', 'POST', true),
+('customer_002', '/api/products', 'GET', true),
+('customer_002', '/api/analytics', 'GET', false);
+```
+
+**說明：**
+- `customer_id`：客戶識別碼
+- `api_path`：API 路徑
+- `method`：HTTP 方法
+- `is_active`：權限是否啟用
+- 建立索引讓查詢更快
+
+---
+
+## 🔧 第三步：開發核心處理器
+
+### 建立 handler.lua
+
+```lua:custom-acl/handler.lua
+local kong_meta = require "kong.meta"
+local cjson = require "cjson.safe"
+local postgres = require "resty.postgres"
+
+local kong = kong
+local _M = {}
+
+local CustomAclHandler = {
+  PRIORITY = 1000,  -- 執行優先順序
+  VERSION = "1.0.0",
+}
+
+-- 步驟 1：從 Kong 取得客戶 ID
+local function extract_customer_id_from_keyauth()
+  local consumer = kong.client.get_consumer()
+  if consumer and consumer.custom_id then
+    kong.log.debug("取得到客戶 ID: ", consumer.custom_id)
+    return consumer.custom_id
+  end
+  return nil
+end
+
+-- 步驟 2：連接資料庫
+local function get_postgres_connection()
+  local config = {
+    host = os.getenv("KONG_PG_HOST") or "kong-database",
+    port = tonumber(os.getenv("KONG_PG_PORT")) or 5432,
+    database = os.getenv("KONG_PG_DATABASE") or "kong",
+    user = os.getenv("KONG_PG_USER") or "kong",
+    password = os.getenv("KONG_PG_PASSWORD") or "kong"
+  }
+
+  local db, err = postgres:new()
+  if not db then
+    return nil, "無法建立資料庫連接: " .. tostring(err)
+  end
+
+  db:set_timeout(5000)
+  
+  local ok, err = db:connect(config.host, config.port, config.database, config.user, config.password)
+  if not ok then
+    return nil, "連接資料庫失敗: " .. tostring(err)
+  end
+
+  return db
+end
+
+-- 步驟 3：檢查權限
+local function check_permissions(customer_id, api_path)
+  local query = string.format([[
+    SELECT id, api_path, is_active
+    FROM customer_api_permissions
+    WHERE customer_id = '%s' AND is_active = true
+  ]], customer_id)
+
+  kong.log.debug("檢查權限: ", customer_id, " -> ", api_path)
+
+  local db, err = get_postgres_connection()
+  if not db then
+    return false, "資料庫連接失敗: " .. tostring(err)
+  end
+
+  local res, err = db:query(query)
+  db:close()
+
+  if not res or #res == 0 then
+    return false, "無權限記錄"
+  end
+
+  -- 檢查路徑是否匹配
+  for _, permission in ipairs(res) do
+    if permission.is_active and permission.api_path then
+      -- 完全匹配或路徑前綴匹配
+      if permission.api_path == api_path or 
+         string.sub(api_path, 1, string.len(permission.api_path)) == permission.api_path then
+        kong.log.notice("✅ 權限通過: ", permission.id)
+        return true, "權限匹配: " .. permission.id
+      end
+    end
+  end
+
+  return false, "無匹配權限"
+end
+
+-- 主要處理函數
+function CustomAclHandler:access(conf)
+  kong.log.notice("開始 ACL 權限檢查")
+
+  -- 步驟 1：取得客戶 ID
+  local customer_id = extract_customer_id_from_keyauth()
+  if not customer_id then
+    return kong.response.exit(403, {
+      error = "需要客戶 ID",
+      message = "請先通過身份驗證"
+    })
+  end
+
+  -- 步驟 2：取得請求路徑
+  local api_path = kong.request.get_path()
+  kong.log.debug("檢查路徑: ", customer_id, " -> ", api_path)
+
+  -- 步驟 3：檢查權限
+  local allowed, reason = check_permissions(customer_id, api_path)
+
+  if not allowed then
+    kong.log.warn("❌ 權限拒絕: ", customer_id, " -> ", api_path)
+    return kong.response.exit(conf.error_code or 403, {
+      error = conf.error_message or "存取被拒絕",
+      customer_id = customer_id,
+      api_path = api_path,
+      reason = reason
+    })
+  end
+
+  -- 步驟 4：權限通過
+  kong.log.notice("✅ 權限檢查通過: ", reason)
+end
+
+return CustomAclHandler
+```
+
+**程式碼說明：**
+1. **取得客戶 ID**：從 Kong 的身份驗證插件取得客戶識別碼
+2. **連接資料庫**：建立 PostgreSQL 連接
+3. **檢查權限**：查詢資料庫檢查客戶是否有權限存取該 API
+4. **返回結果**：根據權限檢查結果允許或拒絕請求
+
+---
+
+## ⚙️ 第四步：定義插件配置
+
+### 建立 schema.lua
+
+```lua:custom-acl/schema.lua
+local typedefs = require "kong.db.schema.typedefs"
+
+return {
+    name = "custom-acl",
+    fields = {
+        { protocols = typedefs.protocols_http },
+        { config = {
+            type = "record",
+            fields = {
+                -- 錯誤回應設定
+                { error_code = { type = "number", default = 403 }},
+                { error_message = { type = "string", default = "存取被拒絕" }},
+                
+                -- 日誌設定
+                { enable_logging = { type = "boolean", default = true }},
+                
+                -- 除錯模式
+                { debug = { type = "boolean", default = false }}
+            }
+        }}
+    }
+}
+```
+
+**配置說明：**
+- `error_code`：權限拒絕時的 HTTP 狀態碼
+- `error_message`：權限拒絕時的錯誤訊息
+- `enable_logging`：是否啟用詳細日誌
+- `debug`：是否啟用除錯模式
+
+---
+
+## 🌐 第五步：建立管理 API
+
+### 建立 api.lua
+
+```lua:custom-acl/api.lua
+local cjson = require "cjson"
+local postgres = require "resty.postgres"
+
+-- 資料庫連接函數
+local function get_postgres_connection()
+    local config = {
+        host = os.getenv("KONG_PG_HOST") or "kong-database",
+        port = tonumber(os.getenv("KONG_PG_PORT")) or 5432,
+        database = os.getenv("KONG_PG_DATABASE") or "kong",
+        user = os.getenv("KONG_PG_USER") or "kong",
+        password = os.getenv("KONG_PG_PASSWORD") or "kong"
+    }
+
+    local db, err = postgres:new()
+    if not db then
+        return nil, err
+    end
+    
+    db:set_timeout(5000)
+    
+    local ok, err = db:connect(config.host, config.port, config.database, config.user, config.password)
+    if not ok then
+        return nil, err
+    end
+    
+    return db
+end
+
+-- 執行查詢
+local function execute_query(query, params)
+    local db, err = get_postgres_connection()
+    if not db then
+        return nil, err
+    end
+    
+    local res, err = db:query(query, params)
+    db:close()
+    
+    if not res then
+        return nil, err
+    end
+    
+    return res
+end
+
+return {
+  -- 查詢權限列表
+  ["/custom-acl/permissions"] = {
+    GET = function(self, dao_factory, helpers)
+      local customer_id = kong.request.get_query()["customer_id"]
+      
+      if not customer_id then
+        return kong.response.exit(400, { error = "需要提供 customer_id 參數" })
+      end
+      
+      local query = [[
+        SELECT id, customer_id, api_path, method, is_active, created_at
+        FROM customer_api_permissions 
+        WHERE customer_id = $1 AND is_active = true
+        ORDER BY created_at DESC
+      ]]
+      
+      local res, err = execute_query(query, {customer_id})
+      if not res then
+        return kong.response.exit(500, { 
+          error = "資料庫查詢失敗",
+          details = tostring(err)
+        })
+      end
+      
+      return kong.response.exit(200, {
+        customer_id = customer_id,
+        permissions = res,
+        total = #res
+      })
+    end,
+    
+    -- 新增權限
+    POST = function(self, dao_factory, helpers)
+      local body = kong.request.get_body()
+      
+      if not body.customer_id then
+        return kong.response.exit(400, { error = "需要提供 customer_id" })
+      end
+      
+      if not body.api_path then
+        return kong.response.exit(400, { error = "需要提供 api_path" })
+      end
+      
+      local insert_query = [[
+        INSERT INTO customer_api_permissions 
+        (customer_id, api_path, method, is_active, created_by)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING id, customer_id, api_path, method, is_active, created_at
+      ]]
+      
+      local res, err = execute_query(insert_query, {
+        body.customer_id,
+        body.api_path,
+        body.method or 'GET',
+        body.is_active ~= false,
+        body.created_by or 'system'
+      })
+      
+      if not res then
+        return kong.response.exit(500, { 
+          error = "建立權限失敗",
+          details = tostring(err)
+        })
+      end
+      
+      return kong.response.exit(201, {
+        message = "權限建立成功",
+        permission = res[1]
+      })
+    end
+  },
+  
+  -- 測試 API
+  ["/custom-acl/test"] = {
+    GET = function(self, dao_factory, helpers)
+      return kong.response.exit(200, {
+        message = "Custom ACL 插件運作正常！",
+        timestamp = ngx.time(),
+        version = "1.0.0"
+      })
+    end
+  }
+}
+```
+
+**API 功能說明：**
+- `GET /custom-acl/permissions`：查詢客戶權限列表
+- `POST /custom-acl/permissions`：新增客戶權限
+- `GET /custom-acl/test`：測試插件是否正常運作
+
+---
+
+## 🐳 第六步：容器化部署
+
+### 建立 Dockerfile
+
+```dockerfile:custom-acl/Dockerfile
+# 使用官方 Kong 映像
+FROM kong:3.4
+
+# 安裝必要工具
+USER root
+RUN apk add --no-cache postgresql-client
+
+# 複製插件檔案
+COPY custom-acl /usr/local/share/lua/5.1/kong/plugins/custom-acl
+RUN chown -R kong:kong /usr/local/share/lua/5.1/kong/plugins/custom-acl
+
+# 將插件加入 Kong 插件列表
+RUN sed -i '/local plugins *= *{/a\    "custom-acl",' /usr/local/share/lua/5.1/kong/constants.lua
+
+# 設定環境變數
+ENV KONG_PLUGINS=bundled,custom-acl
+
+# 切換回 kong 用戶
+USER kong
+
+# 啟動命令
+CMD ["kong", "docker-start"]
+```
+
+### 建立 docker-compose.yml
+
+```yaml:custom-acl/docker-compose.yml
+version: '3.8'
+
+services:
+  # PostgreSQL 資料庫
+  kong-database:
+    image: postgres:15-alpine
+    container_name: kong-database
+    environment:
+      POSTGRES_USER: kong
+      POSTGRES_DB: kong
+      POSTGRES_PASSWORD: kong
+    volumes:
+      - kong-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kong"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kong-net
+
+  # Kong API Gateway
+  kong:
+    build: .
+    container_name: kong-gateway
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_PORT: 5432
+      KONG_PG_DATABASE: kong
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kong
+      KONG_PLUGINS: bundled,custom-acl
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_PROXY_LISTEN: 0.0.0.0:8000
+    ports:
+      - "8000:8000"  # Proxy
+      - "8001:8001"  # Admin API
+    depends_on:
+      kong-database:
+        condition: service_healthy
+    networks:
+      - kong-net
+
+volumes:
+  kong-data:
+
+networks:
+  kong-net:
+    driver: bridge
+```
+
+---
+
+## 🚀 第七步：部署和測試
+
+### 1. 啟動服務
+
+```bash
+# 建立並啟動所有服務
+docker-compose up --build
+
+# 檢查服務狀態
+docker-compose ps
+```
+
+### 2. 檢查資料庫
+
+```bash
+# 連接到資料庫容器
+docker exec -it kong-database psql -U kong -d kong
+
+# 檢查表是否建立
+\dt customer_api_permissions
+
+# 查看測試資料
+SELECT * FROM customer_api_permissions;
+```
+
+### 3. 測試插件
+
+```bash
+# 測試插件是否正常運作
+curl http://localhost:8001/custom-acl/test
+
+# 查詢權限列表
+curl "http://localhost:8001/custom-acl/permissions?customer_id=customer_001"
+
+# 新增權限
+curl -X POST http://localhost:8001/custom-acl/permissions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "customer_id": "customer_003",
+    "api_path": "/api/test",
+    "method": "GET",
+    "is_active": true
+  }'
+```
+
+---
+
+## 🔍 第八步：常見問題排解
+
+### 問題 1：插件無法載入
+**症狀：** Kong 啟動時出現插件載入錯誤
+**解決方案：**
+```bash
+# 檢查插件檔案權限
+docker exec -it kong-gateway ls -la /usr/local/share/lua/5.1/kong/plugins/custom-acl
+
+# 檢查 Kong 日誌
+docker-compose logs kong
+```
+
+### 問題 2：資料庫連接失敗
+**症狀：** 插件無法連接資料庫
+**解決方案：**
+```bash
+# 檢查資料庫服務狀態
+docker-compose ps kong-database
+
+# 檢查環境變數
+docker exec -it kong-gateway env | grep KONG_PG
+```
+
+### 問題 3：權限檢查不正確
+**症狀：** 有權限的請求被拒絕
+**解決方案：**
+```bash
+# 檢查資料庫中的權限資料
+docker exec -it kong-database psql -U kong -d kong -c "SELECT * FROM customer_api_permissions WHERE customer_id = 'your_customer_id';"
+
+# 檢查 Kong 日誌中的權限檢查過程
+docker-compose logs kong | grep "權限檢查"
+```
+---
+
+## 🎉 恭喜完成！
+
+你已經成功學會如何開發 Kong Custom ACL 插件！這個專案涵蓋了：
+- ✅ 資料庫設計
+- ✅ 插件開發
+- ✅ 容器化部署
+- ✅ 測試驗證
+
+### 相關資源
+- [Kong 官方文件](https://docs.konghq.com/)
+- [Lua 程式設計指南](https://www.lua.org/pil/)
+- [PostgreSQL 教學](https://www.postgresql.org/docs/)
+
+
+
+
