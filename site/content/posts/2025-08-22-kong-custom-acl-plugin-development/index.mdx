@@ -1,6 +1,6 @@
 ---
 featured: true
-title: Kong Custom ACL 套件開發教學：從零開始打造 API 權限管理系統
+title: Kong Custom ACL 套件開發教學
 slug: kong-custom-acl-plugin-development
 category: DevOps
 thumbnail: kong-custom-acl-plugin-development.png
@@ -9,8 +9,8 @@ tags: ['Kong', 'API Gateway', 'Custom Plugin', 'Lua', 'PostgreSQL', '權限管�
 description: 跟著步驟學習如何開發 Kong Custom ACL 套件，從基礎概念到完整實作，打造專屬的 API 權限管理系統。
 author: Mark Ku
 ---
-
-# Kong Custom ACL 套件開發教學：從零開始打造 API 權限管理系統
+##　前言
+Kong 內建的 ACL 有些時候，並不符合需求單位的情境，因此需要客製，這邊做就個POC。
 
 ## 🎯 學習目標
 
@@ -99,7 +99,7 @@ INSERT INTO customer_api_permissions (customer_id, api_path, method, is_active) 
 
 ---
 
-## 🔧 第三步：開發核心處理器
+## 🔧 第三步：開發套件處理常式
 
 ### 建立 handler.lua
 
@@ -226,7 +226,7 @@ return CustomAclHandler
 ```
 
 **程式碼說明：**
-1. **取得客戶 ID**：從 Kong 的身份驗證插件取得客戶識別碼
+1. **取得客戶 ID**：從 Kong 的身份驗證插件取得客戶識別碼 (Customer Id)
 2. **連接資料庫**：建立 PostgreSQL 連接
 3. **檢查權限**：查詢資料庫檢查客戶是否有權限存取該 API
 4. **返回結果**：根據權限檢查結果允許或拒絕請求
