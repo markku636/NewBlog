@@ -102,7 +102,7 @@ INSERT INTO customer_api_permissions (customer_id, api_path, method, is_active) 
 ## 🔧 第三步：開發套件處理常式
 
 ### 建立 handler.lua
-
+這邊我比較喜歡採用的是 openresty 的底層，像是 resty.postgres，這邊比較不用受到Kong 的版本昇級而壞掉。
 ```lua:custom-acl/handler.lua
 local kong_meta = require "kong.meta"
 local cjson = require "cjson.safe"
