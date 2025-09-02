@@ -388,7 +388,7 @@ variables:
 * 在 K8s 裡部署一個 buildkitd DaemonSet 或 Deployment
 * 每個 runner job 透過 buildctl CLI，呼叫 cluster 內的 buildkitd 服務去 build
 * 不需要 mount `/var/run/docker.sock`，安全性比 DinD 高
-
+![](buildKit-pod.png)
 ## 部署建議
 
 ### 選擇建議
@@ -399,14 +399,14 @@ variables:
 4. **需要快取/效能**: 使用 BuildKit
 5. **OpenShift/Red Hat 系統**: 使用 Buildah
 
-### 安全性考量
+### 若是安全性考量
 
 * DinD 和 DooD 需要 privileged 模式，安全性較低
 * Kaniko 和 BuildKit 不需要 privileged 模式，安全性較高
 * 建議在生產環境使用 Kaniko 或 BuildKit
 
 #### 進階：moby/BuildKit
-設定有點複雜，但設定類似於 DinD 及 DooD
+設定有點複雜，需要額外部署 buildkitd Pod 或使用 DinD / Kaniko 等方案。
 
 ## 參考資料
 
