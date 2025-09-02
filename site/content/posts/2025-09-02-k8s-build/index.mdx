@@ -10,24 +10,10 @@ description: 在 K8s 上建置容器映像的各種做法與取捨，涵蓋 DinD
 author: Mark Ku
 ---
 
-# Docker CI/CD 工具比較與部署指南
-
+## Docker CI/CD 工具比較與部署指南
+本文快速比較 DinD、DooD、Kaniko、BuildKit、Buildah 的差異，並提供在 GitLab Runner on K8s 的最小可用配置與常見踩雷排解。
 > TL;DR：在 K8s 上建置映像，如果你追求相容性與安全性，優先選 Kaniko；追求效能與快取，選 BuildKit；DinD/DooD 僅在受信任環境或暫時性需求下使用。
 
-本文快速比較 DinD、DooD、Kaniko、BuildKit、Buildah 的差異，並提供在 GitLab Runner on K8s 的最小可用配置與常見踩雷排解。
-
-## 目錄
-
-- [工具比較表](#工具比較表)
-- [工具說明](#工具說明)
-- [常見問題與解決方案](#常見問題與解決方案)
-- [部署指南](#部署指南)
-  - [K8s DinD 部署](#1-k8s-dind-部署)
-  - [K8s DooD 部署](#2-k8s-dood-部署)
-  - [Kaniko 部署](#3-kaniko-部署)
-  - [BuildKit 部署](#4-buildkit-部署)
-- [部署建議](#部署建議)
-- [參考資料](#參考資料)
 
 ## 工具比較表
 
@@ -39,7 +25,7 @@ author: Mark Ku
 | **BuildKit** | ✅ (buildkitd) | ✅/rootless | 高 | 高 | 需要快取/效能 |
 | **Buildah** | ❌ | ❌ (可 rootless) | 中 | 高 | OpenShift / Red Hat 系統 |
 
-## 工具說明
+## 工具說明 DinD vs DooD
 
  ![](attachments/372ac1ee-0f92-480b-a43c-188bfabdd491.png)
 
@@ -100,7 +86,6 @@ author: Mark Ku
 
 ### 可行的解決方法
 
-
 1. **Kaniko** - 無需 Docker daemon，相容性最好
 2. **在宿主主機直接裝 GitLab Runner**
 3. **Windows 安裝 GitLab Runner**
@@ -140,7 +125,7 @@ author: Mark Ku
 ## 部署指南
 ### 1. K8s DinD 部署（GitLab Runner 需設定 privileged=true）
 
-在 k8s 中 DinD，我並沒建構成功。
+試了蠻多遍的，在 k8s 中 DinD，我並沒成功建置映像檔。
 
 ### 2. K8s DooD 部署
 
@@ -408,7 +393,6 @@ variables:
 
 ### 選擇建議
 
-
 1. **小團隊快速 CI**: 使用 DinD
 2. **內部自用 CI**: 使用 DooD
 3. **雲原生 CI/CD**: 使用 Kaniko
@@ -421,15 +405,8 @@ variables:
 * Kaniko 和 BuildKit 不需要 privileged 模式，安全性較高
 * 建議在生產環境使用 Kaniko 或 BuildKit
 
-### 效能考量
-
-* DooD 效能最好，但安全性最低
-* BuildKit 效能好，支援快取
-* Kaniko 效能中等，但相容性最好
-* DinD 效能中等，適合隔離環境
-
 #### 進階：moby/BuildKit
-設定有點複雜，但類似於 DinD 及 DooD
+設定有點複雜，但設定類似於 DinD 及 DooD
 
 ## 參考資料
 
