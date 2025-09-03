@@ -4,7 +4,7 @@ title: 幾個常見在 K8s 上的映像檔建置方法：Docker(DinD DooD)/Kanik
 slug: k8s-build-image-methods
 category: DevOps
 thumbnail: k8s-build-image-methods.png
-date: 2025-09-02 01:01:00 +0800
+date: 2025-09-02 05:01:00 +0800
 tags: ['Kubernetes', 'Docker', 'CI/CD', 'GitLab Runner', 'Kaniko', 'BuildKit', 'DinD', 'DooD', 'DevOps']
 description: 在 K8s 上建置容器映像的各種做法與取捨，涵蓋 DinD、DooD、Kaniko、BuildKit 與實戰範例。
 author: Mark Ku
@@ -26,7 +26,7 @@ author: Mark Ku
 | **BuildKit** | ✅ (buildkitd) | ✅/rootless | 高 | 高 | 需要快取/效能 |
 | **Buildah** | ❌ | ❌ (可 rootless) | 中 | 高 | OpenShift / Red Hat 系統 |
 
-## 工具說明：DinD vs DooD
+## DinD vs DooD
 
 大多人常常會很困惑，常常會看到兩個詞，下圖可以快速讓你了解差異：
 
@@ -61,17 +61,13 @@ author: Mark Ku
 - 等同把宿主 Docker 權限暴露給容器，不適合多租戶
 - 與節點相依，K8s 可攜性與彈性較差
 
-## 常見問題與解決方案
-
-### Docker 版本相容性問題
-
-#### 為什麼選擇 Docker 20.10？
+#### 為什麼網路上的範例都大多採用 Docker 20.10？
 
 Docker 20.10 是 2020 年底發布的長期穩定版本，一直都有安全更新和修補，很多 Linux 系統都內建這個版本，整個生態圈支援最好，大部分的自動化工具（GitLab Runner、Drone、Jenkins 等）最早都是用這個版本測試的，所以最穩定可靠。
 
 從 Docker 23.x 開始，很多功能都改來改去，一些設定和 API 都變了，導致舊的範例程式碼直接壞掉，在 Kubernetes 或 GitLab Runner 上可能會遇到建置失敗的情況。
 
-## 部署指南
+## 上述幾種的建構映像檔的部署指南
 
 ### 1. K8s DinD 部署（GitLab Runner 需設定 privileged=true）
 
