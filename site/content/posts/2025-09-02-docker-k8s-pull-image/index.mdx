@@ -164,3 +164,60 @@ kubectl get secret kong-api-gateway-secret -n <your-namespace>
 # 將 Secret 掛到該命名空間的 default ServiceAccount
 kubectl patch serviceaccount default -n <your-namespace> -p '{"imagePullSecrets":[{"name":"kong-api-gateway-secret"}]}'
 ```
+可以幫你把這段再精簡成更好懂的「安全金鑰使用說明」，保留重點但去掉技術贅字：
+
+## 4. 補充:GitLab 金鑰安全
+
+在 GitLab 使用金鑰或密碼時，要注意以下幾點，避免外洩：
+
+### 4.1 Masked 變數
+
+* **功能**：啟用後，變數值在 CI 日誌裡會變成 `[MASKED]`，不會顯示真實內容。
+* **限制**：必須符合 GitLab 規則（至少 8 字元、英數字+部分符號），不支援空白或換行。
+* **建議**：如果有換行或特殊字元，改用 **File 變數** 或先 Base64 編碼。
+* **更安全**：同時設成 **Protected**，只允許在受保護分支/標籤使用。
+
+### 4.2 File 類型變數（推薦存放多行金鑰）
+
+適合 SSH 私鑰、Kubeconfig、JSON 憑證等。
+
+1. 在 GitLab 設定變數時，類型選 **File**，直接貼上完整內容（含換行）。
+2. 在 Pipeline 裡，變數變成 **檔案路徑**，而不是字串。
+
+範例：
+
+```bash
+chmod 600 "$SSH_PRIVATE_KEY"
+GIT_SSH_COMMAND="ssh -i $SSH_PRIVATE_KEY -o StrictHostKeyChecking=no" \
+  git ls-remote git@your.gitlab.com:group/project.git
+```
+
+### 4.3 避免密鑰被印出
+
+* 用 **標準輸入**傳遞密碼，避免出現在命令列或 shell 歷史。
+* 在有密鑰的地方關掉 `set -x`。
+
+範例：
+
+```bash
+printf "%s" "$DEPLOY_TOKEN" | docker login registry.abc.com -u "$DEPLOY_USER" --password-stdin
+```
+
+### 4.4 權限最小化
+
+* 只給需要的權限（例如 Deploy Token 用 `read_registry` 就好）。
+* 設定變數的使用範圍（特定分支/環境）。
+* Token 要有 **到期日**，並定期更新。
+
+### 4.5 密碼安全技巧
+
+* `--password-stdin`：避免密碼出現在命令列。
+* **File/Masked/Protected 變數**：避免 CI 日誌洩漏。
+* **K8s ImagePullSecret**：避免憑證寫死在 YAML。
+* **額外建議**：用完就 `unset`，刪除暫存檔，Runner 啟用清理，K8s 啟用 Secret 加密。
+
+### 4.6 常見錯誤（不要這樣做）
+
+* 把密碼寫在 `docker login -p`、Dockerfile、YAML、.env 檔裡。
+* 在 MR/Issue/聊天中貼出完整的錯誤訊息或日誌，裡面包含密鑰。
+* 在不同命名空間重複用同一個 Secret。
