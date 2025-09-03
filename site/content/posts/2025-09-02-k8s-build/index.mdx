@@ -1,6 +1,6 @@
 ---
 featured: true
-title: 常見在 K8s 上的映像檔建置 ：Docker/BuildKit/Kaniko 建置心得
+title: 常見在 K8s 上的映像檔建置：Docker/BuildKit/Kaniko 建置心得
 slug: k8s-build-image-methods
 category: DevOps
 thumbnail: k8s-build-image-methods.png
@@ -10,24 +10,27 @@ description: 在 K8s 上建置容器映像的各種做法與取捨，涵蓋 DinD
 author: Mark Ku
 ---
 
-## Docker CI/CD 工具比較與部署指南
-本文快速比較 DinD、DooD、Kaniko、BuildKit、Buildah 的差異，並提供在 GitLab Runner on K8s 的最小可用配置與常見踩雷排解。
-> TL;DR：在 K8s 上建置映像，如果你追求相容性與安全性，優先選 Kaniko；追求效能與快取，選 BuildKit；DinD/DooD 僅在受信任環境或暫時性需求下使用。
+## 概述
 
+本文快速比較 **DinD**、**DooD**、**Kaniko**、**BuildKit**、**Buildah** 的差異，並提供在 GitLab Runner on K8s 的最小可用配置與常見踩雷排解。
+
+> **TL;DR：** 在 K8s 上建置映像，如果你追求相容性與安全性，優先選 **Kaniko**；追求效能與快取，選 **BuildKit**；DinD/DooD 僅在受信任環境或暫時性需求下使用。
 
 ## 工具比較表
 
 | 工具 | 是否需 daemon | 是否需 privileged | 效能 | 相容性 | 適合場景 |
-|----|----|----|----|----|----|
+|------|---------------|-------------------|------|--------|----------|
 | **DinD** | ✅ | ✅ | 中 | 高 | 小團隊快速 CI |
 | **DooD** | ✅ (宿主) | ✅ | 高 | 高 | 內部自用 CI |
 | **Kaniko** | ❌ | ❌ | 中 | 高 | 雲原生 CI/CD |
 | **BuildKit** | ✅ (buildkitd) | ✅/rootless | 高 | 高 | 需要快取/效能 |
 | **Buildah** | ❌ | ❌ (可 rootless) | 中 | 高 | OpenShift / Red Hat 系統 |
 
-## 工具說明 DinD vs DooD
+## 工具說明：DinD vs DooD
 
- ![](attachments/372ac1ee-0f92-480b-a43c-188bfabdd491.png)
+大多人常常會很困惑，常常會看到兩個詞，下圖可以快速讓你了解差異：
+
+![](attachments/372ac1ee-0f92-480b-a43c-188bfabdd491.png)
 
 ### DinD (Docker-in-Docker)
 
@@ -35,11 +38,11 @@ author: Mark Ku
 * 可以透過 TCP 連線
 * 適合隔離環境的 CI/CD
 
-優點：
+**優點：**
 - 設定簡單、相依關係清楚，與 Docker 指令完全相容
 - 容器內部隔離，方便一次性測試
 
-缺點：
+**缺點：**
 - 必須 privileged，風險較高
 - 效能中等，nested cgroups 帶來額外開銷
 - 在雲端受管 K8s/VM 上常遇到網路與權限限制
@@ -50,11 +53,11 @@ author: Mark Ku
 * 直接掛載宿主機的 Docker socket (`/var/run/docker.sock`) 給容器使用
 * 效能較好，但安全性較低
 
-優點：
+**優點：**
 - 效能最佳，重用宿主 Docker cache
 - 啟動速度快
 
-缺點：
+**缺點：**
 - 等同把宿主 Docker 權限暴露給容器，不適合多租戶
 - 與節點相依，K8s 可攜性與彈性較差
 
@@ -64,68 +67,15 @@ author: Mark Ku
 
 #### 為什麼選擇 Docker 20.10？
 
-* **20.10 是長期穩定版 (LTS)**
-  * Docker Engine 20.10 在 2020 年底發布
-  * 長時間都有安全更新與 bugfix
-  * 許多 Linux 發行版（Ubuntu 20.04、Debian Bullseye）把它當成內建版本
-  * 生態系支援最好
-  * 很多 CI/CD 工具（GitLab Runner、Drone、Jenkins plugin）最早都是針對 20.10 測試與穩定運行
+Docker 20.10 是 2020 年底發布的長期穩定版本，一直都有安全更新和修補，很多 Linux 系統都內建這個版本，整個生態圈支援最好，大部分的自動化工具（GitLab Runner、Drone、Jenkins 等）最早都是用這個版本測試的，所以最穩定可靠。
 
-#### 新版本變動問題
-
-* 從 Docker 23.x 開始，很多功能被抽出到 Moby
-* 一些 API 或 default 設定有變動，導致老舊的 CI 範例直接掛掉
-* 例如：rootless mode、BuildKit 默認啟用等
-* 在 K8s 或 GitLab Runner 上可能出現「image build 不起來」的情況
-
-#### 環境相容性問題
-
-* 自架的 K8s 與雲端 VM 架的 K8s 行為不一致
-* 雲端環境和地端環境可能存在相容性問題
-* 大多數 CI 工具都是針對 Docker 20.10 運行
-
-### 可行的解決方法
-
-1. **Kaniko** - 無需 Docker daemon，相容性最好
-2. **在宿主主機直接裝 GitLab Runner**
-3. **Windows 安裝 GitLab Runner**
-4. **Docker in docker 走 2375 port**
-
-### Kaniko 適用與限制
-
-優點：
-- 不需 Docker daemon 或 privileged，在受管 K8s 上相容性極佳
-- 支援常見 Dockerfile 指令，易於遷移
-
-限制：
-- 初次 build 較慢，cache 需要正確配置到共享儲存或 registry
-- 某些 BuildKit 專屬進階特性不支援
-
-### BuildKit 適用與限制
-
-優點：
-- 高效能並行構建，強大 cache（inline/registry）
-- 支援秘密管理、ssh 轉傳、前端（e.g. Dockerfile frontend）
-- 支援多架構（buildx）
-
-限制：
-- 需要 buildkitd（或透過 Docker Engine 啟用），部署複雜度較高
-- 權限模型需額外設計（rootless/Pod 安全性）
-
-### Buildah 適用與限制
-
-優點：
-- 完全無 daemon，原生支援 rootless
-- 與 OCI 規範高度一致，OpenShift 友善
-
-限制：
-- 社群與文件在 CI/CD 例子上相對分散
-- Dockerfile 相容性不如 Docker/BuildKit 生態
+從 Docker 23.x 開始，很多功能都改來改去，一些設定和 API 都變了，導致舊的範例程式碼直接壞掉，在 Kubernetes 或 GitLab Runner 上可能會遇到建置失敗的情況。
 
 ## 部署指南
+
 ### 1. K8s DinD 部署（GitLab Runner 需設定 privileged=true）
 
-試了蠻多遍的，在 k8s 中 DinD，我並沒成功建置映像檔。
+試了蠻多遍的，在 k8s 中 DinD，我並沒有在同一個 Pod 中設定成功，但原理應該是透過 2375 遠端管理 Port 連線Docker去建置，基於我們公司的安全考量，我就沒繼續研究了。
 
 ### 2. K8s DooD 部署
 
@@ -285,9 +235,11 @@ helm install gitlab-runner -f values.yaml gitlab/gitlab-runner --namespace k8s-c
 helm upgrade gitlab-runner -f values.yaml gitlab/gitlab-runner --namespace k8s-cd-gitlab-runner
 ```
 
-P.S. 這個方法在地端自架的 K8s 可行，但在 GCP 開 VM 架設時常不可行
+> **注意：** 這個方法在地端自架的 K8s 可行，但在 GCP 開 VM 架設時常不可行
 
 ### 3. Kaniko 部署
+
+安全性最佳，建構過程不需 Docker daemon 或 privileged，在受管 K8s 上相容性極佳，支援常見 Dockerfile 指令，易於遷移除錯，但建構時會比 DinD 或 DooD 慢 20% ~ 30%。
 
 #### Helm Values 配置
 
@@ -371,6 +323,8 @@ create-secret:
 
 ### 4. BuildKit 部署
 
+Docker 公司推出的新指令及映像檔
+
 BuildKit 有兩種常見模式：
 
 #### 模式 1: DinD BuildKit
@@ -388,7 +342,9 @@ variables:
 * 在 K8s 裡部署一個 buildkitd DaemonSet 或 Deployment
 * 每個 runner job 透過 buildctl CLI，呼叫 cluster 內的 buildkitd 服務去 build
 * 不需要 mount `/var/run/docker.sock`，安全性比 DinD 高
+
 ![](buildKit-pod.png)
+
 ## 部署建議
 
 ### 選擇建議
@@ -399,14 +355,17 @@ variables:
 4. **需要快取/效能**: 使用 BuildKit
 5. **OpenShift/Red Hat 系統**: 使用 Buildah
 
-### 若是安全性考量
+### 安全性考量
 
-* DinD 和 DooD 需要 privileged 模式，安全性較低
-* Kaniko 和 BuildKit 不需要 privileged 模式，安全性較高
+* **DinD 和 DooD** 需要 privileged 模式，安全性較低
+* **Kaniko 和 BuildKit** 不需要 privileged 模式，安全性較高
 * 建議在生產環境使用 Kaniko 或 BuildKit
 
-#### 進階：moby/BuildKit
-設定有點複雜，需要額外部署 buildkitd Pod 或使用 DinD / Kaniko 等方案。
+> **進階：moby/BuildKit** 設定更複雜，暫時我就沒有研究了，需要額外部署 buildkitd Pod 都是基於 DinD / DooD 來運作。
+
+## 結論
+
+配置這環境蠻麻煩的，很多時候環境一點點的差距就會有不一樣的行為，多會幾種建置方法，才可以應對不同的環境，不過隨著時間及技術的迭代，這類問題應該會越來越少。
 
 ## 參考資料
 
