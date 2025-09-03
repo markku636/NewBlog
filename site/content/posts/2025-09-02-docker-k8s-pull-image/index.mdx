@@ -1,0 +1,166 @@
+---
+featured: true
+title: Docker 及 K8s 如何拉取映像檔
+slug: docker-k8s-pull-image-guide
+category: DevOps
+thumbnail: docker-k8s-pull-image.png
+date: 2025-09-08 01:00:00 +0800
+tags: ['Docker', 'Kubernetes', 'GitLab', 'CI/CD', 'Image Pull', 'Registry', 'Authentication', 'DevOps']
+description: 完整的 Docker 與 Kubernetes 映像檔拉取指南，包含 GitLab Deploy Token 設定、認證配置、以及 GitLab Runner 在 K8s 上的三種建置方法比較。
+author: Mark Ku
+---
+
+## 1. 概述
+
+在容器化部署中，如何安全、穩定地「拉取私有映像檔」是常見需求。本文精簡說明兩件事：
+- Docker 在本機或 VM 上如何從 GitLab Registry 拉取 image
+- Kubernetes 叢集內如何透過 ImagePullSecret 拉取同一個 image
+
+> **TL;DR**
+>- Docker：先用 Deploy Token `docker login`，再 `docker pull`
+>- Kubernetes：建立 `docker-registry` 類型的 Secret，於 `imagePullSecrets` 引用
+
+## 2. 過去 Docker 怎麼拉取 GitLab Image
+
+### 2.1 取得 GitLab Deploy Token
+
+進到專案 → Settings → Repository → Deploy tokens
+
+勾選你需要的權限：
+
+- **read_registry** → 拉 image
+- **write_registry** → 推 image
+
+P.S. 如果你有 Group 權限，也可以申請一個 Group Access Token，這樣就能跨專案拉取images
+
+記下 GitLab 給的 username / password。
+
+![GitLab Deploy Token 設定](/api/attachments.redirect?id=64065cdc-f23b-4a2a-aebe-172a385ee6a2)
+
+### 2.2 Docker 認證與拉取（本機/VM）
+
+```bash
+# 清除舊認證（可選）
+docker logout registry.abc.com
+
+# 使用 Deploy Token 登入（建議用 --password-stdin）
+echo "<deploy_token_password>" | docker login registry.abc.com -u <deploy_token_username> --password-stdin
+
+# 拉取測試
+docker pull registry.abc.com/kong/kong-api-gateway/main:70368
+```
+
+為什麼建議使用 `--password-stdin`？
+
+- 避免密碼出現在命令列歷史（例如 `~/.bash_history`、PowerShell 歷史）。
+- 避免密碼暴露在系統程序列表（Linux `ps`、Windows `Get-CimInstance Win32_Process` 會看得到參數）。
+- 適合 CI/CD 無互動環境，搭配隱藏的環境變數（masked secrets）更安全。
+- 官方不建議用 `--password` 明文參數；使用標準輸入更安全且可審計。
+
+範例（更安全的一次性輸入）：
+
+```bash
+# Bash / Linux / macOS：建議用 printf 避免 echo 行為差異
+printf "%s" "$DEPLOY_TOKEN" | docker login registry.abc.com -u "$DEPLOY_USER" --password-stdin
+```
+
+```powershell
+# Windows PowerShell
+$Env:DEPLOY_TOKEN | docker login registry.abc.com -u $Env:DEPLOY_USER --password-stdin
+```
+
+### 2.3 若 Registry 無 HTTPS（Insecure Registry）
+
+若你的 Registry 沒有 HTTPS，需在 Docker Daemon 設定 `insecure-registries`：
+
+```bash
+# 編輯 Docker daemon 配置
+sudo nano /etc/docker/daemon.json
+
+# 加入以下內容
+{
+  "insecure-registries": ["registry.abc.com:5000", "192.168.1.100:5000"]
+}
+
+# 重啟 Docker 服務
+sudo systemctl restart docker
+
+# 或者重啟 Docker Desktop (Windows/Mac)
+```
+
+**注意事項：**
+- 生產環境不建議使用 HTTP registry
+- 如果是自建的 GitLab registry，建議配置 SSL 證書
+- 開發環境可以使用 HTTP，但要注意安全性
+
+## 3. K8s 怎麼拉取
+
+### 3.1 建立 ImagePullSecret
+
+在要部署的命名空間建立一個 `docker-registry` 類型的 Secret：
+
+```bash
+# 建立 Docker Registry Secret
+kubectl create secret docker-registry kong-api-gateway-secret \
+  --docker-server=registry.abc.com \
+  --docker-username=<deploy_token_username> \
+  --docker-password=<deploy_token_password> \
+  --docker-email=none \
+  -n <your-namespace>
+```
+
+### 3.2 在 Deployment 引用
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kong-api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kong-api-gateway
+  template:
+    metadata:
+      labels:
+        app: kong-api-gateway
+    spec:
+      containers:
+        - name: kong
+          image: registry.abc.com/kong/kong-api-gateway/main:70368
+          ports:
+            - containerPort: 8000
+      imagePullSecrets:
+        - name: kong-api-gateway-secret
+```
+
+### 3.3 驗證與疑難排解
+
+```bash
+# 檢查 Secret 是否建立成功（命名空間必須正確）
+kubectl get secret kong-api-gateway-secret -n <your-namespace> -o yaml
+
+# 重新建立 Secret
+kubectl delete secret kong-api-gateway-secret -n <your-namespace>
+kubectl create secret docker-registry kong-api-gateway-secret \
+  --docker-server=registry.abc.com \
+  --docker-username=<deploy_token_username> \
+  --docker-password=<deploy_token_password> \
+  --docker-email=none \
+  -n <your-namespace>
+```
+
+### 3.4 Secret 與命名空間補充
+
+- Secret 是「命名空間範圍」，必須與工作負載在同一個命名空間。
+- 想讓該命名空間所有 Pod 都能自動拉私有 image，可把 Secret 加到該命名空間的預設 ServiceAccount。
+- Secret 不可跨命名空間共用；需要時請在目標命名空間各自建立或同步。
+
+```bash
+# 檢查 Secret 是否存在於指定命名空間
+kubectl get secret kong-api-gateway-secret -n <your-namespace>
+
+# 將 Secret 掛到該命名空間的 default ServiceAccount
+kubectl patch serviceaccount default -n <your-namespace> -p '{"imagePullSecrets":[{"name":"kong-api-gateway-secret"}]}'
+```
