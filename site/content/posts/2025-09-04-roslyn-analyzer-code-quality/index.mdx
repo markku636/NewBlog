@@ -1,0 +1,221 @@
+---
+featured: true
+title: Visual studio 程式碼品質管理筆記：從 AI 生成到 Code Review
+slug: improving-visual-studio-code-quality
+thumbnail:  improving-visual-studio-code-quality.png
+category: NETCORE
+date: 2025-09-04 01:00:00 +0800
+tags: ['.NET', 'Roslyn', 'Analyzer', 'EditorConfig', 'Copilot', 'Code Review', 'Code Quality']
+author: Mark Ku
+---
+
+## 前言
+
+在現代軟體開發中，維持一致的程式碼風格與高品質至關重要，本文將介紹目前常見的Visual studio程式碼品質管理方法，並透過 AI 輔助開發到最終程式碼審查，幫助團隊輕鬆維護高品質程式碼。
+
+## 預先安裝
+* Github copilot
+
+## 1️⃣ Roslyn Analyzer（免安裝）
+
+Roslyn Analyzer 是 .NET 內建程式碼分析工具，類似 JavaScript 的 ESLint，可在編譯時檢查程式碼品質。
+
+### 結合 .editorconfig 設定
+
+在專案根目錄建立 `.editorconfig`：
+
+```ini
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
+dotnet_style_qualification_for_field = false:error
+dotnet_style_qualification_for_property = false:error
+dotnet_style_qualification_for_method = false:error
+dotnet_style_qualification_for_event = false:error
+
+[*.cs]
+csharp_style_var_for_built_in_types = false
+dotnet_diagnostic.IDE0008.severity = error
+csharp_style_namespace_declarations = file_scoped:error
+```
+
+### Visual Studio UI 查看 .editorconfig
+
+* 開啟 `工具 > 選項 > 文字編輯器 > C# > 程式碼樣式`
+* Visual Studio 2022 版本內建支援 EditorConfig，重新載入專案即可生效
+
+### CLI 操作（也方便整合 CI/CD）
+
+```bash
+# 檢查程式碼風格
+dotnet build --verbosity normal
+
+# 格式化程式碼
+dotnet format
+
+# 驗證格式化結果
+dotnet format --verify-no-changes
+```
+---
+
+### 修改專案檔 `WebApplication1/WebApplication1.csproj`：
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- 啟用 .NET 分析器 -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>
+```
+
+---
+
+### 使用方式
+
+#### 1. Visual Studio
+
+* 錯誤清單視窗 (`檢視 > 錯誤清單`)
+* 編輯器波浪線提示錯誤
+* 快速修正：`Ctrl+.` → 選擇建議方案
+
+#### 2. 命令列
+
+```bash
+# 建置並顯示警告
+dotnet build --verbosity normal
+
+# 僅執行程式碼分析
+dotnet build --no-restore --verbosity normal
+
+# 將警告視為錯誤
+dotnet build /p:TreatWarningsAsErrors=true
+```
+P.S. 如果要更複雜的邏輯，可以自己客製 NamingConventionAnalyzer，這就得自己寫程式
+---
+
+## 2️⃣ 存檔時自動格式化（程式碼清除功能）
+
+### Visual Studio 設定
+
+* 開啟 `工具 > 選項 > 文字編輯器 > C#`
+* 勾選：
+
+  * `在儲存時自動格式化文件`
+  * `在儲存時移除並排序 using`
+
+### 程式碼清除設定
+
+* 開啟 `工具 > 選項 > 文字編輯器 > 程式碼清除 > 設定程式碼清除`
+* 選擇要執行的規則，設定快捷鍵 `Ctrl+K, Ctrl+E`
+
+**團隊同步注意**：
+
+* Windows: `%USERPROFILE%\AppData\Local\Microsoft\VisualStudio\<version>\CodeCleanupProfiles.json`
+* Mac: `~/Library/Preferences/VisualStudio/<version>/CodeCleanupProfiles.json`
+
+---
+
+### 範例：自動格式化效果
+
+**格式化前**：
+
+```csharp
+namespace WebApplication1
+{
+    public class TestFormatting
+    {
+        private string fieldName;
+        private int fieldValue;
+
+        public TestFormatting()
+        {
+            this.fieldName = "test";
+            this.fieldValue = 42;
+        }
+    }
+}
+```
+
+**存檔自動格式化後**：
+
+```csharp
+namespace WebApplication1;
+
+public class TestFormatting
+{
+    private string fieldName;
+    private int fieldValue;
+
+    public TestFormatting()
+    {
+        fieldName = "test";
+        fieldValue = 42;
+    }
+}
+```
+
+## 3️⃣ GitHub Copilot 自動生成 Commit Message（範例與做法）
+
+[可參考延伸閱讀中的「定義 Git 提交訊息產生的自訂指令」，在 Copilot 的自訂指令中加入 Commit 規範（如 Conventional Commits），或在工作流程中加入範例結構，協助自動產生更一致的訊息。](https://blog.miniasp.com/post/2024/12/27/GitHub-Copilot-Cookbook-Define-Custom-Instructions-for-Generating-Git-Commit-Messages)
+
+
+---
+
+## 4️⃣ 依據 Coding Rules 生成程式碼（Copilot 自訂規則）
+
+### 使用 GitHub Copilot 與自訂規則
+
+GitHub Copilot 是強大的 AI 程式碼助手，可透過設定指令生成符合團隊規範的程式碼。
+
+#### 設定 Copilot 指令
+
+在專案根目錄建立 `.github/copilot-instructions.md`：
+
+```markdown
+程式註解一律使用繁體中文
+變數、函數、類別名稱使用英文
+函數名稱尾巴加上 123
+程式碼最上方加註：由 GitHub Copilot 產生
+變數名稱全部大寫並使用底線分隔
+```
+
+**限制說明**：
+
+* 只影響 AI Chat 生成的程式碼
+* Visual Studio IntelliSense 與自動完成不會遵循這些規則
+
+---
+
+## 5️⃣ GitHub Copilot Code Review
+
+GitHub Copilot 不僅協助生成程式碼，也能進行程式碼審查。透過 AI 協助，可以快速檢查程式碼品質、發現潛在問題並提供改進建議。
+
+> ⚠️ 注意：此功能需 GitHub Copilot Enterprise 訂閱，預設關閉，開啟後才能使用。
+
+---
+
+## 延伸閱讀
+
+- [EditorConfig 官方文件](https://editorconfig.org/)
+- [Roslyn Analyzers 文件](https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/)
+- [GitHub Copilot 最佳實踐](https://github.com/features/copilot)
+- [Visual Studio 程式碼清除功能](https://docs.microsoft.com/en-us/visualstudio/ide/code-styles-and-code-cleanup)
+- [讓程式碼更一致：使用 GitHub Copilot 自訂提示的技巧與設定](https://dotblogs.com.tw/anyun/2024/11/23/160548)
+- [Git 提交訊息產生的自訂指令](https://blog.miniasp.com/post/2024/12/27/GitHub-Copilot-Cookbook-Define-Custom-Instructions-for-Generating-Git-Commit-Messages)
+
+
