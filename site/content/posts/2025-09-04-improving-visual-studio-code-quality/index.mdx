@@ -62,18 +62,6 @@ csharp_style_namespace_declarations = file_scoped:error
 * Visual Studio 2022 版本內建支援 EditorConfig，重新載入專案即可生效
 ![](auto-arrange-code.png)
 
-### CLI 操作（也方便整合 CI/CD）
-
-```bash
-# 檢查程式碼風格
-dotnet build --verbosity normal
-
-# 格式化程式碼
-dotnet format
-
-# 驗證格式化結果
-dotnet format --verify-no-changes
-```
 ---
 
 ### 修改專案檔 `WebApplication1/WebApplication1.csproj`：
@@ -105,7 +93,7 @@ dotnet format --verify-no-changes
 * 快速修正：`Ctrl+.` → 選擇建議方案
 ![](fix-issue.png)
 
-### 補充說明，也透過命令列 (CLI 去執行驗證規則，方便整合在CICD上)
+### 補充說明，也可以透過命令列 (CLI 去執行驗證規則，方便整合在CICD上)
 
 ```bash
 # 建置並顯示警告
