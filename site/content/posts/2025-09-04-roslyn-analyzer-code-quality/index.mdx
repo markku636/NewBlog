@@ -11,7 +11,7 @@ author: Mark Ku
 
 ## 前言
 
-在現代軟體開發中，維持一致的程式碼風格與高品質至關重要，本文將介紹目前常見的Visual studio程式碼品質管理方法，並透過 AI 輔助開發到最終程式碼審查，幫助團隊輕鬆維護高品質程式碼。
+在現代軟體開發中，維持一致的程式碼風格與高品質至關重要，本篇文章將介紹目前常見的Visual studio程式碼品質管理方法，並透過開發規範讓 AI 輔助開發，到最終程式碼審查，幫助團隊輕鬆維護高品質程式碼。
 
 ## 預先安裝
 * Github copilot
@@ -82,18 +82,20 @@ dotnet format --verify-no-changes
   </PropertyGroup>
 </Project>
 ```
+此時建置專案，會就出現規則錯誤
+![](build-error-1.png)
+![](build-error-2.png)
+![](build-error-3.png)
 
 ---
 
-### 使用方式
-
-#### 1. Visual Studio
-
+### 修正錯誤
 * 錯誤清單視窗 (`檢視 > 錯誤清單`)
 * 編輯器波浪線提示錯誤
 * 快速修正：`Ctrl+.` → 選擇建議方案
+![](fix-issue.png)
 
-#### 2. 命令列
+### 補充說明，也透過命令列 (CLI 去執行驗證規則，方便整合在CICD上)
 
 ```bash
 # 建置並顯示警告
@@ -121,13 +123,14 @@ P.S. 如果要更複雜的邏輯，可以自己客製 NamingConventionAnalyzer�
 ### 程式碼清除設定
 
 * 開啟 `工具 > 選項 > 文字編輯器 > 程式碼清除 > 設定程式碼清除`
+![](clean-code-1.png)
+
 * 選擇要執行的規則，設定快捷鍵 `Ctrl+K, Ctrl+E`
+![](clean-code-2.png)
 
-**團隊同步注意**：
-
+**團隊得人工同步設定**：
 * Windows: `%USERPROFILE%\AppData\Local\Microsoft\VisualStudio\<version>\CodeCleanupProfiles.json`
 * Mac: `~/Library/Preferences/VisualStudio/<version>/CodeCleanupProfiles.json`
-
 ---
 
 ### 範例：自動格式化效果
@@ -150,7 +153,6 @@ namespace WebApplication1
     }
 }
 ```
-
 **存檔自動格式化後**：
 
 ```csharp
@@ -172,7 +174,7 @@ public class TestFormatting
 ## 3️⃣ GitHub Copilot 自動生成 Commit Message（範例與做法）
 
 [可參考延伸閱讀中的「定義 Git 提交訊息產生的自訂指令」，在 Copilot 的自訂指令中加入 Commit 規範（如 Conventional Commits），或在工作流程中加入範例結構，協助自動產生更一致的訊息。](https://blog.miniasp.com/post/2024/12/27/GitHub-Copilot-Cookbook-Define-Custom-Instructions-for-Generating-Git-Commit-Messages)
-
+![](automatically- generate-commit-message.png)
 
 ---
 
@@ -184,7 +186,10 @@ GitHub Copilot 是強大的 AI 程式碼助手，可透過設定指令生成符�
 
 #### 設定 Copilot 指令
 
-在專案根目錄建立 `.github/copilot-instructions.md`：
+在新的visual studio 在工具>選項 > Github Copilot 預設會啟用參考 github/copilot-instructions 指引做生成
+![](copilot-instructions-setting)
+
+所以我們只要，在專案根目錄建立 `.github/copilot-instructions.md`：
 
 ```markdown
 程式註解一律使用繁體中文
@@ -528,3 +533,4 @@ trim_trailing_whitespace = false
 max_line_length = off
 # Markdown 不限制行長度
 ```
+
