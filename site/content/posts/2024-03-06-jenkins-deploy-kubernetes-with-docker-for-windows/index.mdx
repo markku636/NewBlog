@@ -32,6 +32,8 @@ slug: jenkins-deploy-kubernetes-with-docker-for-windows
 ## 預先準備
 ### 1.安裝Docker Desktop，並勾選 Kubernetes 及 Show system containers
 ![setup widnows docker](set-up-widnows-docker.png)
+P.S. 按下 apply 後會自動建立 %USERPROFILE%\.kube\config 連線的檔案
+
 ### 2. 架設Private Docker registry server
 ```
 docker run -d -p 5000:5000 -e REGISTRY_STORAGE_DELETE_ENABLED=true --name registry registry:2
