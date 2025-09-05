@@ -231,7 +231,7 @@ helm install gitlab-runner -f values.yaml gitlab/gitlab-runner --namespace k8s-c
 helm upgrade gitlab-runner -f values.yaml gitlab/gitlab-runner --namespace k8s-cd-gitlab-runner
 ```
 
-> **注意：** 這個方法在地端自架的 K8s 可行，但在 GCP 開 VM 架設時常不可行
+> **注意：** 這個方法在地端自架的Ubuntu K8s 可行， 但在RKE2 可能因為一些安全性設定無法挷定 /var/run/docker.sock
 
 ### 3. Kaniko 部署
 
