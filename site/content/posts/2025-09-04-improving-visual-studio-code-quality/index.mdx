@@ -26,11 +26,16 @@ author: Mark Ku
 * Visual studio 2022 以上
 * Github copilot
 
-## 1️⃣ Roslyn Analyzer（免安裝）
+## 1️⃣ Roslyn Analyzers 跟 .editorconfig（免安裝）
+Roslyn Analyzer 就是 .NET 世界裡的程式碼檢查工具，功能有點像 JavaScript 的 ESLint，它本身是一個「規則引擎」，會在你寫程式、編譯的時候自動幫你檢查程式碼品質，而 .editorconfig 則是「規則設定檔」，你可以在裡面決定規則要怎麼跑，比如命名要不要用駝峰、縮排要幾格。
 
-Roslyn Analyzer 是 .NET 內建程式碼分析工具，類似 JavaScript 的 ESLint，可在編譯時檢查程式碼品質。
+簡單說：  
 
-### 結合 .editorconfig 設定
+Roslyn Analyzer = 負責檢查  
+
+.editorconfig = 規則怎麼檢查  
+
+### 結合 .editorconfig 設定  
 
 在專案根目錄建立 `.editorconfig`：
 
