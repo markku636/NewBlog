@@ -24,6 +24,7 @@ author: Mark Ku
 
 ## 預先安裝
 * Github copilot
+* Visual studio 2022 以上
 
 ## 1️⃣ Roslyn Analyzer（免安裝）
 
@@ -126,7 +127,7 @@ P.S. 如果要更複雜的邏輯，可以自己客製 NamingConventionAnalyzer�
 * 選擇要執行的規則，設定快捷鍵 `Ctrl+K, Ctrl+E`
 ![](clean-code-2.png)
 
-**團隊得人工同步設定**：
+**比較麻煩的事，團隊得人工同步設定**：
 * Windows: `%USERPROFILE%\AppData\Local\Microsoft\VisualStudio\<version>\CodeCleanupProfiles.json`
 * Mac: `~/Library/Preferences/VisualStudio/<version>/CodeCleanupProfiles.json`
 ---
@@ -196,11 +197,7 @@ GitHub Copilot 是強大的 AI 程式碼助手，可透過設定指令生成符�
 程式碼最上方加註：由 GitHub Copilot 產生
 變數名稱全部大寫並使用底線分隔
 ```
-
-**限制說明**：
-
-* 只影響 AI Chat 生成的程式碼
-* Visual Studio IntelliSense 與自動完成不會遵循這些規則
+現在只要打開Copliot Chat，就會依據開發指引來生成程式碼，但 Visual Studio IntelliSense 與自動完成不會遵循這些規則。
 
 ---
 
