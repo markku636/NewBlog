@@ -133,7 +133,7 @@ spec:
         - name: kong-api-gateway-secret
 ```
 
-### 3.3 驗證與疑難排解
+### 3.3 驗證功能
 
 ```bash
 # 檢查 Secret 是否建立成功（命名空間必須正確）
@@ -149,11 +149,10 @@ kubectl create secret docker-registry kong-api-gateway-secret \
   -n <your-namespace>
 ```
 
-### 3.4 Secret 與命名空間補充
-
-- Secret 是「命名空間範圍」，必須與工作負載在同一個命名空間。
-- 想讓該命名空間所有 Pod 都能自動拉私有 image，可把 Secret 加到該命名空間的預設 ServiceAccount。
-- Secret 不可跨命名空間共用；需要時請在目標命名空間各自建立或同步。
+補充
+* Secret 是「命名空間範圍」，必須與工作負載在同一個命名空間。
+* 想讓該命名空間所有 Pod 都能自動拉私有 image，可把 Secret 加到該命名空間的預設 ServiceAccount。
+* Secret 不可跨命名空間共用；需要時請在目標命名空間各自建立或同步。
 
 ```bash
 # 檢查 Secret 是否存在於指定命名空間
