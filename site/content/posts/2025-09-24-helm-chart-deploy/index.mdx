@@ -1,6 +1,6 @@
 ---
 featured: false
-title: 用 Helm 佈署應用：為什麼選 Helm、怎麼裝、和純 YAML 的差異
+title: 用 Helm 佈署應用：為什麼選 Helm 佈署Kubernetes 容器應用、怎麼裝、和純 YAML 的差異
 slug: helm-chart-deploy
 category: DevOps
 thumbnail: helm-chart-deploy.png
@@ -9,8 +9,32 @@ tags: ['Kubernetes', 'Helm', 'DevOps', 'Chart', 'Artifact Hub', 'Bitnami']
 description: 以實務角度整理 Helm 的價值、安裝方式、與 Deployment YAML 的差異，並提供官方/社群 Chart 來源與下載範例。
 author: Mark Ku
 ---
+ ## 前言
 
-# Helm Chart：Kubernetes 的套件管理器
+在容器化技術的演進過程中，我們經歷了從 Docker 到 Kubernetes 的轉變：
+
+**Docker 時代**：
+- 學習曲線相對平緩，一個 `docker run` 就能啟動應用
+- 單一容器，配置簡單，容易理解
+- 適合小型專案和個人開發
+
+**Kubernetes 時代**：
+- 功能強大，但學習曲線陡峭
+- 需要管理多種資源（Pod、Service、Deployment、Ingress 等）
+- 檔案數量爆炸式增長，維護成本高
+- 但提供了企業級的擴展性、高可用性和自動化能力
+
+**Helm 的出現**：
+- 讓 Kubernetes 的複雜性變得可管理
+- 就像 Docker 讓容器變得簡單一樣，Helm 讓 K8s 部署變得簡單
+- 一個 Chart 就能管理整個應用的生命週期
+- 抽換方便，版本管理清晰，回滾容易
+
+**但 Helm 也帶來了新的挑戰**：
+- 配置數量變得更多：除了原本的 YAML，還要學習 Chart 結構、values.yaml、模板語法
+- 學習曲線又更高了：需要理解 Go template、Helm 指令、Chart 生態圈
+- 初學者可能覺得 Helm 比純 YAML 更複雜
+- 但一旦掌握，維護及遷移成本會是比較低的。
 
 ## 什麼是 Helm？為什麼需要它？
 
