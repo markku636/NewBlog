@@ -1,0 +1,721 @@
+---
+featured: true
+title: 用 Argo CD 實作 GitOps：從 Helm 安裝到 GitLab SSO 一次搞定
+slug: argocd-gitops-helm-installation-and-gitlab-sso-setup
+category: DevOps
+thumbnail: argocd-gitops-helm-installation-and-gitlab-sso-setup.png
+date: 2025-11-20 10:00:00 +0800
+tags: ['Kubernetes', 'Argo CD', 'GitOps', 'Helm', 'GitLab', 'DevOps']
+description: 以實務步驟示範如何用 Helm 安裝 Argo CD，並結合 GitOps 與 GitLab SSO，讓多叢集 K8s 部署管理自動化又可回溯。
+author: Mark Ku
+---
+
+## 前言
+
+平常用 **kubectl** 最大的麻煩，就是要一直切換環境。如果你同時管理 **10～20 個 Kubernetes 集群（Cluster）**，每次都要手動一個一個下指令，早晚會出錯。
+
+想像一下，你要幫 **20 台手機** 安裝同一個 App，如果一台一台自己操作，總有一天會裝錯或漏裝。
+
+另一方面，**Argo CD / GitOps 的學習曲線會比單純用 kubectl 高很多**：
+
+- 需要理解 GitOps 思維（宣告式、單一真相來源）
+- 要會看 Argo CD 的 Application / Project / Sync 狀態
+- 還要學 Helm、OAuth、Registry、RBAC 等整合
+
+不過一旦跨過這個門檻，之後在多叢集、多環境的維運效率會大幅提升。
+
+這篇文章會帶你從零開始：
+
+- 了解 Argo CD 在 GitOps 裡扮演的角色
+- 用 Helm 安裝與設定 Argo CD
+- 配置 GitLab SSO，實作更安全的登入與權限管理
+
+---
+
+![](attachments/fc06bf13-fadf-44f9-8e67-e8e4d1ffbb5e.png)
+
+---
+
+## 為什麼要用 Argo CD
+![](how-argocd-work.png)
+平常用 **kubectl** 最大的麻煩，就是要一直切換環境。 如果你同時管理 **10～20 個 Kubernetes 集群（Cluster）**，每次都要手動一個一個下指令，早晚會出錯。
+
+Argo CD 的上手成本雖然比較高，但它可以：
+
+- 把所有環境的設定集中在 Git 裡管理
+- 自動比對「Git 定義」與「實際叢集狀態」
+- 用 UI / Git Commit 追蹤誰改了什麼、什麼時候改
+
+換句話說，你付出的，是一開始多花一點時間學習；換回來的，是之後日常維運的大量節省。
+
+---
+
+## 什麼是 GitOps？
+
+**GitOps** 的想法很簡單：
+
+* **Git = 設定的唯一真相** 你把所有 Kubernetes 設定檔放在 Git 裡，就像「食譜」一樣。
+* **自動同步** 系統會自動根據 Git 的內容，幫你把設定套用到所有環境。
+* **可回溯** 每次修改都有 Git 記錄，就算出錯，也能快速回到前一版。
+
+就像你寫好食譜（Git），廚房（Cluster）就會照著食譜自動煮菜，而不是你要一盤一盤端上桌。
+
+---
+
+## Argo CD 在 GitOps 裡的角色
+
+Argo CD 就是那個「廚師」，它專門：
+
+* 盯著 Git，看食譜有沒有更新。
+* 發現食譜變了，就自動更新所有菜（Cluster）。
+* 幫你保證每盤菜味道一致，不會有人煮錯或加錯料。
+
+所以，Argo CD 的價值不只是「省麻煩」，而是讓你的環境**更安全、更一致、更好管理**。
+
+
+
+## GitLab PAT vs Group Access Token 是什麼？
+
+首先，我們得先了解，在 Argo CD + GitLab 的整合裡，最常見的兩種 Token 是：
+
+- **Personal Access Token（PAT）**：
+  - 綁定在「個人帳號」上
+  - 權限通常跟你的使用者相同
+  - 適合個人實驗、PoC，或是少量 Repo 的情境
+
+- **Group Access Token（群組存取 Token）**：
+  - 綁定在「GitLab Group」上
+  - 可以只給這個 Group 相關的 `read_repository` / `read_api` 等權限
+  - 適合團隊 / 專案群組，共享給 Argo CD 或 CI/CD 使用
+
+**差異重點：**
+
+- PAT 比較像是「某個人的萬用鑰匙」，如果外洩，風險綁在個人帳號上
+- Group Access Token 比較像是「這個專案群組的服務鑰匙」，可以獨立管理、輪替，
+  而且不會直接綁在某個工程師的個人帳號
+
+在這篇實作裡，我選擇用 **Group Access Token** 讓 Argo CD 讀取同一個 Group 底下的所有 Repo，
+維護上會比到處散落的個人 PAT 更乾淨、也比較符合團隊使用情境。
+
+
+## Step 1：用 Helm 安裝 Argo CD
+
+1️⃣ 加入 Argo CD 的 Helm repo 並更新：
+
+```bash
+helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
+```
+
+2️⃣（可選）查詢目前安裝狀態：
+
+```bash
+helm list -n argocd
+```
+
+3️⃣（可選）匯出指定版本的預設 values（方便修改）：
+
+```bash
+helm show values argo/argo-cd --version 8.3.2 > values.yaml
+```
+
+接下來我們會一步步補上網路設定、GitLab OAuth、Group Access Token 等設定到這個 `values.yaml` 中。
+
+---
+
+## Step 2：設定 Argo CD 對外網路（NodePort 範例）
+
+在實驗或內網環境，你可能會用 **NodePort** 直接把 Argo CD 暴露出來，例如：
+
+```bash
+type: NodePort
+nodePortHttp: 32009
+nodePortHttps: 32010
+argocdUrl: http://<your-node-ip>:32009
+```
+
+> 建議正式環境還是搭配 Ingress 或 Nginx + HTTPS，NodePort 只適合 PoC 或 Lab。
+
+這部分會在後面的 `values.yaml` 範例裡一起設定。
+
+---
+
+## Step 3：在 GitLab 建立 OAuth 與 Group Access Token
+
+設定 GitLab 作為 Argo CD 的 OAuth Provider，大致會需要：
+
+- GitLab URL，例如：`https://gitlab.example.com`
+- Application ID（Client ID）
+- Secret（Client Secret）
+- Callback URL：`https://<argo-cd-domain>/auth/callback`
+
+> 請在 GitLab 介面中建立 OAuth Application，不要把實際的 ID / Secret 寫在程式碼或 Git 版本庫裡。
+
+## Step 4：設定存取及權限（安全做法）
+
+在這個架構中，我**沒有使用 Deploy Token**，而是統一用 **GitLab Group Access Token** 讓 Argo CD 讀取所有相關 repo（例如 manifest repo、Helm chart repo）。
+
+```bash
+# 建議做法：在 GitLab「Group」層級建立 Access Token，
+# 再透過 K8s Secret 或 Helm values 提供給 Argo CD 使用。
+
+# 範例欄位（請在 GitLab 介面中建立，不要把實際 token 寫進 Git）：
+# group        : your-group
+# name         : argocd-group-readonly
+# scopes       : read_api, read_repository
+# group page   : https://gitlab.example.com/your-group
+
+# Argo CD 端可把這組 Group Access Token 配成 Repository Credential，
+# 之後只要是這個 group 下面的 repo，Argo CD 都能用同一組憑證讀取。
+```
+
+> 安全性提醒：請勿將實際的 GitLab Token 或密碼寫入 Git 版本庫，
+> 建議改用 K8s Secret、環境變數或 CI/CD 變數來管理敏感資訊。
+
+---
+
+## Step 5：在 Helm values.yaml 中設定 GitLab 整合
+
+以下是實際的 `values.yaml` 設定範例，整合了 GitLab OAuth、Group Access Token 與 Repository 設定：
+
+```yaml
+configs:
+  # 設定 GitLab OAuth SSO
+  cm:
+    url: http://<your-node-ip>:32009
+    # 如果使用 HTTP，需要設定 insecure
+    # 正式環境建議改用 HTTPS + Ingress
+    
+  # Repository Credentials - 使用 GitLab Group Access Token
+  credentialTemplates:
+    gitlab-group-token:
+      url: https://gitlab.example.com
+      username: oauth2
+      password: <your-gitlab-group-access-token>
+      
+  # 設定要同步的 Repository
+  repositories:
+    kong-api-gateway:
+      url: https://gitlab.example.com/your-group/kong-api-gateway.git
+      type: git
+    argocd-deployment:
+      url: https://gitlab.example.com/your-group/argocd-deployment.git
+      type: git
+
+  # OAuth 設定
+  secret:
+    createSecret: true
+    # GitLab OAuth Application 的設定
+    # 請在 GitLab 介面建立 OAuth Application 後，填入以下資訊
+    extra:
+      oidc.gitlab.clientID: <your-gitlab-oauth-client-id>
+      oidc.gitlab.clientSecret: <your-gitlab-oauth-client-secret>
+
+# Server 設定
+server:
+  # NodePort 設定（實驗環境）
+  service:
+    type: NodePort
+    nodePortHttp: 32009
+    nodePortHttps: 32010
+  
+  # 允許 HTTP（僅限開發/測試環境）
+  extraArgs:
+    - --insecure
+```
+
+### Step 6：完整安裝指令（套用 values.yaml）
+
+```bash
+# 1. 加入 Argo CD Helm repo
+helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
+
+# 2. 查看指定版本的預設值（可選）
+helm show values argo/argo-cd --version 8.3.2 > values.yaml
+
+# 3. 編輯 values.yaml，加入上述設定
+
+# 4. 安裝 Argo CD
+helm upgrade --install homelab-argo argo/argo-cd \
+  --version 8.3.2 \
+  -f values.yaml \
+  -n argocd --create-namespace
+
+# 5. 等待所有 Pod 啟動
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-server -n argocd --timeout=300s
+```
+
+---
+
+## Step 7：設定 RBAC 與 AppProject
+
+安裝完成後，需要建立 AppProject 來管理應用權限。以下是完整的 RBAC 與 Project 設定：
+
+### 建立 AppProject 設定檔
+
+建立 `argocd-projects.yaml`：
+
+```yaml
+apiVersion: v1
+kind: List
+items:
+# Default Project - 基本權限
+- apiVersion: argoproj.io/v1alpha1
+  kind: AppProject
+  metadata:
+    name: default
+    namespace: argocd
+  spec:
+    # 允許所有來源 repo
+    sourceRepos:
+    - '*'
+    
+    # 允許部署到所有叢集與 namespace
+    destinations:
+    - namespace: '*'
+      server: '*'
+    
+    # 允許操作集群級資源
+    clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+    
+    # 允許操作命名空間級資源
+    namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+# 自訂 Project - 依需求調整
+- apiVersion: argoproj.io/v1alpha1
+  kind: AppProject
+  metadata:
+    name: your-project
+    namespace: argocd
+  spec:
+    description: 你的專案描述
+    
+    sourceRepos:
+    - 'https://gitlab.example.com/your-group/*'
+    
+    destinations:
+    - namespace: '*'
+      server: https://kubernetes.default.svc
+    
+    # 集群級資源白名單
+    clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+    - group: 'rbac.authorization.k8s.io'
+      kind: ClusterRole
+    - group: 'rbac.authorization.k8s.io'
+      kind: ClusterRoleBinding
+    - group: 'apiextensions.k8s.io'
+      kind: CustomResourceDefinition
+    
+    # 命名空間級資源白名單
+    namespaceResourceWhitelist:
+    - group: ''
+      kind: ConfigMap
+    - group: ''
+      kind: Secret
+    - group: ''
+      kind: Service
+    - group: ''
+      kind: ServiceAccount
+    - group: 'apps'
+      kind: Deployment
+    - group: 'apps'
+      kind: StatefulSet
+    - group: 'batch'
+      kind: Job
+    - group: 'batch'
+      kind: CronJob
+    - group: 'networking.k8s.io'
+      kind: Ingress
+
+# Argo CD Controller 額外的 RBAC 權限（支援 metrics-server 等）
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRole
+  metadata:
+    name: argocd-application-controller-auth-delegator
+    labels:
+      app.kubernetes.io/component: application-controller
+      app.kubernetes.io/name: argocd-application-controller
+      app.kubernetes.io/part-of: argocd
+  rules:
+  # Auth delegation for metrics-server
+  - apiGroups: ["authentication.k8s.io"]
+    resources: ["tokenreviews"]
+    verbs: ["create"]
+  - apiGroups: ["authorization.k8s.io"]
+    resources: ["subjectaccessreviews"]
+    verbs: ["create"]
+  # API Services management
+  - apiGroups: ["apiregistration.k8s.io"]
+    resources: ["apiservices"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRoleBinding
+  metadata:
+    name: argocd-application-controller-auth-delegator
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: argocd-application-controller-auth-delegator
+  subjects:
+  - kind: ServiceAccount
+    name: argocd-application-controller
+    namespace: argocd
+```
+
+### 套用設定
+
+```bash
+# 套用 AppProject 與 RBAC 設定
+kubectl apply -f argocd-projects.yaml -n argocd
+
+# 驗證 Project 是否建立成功
+kubectl get appprojects -n argocd
+
+# 驗證 RBAC 是否建立成功
+kubectl get clusterrole | grep argocd
+kubectl get clusterrolebinding | grep argocd
+```
+
+## GitLab 權限與 Argo CD 的關係
+
+在這個實作裡，權限可以簡化成三個層面：
+
+1️⃣ **SSO 登入（GitLab OAuth）**：讓使用者登入 Argo CD，決定「誰可以進來、能看到哪些 Application」。
+
+2️⃣ **存取 Repo（Personal Access Token / Group Access Token）**：
+   - 讓 Argo CD 去讀 GitLab 上的 **Git repo / Helm chart repo**。
+   - 本文採用 **Group Access Token**，統一管理整個 group 下面的 repo 權限，維護較簡單。
+
+3️⃣ **（可選）Registry 權限**：如果你的 image 放在 GitLab Container Registry，可以另外用 Deploy Token 或 Registry 專用帳號，
+   但這篇實作中沒有依賴 Deploy Token，只示範 Git repo 讀取的部分。
+
+> **總結 ：SSO → 人；Group Access Token / PAT → 拉程式/Chart；Registry 權限 → 拉 image（本篇未使用 Deploy Token）。**
+
+接下來的三個小節，會把這三種權限對應到實際操作：
+
+1. 設定 SSO 登入（對應上面的 1️⃣）
+2. 讓 Argo CD 讀 GitLab Repo（對應 2️⃣）
+3. （可選）拉 GitLab Registry Image（對應 3️⃣）
+
+![](attachments/abaaa408-6162-44e9-996f-8a1db2e70fba.png)
+
+---
+
+## Step 8：設定 SSO 登入（UI 操作版）
+
+### GitLab 端
+
+
+1. 登入 GitLab → 點右上頭像 → `Settings → Applications`
+2. 點 **New Application**
+3. 填寫：
+   * Name：例如 `ArgoCD SSO`
+   * Redirect URI：`https://<argo-cd-domain>/auth/callback`
+   * Scopes：勾選 `read_user`
+4. 點 **Save Application**
+5. 取得 **Application ID（Client ID）** 和 **Secret（Client Secret）**
+
+### Argo CD 端
+
+
+1. 進 Argo CD UI → `Settings → SSO / OAuth`
+2. 選 GitLab，填寫：
+   * Client ID → GitLab OAuth App 的 ID
+   * Client Secret → GitLab OAuth App 的 Secret
+   * Redirect URI → 同上
+3. 儲存設定，此時使用者可透過 GitLab 帳號登入 Argo CD UI 或 CLI
+
+ ![](attachments/b8ce9bbd-f83d-4715-96e8-ca016638d3ef.png " =1874x907")
+
+ ![](attachments/5a1836e9-f936-4e9c-9762-55b5eb67285e.png " =1548x674")
+
+
+---
+
+## Step 9：讓 Argo CD 讀取 GitLab Repo（Group Access Token 版）
+
+這一段對應前面提到的「**Group Access Token / Repo 權限**」，我們用 **Group Access Token** 統一讓 Argo CD 讀取 GitLab 上同一個 Group 底下的多個 Repo。
+
+### GitLab 端（建立 Group Access Token）
+
+1. 到 GitLab Group 頁面 → `Settings → Access Tokens`
+2. 建立一組 **Group Access Token**：
+  * Name：例如 `argocd-group-readonly`
+  * Scopes：勾選 `read_repository`（必要），必要時可加 `read_api`
+3. 請**妥善保存**這組 Token，稍後會寫進 Kubernetes Secret 或 Helm `values.yaml` 中
+
+> 建議不要再用個人 PAT 來讓 Argo CD 讀 Repo，改用 Group Access Token 會比較好管理、也較不綁個人帳號。
+
+### Argo CD 端（設定 Repository Credentials）
+
+如果你走「**先裝好 Argo CD，再用 CLI / UI 加 Repo**」的流程，可以這樣做：
+
+1. 先在 Kubernetes 建一個 Secret（建議做法）：
+
+```bash
+kubectl create secret generic argocd-gitlab-group-token \
+  --from-literal=username=oauth2 \
+  --from-literal=password=<your-gitlab-group-access-token> \
+  -n argocd
+```
+
+2. 在 Argo CD UI 中設定 Repository Credentials，或用 CLI 指定（以下為 CLI 範例，實務上建議搭配上面的 Secret 或 Helm values 管理）：
+
+```bash
+argocd repo add https://gitlab.example.com/your-group/your-repo.git \
+  --username oauth2 --password <your-gitlab-group-access-token>
+```
+
+3. 建立 Application，指定：
+  * `repoURL` → GitLab 專案 URL（例如 `https://gitlab.example.com/your-group/argocd-deployment.git`）
+  * `targetRevision` → 分支或 tag（例如 `main`）
+  * `path` → manifests 或 Helm chart 目錄（例如 `overlays/prod` 或 `charts/argocd`）
+
+
+---
+
+## Step 10：（可選）拉 GitLab Registry Image
+
+
+1. ### 取得 Registry 用的 Deploy Token
+
+   → 左側選單 → Settings → Repository → 往下拉，找到 Deploy Tokens 區塊
+
+* Scope: `read_registry`
+* GitLab 會給你：
+  * Username（通常是 `gitlab+deploy-token-XX`）
+  * Token（密碼）
+
+
+---
+
+
+2. ### 用 kubectl 建 Secret（Registry 用）
+
+```bash
+kubectl create secret docker-registry gitlab-registry \
+  --docker-server=registry.gitlab.com \
+  --docker-username=<Deploy Token Username> \
+  --docker-password=<Deploy Token Token> \
+  --docker-email=<your-email@example.com> \
+  -n <namespace>
+```
+
+* `gitlab-registry` → Secret 名稱
+* `registry.gitlab.com` → GitLab Container Registry 地址
+* `<namespace>` → 你要部署的 namespace
+
+> 建好 Secret 後，Kubernetes Pod 就可以用這個 Secret 拉 image。
+
+
+---
+
+3\. Deployment 或 Helm 指定 imagePullSecrets
+
+```yaml
+spec:
+  template:
+    spec:
+      containers:
+        - name: my-app
+          image: registry.gitlab.com/<group>/<project>/<image>:<tag>
+      imagePullSecrets:
+        - name: gitlab-registry
+```
+
+> 這樣 Argo CD 同步 Application 時，Kubernetes 就能拉 GitLab Container Registry 的 image。
+
+## Helm 初始化
+
+如果你不希望手動設定，也可以透過helm 初始化的values.yaml 就將其設定好
+
+我幫你補充「如何把這些設定加到 Helm 初始化的 `values.yaml`」，並整理成完整流程：
+
+
+---
+
+## 一、設定 SSO 登入（Helm Values）
+
+在 `values.yaml` 裡可以加：
+
+```yaml
+configs:
+  cm:
+    url: https://<argo-cd-domain>
+    # OAuth / SSO 設定
+    oidc.config: |
+      name: GitLab
+      issuer: https://gitlab.com
+      clientID: <GitLab OAuth App Client ID>
+      clientSecret: <GitLab OAuth App Client Secret>
+      requestedScopes: ["openid", "profile", "email", "groups"]
+```
+
+
+---
+
+## 二、讀取 GitLab Repository（Helm Values）
+
+在 `values.yaml` 裡可以預先加 Repo Credential：
+
+```yaml
+configs:
+  repositories:
+    - url: https://gitlab.com/<group>/<repo>.git
+      username: <username>
+      password: <Personal Access Token>
+```
+
+
+---
+
+## 三、拉 GitLab Container Registry Image（Helm Values / Secret）
+
+Helm 無法直接在 `values.yaml` 裡創建 Kubernetes Secret，但可以用兩種方式：
+
+1️⃣ **用** `**extraSecrets**`**（Argo CD Helm chart 支援）**
+
+```yaml
+configs:
+  secret:
+    extraSecrets:
+      gitlab-registry:
+        type: kubernetes.io/dockerconfigjson
+        data:
+          .dockerconfigjson: <base64-encoded-docker-config>
+```
+
+2️⃣ **或安裝完 Argo CD 後用 kubectl 建 Secret**（前面教的方法） 然後在 `values.yaml` 指定 `imagePullSecrets`：
+
+```yaml
+controller:
+  extraArgs:
+    - --kube-secret-name=gitlab-registry
+```
+
+
+rabc
+
+---
+
+## 補充：常用指令與維運小抄
+
+### 安裝 Helm（Windows 範例）
+
+```bash
+choco install kubernetes-helm
+```
+
+### 查詢 Argo CD Service
+
+```bash
+kubectl get svc argocd-server -n argocd
+kubectl get svc -A | grep argocd
+```
+
+### 將 Service 改成 NodePort（範例）
+
+```bash
+kubectl patch svc argocd-server -n argocd -p '{
+  "spec": {
+    "type": "NodePort",
+    "ports": [
+      {
+        "port": 80,
+        "targetPort": 8080,
+        "nodePort": 32009
+      }
+    ]
+  }
+}'
+```
+
+### 以 Helm 安裝 / 升級 Argo CD（簡化版）
+
+```bash
+helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
+
+helm upgrade --install argocd argo/argo-cd \
+  --namespace argocd --create-namespace \
+  -f values.yaml
+```
+
+### 取得初始 admin 密碼（建議立即修改）
+
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d
+```
+
+取得後，請立刻登入 Argo CD UI / CLI 修改 admin 密碼。
+
+### 匯出 Helm 與 Argo CD 設定
+
+```bash
+helm get values argocd -n argocd -o yaml > current-values.yaml
+kubectl get appprojects -n argocd -o yaml > argocd-projects.yaml
+```
+
+
+\
+圖表說明 ![](attachments/37293e96-21b9-4734-b8b8-8f657ecd65e6.png)
+
+
+\
+這張圖片是 [Argo CD](https://argo-cd.readthedocs.io/en/stable/) 的應用程式狀態畫面，用來管理 Kubernetes 應用程式的部署狀態。讓我為你逐一說明畫面中的資訊：
+
+
+---
+
+### 🔍 **整體狀況總覽**
+
+* **應用程式名稱：** `testapp`
+* **APP HEALTH（健康狀態）：** ✅ **Healthy** → 代表應用程式目前的所有資源都運作正常。
+* **SYNC STATUS（同步狀態）：** ✅ **Synced to HEAD (d227ef5)** → 表示 Git 倉庫裡的設定檔已成功同步到叢集，沒有偏差。
+* **LAST SYNC：** ✅ **Sync OK** → 最近一次同步成功，是在 `18 hours ago`（18 小時前）由 `mark.ku` 完成的。 → 提交備註為 `update config`。
+* **Auto sync：** ❌ **未啟用自動同步**（Auto sync is not enabled）
+
+
+---
+
+### 🌳 **應用程式資源架構圖解**
+
+這是以 GitOps 模式部署的 Kubernetes 應用資源樹狀圖：
+
+
+1. **testapp（應用程式）**
+   * **nginx-content（ConfigMap）**
+   * **test-app（Namespace）**
+   * **nginx-test-service（Service）**
+   * **nginx-test（Deployment）**
+     * **nginx-test-554867cd4b（ReplicaSet）**
+       * **nginx-test-554867cd4b-65gtp（Pod）**
+       * **nginx-test-554867cd4b-xgs9x（Pod）**
+
+📌 所有資源右上角都有 ✅，表示部署成功、狀態正常。
+
+
+---
+
+### ✅ **整體結論**
+
+這代表 `testapp` 應用在 Kubernetes 中：
+
+* 結構清晰，包含部署、服務、ConfigMap 等
+* 已正確同步到 Git 倉庫中的定義
+* 所有 Pods 正常執行中
+* 沒有錯誤或異常狀況
+
+## 參考資料
+
+- <https://blog.csdn.net/cr7258/article/details/122028096>
+- <https://ithelp.ithome.com.tw/articles/10266761>
