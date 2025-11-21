@@ -12,21 +12,23 @@ author: Mark Ku
 
 ## 前言
 
-當你同時管理 **10～20 個 Kubernetes 集群**時，使用 kubectl 手動部署不僅耗時，也容易出錯。就像要在 20 台手機上安裝同一個 App，逐一操作遲早會漏掉某一台。
+如果你現在手上有 **10～20 個 Kubernetes 集群** 要顧，還在那邊每一個用 kubectl 手動切 context、apply YAML，其實滿折騰的。
 
-**Argo CD** 搭配 **GitOps** 可以解決這個問題，但學習曲線確實比 kubectl 陡峭。你需要理解：
+有點像你有 20 支手機，要裝同一個 App，結果你一支一支打開商店搜尋、下載、登入——某一天一定會漏裝、裝錯，或是少改一個設定。
 
-- GitOps 的宣告式思維與單一真相來源概念
-- Argo CD 的 Application、Project、Sync 運作機制
-- Helm、OAuth、Registry、RBAC 等整合技術
+**Argo CD** 搭配 **GitOps** 就是在解決這種「人手操作一定會出包」的場景。缺點是，它的學習曲線的確比單純用 kubectl 陡一點，你要先理解：
 
-不過，一旦掌握這些知識，多叢集與多環境的維運效率將大幅提升。
+- GitOps 在講的「宣告式」跟「唯一真相來源」到底是什麼
+- Argo CD 裡的 Application、Project、Sync 這些東西在玩什麼
+- Helm、OAuth、Registry、RBAC 這些元件要怎麼串在一起
 
-本文將帶你完成以下三個目標：
+但一旦這些拼圖拼起來，多叢集、多環境的日常維運真的會輕鬆非常多。
 
-1. 理解 Argo CD 在 GitOps 架構中的定位
-2. 使用 Helm 安裝與配置 Argo CD
-3. 整合 GitLab SSO 實現安全的登入與權限管理
+這篇文章會帶你一步一步做完三件事：
+
+1. 先搞清楚 Argo CD 在整個 GitOps 架構裡是誰、在幹嘛  
+2. 用 Helm 把 Argo CD 安裝起來、必要設定補好  
+3. 把 GitLab SSO 串進來，讓登入、權限都用同一套帳號系統管  
 
 ---
 
@@ -34,49 +36,18 @@ author: Mark Ku
 
 ### 什麼是 GitOps？
 
-**GitOps** 是一種以 Git 為中心的運維方法論：
+先把 GitOps 講白話一點，它其實就是一句話：
 
-- **Git 作為唯一真相來源**：所有 Kubernetes 設定檔都存放在 Git 倉庫中
-- **自動同步機制**：系統自動將 Git 中的設定套用到所有環境
-- **版本可追溯**：每次變更都有完整的 Git 歷史記錄，出錯時可快速回滾
+> **「把基礎設施當程式碼管，然後一切以 Git 為準。」**
 
-比喻來說，Git 就像一本標準食譜，而 GitOps 工具會確保所有廚房（集群）都按照同一份食譜烹飪。
+細拆會長這樣：
 
-### Argo CD 的角色
-![](how-argocd-work.png)
+- **Git 是唯一真相來源**：所有 Kubernetes 設定檔（YAML、Helm values…）都丟在 Git 裡，Git 就是「環境該長什麼樣子」的標準答案。
+- **自動同步**：不是你自己去下 `kubectl apply`，而是系統自動去看 Git，幫你把集群調整成那個狀態。
+- **版本可回溯**：誰改了什麼、什麼時候改，只要有 commit 記錄就查得到，真的炸掉了也可以直接回滾。
 
-Argo CD 是 GitOps 的實踐工具，負責：
-
-- 持續監控 Git 倉庫的變更
-- 自動將變更同步到 Kubernetes 集群
-- 確保實際狀態與 Git 定義保持一致
-- 透過 UI 和 Git 歷史記錄追蹤所有變更
-
-其核心價值在於讓基礎設施管理變得**更安全、更一致、更易於維護**。
-
-### 理解 GitLab Token 類型
-
-在 Argo CD 與 GitLab 的整合中，常用兩種 Token：
-
-#### Personal Access Token (PAT)
-- **綁定對象**：個人帳號
-- **權限範圍**：繼承使用者權限
-- **適用場景**：個人實驗、PoC、小型專案
-
-#### Group Access Token
-- **綁定對象**：GitLab Group
-- **權限範圍**：僅限該 Group 的 `read_repository`、`read_api` 等
-- **適用場景**：團隊協作、生產環境
-
-**安全性比較**：
-
-- PAT 如同「個人萬用鑰匙」，外洩時影響範圍大
-- Group Access Token 如同「專案服務鑰匙」，可獨立管理與輪替，不綁定個人帳號
-
-本文採用 **Group Access Token**，讓 Argo CD 讀取整個 Group 的倉庫，維護更簡潔且符合團隊使用情境。
----
-
-## 安裝流程
+可以把它想成：  
+以前大家在廚房裡都憑感覺煮，每個人心中都有自己的版本；  _gitops-helm-installation-and-gitlab-sso-setup\index.mdx
 
 ### Step 1：準備 Helm 環境
 
