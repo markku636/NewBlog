@@ -1,9 +1,33 @@
 {
+	"redirects": [
+		{
+			"source": "/:path*",
+			"destination": "https://blog.226network.com/:path*",
+			"permanent": true,
+			"has": [
+				{
+					"type": "host",
+					"value": "blog.markkulab.net"
+				}
+			]
+		},
+		{
+			"source": "/:path*",
+			"destination": "https://blog.226network.com/:path*",
+			"permanent": true,
+			"has": [
+				{
+					"type": "host",
+					"value": "www.markkulab.net"
+				}
+			]
+		}
+	],
 	"env": {
 		"GATSBY_FACEBOOK_APP_ID": "468925351809896",
 		"GATSBY_ALGOLIA_APP_ID": "DXSFYKV63H",
 		"GATSBY_ALGOLIA_SEARCH_KEY": "f47d6ac4861af2e2651ddebd509b2455",
-		"GATSBY_ALGOLIA_INDEX_NAME": "www.markkulab.net",
+		"GATSBY_ALGOLIA_INDEX_NAME": "blog.226network.com",
 		"ALGOLIA_ADMIN_KEY": "d285e4af0027b4c61a104fd879da929c"	
 	},
 	"build": {
@@ -11,7 +35,7 @@
 			"GATSBY_FACEBOOK_APP_ID": "468925351809896",
 			"GATSBY_ALGOLIA_APP_ID": "DXSFYKV63H",
 			"GATSBY_ALGOLIA_SEARCH_KEY": "f47d6ac4861af2e2651ddebd509b2455",
-			"GATSBY_ALGOLIA_INDEX_NAME": "www.markkulab.net",
+			"GATSBY_ALGOLIA_INDEX_NAME": "blog.226network.com",
 			"ALGOLIA_ADMIN_KEY": "d285e4af0027b4c61a104fd879da929c"			
 		}
 	}

@@ -18,7 +18,6 @@ module.exports = {
         publisherId: `ca-pub-2396931274355535`
       },
     },
-    `gatsby-plugin-meta-redirect`, // make sure to put last in the array
     {
       resolve: `gatsby-plugin-google-gtag`,
       options: {
@@ -39,6 +38,13 @@ module.exports = {
       },
     },  
     `gatsby-plugin-react-helmet`,
+    {
+      resolve: 'gatsby-plugin-canonical-urls',
+      options: {
+        siteUrl: process.env.SITE_URL || 'https://blog.226network.com',
+        stripQueryString: true
+      }
+    },
     {
       resolve: 'gatsby-plugin-algolia',
       options: {
@@ -62,7 +68,39 @@ module.exports = {
     },    
     {
       resolve: 'gatsby-plugin-sitemap',
-      options: {}
+      options: {
+        output: '/',
+        query: `
+          {
+            site {
+              siteMetadata {
+                siteUrl
+              }
+            }
+            allSitePage {
+              nodes {
+                path
+              }
+            }
+          }
+        `,
+        resolveSiteUrl: () => process.env.SITE_URL || 'https://blog.226network.com',
+        serialize: ({ path }) => {
+          return {
+            url: path,
+            changefreq: 'daily',
+            priority: 0.7,
+          }
+        }
+      }
+    },
+    {
+      resolve: 'gatsby-plugin-robots-txt',
+      options: {
+        host: process.env.SITE_URL || 'https://blog.226network.com',
+        sitemap: `${process.env.SITE_URL || 'https://blog.226network.com'}/sitemap-index.xml`,
+        policy: [{ userAgent: '*', allow: '/' }]
+      }
     },
     {
       resolve: 'gatsby-plugin-netlify-cms',
@@ -81,7 +119,8 @@ module.exports = {
           algolia: true
         }
       }
-    }
+    },
+    `gatsby-plugin-meta-redirect` // make sure to put last in the array
   ], 
   // Customize your site metadata:
   siteMetadata: {
