@@ -51,6 +51,8 @@ author: Mark Ku
 
 ### Step 1：準備 Helm 環境
 
+在開始安裝之前，我們需要先把 Helm 的「軟體來源」設定好。就像你要裝 App 前要先確認應用商店能連上一樣，這裡要讓 Helm 知道去哪裡抓 Argo CD 的安裝包，然後把預設設定檔匯出來方便我們後續修改。
+
 加入 Argo CD 的 Helm repository 並匯出預設設定檔：
 
 ```bash
@@ -64,6 +66,8 @@ helm show values argo/argo-cd --version 8.3.2 > values.yaml
 
 ### Step 2：建立 GitLab OAuth Application
 
+這一步是要讓 Argo CD 跟 GitLab 之間建立「信任關係」。你可以想像成是在 GitLab 裡幫 Argo CD 辦一張「通行證」，以後使用者就可以用 GitLab 帳號直接登入 Argo CD，不用再記一組新的帳號密碼。
+
 前往 GitLab 設定 SSO 整合：
 
 1. 登入 GitLab → 點選右上角頭像 → `Settings → Applications`
@@ -75,9 +79,24 @@ helm show values argo/argo-cd --version 8.3.2 > values.yaml
 
 > ⚠️ 請妥善保存 Client ID 和 Secret，不要提交到 Git 倉庫中。
 
+![](attachments/5a1836e9-f936-4e9c-9762-55b5eb67285e.png " =1548x674")
+
+**兩種設定方式：**
+
+**方案 A：透過 values.yaml 設定（建議）**
+- 在後續 Step 4 中，將 Client ID 和 Secret 寫入 `values.yaml` 的 `dex.config` 區塊
+- 安裝時一次到位，適合自動化部署
+
+**方案 B：透過 UI 設定**
+- 安裝後登入 Argo CD UI → `Settings → SSO / OAuth`
+- 選擇 GitLab 並填寫 Client ID、Secret、Redirect URI
+- 適合事後補強或調整設定
+
+![](attachments/b8ce9bbd-f83d-4715-96e8-ca016638d3ef.png " =1874x907")
+
 ### Step 3：建立 GitLab Group Access Token
 
-為 Argo CD 建立倉庫讀取權限：
+為了讓 Argo CD 能夠自動拉取 GitLab 上的程式碼和 Helm Chart，我們需要給它一把「讀取權限鑰匙」。Group Access Token 就是這把鑰匙，它可以讓 Argo CD 存取整個 GitLab Group 底下的所有專案，而不用每個 repo 都單獨設定一次。
 
 1. 前往 GitLab Group → `Settings → Access Tokens`
 2. 建立新 Token：
@@ -87,6 +106,8 @@ helm show values argo/argo-cd --version 8.3.2 > values.yaml
 3. 儲存後複製 Token（只會顯示一次）
 
 ### Step 4：配置 values.yaml
+
+現在要把前面準備好的「通行證」（OAuth）和「讀取鑰匙」（Group Token）寫進 Argo CD 的設定檔裡。這個 `values.yaml` 就像是 Argo CD 的「身分證+通訊錄」，告訴它自己的對外網址是什麼、要怎麼跟 GitLab 溝通、可以存取哪些 repo。
 
 編輯 `values.yaml`，整合所有設定：
 
@@ -140,6 +161,8 @@ server:
 
 ### Step 5：執行安裝
 
+設定檔準備好了，現在可以正式把 Argo CD 「蓋」到 Kubernetes 集群上。這個過程會建立所有必要的 Pod、Service、ConfigMap 等等，然後等它們全部啟動完成。就像蓋房子一樣，材料備齊了就開始施工，最後驗收確認能住人。
+
 套用設定檔並安裝 Argo CD：
 
 ```bash
@@ -166,6 +189,8 @@ kubectl -n argocd get secret argocd-initial-admin-secret \
 ## 權限管理
 
 ### Step 6：設定 RBAC 與 AppProject
+
+Argo CD 安裝好了，但現在它還不知道「可以管哪些資源」、「可以部署到哪些地方」。AppProject 就像是一份「授權清單」，明確定義 Argo CD 可以碰哪些 Kubernetes 資源、可以連到哪些集群、可以存取哪些 Git repo。沒有這個授權，Argo CD 就會因為權限不足而無法正常工作。
 
 安裝完成後，需要配置 AppProject 來管理應用程式的權限範圍。
 
@@ -317,80 +342,9 @@ Argo CD 與 GitLab 整合涉及三層權限管理：
 - 若使用 GitLab Container Registry 拉取映像檔，需額外設定
 - 可使用 Deploy Token 建立 `imagePullSecrets`
 
-![](attachments/abaaa408-6162-44e9-996f-8a1db2e70fba.png)
-
 > 💡 **簡單記憶**：SSO 管「人」，Group Token 管「程式碼」，Registry Token 管「映像檔」。
 
----
-
-## 選用配置
-
-以下是一些替代方案與進階設定，如果您在前面的步驟中已經透過 `values.yaml` 完成設定，可以跳過這些章節。
-
-### 方案 A：使用 UI 設定 SSO（替代 Step 4 的 values.yaml 設定）
-
-若安裝時未在 `values.yaml` 中設定 OAuth，可透過 UI 介面補充：
-
-1. 登入 Argo CD UI → `Settings → SSO / OAuth`
-2. 選擇 GitLab 並填寫：
-   - **Client ID**：GitLab OAuth Application ID
-   - **Client Secret**：GitLab OAuth Secret
-   - **Redirect URI**：`http://<your-node-ip>:32009/api/dex/callback`
-3. 儲存設定
-
 ![](attachments/b8ce9bbd-f83d-4715-96e8-ca016638d3ef.png " =1874x907")
-![](attachments/5a1836e9-f936-4e9c-9762-55b5eb67285e.png " =1548x674")
-
-### 方案 B：使用 CLI 管理 Repository（替代 Step 4 的 credentialTemplates 設定）
-
-若偏好使用 CLI 而非 `values.yaml` 管理倉庫：
-
-```bash
-# 建立 Kubernetes Secret
-kubectl create secret generic argocd-gitlab-group-token \
-  --from-literal=username=oauth2 \
-  --from-literal=password=<your-gitlab-group-access-token> \
-  -n argocd
-
-# 使用 Argo CD CLI 新增倉庫
-argocd repo add https://gitlab.example.com/your-group/your-repo.git \
-  --username oauth2 \
-  --password <your-gitlab-group-access-token>
-```
-
-### 方案 C：配置 GitLab Container Registry
-
-若需從 GitLab Container Registry 拉取映像檔：
-
-**1. 建立 Deploy Token**
-
-前往 GitLab Project → `Settings → Repository → Deploy Tokens`：
-- Scope：勾選 `read_registry`
-- 記錄 Username 和 Token
-
-**2. 建立 Kubernetes Secret**
-
-```bash
-kubectl create secret docker-registry gitlab-registry \
-  --docker-server=registry.gitlab.com \
-  --docker-username=<Deploy-Token-Username> \
-  --docker-password=<Deploy-Token> \
-  --docker-email=<your-email@example.com> \
-  -n <namespace>
-```
-
-**3. 在 Deployment 中引用**
-
-```yaml
-spec:
-  template:
-    spec:
-      containers:
-        - name: my-app
-          image: registry.gitlab.com/<group>/<project>/<image>:<tag>
-      imagePullSecrets:
-        - name: gitlab-registry
-```
 
 ---
 
