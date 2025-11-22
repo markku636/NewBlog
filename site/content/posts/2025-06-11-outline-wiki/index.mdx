@@ -208,6 +208,3 @@ cat outline_backup.sql | docker exec -i $(docker ps -qf name=postgres) psql -U p
 docker run --rm -v minio_data:/volume -v $(pwd):/backup alpine sh -c "cd /volume && tar xzf /backup/minio_backup.tar.gz"
 ```
 
----
-
-這樣內容就完全聚焦在 Outline，且移除了 Wiki.js 的所有字眼。需要我幫你調整封面圖片命名或其他細節嗎？
