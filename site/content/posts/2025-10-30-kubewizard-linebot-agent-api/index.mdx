@@ -21,6 +21,29 @@ slug: kubewizard-linebot-agent-api
 - 同時支援 REST API，可作為事件入口
 - 支援擴充工具（Tools）、自動化與 AI 協助
 
+在 AI 模型的選擇上，本文示範使用的是 **Google Gemini**：
+
+- Gemini 有提供 **免費額度（Free Tier）**，對於開發這類 DevOps Agent、聊天助理與實驗性專案來說，流量通常非常充足
+- API 介面簡單，容易與 FastAPI、Python SDK 等元件整合
+- 對多語系（包含中英文技術文件、指令說明）理解能力不錯，適合處理維運情境的自然語言互動
+
+以下是截至 2025-11 的部分 **標準 API Free Tier 上限**（實際數值請以官方文件為準）：
+
+| 模型 | Free Tier 每分鐘請求數（RPM） | Free Tier 每分鐘 Token 數（TPM） |
+|------|-------------------------------|-----------------------------------|
+| Gemini 2.5 Flash | 10 | 250,000 |
+| Gemini 2.5 Flash-Lite | 15 | 250,000 |
+| Gemini 2.0 Flash | 15 | 1,000,000 |
+| Gemini 2.0 Flash-Lite | 30 | 1,000,000 |
+| Gemma 3 / 3n | 30 | 15,000 |
+| Embeddings（Gemini Embedding） | 100 | 30,000 |
+
+> 註：上表僅節錄與本文情境較相關的模型／數值，未列出的模型與最新限制請參考官方說明。
+
+更多詳情可參考官方文件：
+
+- [Gemini API Rate limits 官方文件](https://ai.google.dev/gemini-api/docs/rate-limits)
+
 透過此方式，你無須開啟終端機，在通勤、外出或休息時即可完成許多維運工作。
 
 ---
