@@ -197,15 +197,7 @@ load_k8s_config()
 
 ## 系統架構圖
 
-```mermaid
-flowchart LR
-    User[使用者（LINE）] <--> LINEWebhook[LINE Webhook]
-    LINEWebhook --> FastAPI[FastAPI 入口]
-    FastAPI --> Agent[KubeWizard Agent]
-    Agent <--> Redis[(Redis - 記憶與上下文)]
-    Agent --> K8s[Kubernetes API]
-```
-
+![](flowchart.png)
 ---
 
 ## 🛡️ RBAC 権限設定（建議）
