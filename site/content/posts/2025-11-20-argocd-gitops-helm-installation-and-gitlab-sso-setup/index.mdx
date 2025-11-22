@@ -9,33 +9,6 @@ tags: ['Kubernetes', 'Argo CD', 'GitOps', 'Helm', 'GitLab', 'DevOps']
 description: 以實務步驟示範如何用 Helm 安裝 Argo CD，並結合 GitOps 與 GitLab SSO，讓多叢集 K8s 部署管理自動化又可回溯。
 author: Mark Ku
 ---
-
-## 前言
-
-如果你現在手上有 **10～20 個 Kubernetes 集群** 要顧，還在那邊每一個用 kubectl 手動切 context、apply YAML，其實滿折騰的。
-
-有點像你有 20 支手機，要裝同一個 App，結果你一支一支打開商店搜尋、下載、登入——某一天一定會漏裝、裝錯，或是少改一個設定。
-
-**Argo CD** 搭配 **GitOps** 就是在解決這種「人手操作一定會出包」的場景。缺點是，它的學習曲線的確比單純用 kubectl 陡一點，你要先理解：
-
-- GitOps 在講的「宣告式」跟「唯一真相來源」到底是什麼
-- Argo CD 裡的 Application、Project、Sync 這些東西在玩什麼
-- Helm、OAuth、Registry、RBAC 這些元件要怎麼串在一起
-
-但一旦這些拼圖拼起來，多叢集、多環境的日常維運真的會輕鬆非常多。
-
----
-featured: true
-title: 用 Argo CD 實作 GitOps：從 Helm 安裝到 GitLab SSO 一次搞定
-slug: argocd-gitops-helm-installation-and-gitlab-sso-setup
-category: DevOps
-thumbnail: argocd-gitops-helm-installation-and-gitlab-sso-setup.png
-date: 2025-11-20 10:00:00 +0800
-tags: ['Kubernetes', 'Argo CD', 'GitOps', 'Helm', 'GitLab', 'DevOps']
-description: 以實務步驟示範如何用 Helm 安裝 Argo CD，並結合 GitOps 與 GitLab SSO，讓多叢集 K8s 部署管理自動化又可回溯。
-author: Mark Ku
----
-
 ## 前言：為什麼需要 Argo CD + GitOps？
 
 想像一下這個場景：
@@ -99,27 +72,7 @@ author: Mark Ku
 - 沒有 GitOps：每個人都憑感覺煮，**菜色很難一致**  
 - 有 GitOps + Argo CD：大家都照同一份「食譜 (Git repo)」，  
   廚師（Argo CD）會一直檢查「成品」是不是跟食譜一樣，不一樣就自己調整回來。
-   - **Name**：`ArgoCD SSO`
-   - **Redirect URI**：`http://<your-node-ip>:32009/api/dex/callback`
-   - **Scopes**：勾選 `openid`, `read_user`, `email`
-3. 儲存後取得 **Application ID** 和 **Secret**
-
-> ⚠️ 請妥善保存 Client ID 和 Secret，不要提交到 Git 倉庫中，儘量透過系統或Gitlab 變數置換。
-
-![](attachments/5a1836e9-f936-4e9c-9762-55b5eb67285e.png " =1548x674")
-
-**兩種設定方式：**
-
-**方案 A：透過 values.yaml 設定（建議）**
-- 在後續 Step 4 中，將 Client ID 和 Secret 寫入 `values.yaml` 的 `dex.config` 區塊
-- 安裝時一次到位，適合自動化部署
-
-**方案 B：透過 UI 設定**
-- 安裝後登入 Argo CD UI → `Settings → SSO / OAuth`
-- 選擇 GitLab 並填寫 Client ID、Secret、Redirect URI
-- 適合事後補強或調整設定
-
-![](attachments/b8ce9bbd-f83d-4715-96e8-ca016638d3ef.png " =1874x907")
+> 下方的 GitLab OAuth 設定步驟已集中於後續 SSO 章節，這裡不再贅述。
 
 ### Step 3：建立 GitLab Group Access Token
 
@@ -372,6 +325,7 @@ Argo CD 與 GitLab 整合涉及三層權限管理：
 > 💡 **簡單記憶**：SSO 管「人」，Group Token 管「程式碼」，Registry Token 管「映像檔」。
 
 ![](attachments/b8ce9bbd-f83d-4715-96e8-ca016638d3ef.png " =1874x907")
+
 
 ---
 
