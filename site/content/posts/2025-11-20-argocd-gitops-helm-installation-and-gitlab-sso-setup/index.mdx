@@ -24,56 +24,81 @@ author: Mark Ku
 
 但一旦這些拼圖拼起來，多叢集、多環境的日常維運真的會輕鬆非常多。
 
-這篇文章會帶你一步一步做完三件事：
+---
+featured: true
+title: 用 Argo CD 實作 GitOps：從 Helm 安裝到 GitLab SSO 一次搞定
+slug: argocd-gitops-helm-installation-and-gitlab-sso-setup
+category: DevOps
+thumbnail: argocd-gitops-helm-installation-and-gitlab-sso-setup.png
+date: 2025-11-20 10:00:00 +0800
+tags: ['Kubernetes', 'Argo CD', 'GitOps', 'Helm', 'GitLab', 'DevOps']
+description: 以實務步驟示範如何用 Helm 安裝 Argo CD，並結合 GitOps 與 GitLab SSO，讓多叢集 K8s 部署管理自動化又可回溯。
+author: Mark Ku
+---
 
-1. 先搞清楚 Argo CD 在整個 GitOps 架構裡是誰、在幹嘛  
-2. 用 Helm 把 Argo CD 安裝起來、必要設定補好  
-3. 把 GitLab SSO 串進來，讓登入、權限都用同一套帳號系統管  
+## 前言：為什麼需要 Argo CD + GitOps？
+
+想像一下這個場景：
+
+- 你公司有 **10～20 個 Kubernetes 叢集**  
+- 每次要更新服務，都要：
+  - 切換 `kubectl context`
+  - 找 YAML
+  - `kubectl apply`
+  - 再重複 10～20 次…
+
+就好像你有 20 支手機，要裝同一個 App，結果你一支一支打開商店、搜尋、下載、登入——  
+**很花時間，也很容易漏掉或按錯。**
+
+**GitOps + Argo CD** 做的事情，就是：
+
+- 把「你想要的叢集狀態」寫在 Git 裡（例如 YAML / Helm values）
+- 讓 Argo CD 自動幫你把叢集同步成 Git 裡的樣子
+- 所有歷史紀錄都在 Git 裡，要回滾也很簡單
+
+缺點是，一開始你要先理解一些名詞：
+
+- GitOps：宣告式、唯一真相來源（Single Source of Truth）
+- Argo CD：Application、Project、Sync
+- 週邊工具：Helm、OAuth (SSO)、Registry、RBAC…
+
+但一旦這些概念串起來，**多叢集 + 多環境** 的日常維運會舒服非常多。
+
+這篇文章會帶你一步一步完成三件事：
+
+1. 先搞清楚：**Argo CD 在 GitOps 裡扮演什麼角色**  
+2. 用 **Helm 安裝 Argo CD**，並補上最基本的設定  
+3. 把 **GitLab SSO 串進來**，讓你用公司 GitLab 帳號登入 Argo CD
 
 ---
 
-## 核心概念
+## 核心概念：先搞懂 GitOps 是什麼
 
-### 什麼是 GitOps？
+### 什麼是 GitOps？（超白話版）
 
-先把 GitOps 講白話一點，它其實就是一句話：
+一句話版：
 
-> **「把基礎設施當程式碼管，然後一切以 Git 為準。」**
+> **「把基礎設施當程式碼管，一切以 Git 為準。」**
 
-細拆會長這樣：
+展開一點大概是這樣：
 
-- **Git 是唯一真相來源**：所有 Kubernetes 設定檔（YAML、Helm values…）都丟在 Git 裡，Git 就是「環境該長什麼樣子」的標準答案。
-- **自動同步**：不是你自己去下 `kubectl apply`，而是系統自動去看 Git，幫你把集群調整成那個狀態。
-- **版本可回溯**：誰改了什麼、什麼時候改，只要有 commit 記錄就查得到，真的炸掉了也可以直接回滾。
+- **Git 是唯一真相來源 (Single Source of Truth)**  
+  - 所有 Kubernetes 設定檔（YAML、Helm values…）都放在 Git  
+  - 想知道「現在這個環境應該長什麼樣子」→ 看 Git 就對了  
 
-可以把它想成：  
-以前大家在廚房裡都憑感覺煮，每個人心中都有自己的版本，但有了ArgoCD，大家依據食譜做菜
+- **由系統自動 apply，不是人手 apply**  
+  - 不是你下 `kubectl apply` 把東西推進去  
+  - 而是由像 Argo CD 這種工具，**自己去 Git 抓設定**、自己幫你套用到叢集  
 
-## 安裝相關環境
+- **天然擁有版本控制與回滾能力**  
+  - 誰改了什麼、什麼時候改，都有 commit log  
+  - 若這次變更有問題，直接 Git revert 或切回前一版即可
 
-### Step 1：準備 Helm 環境
+可以用「煮菜」來比喻：
 
-在開始安裝之前，我們需要先把 Helm 的「軟體來源」設定好。就像你要裝 App 前要先確認應用商店能連上一樣，這裡要讓 Helm 知道去哪裡抓 Argo CD 的安裝包，然後把預設設定檔匯出來方便我們後續修改。
-
-加入 Argo CD 的 Helm repository 並匯出預設設定檔：
-
-```bash
-# 新增 Helm repository
-helm repo add argo https://argoproj.github.io/argo-helm
-helm repo update
-
-# 匯出預設 values 供修改使用
-helm show values argo/argo-cd --version 8.3.2 > values.yaml
-```
-
-### Step 2：建立 GitLab OAuth Application
-
-這一步是要讓 Argo CD 跟 GitLab 之間建立「信任關係」。你可以想像成是在 GitLab 裡幫 Argo CD 辦一張「通行證」，以後使用者就可以用 GitLab 帳號直接登入 Argo CD，不用再記一組新的帳號密碼。
-
-前往 GitLab 設定 SSO 整合：
-
-1. 登入 GitLab → 點選右上角頭像 → `Settings → Applications`
-2. 點選 **New Application** 並填寫：
+- 沒有 GitOps：每個人都憑感覺煮，**菜色很難一致**  
+- 有 GitOps + Argo CD：大家都照同一份「食譜 (Git repo)」，  
+  廚師（Argo CD）會一直檢查「成品」是不是跟食譜一樣，不一樣就自己調整回來。
    - **Name**：`ArgoCD SSO`
    - **Redirect URI**：`http://<your-node-ip>:32009/api/dex/callback`
    - **Scopes**：勾選 `openid`, `read_user`, `email`
