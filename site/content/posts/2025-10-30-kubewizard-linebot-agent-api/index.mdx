@@ -12,80 +12,135 @@ slug: kubewizard-linebot-agent-api
 
 ## 前言
 
-管理 Kubernetes，大多數人會使用 `kubectl` 或開啟 Dashboard。  
-然而，若能透過聊天的方式管理 K8s，是否會更直覺、更便利？
+管理 Kubernetes 時，我們習慣使用 `kubectl` 或 Dashboard。若能「用聊天」完成查詢、診斷、重啟、告警回應，維運體驗會更貼近日常溝通—省去開電腦、找 VPN、記指令的摩擦。這篇文章把 **KubeWizard** 改造成可在 LINE 上操作的 **Kubernetes 智能助理 (Agent API)**，同時具備：
 
-本文將示範如何將 **KubeWizard** 打造成可在 LINE 上操作的 **Kubernetes 管理助理**：
+- 文字互動管理 K8s（查資源 / 看 Logs / 重啟服務）
+- 提供 REST API 事件入口（Prometheus / GitOps / Webhook）
+- 可擴充 Tools、AI 輔助與自動化腳本
+- 多使用者獨立記憶 + 智能上下文
 
-- 可直接傳訊息查叢集狀態、查看 Logs、重啟服務
-- 同時支援 REST API，可作為事件入口
-- 支援擴充工具（Tools）、自動化與 AI 協助
+我們選用 **Google Gemini** 做為基礎模型，原因：
 
-在 AI 模型的選擇上，本文示範使用的是 **Google Gemini**：
+- 提供 Free Tier，足以支撐中小型 DevOps Agent 流量
+- 與 Python / FastAPI / LangChain 整合直接
+- 多語系（中英文指令 / 技術敘述）理解佳，適合維運場景
 
-- Gemini 有提供 **免費額度（Free Tier）**，對於開發這類 DevOps Agent、聊天助理與實驗性專案來說，流量通常非常充足
-- API 介面簡單，容易與 FastAPI、Python SDK 等元件整合
-- 對多語系（包含中英文技術文件、指令說明）理解能力不錯，適合處理維運情境的自然語言互動
+截至 2025-11 常用模型 Free Tier（節錄）：
 
-以下是截至 2025-11 的部分 **標準 API Free Tier 上限**（實際數值請以官方文件為準）：
-
-| 模型 | Free Tier 每分鐘請求數（RPM） | Free Tier 每分鐘 Token 數（TPM） |
-|------|-------------------------------|-----------------------------------|
+| 模型 | RPM | TPM |
+|------|-----|-----|
 | Gemini 2.5 Flash | 10 | 250,000 |
 | Gemini 2.5 Flash-Lite | 15 | 250,000 |
 | Gemini 2.0 Flash | 15 | 1,000,000 |
 | Gemini 2.0 Flash-Lite | 30 | 1,000,000 |
 | Gemma 3 / 3n | 30 | 15,000 |
-| Embeddings（Gemini Embedding） | 100 | 30,000 |
+| Embeddings | 100 | 30,000 |
 
-> 註：上表僅節錄與本文情境較相關的模型／數值，未列出的模型與最新限制請參考官方說明。
+> 以官方最新文件為準：[Gemini API Rate limits](https://ai.google.dev/gemini-api/docs/rate-limits)
 
-更多詳情可參考官方文件：
-
-- [Gemini API Rate limits 官方文件](https://ai.google.dev/gemini-api/docs/rate-limits)
-
-透過此方式，你無須開啟終端機，在通勤、外出或休息時即可完成許多維運工作。
+接下來我們先看價值 → 架構 → 核心元件 → 實作步驟；最後再展示 Demo 與延伸應用。
 
 ---
 
-## 為什麼用 LINE 來做 K8s 聊天助理
+## 使用 LINE + Agent 管理 K8s 的價值
 
-以下是此模式能帶來的主要價值：
+### ✅ 隨時隨地
+- 無需 VPN / Terminal，一支手機即可完成常見操作
+- 支援多使用者，獨立 session 記憶
 
-### ✅ 隨時隨地可用
+### 🔗 事件入口整合
+- REST API 可掛入 Prometheus、GitLab、Argo CD、AlertManager Webhook
+- 發生告警 → 直接回覆診斷 + 提供操作選項
 
-- 不需 VPN、不需 Terminal
-- 一支手機即可完成常見維運操作
-- 支援多用戶同時使用，每個用戶擁有獨立的對話記憶
+### 🧠 智能擴充
+- Tools 模式：查 K8s、Pipeline、Jira、Log 分析、Search、HTTP 呼叫其他 API
+- AI 可生成 YAML、做錯誤摘要、提供修復建議
 
-### 🔗 支援 API Gateway
-
-KubeWizard 可同時提供 **REST API**，可整合各種事件來源，例如：
-
-- Prometheus 告警觸發後通知 LINE 並提供操作選項
-- GitLab Pipeline 成功/失敗通知與相關指令建議
-- Argo CD Drift 監控並詢問是否自動同步
-
-### 🧠 可擴充成 DevOps 助理
-
-支援以插件形式擴充工具（LangChain Tools），例如：
-
-- 查詢 GitLab Pipeline 狀態
-- 查詢 Jira Ticket 狀態
-- 執行維運自動化 Script
-- AI 協助分析 Log 或產生 YAML
-- 網路搜尋功能（DuckDuckGo）
-- HTTP 請求工具（可呼叫其他 API）
-
-### 🎯 智能對話記憶
-
-- 使用 Redis 儲存對話歷史，支援上下文理解
-- 自動總結長對話，避免 Token 超限
-- 每個用戶擁有獨立的 session，互不干擾
+### 🎯 對話記憶
+- Redis 保存上下文 + Token Buffer 自動摘要
+- 依使用者分流，互不干擾
 
 ---
 
-## Step 1：建立 LINE Bot
+## 系統總覽與架構圖
+
+下圖展示整體資料流（使用者訊息 → LINE → Webhook → Agent → 工具 → 回覆）：
+
+![系統架構圖](flowchart.png)
+
+架構核心四層：
+
+| 層級 | 角色 | 說明 |
+|------|------|------|
+| 介面層 | LINE Bot / REST API | 多入口、Webhook、告警/事件注入 |
+| 智能層 | Agent + LLM | 決策是否使用工具、整合輸出、維持上下文 |
+| 工具層 | KubeTool / Search / RequestsGet / 人工介入 | 可插拔，易擴充、權限隔離 |
+| 狀態層 | Redis / Kubernetes SDK | 對話記憶、叢集操作、資源快照 |
+
+---
+
+## LangChain 核心概念（速讀版）
+
+LangChain 幫你把「LLM + Tools + 記憶 + Prompt + 執行迴路」組成一顆可擴充的大腦：
+
+| 概念 | 在本專案 | 比喻 |
+|------|-----------|------|
+| LLM | `ChatGoogleGenerativeAI` | 顧問大腦 |
+| Prompt | `SYSTEM_PROMPT` | 顧問工作說明書 / SOP |
+| Tools | `KubeTool`, `RequestsGet`, `search`, `human_console_input` | 工具箱 |
+| Memory | Redis + Token Buffer | 顧問筆記（會自動瘦身）|
+| Agent | `create_openai_tools_agent` + Executor | 決策迴路 |
+| Scratchpad | `agent_scratchpad` | 臨時思考紙 |
+
+工作流程：問題 → 判斷需工具 → 執行工具 → 整合回覆 → 儲存記憶（必要時摘要）。
+
+```python
+prompt = ChatPromptTemplate.from_messages([
+  ("system", SYSTEM_PROMPT),
+  MessagesPlaceholder("chat_history"),
+  ("user", "{input}"),
+  MessagesPlaceholder("agent_scratchpad"),
+])
+
+tools = [KubeTool(), RequestsGet(), create_search_tool()]
+memory = ConversationTokenBufferMemory(
+  llm=llm,
+  memory_key="chat_history",
+  max_token_limit=2000,
+  chat_memory=RedisChatMessageHistory(url=REDIS_URL, session_id=user_id)
+)
+
+agent = create_openai_tools_agent(llm, tools, prompt)
+executor = AgentExecutor(agent=agent, tools=tools, memory=memory, verbose=True)
+reply = executor.invoke({"input": "列出所有 namespace"})
+```
+
+---
+
+## 為什麼選 Python Kubernetes SDK 而非直接呼叫 kubectl
+
+| 面向 | Python SDK | 直接 kubectl |
+|------|------------|--------------|
+| 安全性 | 避免字串注入 | 需特別處理指令拼接 |
+| 錯誤處理 | 結構化例外 | 文字解析困難 |
+| 體積 | 輕量映像 | 需額外安裝 CLI |
+| 程式化能力 | 物件操作、易封裝 | 需解析輸出字串 |
+| RBAC 整合 | 原生憑證/SA | 需掛載 kubeconfig |
+
+自動偵測環境：
+```python
+def load_k8s_config():
+    if os.path.exists("/var/run/secrets/kubernetes.io/serviceaccount/token"):
+        config.load_incluster_config()
+    else:
+        config.load_kube_config()
+```
+
+常見映射：`kubectl get pods -n X` → `v1.list_namespaced_pod(namespace=X)`。
+
+---
+
+## Step 1：建立 LINE Bot（前置準備）
 
 1. 前往 LINE Developers：  
    https://developers.line.biz/console/
@@ -120,7 +175,7 @@ Webhook 測試可使用 ngrok 進行本地公開。
 
 ---
 
-## Step 2：將 KubeWizard 改造成「LINE Bot Agent API」
+## Step 2：改造成「LINE Bot Agent API」核心元件
 
 預設的 KubeWizard 屬於一次性查詢工具：問一句、答一句。  
 欲提升可用性，需將其調整為具備記憶能力、工具判斷與多入口能力的 Agent。
@@ -302,52 +357,7 @@ def handle_message(event):
     )
 ```
 
----
-
-## LangChain 核心概念（淺顯版）
-
-很多人第一次接觸 LangChain 會覺得「好像很複雜」，其實它就是幫你把「LLM + 工具 + 記憶 + 提示詞 + 執行流程」這些零件組成一個可擴充的腦袋。以下用生活比喻快速理解：
-
-| 概念 | 在 KubeWizard 裡 | 比喻 |
-|------|------------------|------|
-| LLM (大腦) | `ChatGoogleGenerativeAI` | 顧問的大腦，負責理解問題與思考 |
-| Prompt (說明書) | `SYSTEM_PROMPT` + `ChatPromptTemplate` | 給顧問的人設與工作流程 SOP |
-| Tools (工具箱) | `KubeTool`, `RequestsGet`, `search`, `human_console_input` | 顧問手邊的螺絲起子、手冊、電話詢問管道 |
-| Memory (記憶) | `RedisChatMessageHistory` + `ConversationTokenBufferMemory` | 顧問的筆記本（會自動刪舊做摘要）|
-| Agent (決策迴路) | `create_openai_tools_agent` + `AgentExecutor` | 顧問決定要不要翻工具箱、查筆記還是直接回答 |
-| Scratchpad | `agent_scratchpad` | 顧問的「思考過程便條紙」 |
-
-工作流程超簡化：
-1. 使用者輸入問題
-2. Prompt + 記憶提供上下文給 LLM
-3. LLM 判斷是否需要工具（例如列出 pods → 用 KubeTool）
-4. 執行工具取得結果（Pod 狀態 / HTTP 回應）
-5. LLM 整合工具輸出形成最終答覆
-6. 記憶系統儲存本輪對話，必要時做摘要避免變太胖
-
-簡化版程式骨架：
-```python
-prompt = ChatPromptTemplate.from_messages([
-  ("system", SYSTEM_PROMPT),
-  MessagesPlaceholder("chat_history"),
-  ("user", "{input}"),
-  MessagesPlaceholder("agent_scratchpad"),
-])
-
-tools = [KubeTool(), RequestsGet(), create_search_tool()]
-memory = ConversationTokenBufferMemory(
-  llm=llm,
-  memory_key="chat_history",
-  max_token_limit=2000,
-  chat_memory=RedisChatMessageHistory(url=REDIS_URL, session_id=user_id)
-)
-
-agent = create_openai_tools_agent(llm, tools, prompt)
-executor = AgentExecutor(agent=agent, tools=tools, memory=memory, verbose=True)
-reply = executor.invoke({"input": "列出所有 namespace"})
-```
-
-## 我如何用「Vibe Coding」打造這個 Agent
+## 我如何用「Vibe Coding」迭代打造 Agent
 
 所謂「Vibe Coding」是我在這個專案中採用的一種「感覺驅動、輕量迭代」開發方式：不先寫滿所有設計文件，而是讓程式、LLM 回應與工具行為逐步告訴我下一步該修什麼。流程長這樣：
 
@@ -367,10 +377,10 @@ reply = executor.invoke({"input": "列出所有 namespace"})
 - 把難 Debug 的東西（像 kubectl 字串）換成可程式化（Python SDK）。
 
 小技巧分享：
-- Prompt 中明確列出常說口頭禪 → 模型回答更一致。
-- 工具描述要「使用者語言」而非僅程式語言，例如：`"查詢 Kubernetes Pods（可附加 namespace）"`。
-- 危險操作要分工具並加人工確認 → 避免模型過度自信。
-- 日誌層級分兩段：DEBUG 看推理、INFO 看工具使用。
+- Prompt 中明確列出常說口頭禪 → 回覆語氣一致。
+- 工具描述用「使用者語言」取代純技術術語。
+- 危險操作拆分工具 + 人工確認。
+- DEBUG 看推理、INFO 看工具使用，方便問題定位。
 
 ## 技術亮點與挑戰 & 解決方案
 
@@ -403,99 +413,8 @@ def map_command(cmd: str):
 
 > 註：此表列出已完成與預留強化的項目，後續可加入：自動重試、工具使用統計、Prometheus 指標。
 
-### 為什麼選 Python SDK 而非 kubectl？（可支援 Pod 內外）
-
-KubeWizard 使用 **Kubernetes Python SDK** 操作叢集，而非呼叫 `kubectl` 指令。
-
-**優點：**
-
-- ✅ **不依賴 CLI**：不需安裝 kubectl 二進制文件
-- ✅ **Docker 映像更小**：從 ~500MB 減少到 ~300MB（節省 40%）
-- ✅ **更安全**：避免字串注入攻擊與 shell 執行風險
-- ✅ **更好的錯誤處理**：Python SDK 提供結構化的異常
-- ✅ **程式化控制**：可精準控制每個 API 調用
-- ✅ **RBAC 整合**：可搭配 ServiceAccount 精準控管權限
-
-Python SDK 在 **Pod 內與外部皆可使用**：
-
-| 運行環境 | 載入方式 | 配置來源 | 用途 |
-|---------|--------|--------|--------|
-| 叢集內（Pod） | `load_incluster_config()` | ServiceAccount Token | 正式部署與權限控管 |
-| 外部（本地/VM） | `load_kube_config()` | ~/.kube/config | 開發與測試 |
-
-**自動偵測環境範例：**
-
-```python
-from kubernetes import client, config
-import os
-import logging
-
-logger = logging.getLogger(__name__)
-
-def load_k8s_config():
-    """自動判斷環境並載入適當的 K8s 配置"""
-    try:
-        # 檢查是否在 K8s Pod 內（存在 ServiceAccount Token）
-        if os.path.exists("/var/run/secrets/kubernetes.io/serviceaccount/token"):
-            config.load_incluster_config()
-            logger.info("✓ 使用集群內配置 (Pod 環境)")
-            return True
-        else:
-            # 本地環境，使用 kubeconfig
-            config.load_kube_config()
-            logger.info("✓ 使用本地 kubeconfig 配置")
-            return True
-    except Exception as e:
-        logger.error(f"✗ 無法載入 K8s 配置: {e}")
-        return False
-
-# 初始化 API 客戶端
-load_k8s_config()
-v1 = client.CoreV1Api()
-apps_v1 = client.AppsV1Api()
-
-# 使用範例
-def list_pods(namespace="default"):
-    """列出指定 namespace 的所有 pods"""
-    try:
-        pods = v1.list_namespaced_pod(namespace=namespace)
-        return [pod.metadata.name for pod in pods.items]
-    except client.exceptions.ApiException as e:
-        logger.error(f"API 錯誤: {e.status} - {e.reason}")
-        return []
-```
-
-**支援的 kubectl 命令轉換：**
-
-| kubectl 命令 | Python SDK 實現 |
-|-------------|----------------|
-| `kubectl get pods -n default` | `v1.list_namespaced_pod(namespace="default")` |
-| `kubectl get nodes` | `v1.list_node()` |
-| `kubectl describe pod <name> -n <ns>` | `v1.read_namespaced_pod(name, namespace)` |
-| `kubectl logs <pod> -n <ns>` | `v1.read_namespaced_pod_log(name, namespace)` |
-| `kubectl get deployments -n <ns>` | `apps_v1.list_namespaced_deployment(namespace)` |
-
-**KubeTool 實際輸出範例：**
-
-```
-📦 Namespace: default
-================================
-NAME                         READY   STATUS    RESTARTS   AGE
-nginx-deployment-7d8f...     1/1     Running   0          2d
-redis-master-0               1/1     Running   0          5d
-mysql-5.7-6c9d4f...          1/1     Running   1          10d
-
-總計: 3 pods (3 Running, 0 Pending, 0 Failed)
-```
-
----
-
-## 系統架構圖
-
-![系統架構圖](flowchart.png)
-
----
-## 🛡️ RBAC 權限設定（建議）
+（技術選型已前移，原段落合併至前面）
+## ️ RBAC 權限設定（建議）
 
 以下為建議的最小必要權限，支援 **Namespace Scoped** 和 **Cluster Wide** 兩種模式。
 
@@ -852,6 +771,41 @@ Services:
 ![實際操作截圖 2](result-2.png)
 ---
 
+## 更多應用場景
+（原延伸應用已在結語後，提前放，方便讀者快速想像擴充場景——告警 / GitOps / 定時任務）
+
+**1. 告警自動處理**
+```python
+# Prometheus AlertManager Webhook
+@app.post("/webhook/prometheus")
+async def prometheus_webhook(alert: PrometheusAlert):
+  agent = KubeAgent()
+  result = agent.invoke(f"診斷問題: {alert.description}")
+  send_line_message(result)
+```
+
+**2. GitOps 整合**
+```python
+@app.post("/webhook/argocd")
+async def argocd_webhook(event: ArgoCDEvent):
+  if event.type == "sync-failed":
+    agent = KubeAgent()
+    result = agent.invoke(f"分析同步失敗原因: {event.app_name}")
+    send_line_message(result)
+```
+
+**3. 定時健康檢查**
+```python
+@app.get("/cron/health-check")
+async def health_check():
+  agent = KubeAgent()
+  result = agent.invoke("檢查所有 namespace 的 pod 狀態")
+  if "CrashLoopBackOff" in result:
+    send_alert("發現異常 Pod！")
+```
+
+---
+
 ## 結語
 
 本文示範如何將 KubeWizard 整合至 LINE Bot，打造出可管理 K8s 的聊天式助理，具備：
@@ -915,44 +869,6 @@ helm install kubewizard ./helm \
 - [LINE Bot 整合文檔](https://github.com/markku636/kubewizard/blob/main/kubewizard_linebot/LINE_BOT_README.md)
 - [Kubernetes 配置說明](https://github.com/markku636/kubewizard/blob/main/docs/K8S_CONFIG_GUIDE.md)
 - [Helm Chart 部署指南](https://github.com/markku636/kubewizard/blob/main/helm/DEPLOYMENT.md)
-
-### 💡 更多應用場景
-
-**1. 告警自動處理**
-```python
-# Prometheus AlertManager Webhook
-@app.post("/webhook/prometheus")
-async def prometheus_webhook(alert: PrometheusAlert):
-    # 自動診斷並提供解決方案
-    agent = KubeAgent()
-    result = agent.invoke(f"診斷問題: {alert.description}")
-    
-    # 透過 LINE 通知並提供操作選項
-    send_line_message(result)
-```
-
-**2. GitOps 整合**
-```python
-# ArgoCD Webhook
-@app.post("/webhook/argocd")
-async def argocd_webhook(event: ArgoCDEvent):
-    if event.type == "sync-failed":
-        agent = KubeAgent()
-        result = agent.invoke(f"分析同步失敗原因: {event.app_name}")
-        send_line_message(result)
-```
-
-**3. 自動化運維腳本**
-```python
-# 定時健康檢查
-@app.get("/cron/health-check")
-async def health_check():
-    agent = KubeAgent()
-    result = agent.invoke("檢查所有 namespace 的 pod 狀態")
-    
-    if "CrashLoopBackOff" in result:
-        send_alert("發現異常 Pod！")
-```
 
 ### 🙏 致謝
 
