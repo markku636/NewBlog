@@ -1,103 +1,109 @@
 ---
 featured: true
-title: 用 Argo CD 實作 GitOps：從 Helm 安裝到 GitLab SSO 一次搞定
+title: Argo CD 實戰筆記：從 Helm 安裝到搞定 GitLab SSO
 slug: argocd-gitops-helm-installation-and-gitlab-sso-setup
 category: DevOps
 thumbnail: argocd-gitops-helm-installation-and-gitlab-sso-setup.png
 date: 2025-11-20 10:00:00 +0800
 tags: ['Kubernetes', 'Argo CD', 'GitOps', 'Helm', 'GitLab', 'DevOps']
-description: 以實務步驟示範如何用 Helm 安裝 Argo CD，並結合 GitOps 與 GitLab SSO，讓多叢集 K8s 部署管理自動化又可回溯。
+description: 手把手紀錄如何用 Helm 架設 Argo CD，並串接 GitOps 與 GitLab SSO。告別手動 kubectl，讓 K8s 部署自動化且可追溯。
 author: Mark Ku
 ---
-## 前言：為什麼需要 Argo CD + GitOps？
 
-想像一下這個場景：
+## 聊聊為什麼要用 Argo CD + GitOps？
 
-- 你公司有 **10～20 個 Kubernetes 叢集**  
-- 每次要更新服務，都要：
-  - 切換 `kubectl context`
-  - 找 YAML
-  - `kubectl apply`
-  - 再重複 10～20 次…
+先說個大實話，如果你手邊只有一個 K8s 叢集，偶爾版更一次，那其實 `kubectl apply` 加減用也沒什麼問題。但如果你跟我一樣遇到這種場景：
 
-就好像你有 20 支手機，要裝同一個 App，結果你一支一支打開商店、搜尋、下載、登入——  
-**很花時間，也很容易漏掉或按錯。**
+- 公司長出了 **10～20 個 K8s 叢集**（Dev/Staging/Prod 分得亂七八糟）
+- 每次版更都要切換 `kubectl context`，切到頭暈
+- 手動 Apply 完，根本不知道現在環境跟版控裡的 YAML 到底還一不一樣
 
-**GitOps + Argo CD** 做的事情，就是：
+這時候，**GitOps + Argo CD** 就是救星了。
 
-- 把「你想要的叢集狀態」寫在 Git 裡（例如 YAML / Helm values）
-- 讓 Argo CD 自動幫你把叢集同步成 Git 裡的樣子
-- 所有歷史紀錄都在 Git 裡，要回滾也很簡單
+簡單來說，它的邏輯就是：**「別再讓人去動叢集，讓機器人去動」**。
 
-缺點是，一開始你要先理解一些名詞：
+- **Git 是老大**：所有 YAML、Helm values 全部丟進 Git，它就是唯一真理（Source of Truth）。
+- **Argo CD 是監工**：它會盯著 Git 看，一旦你推了 code，它就自動把叢集變成你要的樣子。
+- **回滾超快**：出包了？Git Revert 一下，Argo CD 馬上幫你切回上一版。
 
-- GitOps：宣告式、唯一真相來源（Single Source of Truth）
-- Argo CD：Application、Project、Sync
-- 週邊工具：Helm、OAuth (SSO)、Registry、RBAC…
-
-但一旦這些概念串起來，**多叢集 + 多環境** 的日常維運會舒服非常多。
-
-這篇文章會帶你一步一步完成三件事：
-
-1. 先搞清楚：**Argo CD 在 GitOps 裡扮演什麼角色**  
-2. 用 **Helm 安裝 Argo CD**，並補上最基本的設定  
-3. 把 **GitLab SSO 串進來**，讓你用公司 GitLab 帳號登入 Argo CD
+這篇筆記主要紀錄我最近把這套流程架起來的步驟，包含：用 Helm 安裝 Argo CD、最麻煩的 GitLab SSO 串接，以及權限怎麼管才不會出事。
 
 ---
 
-## 核心概念：先搞懂 GitOps 是什麼
+## 觀念對齊：GitOps 到底在幹嘛？
 
-### 什麼是 GitOps？（超白話版）
+雖然不想講太多理論，但有個觀念一定要通。
 
-一句話版：
+以前我們是「煮大鍋飯」，每個人隨興加料（手動 apply），最後沒人記得這鍋湯裡到底放了什麼。
+GitOps 就像是「標準SOP食譜」，Argo CD 是那個死板的廚師長，他會嚴格執行食譜（Git Repo）。如果有人偷偷往湯裡加鹽（手動修改 Cluster），Argo CD 會發現「欸？跟食譜不一樣」，然後強制把它改回來（Self-healing）。
 
-> **「把基礎設施當程式碼管，一切以 Git 為準。」**
+搞懂這個，後面的設定才合理。
 
-展開一點大概是這樣：
+> （前置作業如 Helm Repo 添加這裡就跳過了，直接進入 SSO 和權限設定的重頭戲）
 
-- **Git 是唯一真相來源 (Single Source of Truth)**  
-  - 所有 Kubernetes 設定檔（YAML、Helm values…）都放在 Git  
-  - 想知道「現在這個環境應該長什麼樣子」→ 看 Git 就對了  
 
-- **由系統自動 apply，不是人手 apply**  
-  - 不是你下 `kubectl apply` 把東西推進去  
-  - 而是由像 Argo CD 這種工具，**自己去 Git 抓設定**、自己幫你套用到叢集  
+## 實作開始：搞定認證與安裝
 
-- **天然擁有版本控制與回滾能力**  
-  - 誰改了什麼、什麼時候改，都有 commit log  
-  - 若這次變更有問題，直接 Git revert 或切回前一版即可
+### Step 1：準備 Helm 環境
 
-可以用「煮菜」來比喻：
+這步很簡單，先把 Helm 的 repo 加進來，然後把 Argo CD 的預設 values.yaml 匯出來，等等直接改。
 
-- 沒有 GitOps：每個人都憑感覺煮，**菜色很難一致**  
-- 有 GitOps + Argo CD：大家都照同一份「食譜 (Git repo)」，  
-  廚師（Argo CD）會一直檢查「成品」是不是跟食譜一樣，不一樣就自己調整回來。
-> 下方的 GitLab OAuth 設定步驟已集中於後續 SSO 章節，這裡不再贅述。
+```bash
+# 新增 Helm repository
+helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
+
+# 匯出預設 values 供修改使用
+helm show values argo/argo-cd --version 8.3.2 > values.yaml
+```
+
+### Step 2：建立 GitLab OAuth Application
+
+這步是要讓 Argo CD 跟 GitLab 建立信任關係，等於在 GitLab 幫 Argo CD 辦一張「通行證」，以後大家都能用 GitLab 帳號登入 Argo CD。
+
+1. 登入 GitLab → 右上角頭像 → `Settings → Applications`
+2. 新增 Application：
+  - **Name**：`ArgoCD SSO`
+  - **Redirect URI**：`http://<your-node-ip>:32009/api/dex/callback`
+  - **Scopes**：勾 `openid`, `read_user`, `email`
+3. 儲存後拿到 **Application ID** 和 **Secret**
+
+> ⚠️ 記得 Client ID 和 Secret 不要丟進 Git 倉庫。
+
+![](attachments/5a1836e9-f936-4e9c-9762-55b5eb67285e.png " =1548x674")
+
+**設定方式有兩種：**
+
+A. 直接寫進 values.yaml（推薦，方便自動化）
+B. 安裝完後進 Argo CD UI 補設定（適合臨時調整）
+
+![](attachments/b8ce9bbd-f83d-4715-96e8-ca016638d3ef.png " =1874x907")
+
 
 ### Step 3：建立 GitLab Group Access Token
 
-為了讓 Argo CD 能夠自動拉取 GitLab 上的程式碼和 Helm Chart，我們需要給它一把「讀取權限鑰匙」。Group Access Token 就是這把鑰匙，它可以讓 Argo CD 存取整個 GitLab Group 底下的所有專案，而不用每個 repo 都單獨設定一次。
+Argo CD 要去拉 Git 裡的 Code，總得給它一把鑰匙。
+這裡強烈建議不要用你個人的帳號，不然哪天你離職或改密碼，整個 Production 部署就掛了。最好的方式是用 **Group Access Token**。
 
-1. 前往 GitLab Group → `Settings → Access Tokens`
-2. 建立新 Token：
-   - **Name**：`argocd-group-readonly`
-   - **Scopes**：勾選 `read_repository` 和 `read_api`
-   - **Role**：選擇 `Reporter`
-3. 儲存後複製 Token（只會顯示一次）
+1. 到你的 GitLab Group 頁面 → `Settings` → `Access Tokens`。
+2. 建立一個 Token：
+  - **Name**：取個好認的，例如 `argocd-group-readonly`
+  - **Scopes**：勾選 `read_repository` 和 `read_api` 就好，權限越小越安全。
+  - **Role**：選 `Reporter`（能讀就好）。
+3. **重點**：Token 產生後馬上複製下來，GitLab 只會顯示這一次。
 
-### Step 4：配置 values.yaml
 
-現在要把前面準備好的「通行證」（OAuth）和「讀取鑰匙」（Group Token）寫進 Argo CD 的設定檔裡。這個 `values.yaml` 就像是 Argo CD 的「身分證+通訊錄」，告訴它自己的對外網址是什麼、要怎麼跟 GitLab 溝通、可以存取哪些 repo。
+### Step 4：撰寫 values.yaml
 
-編輯 `values.yaml`，整合所有設定：
+這是最關鍵的一步。我們不直接用 Helm 的預設設定，而是要寫一份自己的 `values.yaml`，把 SSO 和 Repo 的資訊灌進去。這份檔案就是 Argo CD 的身分證。
 
 ```yaml
 configs:
   cm:
-    # Argo CD 對外 URL
+    # 這裡填 Argo CD 的入口網址，SSO callback 會用到
     url: http://<your-node-ip>:32009
     
-    # GitLab SSO 設定
+    # 這是最容易卡關的地方：Dex (SSO) 設定
     dex.config: |
       connectors:
         - type: gitlab
@@ -107,16 +113,17 @@ configs:
             baseURL: https://gitlab.example.com
             clientID: <your-gitlab-oauth-client-id>
             clientSecret: <your-gitlab-oauth-client-secret>
+            # 記得要去 GitLab Application 設定裡把這個 Callback URL 填對
             redirectURI: http://<your-node-ip>:32009/api/dex/callback
-    
-  # GitLab Repository 認證（使用 Group Access Token）
+  
+  # 這裡把剛剛申請的 Token 填進去，讓 Argo CD 認得你的 GitLab
   credentialTemplates:
     gitlab-group-token:
       url: https://gitlab.example.com
-      username: oauth2
+      username: oauth2  # 固定寫 oauth2 即可
       password: <your-gitlab-group-access-token>
-      
-  # 預先註冊的 Repository
+  
+  # 預先註冊 Repo，省得之後在 UI 一個一個加
   repositories:
     kong-api-gateway:
       url: https://gitlab.example.com/your-group/kong-api-gateway.git
@@ -125,25 +132,24 @@ configs:
       url: https://gitlab.example.com/your-group/argocd-deployment.git
       type: git
 
-# Server 網路設定
+# Server 網路設定 (Lab 環境偷懶用 NodePort，正式環境請上 Ingress)
 server:
   service:
     type: NodePort
     nodePortHttp: 32009
     nodePortHttps: 32010
   
-  # 允許 HTTP（僅開發環境使用）
+  # 開發環境允許 HTTP，不然會一直跳憑證錯誤
   extraArgs:
     - --insecure
 ```
 
-> 💡 **生產環境建議**：使用 Ingress + TLS 取代 NodePort，並移除 `--insecure` 參數。
+> 💡 生產環境建議：Ingress + TLS 取代 NodePort，並移除 `--insecure`。
 
-### Step 5：執行安裝
 
-設定檔準備好了，現在可以正式把 Argo CD 「蓋」到 Kubernetes 集群上。這個過程會建立所有必要的 Pod、Service、ConfigMap 等等，然後等它們全部啟動完成。就像蓋房子一樣，材料備齊了就開始施工，最後驗收確認能住人。
+### Step 5：安裝 Argo CD
 
-套用設定檔並安裝 Argo CD：
+設定檔都準備好後，直接開工：
 
 ```bash
 # 安裝 Argo CD
@@ -152,27 +158,26 @@ helm upgrade --install homelab-argo argo/argo-cd \
   -f values.yaml \
   -n argocd --create-namespace
 
-# 等待 Pod 就緒
+# 等 Pod 跑起來
 kubectl wait --for=condition=ready pod \
   -l app.kubernetes.io/name=argocd-server \
   -n argocd --timeout=300s
 
-# 取得初始 admin 密碼
+# 拿初始 admin 密碼
 kubectl -n argocd get secret argocd-initial-admin-secret \
   -o jsonpath="{.data.password}" | base64 -d
 ```
 
-登入後請立即修改 admin 密碼。
+第一次登入記得馬上改 admin 密碼。
 
 ---
 
+
 ## 權限管理
 
-### Step 6：設定 RBAC 與 AppProject
+### Step 6：設定 RBAC 跟 AppProject
 
-Argo CD 安裝好了，但現在它還不知道「可以管哪些資源」、「可以部署到哪些地方」。AppProject 就像是一份「授權清單」，明確定義 Argo CD 可以碰哪些 Kubernetes 資源、可以連到哪些集群、可以存取哪些 Git repo。沒有這個授權，Argo CD 就會因為權限不足而無法正常工作。
-
-安裝完成後，需要配置 AppProject 來管理應用程式的權限範圍。
+Argo CD 裝好只是第一步，還要告訴它「你可以管哪些資源、可以 deploy 到哪些地方」。AppProject 就像是授權清單，沒設好權限，Argo CD 什麼都不能做。
 
 建立 `argocd-projects.yaml`：
 
@@ -290,69 +295,58 @@ items:
     namespace: argocd
 ```
 
+
 ### 套用設定
 
 ```bash
-# 套用 AppProject 與 RBAC 設定
+# 套用 AppProject 跟 RBAC 設定
 kubectl apply -f argocd-projects.yaml -n argocd
 
-# 驗證 Project 是否建立成功
+# 看 Project 有沒有建起來
 kubectl get appprojects -n argocd
 
-# 驗證 RBAC 是否建立成功
+# RBAC 權限也查一下
 kubectl get clusterrole | grep argocd
 kubectl get clusterrolebinding | grep argocd
 ```
 
-### 理解權限架構
 
-Argo CD 與 GitLab 整合涉及三層權限管理：
+### 權限結構小抄
 
-**1. SSO 登入（GitLab OAuth）**
-- 控制使用者身分驗證與授權
-- 決定誰可以存取 Argo CD UI 及可見的 Application 範圍
-- 本文已在 Step 4 的 `values.yaml` 中完成設定
+Argo CD 跟 GitLab 整合，權限分三層：
 
-**2. Repository 存取（Group Access Token）**
-- 讓 Argo CD 讀取 GitLab 倉庫的程式碼與 Helm Chart
-- 採用 Group Access Token 統一管理整個 Group 的權限
-- 已在 Step 4 的 `credentialTemplates` 中完成設定
+1. SSO 登入（GitLab OAuth）：管誰能進 Argo CD UI
+2. Repo 存取（Group Access Token）：管 Argo CD 能讀哪些 GitLab repo
+3. Registry（選用）：拉 image 要額外設 Deploy Token
 
-**3. Container Registry（選用）**
-- 若使用 GitLab Container Registry 拉取映像檔，需額外設定
-- 可使用 Deploy Token 建立 `imagePullSecrets`
-
-> 💡 **簡單記憶**：SSO 管「人」，Group Token 管「程式碼」，Registry Token 管「映像檔」。
+> 💡 SSO 管「人」、Group Token 管「程式碼」、Registry Token 管「映像檔」。
 
 ![](attachments/b8ce9bbd-f83d-4715-96e8-ca016638d3ef.png " =1874x907")
 
-
 ---
+
 
 ## 實戰範例
 
 ### 應用程式狀態總覽
 
-圖表說明 ![](attachments/37293e96-21b9-4734-b8b8-8f657ecd65e6.png)
+![](attachments/37293e96-21b9-4734-b8b8-8f657ecd65e6.png)
 
-這張圖片是 [Argo CD](https://argo-cd.readthedocs.io/en/stable/) 的應用程式狀態畫面，用來管理 Kubernetes 應用程式的部署狀態：
+這張圖是 [Argo CD](https://argo-cd.readthedocs.io/en/stable/) 的 Application 狀態頁，主要看幾個重點：
 
-
-* **應用程式名稱：** `testapp`
-* **APP HEALTH（健康狀態）：** ✅ **Healthy** → 代表應用程式目前的所有資源都運作正常。
-* **SYNC STATUS（同步狀態）：** ✅ **Synced to HEAD (d227ef5)** → 表示 Git 倉庫裡的設定檔已成功同步到叢集，沒有偏差。
-* **LAST SYNC：** ✅ **Sync OK** → 最近一次同步成功，是在 `18 hours ago`（18 小時前）由 `mark.ku` 完成的。 → 提交備註為 `update config`。
-* **Auto sync：** ❌ **未啟用自動同步**（Auto sync is not enabled）
-
+- **應用程式名稱：** `testapp`
+- **APP HEALTH：** ✅ Healthy，全部資源都正常
+- **SYNC STATUS：** ✅ Synced to HEAD，Git 設定已同步到叢集
+- **LAST SYNC：** ✅ Sync OK，最近一次同步成功
+- **Auto sync：** ❌ 沒開自動同步
 
 ---
 
 ### 🌳 應用程式資源架構圖解
 
-這是以 GitOps 模式部署的 Kubernetes 應用資源樹狀圖：
+用 GitOps 部署的 K8s 資源樹大致長這樣：
 
-
-1. **testapp（應用程式）**
+1. **testapp（Application）**
    * **nginx-content（ConfigMap）**
    * **test-app（Namespace）**
    * **nginx-test-service（Service）**
@@ -361,11 +355,12 @@ Argo CD 與 GitLab 整合涉及三層權限管理：
        * **nginx-test-554867cd4b-65gtp（Pod）**
        * **nginx-test-554867cd4b-xgs9x（Pod）**
 
-📌 所有資源右上角都有 ✅，表示部署成功、狀態正常。
+📌 只要右上角有 ✅ 就是部署成功。
 
 ---
 
-## 常用指令參考
+
+## 常用指令小抄
 
 ### Helm 相關
 
@@ -378,7 +373,7 @@ helm upgrade --install argocd argo/argo-cd \
   --namespace argocd --create-namespace \
   -f values.yaml
 
-# 匯出當前設定
+# 匯出目前設定
 helm get values argocd -n argocd -o yaml > current-values.yaml
 ```
 
@@ -388,7 +383,7 @@ helm get values argocd -n argocd -o yaml > current-values.yaml
 # 查詢 Argo CD Service
 kubectl get svc argocd-server -n argocd
 
-# 將 Service 改為 NodePort
+# Service 改成 NodePort
 kubectl patch svc argocd-server -n argocd -p '{
   "spec": {
     "type": "NodePort",
@@ -402,7 +397,7 @@ kubectl patch svc argocd-server -n argocd -p '{
   }
 }'
 
-# 取得初始 admin 密碼
+# 拿初始 admin 密碼
 kubectl -n argocd get secret argocd-initial-admin-secret \
   -o jsonpath="{.data.password}" | base64 -d
 
@@ -410,26 +405,27 @@ kubectl -n argocd get secret argocd-initial-admin-secret \
 kubectl get appprojects -n argocd -o yaml > argocd-projects.yaml
 ```
 
-> ⚠️ 取得 admin 密碼後，請立即登入並修改密碼以確保安全。
+> ⚠️ admin 密碼拿到後，記得馬上改掉。
 
 ---
 
+
 ## 總結
 
-透過本文，您已經完成：
+這篇筆記帶你從零到一把 Argo CD + GitOps + GitLab SSO 全部串起來，重點流程都跑過一遍。
 
-1. ✅ 理解 GitOps 與 Argo CD 的核心概念
-2. ✅ 使用 Helm 完整安裝與配置 Argo CD
-3. ✅ 整合 GitLab SSO 實現安全的身分驗證
-4. ✅ 使用 Group Access Token 管理倉庫存取權限
-5. ✅ 設定 RBAC 與 AppProject 控制資源權限
+1. GitOps/Argo CD 觀念對齊
+2. 用 Helm 安裝、配置 Argo CD
+3. GitLab SSO 串接，安全登入
+4. Group Access Token 管理 repo 權限
+5. RBAC/AppProject 控制資源範圍
 
 **下一步建議**：
 
-- 建立您的第一個 Application，實際體驗 GitOps 工作流程
-- 啟用自動同步功能，實現完全自動化部署
-- 整合 CI/CD Pipeline，建立完整的 DevOps 流程
-- 在生產環境中配置 Ingress + TLS，提升安全性
+- 建第一個 Application，實際跑跑看
+- 開啟自動同步，體驗全自動部署
+- 整合 CI/CD Pipeline，DevOps 一條龍
+- 生產環境記得用 Ingress + TLS
 
 ## 參考資料
 
