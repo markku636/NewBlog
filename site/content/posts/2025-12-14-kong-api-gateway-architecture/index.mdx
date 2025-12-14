@@ -1,5 +1,5 @@
 ---
-title: 半年回顧：大型系統 API Gateway (Kong) 架構評估及驗證
+title: 半年回顧：中大型系統 API Gateway (Kong) 架構評估及驗證
 slug: kong-api-gateway-architecture-verification
 category: DevOps
 thumbnail: kong-api-gateway-architecture-verification.png
@@ -11,11 +11,11 @@ tags:
   - Observability
   - Grafana
   - ELK
-description: 這半年我負責協助某大型圖資專案第一期的 API Gateway 架構評估及驗證。本文紀錄了如何利用 Kong 實現圖資服務的路由管理、金鑰驗證，並整合 Prometheus、Grafana 與 ELK Stack 建立完整的監控體系。
+description: 這半年我負責協助某中大型圖資專案第一期的 API Gateway 架構評估及驗證。本文紀錄了如何利用 Kong 實現圖資服務的路由管理、金鑰驗證，並整合 Prometheus、Grafana 與 ELK Stack 建立完整的監控體系。
 author: "Mark Ku"
 ---
 
-在這過去的半年裡，我深度參與了「圖資開放平台」的建置案，主要負責第一期的 **API Gateway 架構評估及驗證**。
+在這過去的半年裡，我深度參與了「地理資訊平台」的建置案，主要負責第一期的 **API Gateway 架構評估及驗證**。
 
 這項任務不僅僅是部署一個服務，更具挑戰的是要為海量的地理空間資訊打造一個兼具**安全性**、**可觀測性**與**高可用性**的流量入口。以下將整理這段時間的架構規劃與實作細節，分享我們如何從零打造這套系統。
 
@@ -31,16 +31,22 @@ author: "Mark Ku"
 * **配置儲存**：使用 PostgreSQL 儲存路由與插件配置，確保資料持久化。
 * **GitOps 流程**：透過 GitLab CI/CD 與 ArgoCD 將設定檔同步至 K8s 環境。
 
-### 自動化部署挑戰 (CI/CD Pipeline)
-我們在 GitLab CI 中實作了完整的 GitOps 流程，但在驗證初期遇到了 **Helm Hook Deadlock** 的問題。
-具體來說，`redis-secret-init` Job 經常因為資源競爭而卡住。為此，我們在 Pipeline 中加入了自動偵測與修復機制：
+### 基礎設施環境 (Infrastructure)
+這次的架構驗證環境我們選擇部署於 **Google Cloud Platform (GCP)** 的虛擬機器 (VM) 上，自行架設 **Kubernetes Cluster** 進行測試。這讓我們能更彈性地模擬地端機房的網路限制與資源調度情境。
+
+### 自動化部署策略 (Helm & Helmfile)
+我們採用 **Helmfile** 來管理多個 Helm Releases（包含 Kong, Redis, Postgres 等）。為了讓架構更穩健並符合資安要求，我們採取了**狀態分離**的部署策略：
+
+*   **Stateless 服務自動化**：Application 層級的元件（如 Kong Gateway, Kuma）完全交由 GitOps 自動同步。
+*   **Stateful 與機敏資料手動化**：考量到資料安全性與持久化需求，**Secret (敏感資訊)** 與 **PersistentVolume (PV/PVC)** 均從 Helm Chart 中抽離。這些資源由維運人員**手動部署** (Manual Apply)，確保不會因為 CI/CD pipeline 的誤操作導致資料遺失或金鑰外洩。
+
+而在 CI/CD 流程中，我們利用 `envsubst` 動態注入非敏感的環境變數，解決了 **Helm Hook Deadlock** 問題。具體來說，`redis-secret-init` Job 經常因為資源競爭而卡住...
 1. **前置檢查**：在部署前自動掃描是否有卡住的 Job (`app.kubernetes.io/component=redis-secret-init`)。
 2. **自動清理**：如果發現殭屍 Job，Pipeline 會自動執行 `kubectl delete job --force` 進行清理，確保新的部署不會被阻塞。
-3. **環境變數注入**：利用 `envsubst` 動態注入敏感資訊，避免將 Secrets 直接寫入 Git Repository。
 
 ## 2. API 管理機制的實作 (API Management)
 
-進行 API Gateway 架構驗證的首要目標是將既有的圖資服務（如向量電子地圖、建物模型等）納入統一管理。
+進行 API Gateway 架構驗證的首要目標是將既有的地理空間資訊服務API，納入統一管理。
 
 ### 路由與服務配置
 我利用 **Kong Manager** 進行了標準化的配置工作，重點如下：
@@ -149,4 +155,4 @@ histogram_quantile(0.95,
 
 這半年的最終成果，即是順利協助專案**通過第一期的系統驗收**。
 
-在驗收過程中，我們使用開源 API 測試工具 **Hoppscotch** (前身為 Postwoman) 針對 15 項關鍵服務進行了密集的功能驗證。測試結果顯示，API Gateway 不僅能有效攔截未授權的惡意請求，其精細的流量控制機制也能在系統高負載下維持服務穩定，成功達成契約所訂定的各項效能指標。
+在驗收過程中，我們使用開源 API 測試工具 **Hoppscotch** (前身為 Postwoman) 針對多項關鍵服務進行了密集的功能驗證。測試結果顯示，API Gateway 不僅能有效攔截未授權的惡意請求，其精細的流量控制機制也能在系統高負載下維持服務穩定，成功達成契約所訂定的各項效能指標。
