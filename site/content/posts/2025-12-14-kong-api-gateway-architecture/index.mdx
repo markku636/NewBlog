@@ -1,5 +1,5 @@
 ---
-title: "半年回顧：大型圖資系統 API Gateway (Kong) 導入與架構實踐"
+title: "半年回顧：評估大型圖資系統 API Gateway (Kong) 導入與架構實踐"
 date: "2025-12-14"
 category: "DevOps"
 tags:
@@ -12,67 +12,137 @@ tags:
 description: "這半年我負責協助某大型圖資專案第一期的 API Gateway 導入評估。本文紀錄了如何利用 Kong 實現圖資服務的路由管理、金鑰驗證，並整合 Prometheus、Grafana 與 ELK Stack 建立完整的監控體系。"
 ---
 
-在過去的半年裡，我投入了「圖資服務入口網」的建置案，我的主要任務是負責第一期 **API Gateway 的導入與評估**。
+在過去的半年裡，我投入了「圖資開放平台」的建置案，我的主要任務是負責第一期 **API Gateway 的導入與評估**。
 
-這不僅僅是部署一個服務，而是要為海量的地理空間資訊（如 WMTS, WFS, 3D Tiles）建立一個安全、可觀測且高可用的流量入口。以下整理了這段時間的技術架構與實作細節。
+這不僅僅是部署一個服務，而是要為海量的地理空間資訊建立一個安全、可觀測且高可用的流量入口。以下整理了這段時間的技術架構與實作細節。
 
 ![Architecture Diagram](./architecture.png)
 
 ## 1. 核心架構：為什麼選擇 Kong？
 
-在評估階段，我們需要一個能夠處理高並發請求、支援豐富插件且能與 Kubernetes 原生整合的解決方案。最終我們選用了 **Kong API Gateway** 搭配 **Redis Cluster** 作為核心架構。
+在評估階段，我們需要一個能夠處理高並發請求、支援豐富插件且能與 Kubernetes 原生整合的解決方案。最終我們選用了 **Kong API Gateway** 搭配 **Redis Cluster** 與 **PostgreSQL** 作為核心架構。
 
 根據我們的架構規劃 ：
 * **流量入口**：所有的外部請求（Request）都由 Kong 統一接管。
 * **狀態管理**：使用 Redis Cluster 處理 Kong 的 Cache 與 Rate Limiting 狀態。
+* **配置儲存**：使用 PostgreSQL 儲存路由與插件配置，確保資料持久化。
 * **GitOps 流程**：透過 GitLab CI/CD 與 ArgoCD 將設定檔同步至 K8s 環境。
+
+### 自動化部署挑戰 (CI/CD Pipeline)
+我們在 GitLab CI 中實作了完整的 GitOps 流程，但在導入初期遇到了 **Helm Hook Deadlock** 的問題。
+具體來說，`redis-secret-init` Job 經常因為資源競爭而卡住。為此，我們在 Pipeline 中加入了自動偵測與修復機制：
+1. **前置檢查**：在部署前自動掃描是否有卡住的 Job (`app.kubernetes.io/component=redis-secret-init`)。
+2. **自動清理**：如果發現殭屍 Job，Pipeline 會自動執行 `kubectl delete job --force` 進行清理，確保新的部署不會被阻塞。
+3. **環境變數注入**：利用 `envsubst` 動態注入敏感資訊，避免將 Secrets 直接寫入 Git Repository。
 
 ## 2. API 管理機制的實作 (API Management)
 
-導入 API Gateway 的首要目標是將既有的圖資服務（如通用版電子地圖、建物模型等）納入統一管理。
+導入 API Gateway 的首要目標是將既有的圖資服務（如向量電子地圖、建物模型等）納入統一管理。
 
 ### 路由與服務配置
 我利用 **Kong Manager** 進行了標準化的配置工作：
 * **Gateway Services**：定義了後端服務的轉發目標，包含 WFS、WMS、3D Tiles 等多種 GIS 服務協定。
-* **Routes**：設定了精確的路徑轉發規則（Paths, Methods, Protocols），確保請求能準確送達目標子系統。
+* **Routes**：設定了精確的路徑轉發規則。針對舊版 API，我們使用了 **Request Transformer** 插件搭配正規表達式 (Regex) 進行路徑重寫 (URI Rewrite)，例如將 `~/(wms|wmts)/(?<path>api/item/1)$` 統一轉發，讓新舊系統能無縫接軌。
 
-### 安全與流量控制
-為了保護後端服務不被濫用，我配置了以下關鍵插件（Plugins）：
-* **Key Authentication**：實作了 API 金鑰驗證機制。經過測試，無金鑰或無效金鑰的請求會直接被攔截（HTTP 401/403），只有攜帶正確 Key 的請求才能通過。
-* **Rate Limiting**：針對不同等級的用戶設定流量限制。當請求超過閥值時，系統會自動回傳 `API rate limit exceeded`，並在 Response Header 中顯示剩餘額度。
+### 分級流量控制 (Tiered Rate Limiting)
+為了合理分配運算資源，我們不採用單一限制，而是依據**服務資源消耗**（如輕量 API vs 重量級 3D Tiles）與**用戶等級**設計了分級策略。
+
+```mermaid
+graph LR
+    User[用戶請求] --> Type{服務類型}
+    
+    subgraph Rate_Limit [頻次控制]
+        Type --> |向量圖資| RL_Basic[基礎頻次]
+        Type --> |API 服務| RL_High[高頻次通道]
+    end
+    
+    subgraph Bandwidth_Limit [流量/頻寬控制]
+        Type --> |3D 模型| BW_Heavy[大流量寬限]
+    end
+    
+    RL_Basic --> Redis[(Redis Cluster)]
+    RL_High --> Redis
+    BW_Heavy --> Redis
+```
+
+### 客製化頻寬限制 (Custom Bandwidth Limiting)
+除了基礎的請求次數限制 (Rate Limiting)，針對 GIS 領域特有的高頻寬需求（如 3D Tiles 大檔傳輸），我開發了客製化的 Kong Lua 插件：
+* **多維度頻寬控制**：支援從「秒」到「年」的六種時間維度，並自動將 MB 轉換為 Bytes 進行精確運算。
+* **高可靠性架構**：實作了 **Redis 緩存優化**與**故障轉移 (Fault Tolerance)** 機制。當 Redis 發生故障時，插件會自動降級為本地計數策略，防止單點故障影響 API 可用性。
+* **智慧回滾機制**：在流量超限被攔截時，會自動執行 **Rollback** 扣除該次請求的計數，確保配額計算精確無誤。
+
+### 精細的權限管控 (ACL & Consumer Groups)
+針對付費與敏感資料，我們利用 **ACL (Access Control Lists)** 插件建立了嚴格的權限模型：
+* 建立了 `backend_service`, `mobile_app` 等 Consumers。
+* 將 Consumer 加入特定群組 (如 `business-tier-gold`, `map-data-premium`)。
+* 在 Route 層級啟用 ACL，例如 `allow: ["advanced"]`，確保只有授權用戶能訪問高價值的 GIS 資料。
+
+### 安全防護
+除了基本的 Key Auth，我們還啟用了 **Correlation ID** 插件，為每個請求注入唯一識別碼 (`X-Correlation-ID`)，這在跨系統除錯時不僅能追蹤軌跡，也是資安稽核的重要依據。
 
 ## 3. 打造全方位的監控體系 (Observability)
 
 一個強大的 Gateway 不能沒有監控。這半年我花了不少心力整合 **ELK** 與 **Prometheus** 生態系，實現了從「日誌查詢」到「指標儀表板」的完整可觀測性。
 
-### Log 分析 (ELK Stack)
-我們將 Kong 的 Access Logs 透過 UDP Log 插件發送至 **Logstash**，並儲存於 **Elasticsearch**。
-* **成果**：在 **Kibana** 中建立了 `kong-logs` 索引，開發團隊可以隨時查詢每一個 API 請求的詳細日誌，快速定位問題。
+### Log 分析 (ELK Stack & Custom Lua)
+
+為了確保日誌中能紀錄使用者的真實 IP（而非 Load Balancer IP），我們在 **UDP Log** 插件中注入了客製化 Lua 腳本：
+
+```lua
+custom_fields_by_lua = {
+  remote_addr = "return kong.client.get_forwarded_ip()",
+  real_ip = "return ngx.var.realip_remote_addr",
+  x_forwarded_for = "return kong.request.get_header('x-forwarded-for')"
+}
+```
+
+這段配置讓我們能精準分析地理圖資的熱點分佈，對業務決策提供了關鍵數據。同時，我們採用 **Sidecar 模式** 部署 Filebeat，直接讀取 `/var/log/kong` 下的 access/error log 並轉發至 Elasticsearch，建立 `kong-logs-YYYY.MM.DD` 索引。
 
 ### 指標監控 (Prometheus & Grafana)
 利用 Kong 的 Prometheus 插件，我們收集了詳細的流量指標，並在 **Grafana** 建立了專屬儀表板：
 * **Kong API Gateway Dashboard**：即時顯示 Request Rate、Latency（延遲）、Bandwidth（頻寬）等關鍵指標。
 * **Node Exporter Full**：監控底層伺服器的 CPU、記憶體、硬碟與網路使用率。
 
-### 服務可用性監控 (Uptime Kuma)
-為了模擬外部使用者的視角，我部署了 **Uptime Kuma** 定期對 API 進行 HTTP 探測。然而在面對高達 4000 支 API 的監控需求時，原生的 Uptime Kuma (約 800 支監控) 即會遇到效能瓶頸。為此，我進行了深度的客製化開發：
-
-* **Restful API 擴充**：實作 API 介面以支援監控項目的自動化上架。
-* **集群架構 (Clustering) 與容錯移轉**：改造為集群架構，克服單機效能限制；並實作 Failover 機制，當單一節點故障時，其他節點能自動接手監控任務。
-* **Public Status Page 優化**：實作狀態頁面的分頁功能，優化大量監控項目的顯示效能。
+### 服務可用性監控 (Uptime Kuma Clustering)
+為了克服原生 Uptime Kuma 在大量監控下的效能瓶頸（約 800 支 API），我們將架構進行了改造：
+* **Database 抽離**：將預設的 SQLite 替換為 **MariaDB**，並獨立部署為 `kuma-mariadb` 服務，支援更高的併發讀寫。
+* **Clustering**：透過多個 Uptime Kuma 實例連接同一資料庫，實現負載分擔。
 
 關於這部分的實作細節，我另外整理了一篇文章：[使用 Vibe Coding 打造 Uptime Kuma 集群系統：從單機到高可用監控平台](../2025-08-22-implement-uptime-kuma-cluster-vibe-coding)。
 
 
 ## 4. 告警機制的建立 (Alerting)
 
-監控的最後一哩路是「告警」。我在 Prometheus 與 **Alert Manager** 中定義了多項告警規則（Alerting Rules），確保在異常發生時（如服務停止運作超過 1 分鐘）能立即發送 Email 通知維運人員。
+監控的最後一哩路是「告警」。我們在 Prometheus 與 **Alert Manager** 中定義了 **20 條告警規則**，分為 Critical、Warning 與 Info 三個等級。
 
-我們定義的關鍵閥值包括：
-* **KongServiceDown**：服務無法運行持續 2 分鐘。
-* **KongHighErrorRate**：5xx 錯誤率 > 5%。
-* **KongHighLatency**：P95 延遲 > 2 秒。
-* **System Resources**：CPU 或記憶體使用率過高 (> 95%)。
+以下是我們定義的幾個關鍵 Critical 告警規則 (PromQL)：
+
+### 1. 服務完全不可用 (KongServiceDown)
+當 Kong Namespace 下沒有任何 Up 的 Pod 時觸發：
+```promql
+sum(up{job="kong-metrics", namespace="kong"}) == 0
+```
+
+### 2. 高錯誤率 (KongHighErrorRate)
+當 5xx 錯誤率超過 5% 時觸發，這通常代表後端服務異常：
+```promql
+(sum(rate(kong_http_requests_total{code=~"5.."}[5m])) by (instance)
+ /
+ sum(rate(kong_http_requests_total[5m])) by (instance)
+) > 0.05
+```
+
+### 3. 高延遲 (KongHighLatency)
+當 P95 請求延遲超過 2 秒時觸發 (Warning 等級)：
+```promql
+histogram_quantile(0.95, 
+  sum(rate(kong_latency_bucket[5m])) by (le, instance)
+) > 2000
+```
+
+### 4. 系統資源告警
+* **硬碟空間**: `NodeDiskSpaceCritical` (可用空間 < 5%)
+* **記憶體**: `NodeMemoryCritical` (使用率 > 95%)
 
 ## 5. 驗證與成果
 
