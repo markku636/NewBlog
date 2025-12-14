@@ -15,9 +15,9 @@ description: 這半年我負責協助某大型圖資專案第一期的 API Gatew
 author: "Mark Ku"
 ---
 
-在過去的半年裡，我投入了「圖資開放平台」的建置案，我的主要任務是負責第一期 **API Gateway 的架構評估及驗證**。
+在這過去的半年裡，我深度參與了「圖資開放平台」的建置案，主要負責第一期的 **API Gateway 架構評估及驗證**。
 
-這不僅僅是部署一個服務，而是要為海量的地理空間資訊建立一個安全、可觀測且高可用的流量入口。以下整理了這段時間的技術架構與實作細節。
+這項任務不僅僅是部署一個服務，更具挑戰的是要為海量的地理空間資訊打造一個兼具**安全性**、**可觀測性**與**高可用性**的流量入口。以下將整理這段時間的架構規劃與實作細節，分享我們如何從零打造這套系統。
 
 ![Architecture Diagram](./architecture.png)
 
@@ -43,10 +43,11 @@ author: "Mark Ku"
 進行 API Gateway 架構驗證的首要目標是將既有的圖資服務（如向量電子地圖、建物模型等）納入統一管理。
 
 ### 路由與服務配置
-我利用 **Kong Manager** 進行了標準化的配置工作：
-* **Gateway Services**：定義了後端服務的轉發目標，包含 WFS、WMS、3D Tiles 等多種 GIS 服務協定。
-* **突破插件限制 (Plugin Limitation)**：由於 Kong 機制上單一路由無法重複掛載相同插件（例如無法對同一 Route 同時設定兩種不同的 Rate Limiting 規則），我們透過 **自訂路由 (Custom Routes)** 的方式來錯開此限制。針對同一 Backend Service，我們依據 URL 特徵拆分出多個 Route，以便分別掛載針對性的流量控制插件，實現更細粒度的管理。
-* **Routes**：設定了精確的路徑轉發規則。針對舊版 API，我們使用了 **Request Transformer** 插件搭配正規表達式 (Regex) 進行路徑重寫 (URI Rewrite)，例如將 `~/(wms|wmts)/(?<path>api/item/1)$` 統一轉發，讓新舊系統能無縫接軌。
+我利用 **Kong Manager** 進行了標準化的配置工作，重點如下：
+
+*   **Gateway Services**：統一定義後端服務的轉發目標，涵蓋 WFS、WMS、3D Tiles 等多種 GIS 服務協定。
+*   **突破插件限制 (Plugin Limitation)**：由於 Kong 的機制限制單一路由無法重複掛載相同類型的插件（例如無法對同一 Route 同時設定兩組不同的 Rate Limiting 規則），我們採用 **拆分路由 (Route Splitting)** 的策略來解決。針對同一個 Backend Service，依據 URL 特徵拆分出多個 Route，以便分別掛載針對性的流量控制插件，實現更細粒度的管理。
+*   **Routes 與 Rewrite**：設定精確的路徑轉發規則。針對舊版 API，我們靈活運用 **Request Transformer** 插件搭配正規表達式 (Regex) 進行 URI Rewrite（例如將 `~/(wms|wmts)/(?<path>api/item/1)$` 轉發），確保新舊系統能無縫接軌。
 
 > 💡 **這過程中的重要體悟**：
 > 進行 API Gateway 架構驗證時，強列建議**優先進行 API 正規化 (Normalization)**。
@@ -82,7 +83,7 @@ author: "Mark Ku"
 
 ## 3. 打造全方位的監控體系 (Observability)
 
-一個強大的 Gateway 不能沒有監控。這半年我花了不少心力整合 **ELK** 與 **Prometheus** 生態系，實現了從「日誌查詢」到「指標儀表板」的完整可觀測性。
+完善的監控是 Gateway 穩定運行的基石。這半年我投入了大量心力整合 **ELK** 與 **Prometheus** 生態系，實現從「日誌查詢」到「指標儀表板」的全方位可觀測性。
 
 ### Log 分析 (ELK Stack & Custom Lua)
 
@@ -148,4 +149,4 @@ histogram_quantile(0.95,
 
 這半年的最終成果，即是順利協助專案**通過第一期的系統驗收**。
 
-在驗收過程中，我們使用開源api 測試軟體 **Hoppscotch(Postwomen )** 針對 15 項關鍵服務進行了功能驗證。測試結果顯示，API Gateway 確實能有效攔截未授權請求，且流量控制機制運作符合預期，確保系統在壓力下仍能維持穩定，達成契約所訂之各項指標。
+在驗收過程中，我們使用開源 API 測試工具 **Hoppscotch** (前身為 Postwoman) 針對 15 項關鍵服務進行了密集的功能驗證。測試結果顯示，API Gateway 不僅能有效攔截未授權的惡意請求，其精細的流量控制機制也能在系統高負載下維持服務穩定，成功達成契約所訂定的各項效能指標。
