@@ -1,5 +1,5 @@
 ---
-title: "半年回顧：評估大型圖資系統 API Gateway (Kong) 導入與架構實踐"
+title: "半年回顧：評估大型系統 API Gateway (Kong) 導入與架構實踐"
 date: "2025-12-14"
 category: "DevOps"
 tags:
@@ -101,14 +101,14 @@ custom_fields_by_lua = {
 ### 指標監控 (Prometheus & Grafana)
 利用 Kong 的 Prometheus 插件，我們收集了詳細的流量指標，並在 **Grafana** 建立了專屬儀表板：
 * **Kong API Gateway Dashboard**：即時顯示 Request Rate、Latency（延遲）、Bandwidth（頻寬）等關鍵指標。
-* **Node Exporter Full**：監控底層伺服器的 CPU、記憶體、硬碟與網路使用率。
+* **Kubernetes Node 硬體監控**：透過 Node Exporter 整合，可直接在 Grafana 檢視各 K8s 節點的硬體狀態（CPU、記憶體、Disk I/O、Network Traffic），便於掌握基礎設施的健康度。
 
 ### 服務可用性監控 (Uptime Kuma Clustering)
 為了克服原生 Uptime Kuma 在大量監控下的效能瓶頸（約 800 支 API），我們將架構進行了改造：
 * **Database 抽離**：將預設的 SQLite 替換為 **MariaDB**，並獨立部署為 `kuma-mariadb` 服務，支援更高的併發讀寫。
 * **Clustering**：透過多個 Uptime Kuma 實例連接同一資料庫，實現負載分擔。
 
-關於這部分的實作細節，我另外整理了一篇文章：[使用 Vibe Coding 打造 Uptime Kuma 集群系統：從單機到高可用監控平台](../2025-08-22-implement-uptime-kuma-cluster-vibe-coding)。
+關於這部分的實作細節，我另外整理了一篇文章：[使用 Vibe Coding 打造 Uptime Kuma 集群系統：從單機到高可用監控平台](https://blog.markkulab.net/implement-uptime-kuma-cluster-vibe-coding/)。
 
 
 ## 4. 告警機制的建立 (Alerting)
@@ -146,6 +146,6 @@ histogram_quantile(0.95,
 
 ## 5. 驗證與成果
 
-在專案驗證階段，我們使用了 **Hoppscotch** 進行了詳盡的 API 測試，涵蓋了從 WFS 到 I3S 建築模型等 15 項關鍵服務。測試結果顯示，API Gateway 成功攔截了未授權請求，且流量控制機制運作正常，系統在壓力下仍能保持穩定。
+這半年的最終成果，即是順利協助專案**通過第一期的系統驗收**。
 
-這半年的努力，讓圖資平台從傳統的單體架構，成功轉型為具備現代化 API 管理能力的雲原生架構。
+在驗收過程中，我們使用 **Hoppscotch** 針對 15 項關鍵服務（涵蓋 WFS 到 I3S 建築模型）進行了功能驗證。測試結果顯示，API Gateway 確實能有效攔截未授權請求，且流量控制機制運作符合預期，確保系統在壓力下仍能維持穩定，達成契約所訂之各項指標。
