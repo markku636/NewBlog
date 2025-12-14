@@ -409,24 +409,6 @@ kubectl get appprojects -n argocd -o yaml > argocd-projects.yaml
 
 ---
 
-
-## 總結
-
-這篇筆記帶你從零到一把 Argo CD + GitOps + GitLab SSO 全部串起來，重點流程都跑過一遍。
-
-1. GitOps/Argo CD 觀念對齊
-2. 用 Helm 安裝、配置 Argo CD
-3. GitLab SSO 串接，安全登入
-4. Group Access Token 管理 repo 權限
-5. RBAC/AppProject 控制資源範圍
-
-**下一步建議**：
-
-- 建第一個 Application，實際跑跑看
-- 開啟自動同步，體驗全自動部署
-- 整合 CI/CD Pipeline，DevOps 一條龍
-- 生產環境記得用 Ingress + TLS
-
 ## 參考資料
 
 - [Argo CD 官方文件](https://argo-cd.readthedocs.io/)
