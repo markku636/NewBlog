@@ -45,7 +45,12 @@ author: "Mark Ku"
 ### 路由與服務配置
 我利用 **Kong Manager** 進行了標準化的配置工作：
 * **Gateway Services**：定義了後端服務的轉發目標，包含 WFS、WMS、3D Tiles 等多種 GIS 服務協定。
+* **突破插件限制 (Plugin Limitation)**：由於 Kong 機制上單一路由無法重複掛載相同插件（例如無法對同一 Route 同時設定兩種不同的 Rate Limiting 規則），我們透過 **自訂路由 (Custom Routes)** 的方式來錯開此限制。針對同一 Backend Service，我們依據 URL 特徵拆分出多個 Route，以便分別掛載針對性的流量控制插件，實現更細粒度的管理。
 * **Routes**：設定了精確的路徑轉發規則。針對舊版 API，我們使用了 **Request Transformer** 插件搭配正規表達式 (Regex) 進行路徑重寫 (URI Rewrite)，例如將 `~/(wms|wmts)/(?<path>api/item/1)$` 統一轉發，讓新舊系統能無縫接軌。
+
+> 💡 **這過程中的重要體悟**：
+> 導入 API Gateway 時，強列建議**優先進行 API 正規化 (Normalization)**。
+> 如果後端 API 的 URL 結構混亂、命名不統一，雖然靠 Gateway 的 Regex Rewrite 勉強能轉發，但這會導致路由設定變得極度複雜且難以維護。長痛不如短痛，先梳理好 API 規範，整合起來才會事半功倍。
 
 ### 分級流量控制 (Tiered Rate Limiting)
 為了合理分配運算資源，我們不採用單一限制，而是依據**服務資源消耗**（如輕量 API vs 重量級 3D Tiles）與**用戶等級**設計了分級策略。
@@ -143,4 +148,4 @@ histogram_quantile(0.95,
 
 這半年的最終成果，即是順利協助專案**通過第一期的系統驗收**。
 
-在驗收過程中，我們使用 **Hoppscotch** 針對 15 項關鍵服務進行了功能驗證。測試結果顯示，API Gateway 確實能有效攔截未授權請求，且流量控制機制運作符合預期，確保系統在壓力下仍能維持穩定，達成契約所訂之各項指標。
+在驗收過程中，我們使用開源api 測試軟體 **Hoppscotch(Postwomen )** 針對 15 項關鍵服務進行了功能驗證。測試結果顯示，API Gateway 確實能有效攔截未授權請求，且流量控制機制運作符合預期，確保系統在壓力下仍能維持穩定，達成契約所訂之各項指標。
