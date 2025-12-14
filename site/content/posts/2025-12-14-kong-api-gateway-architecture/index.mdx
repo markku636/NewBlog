@@ -50,23 +50,15 @@ author: "Mark Ku"
 ### 分級流量控制 (Tiered Rate Limiting)
 為了合理分配運算資源，我們不採用單一限制，而是依據**服務資源消耗**（如輕量 API vs 重量級 3D Tiles）與**用戶等級**設計了分級策略。
 
-```mermaid
-graph LR
-    User[用戶請求] --> Type{服務類型}
-    
-    subgraph Rate_Limit [頻次控制]
-        Type --> |向量圖資| RL_Basic[基礎頻次]
-        Type --> |API 服務| RL_High[高頻次通道]
-    end
-    
-    subgraph Bandwidth_Limit [流量/頻寬控制]
-        Type --> |3D 模型| BW_Heavy[大流量寬限]
-    end
-    
-    RL_Basic --> Redis[(Redis Cluster)]
-    RL_High --> Redis
-    BW_Heavy --> Redis
-```
+我們的流量分流策略如下：
+
+1.  **頻次控制 (Rate Limit)**：
+    *   **向量圖資**：適用「基礎頻次」限制，防止一般地圖請求過量。
+    *   **API 服務**：提供「高頻次通道」，滿足且需要大量呼叫的應用程式。
+2.  **流量/頻寬控制 (Bandwidth Limit)**：
+    *   **3D 模型**：針對 3D Tiles 這類大檔案傳輸，給予「大流量寬限」策略，避免因單檔過大而被誤擋。
+
+所有的計數與狀態皆統一儲存於 **Redis Cluster** 中，確保多節點間的數據一致性。
 
 ### 客製化頻寬限制 (Custom Bandwidth Limiting)
 除了基礎的請求次數限制 (Rate Limiting)，針對 GIS 領域特有的高頻寬需求（如 3D Tiles 大檔傳輸），我開發了客製化的 Kong Lua 插件：
