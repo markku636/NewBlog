@@ -11,11 +11,11 @@ tags:
   - Observability
   - Grafana
   - ELK
-description: 這半年我負責協助某大型圖資專案第一期的 API Gateway 導入評估。本文紀錄了如何利用 Kong 實現圖資服務的路由管理、金鑰驗證，並整合 Prometheus、Grafana 與 ELK Stack 建立完整的監控體系。
+description: 這半年我負責協助某大型圖資專案第一期的 API Gateway 架構評估及驗證。本文紀錄了如何利用 Kong 實現圖資服務的路由管理、金鑰驗證，並整合 Prometheus、Grafana 與 ELK Stack 建立完整的監控體系。
 author: "Mark Ku"
 ---
 
-在過去的半年裡，我投入了「圖資開放平台」的建置案，我的主要任務是負責第一期 **API Gateway 的導入與評估**。
+在過去的半年裡，我投入了「圖資開放平台」的建置案，我的主要任務是負責第一期 **API Gateway 的架構評估及驗證**。
 
 這不僅僅是部署一個服務，而是要為海量的地理空間資訊建立一個安全、可觀測且高可用的流量入口。以下整理了這段時間的技術架構與實作細節。
 
@@ -32,7 +32,7 @@ author: "Mark Ku"
 * **GitOps 流程**：透過 GitLab CI/CD 與 ArgoCD 將設定檔同步至 K8s 環境。
 
 ### 自動化部署挑戰 (CI/CD Pipeline)
-我們在 GitLab CI 中實作了完整的 GitOps 流程，但在導入初期遇到了 **Helm Hook Deadlock** 的問題。
+我們在 GitLab CI 中實作了完整的 GitOps 流程，但在驗證初期遇到了 **Helm Hook Deadlock** 的問題。
 具體來說，`redis-secret-init` Job 經常因為資源競爭而卡住。為此，我們在 Pipeline 中加入了自動偵測與修復機制：
 1. **前置檢查**：在部署前自動掃描是否有卡住的 Job (`app.kubernetes.io/component=redis-secret-init`)。
 2. **自動清理**：如果發現殭屍 Job，Pipeline 會自動執行 `kubectl delete job --force` 進行清理，確保新的部署不會被阻塞。
@@ -40,7 +40,7 @@ author: "Mark Ku"
 
 ## 2. API 管理機制的實作 (API Management)
 
-導入 API Gateway 的首要目標是將既有的圖資服務（如向量電子地圖、建物模型等）納入統一管理。
+進行 API Gateway 架構驗證的首要目標是將既有的圖資服務（如向量電子地圖、建物模型等）納入統一管理。
 
 ### 路由與服務配置
 我利用 **Kong Manager** 進行了標準化的配置工作：
@@ -49,7 +49,7 @@ author: "Mark Ku"
 * **Routes**：設定了精確的路徑轉發規則。針對舊版 API，我們使用了 **Request Transformer** 插件搭配正規表達式 (Regex) 進行路徑重寫 (URI Rewrite)，例如將 `~/(wms|wmts)/(?<path>api/item/1)$` 統一轉發，讓新舊系統能無縫接軌。
 
 > 💡 **這過程中的重要體悟**：
-> 導入 API Gateway 時，強列建議**優先進行 API 正規化 (Normalization)**。
+> 進行 API Gateway 架構驗證時，強列建議**優先進行 API 正規化 (Normalization)**。
 > 如果後端 API 的 URL 結構混亂、命名不統一，雖然靠 Gateway 的 Regex Rewrite 勉強能轉發，但這會導致路由設定變得極度複雜且難以維護。長痛不如短痛，先梳理好 API 規範，整合起來才會事半功倍。
 
 ### 分級流量控制 (Tiered Rate Limiting)
