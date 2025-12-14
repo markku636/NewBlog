@@ -591,40 +591,6 @@ Services:
 
 這篇筆記示範怎麼把 KubeWizard 整合到 LINE Bot，打造出能聊天管 K8s 的助理，重點：
 
-✅ 智能 Agent：LangChain + Gemini，能自動判斷工具、支援多步驟操作
-✅ 對話記憶：Redis 持久化、Token Buffer 管理長度、多用戶 session
-✅ Python SDK 操作叢集：不用 kubectl 二進制，Docker 映像更輕量，能自動判斷 Pod 內外
-✅ RBAC 權限控管：支援 Namespace Scoped/Cluster Wide，最小權限原則，Helm Chart 一次到位
-✅ 生產就緒：Helm Chart、Docker Compose、健康檢查、錯誤處理、HPA 水平擴展
-
-### 🚀 立即開始
-
-**GitHub 專案：** [KubeWizard](https://github.com/markku636/kubewizard)
-
-```bash
-# 1. Clone 專案
-git clone https://github.com/markku636/kubewizard.git
-cd kubewizard
-
-# 2. 配置環境變數
-cp .env.example .env
-# 編輯 .env，填入你的 API Key
-
-# 3. 使用 Docker Compose 啟動
-docker-compose up -d
-
-# 4. 測試 API
-curl -X POST http://localhost:8000/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message":"列出所有 pods","user_id":"test"}'
-
-# 5. 或使用 Helm 部署到 K8s
-helm install kubewizard ./helm \
-  --set secrets.AI_GOOGLE_API_KEY="your-api-key" \
-  --set secrets.LINE_CHANNEL_SECRET="your-secret" \
-  --set secrets.LINE_CHANNEL_ACCESS_TOKEN="your-token"
-```
-
 ### 📚 參考資料
 
 - [快速開始指南](https://github.com/markku636/kubewizard/blob/main/QUICKSTART.md)
