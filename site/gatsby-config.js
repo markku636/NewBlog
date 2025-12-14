@@ -12,12 +12,6 @@ module.exports = {
   //   })
   // },
   plugins: [
-    {
-      resolve: `gatsby-plugin-google-adsense`,
-      options: {
-        publisherId: `ca-pub-2396931274355535`
-      },
-    },
     `gatsby-plugin-meta-redirect`, // make sure to put last in the array
     {
       resolve: `gatsby-plugin-google-gtag`,
@@ -33,11 +27,11 @@ module.exports = {
           // Puts tracking script in the head instead of the body
           head: true,
           // Setting this parameter is also optional
-          respectDNT: true,          
-          
+          respectDNT: true,
+
         },
       },
-    },  
+    },
     `gatsby-plugin-react-helmet`,
     {
       resolve: 'gatsby-plugin-algolia',
@@ -59,7 +53,7 @@ module.exports = {
         display: 'minimal-ui',
         icon: 'content/assets/favicon.png'
       }
-    },    
+    },
     {
       resolve: 'gatsby-plugin-sitemap',
       options: {}
@@ -71,18 +65,18 @@ module.exports = {
     {
       // ATTENTION: Match the theme name with the theme you're using
       resolve: '@elegantstack/gatsby-theme-flexiblog-personal',
-      options: {                
+      options: {
         sources: {
           local: true
         },
-		    siteUrl: process.env.SITE_URL,
+        siteUrl: process.env.SITE_URL,
         services: {
           facebookComment: true,
           algolia: true
         }
       }
     }
-  ], 
+  ],
   // Customize your site metadata:
   siteMetadata: {
     siteUrl: process.env.SITE_URL,
@@ -103,7 +97,7 @@ module.exports = {
       {
         "name": "Github",
         "url": "https://github.com/markku636"
-      },            
+      },
       {
         "name": "Website",
         "url": "https://www.letgo.com.tw/"
