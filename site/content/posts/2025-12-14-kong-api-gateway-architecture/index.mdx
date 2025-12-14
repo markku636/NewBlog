@@ -109,6 +109,7 @@ custom_fields_by_lua = {
 
 ### 服務可用性監控 (Uptime Kuma Clustering)
 為了克服原生 Uptime Kuma 在大量監控下的效能瓶頸（約 800 支 API），我們將架構進行了改造：
+* **自動化擴充 (RESTful API Extension)**：由於原生的 Uptime Kuma 缺乏對外的 API 介面，為了實現「服務一上線即監控」的自動化目標，我們自行擴充了 RESTful API 功能，讓 CI/CD Pipeline 能在部署時自動註冊監控項目，無須人工介入。
 * **Database 抽離**：將預設的 SQLite 替換為 **MariaDB**，並獨立部署為 `kuma-mariadb` 服務，支援更高的併發讀寫。
 * **Clustering**：透過多個 Uptime Kuma 實例連接同一資料庫，實現負載分擔。
 
