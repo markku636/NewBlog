@@ -11,11 +11,11 @@ tags:
   - Observability
   - Grafana
   - ELK
-description: 這半年我負責協助某中大型圖資專案第一期的 API Gateway 架構評估及驗證。本文紀錄了如何利用 Kong 實現圖資服務的路由管理、金鑰驗證，並整合 Prometheus、Grafana 與 ELK Stack 建立完整的監控體系。
+description: 這半年我負責協助某中大型系統的專案第一期的 API Gateway 架構評估及驗證。本文紀錄了如何利用 Kong 實現圖資服務的路由管理、金鑰驗證，並整合 Prometheus、Grafana 與 ELK Stack 建立完整的監控體系。
 author: "Mark Ku"
 ---
 
-在這過去的半年裡，我深度參與了「地理資訊平台」的建置案，主要負責第一期的 **API Gateway 架構評估及驗證**。
+在這過去的半年裡，我深度參與了「某中大型系統的專案第一期的」的建置案，主要負責第一期的 **API Gateway 架構評估及驗證**。
 
 這項任務不僅僅是部署一個服務，更具挑戰的是要為海量的地理空間資訊打造一個兼具**安全性**、**可觀測性**與**高可用性**的流量入口。以下將整理這段時間的架構規劃與實作細節，分享我們如何從零打造這套系統。
 
@@ -42,7 +42,7 @@ author: "Mark Ku"
 
 ## 2. API 管理機制的實作 (API Management)
 
-進行 API Gateway 架構驗證的首要目標，是將既有的地理空間資訊服務 API 納入統一管理。
+進行 API Gateway 架構驗證的首要目標，是將既有的子系統 API 納入統一管理。
 
 ### 路由與服務配置
 我們利用 **Kong Manager** 進行了標準化的配置工作，重點如下：
