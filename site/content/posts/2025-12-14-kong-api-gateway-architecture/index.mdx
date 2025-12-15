@@ -98,7 +98,7 @@ custom_fields_by_lua = {
 ```
 
 這段配置讓我們能精準分析流量來源與使用行為，對業務決策提供了關鍵數據。同時，我們採用 **Sidecar 模式** 部署 Filebeat，直接讀取 `/var/log/kong` 下的 access/error log 並轉發至 Elasticsearch，建立 `kong-logs-YYYY.MM.DD` 索引。
-![log-sever](log-sever.png)
+![log-sever](log-server.png)
 
 
 ### 指標監控 (Prometheus & Grafana)
