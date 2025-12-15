@@ -65,6 +65,9 @@ author: "Mark Ku"
 
 為了支援多節點 (Multi-Node) 的水平擴展，我們將 Rate Limiting 的策略改為 **Redis 模式 (Redis Mode)**。所有的計數與狀態皆統一儲存於 **Redis** 中，確保數據在不同節點間的一致性，避免單機計數導致的誤差。
 
+![](custom-plugin-1.png)
+![](custom-plugin-2.png)
+
 ### 客製化頻寬限制 (Custom Bandwidth Limiting)
 除了基礎的請求次數限制 (Rate Limiting)，針對 GIS 領域特有的高頻寬需求（如 3D Tiles 大檔傳輸），我們開發了客製化的 Kong Lua 插件：
 * **多維度頻寬控制**：支援從「秒」到「年」的六種時間維度，並自動將 MB 轉換為 Bytes 進行精確運算。
@@ -103,6 +106,11 @@ custom_fields_by_lua = {
 * **Kong API Gateway Dashboard**：即時顯示 Request Rate、Latency（延遲）、Bandwidth（頻寬）等關鍵指標。
 * **Kubernetes Node 硬體監控**：透過 Node Exporter 整合，可直接在 Grafana 檢視各 K8s 節點的硬體狀態（CPU、記憶體、Disk I/O、Network Traffic），便於掌握基礎設施的健康度。
 
+![](prometheus.png)
+![](grafana-kong-monitor.png)
+![](grafana-hardware-monitor.png)
+
+
 ### 服務可用性監控 (Uptime Kuma Clustering)
 為了克服原生 Uptime Kuma 在大量監控下的效能瓶頸（約 800 支 API），我們將架構進行了改造：
 * **自動化擴充 (RESTful API Extension)**：由於原生的 Uptime Kuma 缺乏對外的 API 介面，為了實現「服務一上線即監控」的自動化目標，我們自行擴充了 RESTful API 功能，讓 CI/CD Pipeline 能在部署時自動註冊監控項目，無須人工介入。
@@ -110,9 +118,12 @@ custom_fields_by_lua = {
 * **Clustering**：透過多個 Uptime Kuma 實例連接同一資料庫，實現負載分擔。
 
 關於這部分的實作細節，我另外整理了一篇文章：[使用 Vibe Coding 打造 Uptime Kuma 集群系統：從單機到高可用監控平台](https://blog.markkulab.net/implement-uptime-kuma-cluster-vibe-coding/)。
+![](custom-uptime-kuma.png)
 
 
 ## 4. 告警機制的建立 (Alerting)
+![](alert-manager-2.png)
+![](alert-manager.png)
 
 監控的最後一哩路是「告警」。我們在 Prometheus 與 **Alert Manager** 中定義了 **20 條告警規則**，分為 Critical、Warning 與 Info 三個等級。
 
