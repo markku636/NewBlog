@@ -80,10 +80,6 @@ author: "Mark Ku"
 針對付費與敏感資料，我們利用 **ACL (Access Control Lists)** 插件建立了嚴格的權限模型：
 * 建立了 `backend_service`, `mobile_app` 等 Consumers。
 * 將 Consumer 加入特定群組 (如 `business-tier-gold`)。
-* 在 Route 層級啟用 ACL，例如 `allow: ["advanced"]`，確保只有授權用戶能訪問高價值的 GIS 資料。
-
-### 安全防護
-除了基本的 Key Auth，我們還啟用了 **Correlation ID** 插件，為每個請求注入唯一識別碼 (`X-Correlation-ID`)，這在跨系統除錯時不僅能追蹤軌跡，也是資安稽核的重要依據。
 
 ## 3. 打造全方位的監控體系 (Observability)
 
@@ -112,9 +108,6 @@ custom_fields_by_lua = {
 ![grafana-kong-monitor](grafana-kong-monitor.png)
 * **Kubernetes Node 硬體監控**：透過 Node Exporter 整合，可直接在 Grafana 檢視各 K8s 節點的硬體狀態（CPU、記憶體、Disk I/O、Network Traffic），便於掌握基礎設施的健康度。
 ![grafana-hardware-monitor](grafana-hardware-monitor.png)
-
-
-
 
 
 ### 服務可用性監控 (Uptime Kuma Clustering)
