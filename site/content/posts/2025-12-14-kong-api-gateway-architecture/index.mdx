@@ -17,7 +17,7 @@ author: "Mark Ku"
 
 在這過去的半年裡，我深度參與了「某中大型系統的專案第一期的」的建置案，主要負責第一期的 **API Gateway 架構評估及驗證**。
 
-這項任務不僅僅是部署一個服務，更具挑戰的是要為海量的地理空間資訊打造一個兼具**安全性**、**可觀測性**與**高可用性**的流量入口。以下將整理這段時間的架構規劃與實作細節，分享我們如何從零打造這套系統。
+這項任務不僅僅是部署一個服務，更具挑戰的是要為大量異質服務打造一個兼具**安全性**、**可觀測性**與**高可用性**的流量入口。以下將整理這段時間的架構規劃與實作細節，分享我們如何從零打造這套系統。
 
 ![Architecture Diagram](./architecture.png)
 
@@ -30,6 +30,8 @@ author: "Mark Ku"
 * **狀態管理**：使用 **Redis** 處理 Kong 的 Cache 與 Rate Limiting 狀態。
 * **配置儲存**：使用 PostgreSQL 儲存路由與插件配置，確保資料持久化。
 * **GitOps 流程**：透過 GitLab CI/CD 與 ArgoCD 將設定檔同步至 K8s 環境。
+![argocd](argocd.png)
+
 
 ### 基礎設施環境 (Infrastructure)
 這次的架構驗證環境我們選擇部署於 **Google Cloud Platform (GCP)** 的虛擬機器 (VM) 上，自行架設 **Kubernetes Cluster** 進行測試。這讓我們能更彈性地模擬地端機房的網路限制與資源調度情境。
@@ -47,7 +49,7 @@ author: "Mark Ku"
 ### 路由與服務配置
 我們利用 **Kong Manager** 進行了標準化的配置工作，重點如下：
 
-*   **Gateway Services**：統一定義後端服務的轉發目標，涵蓋 WFS、WMS、3D Tiles 等多種 GIS 服務協定。
+*   **Gateway Services**：統一定義後端服務的轉發目標，涵蓋多種 API 服務協定。
 *   **突破插件限制 (Plugin Limitation)**：由於 Kong 的機制限制單一路由無法重複掛載相同類型的插件（例如無法對同一 Route 同時設定兩組不同的 Rate Limiting 規則），我們採用 **拆分路由 (Route Splitting)** 的策略來解決。針對同一個 Backend Service，依據 URL 特徵拆分出多個 Route，以便分別掛載針對性的流量控制插件，實現更細粒度的管理。
 *   **Routes 與 Rewrite**：設定精確的路徑轉發規則。針對舊版 API，我們靈活運用 **Request Transformer** 插件搭配正規表達式 (Regex) 進行 URI Rewrite（例如將 `~/(wms|wmts)/(?<path>api/item/1)$` 轉發），確保新舊系統能無縫接軌。
 
@@ -60,16 +62,16 @@ author: "Mark Ku"
 
 我們的流量分流策略如下：
 
-1.  **頻次控制 (Rate Limit)**：針對一般向量圖資與高負載 API 服務，分別設定「基礎」與「高頻次」通道，以滿足不同應用場景的需求。
-2.  **頻寬控制 (Bandwidth Limit)**：針對 3D Tiles 這類大檔案傳輸，由於 Kong（即便是付費版）原生並未支援以「流量大小」為基準的精細控制，因此我們額外**開發了客製化插件**來實作寬限策略，避免因單檔過大而誤觸限制。
+1.  **頻次控制 (Rate Limit)**：針對一般 API 與高負載服務，分別設定「基礎」與「高頻次」通道，以滿足不同應用場景的需求。
+2.  **頻寬控制 (Bandwidth Limit)**：針對大檔案傳輸，由於 Kong（即便是付費版）原生並未支援以「流量大小」為基準的精細控制，因此我們額外**開發了客製化插件**來實作寬限策略，避免因單檔過大而誤觸限制。
 
 為了支援多節點 (Multi-Node) 的水平擴展，我們將 Rate Limiting 的策略改為 **Redis 模式 (Redis Mode)**。所有的計數與狀態皆統一儲存於 **Redis** 中，確保數據在不同節點間的一致性，避免單機計數導致的誤差。
 
-![](custom-plugin-1.png)
-![](custom-plugin-2.png)
+![custom-plugin](custom-plugin-1.png)
+![custom-plugin](custom-plugin-2.png)
 
 ### 客製化頻寬限制 (Custom Bandwidth Limiting)
-除了基礎的請求次數限制 (Rate Limiting)，針對 GIS 領域特有的高頻寬需求（如 3D Tiles 大檔傳輸），我們開發了客製化的 Kong Lua 插件：
+除了基礎的請求次數限制 (Rate Limiting)，針對大檔案或高頻寬需求的服務，我們開發了客製化的 Kong Lua 插件：
 * **多維度頻寬控制**：支援從「秒」到「年」的六種時間維度，並自動將 MB 轉換為 Bytes 進行精確運算。
 * **高可靠性架構**：實作了 **Redis 緩存優化**與**故障轉移 (Fault Tolerance)** 機制。當 Redis 發生故障時，插件會自動降級為本地計數策略，防止單點故障影響 API 可用性。
 * **智慧回滾機制**：在流量超限被攔截時，會自動執行 **Rollback** 扣除該次請求的計數，確保配額計算精確無誤。
@@ -77,7 +79,7 @@ author: "Mark Ku"
 ### 精細的權限管控 (ACL & Consumer Groups)
 針對付費與敏感資料，我們利用 **ACL (Access Control Lists)** 插件建立了嚴格的權限模型：
 * 建立了 `backend_service`, `mobile_app` 等 Consumers。
-* 將 Consumer 加入特定群組 (如 `business-tier-gold`, `map-data-premium`)。
+* 將 Consumer 加入特定群組 (如 `business-tier-gold`)。
 * 在 Route 層級啟用 ACL，例如 `allow: ["advanced"]`，確保只有授權用戶能訪問高價值的 GIS 資料。
 
 ### 安全防護
@@ -99,16 +101,20 @@ custom_fields_by_lua = {
 }
 ```
 
-這段配置讓我們能精準分析地理圖資的熱點分佈，對業務決策提供了關鍵數據。同時，我們採用 **Sidecar 模式** 部署 Filebeat，直接讀取 `/var/log/kong` 下的 access/error log 並轉發至 Elasticsearch，建立 `kong-logs-YYYY.MM.DD` 索引。
+這段配置讓我們能精準分析流量來源與使用行為，對業務決策提供了關鍵數據。同時，我們採用 **Sidecar 模式** 部署 Filebeat，直接讀取 `/var/log/kong` 下的 access/error log 並轉發至 Elasticsearch，建立 `kong-logs-YYYY.MM.DD` 索引。
+![log-sever](log-sever.png)
+
 
 ### 指標監控 (Prometheus & Grafana)
 利用 Kong 的 Prometheus 插件，我們收集了詳細的流量指標，並在 **Grafana** 建立了專屬儀表板：
+![prometheus](prometheus.png)
 * **Kong API Gateway Dashboard**：即時顯示 Request Rate、Latency（延遲）、Bandwidth（頻寬）等關鍵指標。
+![grafana-kong-monitor](grafana-kong-monitor.png)
 * **Kubernetes Node 硬體監控**：透過 Node Exporter 整合，可直接在 Grafana 檢視各 K8s 節點的硬體狀態（CPU、記憶體、Disk I/O、Network Traffic），便於掌握基礎設施的健康度。
+![grafana-hardware-monitor](grafana-hardware-monitor.png)
 
-![](prometheus.png)
-![](grafana-kong-monitor.png)
-![](grafana-hardware-monitor.png)
+
+
 
 
 ### 服務可用性監控 (Uptime Kuma Clustering)
@@ -122,8 +128,8 @@ custom_fields_by_lua = {
 
 
 ## 4. 告警機制的建立 (Alerting)
-![](alert-manager-2.png)
-![](alert-manager.png)
+![alert-manager](alert-manager-2.png)
+![alert-manager](alert-manager-1.png)
 
 監控的最後一哩路是「告警」。我們在 Prometheus 與 **Alert Manager** 中定義了 **20 條告警規則**，分為 Critical、Warning 與 Info 三個等級。
 
