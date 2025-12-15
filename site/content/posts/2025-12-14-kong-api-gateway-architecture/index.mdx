@@ -60,6 +60,16 @@ author: "Mark Ku"
 
 *   **Gateway Services**：統一定義後端服務的轉發目標，涵蓋多種 API 服務協定。
 *   **突破插件限制 (Plugin Limitation)**：由於 Kong 的機制限制單一路由無法重複掛載相同類型的插件（例如無法對同一 Route 同時設定兩組不同的 Rate Limiting 規則），我們採用 **拆分路由 (Route Splitting)** 的策略來解決。針對同一個 Backend Service，依據 URL 特徵拆分出多個 Route，以便分別掛載針對性的流量控制插件，實現更細粒度的管理。
+
+    **舉例說明**：假設後端有一個電商服務 `ecommerce-service`，我們可以依據 Route Prefix 拆分成多條路由：
+    | Route Name | Path Prefix | Rate Limit | 用途 |
+    |------------|-------------|------------|------|
+    | `product-list` | `/api/v1/products/*` | 1000 req/min | 商品列表查詢 |
+    | `order-create` | `/api/v1/orders/*` | 100 req/min | 訂單建立（高運算） |
+    | `payment-process` | `/api/v1/payments/*` | 50 req/min | 金流處理（敏感操作） |
+
+    透過這種方式，不僅能針對不同 API 設定差異化的流量限制，還能**利用 Route Prefix 分別統計各類 API 的用量**，便於後續進行用量分析、計費與資源規劃。
+
 *   **Routes 與 Rewrite**：設定精確的路徑轉發規則。針對舊版 API，我們靈活運用 **Request Transformer** 插件搭配正規表達式 (Regex) 進行 URI Rewrite（例如將 `~/(wms|wmts)/(?<path>api/item/1)$` 轉發），確保新舊系統能無縫接軌。
 
 > 💡 **這過程中的重要體悟**：
