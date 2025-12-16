@@ -279,6 +279,191 @@ helm pull <chart>            # 下載 Chart 到本地
 helm template <chart>        # 預覽會產生的 YAML
 ```
 
+## Helm Rollback 是怎麼實作的？
+
+很多人好奇 `helm rollback` 是如何快速回滾的，其實背後的原理並不複雜：
+
+### Release 與 Revision 機制
+
+每次執行 `helm install` 或 `helm upgrade`，Helm 都會建立一個 **Release**，並記錄版本號（Revision）：
+
+```bash
+# 查看部署歷史
+helm history my-app
+
+# 輸出範例：
+REVISION    STATUS      CHART           DESCRIPTION
+1           superseded  my-app-1.0.0    Install complete
+2           superseded  my-app-1.0.1    Upgrade complete
+3           deployed    my-app-1.0.2    Upgrade complete
+```
+
+### 歷史資料儲存在哪裡？
+
+Helm 會把每個 Revision 的完整資訊儲存在 Kubernetes 的 **Secret** 中：
+
+```bash
+# 查看 Helm 建立的 Secret
+kubectl get secrets -l owner=helm
+
+# 輸出範例：
+NAME                          TYPE                 DATA
+sh.helm.release.v1.my-app.v1  helm.sh/release.v1   1
+sh.helm.release.v1.my-app.v2  helm.sh/release.v1   1
+sh.helm.release.v1.my-app.v3  helm.sh/release.v1   1
+```
+
+每個 Secret 包含：
+- **Chart 模板**：當時使用的所有 YAML 模板
+- **Values**：當時使用的設定值
+- **Manifest**：最終產生的 Kubernetes 資源 YAML
+- **Metadata**：版本號、狀態、時間戳記等
+
+### Rollback 的運作流程
+
+當你執行 `helm rollback my-app 2` 時，Helm 會：
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  1. 讀取目標版本                                          │
+│     從 Secret sh.helm.release.v1.my-app.v2 取出資料      │
+└─────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────┐
+│  2. 解壓縮並解碼                                          │
+│     Secret 內容是 base64 + gzip 壓縮的                   │
+└─────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────┐
+│  3. 取得舊版 Manifest                                     │
+│     獲得當時產生的完整 Kubernetes YAML                    │
+└─────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────┐
+│  4. 執行三方合併（Three-way Merge）                       │
+│     比對：舊版 Manifest vs 現有狀態 vs 目標版本           │
+└─────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────┐
+│  5. 套用變更                                              │
+│     透過 kubectl apply 將資源更新到目標狀態               │
+└─────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────┐
+│  6. 建立新的 Revision                                     │
+│     Rollback 本身也會建立一個新版本（如 v4）              │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 實際範例：查看 Secret 內容
+
+```bash
+# 取得特定版本的 Release 資料
+kubectl get secret sh.helm.release.v1.my-app.v2 -o jsonpath='{.data.release}' | base64 -d | gunzip
+
+# 會輸出 JSON 格式的完整 Release 資訊，包含：
+# - chart: Chart 的完整內容
+# - config: 當時的 values
+# - manifest: 產生的 YAML
+# - version: 版本號
+```
+
+### 為什麼 Rollback 這麼快？
+
+1. **不需要重新下載 Chart**：所有資料都存在 Secret 裡
+2. **不需要重新渲染模板**：Manifest 已經預先產生好
+3. **只更新有差異的資源**：透過三方合併，只處理真正需要改變的部分
+
+### 注意事項
+
+⚠️ **Secret 有大小限制**：Kubernetes Secret 預設最大 1MB，如果 Chart 很大可能會有問題
+
+⚠️ **歷史版本會累積**：預設保留 10 個版本，可透過 `--history-max` 調整：
+```bash
+helm upgrade my-app ./my-chart --history-max 5
+```
+
+⚠️ **Rollback 不會還原資料**：只會還原 Kubernetes 資源設定，資料庫等持久化資料不會回滾
+
+### 與 Kubernetes 原生 Rollback 的差異
+
+| 項目 | Helm Rollback | kubectl rollout undo |
+|------|---------------|----------------------|
+| 範圍 | 整個 Release（多個資源） | 單一 Deployment |
+| 歷史儲存 | Kubernetes Secret | ReplicaSet |
+| 設定還原 | 完整還原（含 values） | 只還原 Pod 模板 |
+| ConfigMap/Secret | ✅ 會還原 | ❌ 不會還原 |
+
+### Helm 版本號與 Git 的關係
+
+很多人會問：「Helm 的 Revision 和 Git commit 有什麼關係？」
+
+**答案是：兩者是完全獨立的系統，沒有直接關聯。**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        兩套獨立的版本系統                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   Git（原始碼版本控制）          Helm（部署版本控制）              │
+│   ├── commit abc123             ├── Revision 1                 │
+│   ├── commit def456             ├── Revision 2                 │
+│   ├── commit ghi789             ├── Revision 3                 │
+│   └── 儲存在 Git Repository      └── 儲存在 K8s Secret          │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**它們追蹤的東西不同：**
+
+| 項目 | Git | Helm Revision |
+|------|-----|---------------|
+| 追蹤對象 | 原始碼變更 | 部署狀態變更 |
+| 儲存位置 | Git Repository | Kubernetes Secret |
+| 版本格式 | SHA hash（如 `abc123`） | 遞增數字（1, 2, 3...） |
+| 回滾影響 | 程式碼回到過去 | K8s 資源回到過去 |
+
+**為什麼會獨立？**
+
+1. **部署不一定對應程式碼變更**
+   - 你可能只改了 `replicas: 3` → `replicas: 5`（沒有程式碼變更）
+   - 這時 Helm 會有新 Revision，但 Git 沒有新 commit
+
+2. **一次 commit 可能多次部署**
+   - 同一個版本的程式碼，可能部署到 dev、staging、prod
+   - 每次部署都是新的 Helm Revision
+
+3. **部署可能失敗重試**
+   - 同一個 commit 可能因為設定調整而部署多次
+
+**實務上如何關聯？**
+
+雖然兩者獨立，但在 CI/CD 流程中，我們通常會透過 **標籤（Label）或註解（Annotation）** 來關聯：
+
+```yaml
+# 在 values.yaml 或部署時加入 Git 資訊
+metadata:
+  annotations:
+    git.commit: "abc123def"
+    git.branch: "main"
+    git.repo: "github.com/myorg/myapp"
+```
+
+**部署時帶入 Git 資訊：**
+```bash
+# 在 CI/CD 中自動帶入 Git commit
+helm upgrade my-app ./chart \
+  --set gitCommit=$(git rev-parse --short HEAD) \
+  --set gitBranch=$(git branch --show-current)
+```
+
+**這樣做的好處：**
+- 出問題時可以快速對應到是哪個 commit 造成的
+- 方便追蹤「這個部署對應哪個版本的程式碼」
+- 但 Rollback 還是只能用 Helm Revision，不能用 Git commit
+
+> **總結：** Helm 透過把每個版本的完整資訊存在 Secret 中，實現了快速且完整的回滾機制。這也是為什麼 Helm 比手動管理 YAML 更可靠的原因之一。
+
 ## 哪裡可以找到現成的 Chart？
 
 ### 1. Artifact Hub（最推薦）
