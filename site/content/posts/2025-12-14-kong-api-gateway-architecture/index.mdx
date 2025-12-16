@@ -120,7 +120,7 @@ author: "Mark Ku"
 
 ### Log 分析 (ELK Stack & Custom Lua)
 
-為了確保日誌中能紀錄使用者的真實 IP（而非 Load Balancer IP），我們在 **UDP Log** 插件中注入了客製化 Lua 腳本：
+Kong 的日誌插件本身已包含 `client_ip` 欄位，但若需要取得更多進階資訊（如經過多層 Proxy 後的原始 IP、`X-Forwarded-For` Header 等），可以透過 **UDP Log** 插件的 `custom_fields_by_lua` 注入客製化欄位：
 
 ```lua
 custom_fields_by_lua = {
@@ -130,7 +130,7 @@ custom_fields_by_lua = {
 }
 ```
 
-這段配置讓我們能精準分析流量來源與使用行為，對業務決策提供了關鍵數據。同時，我們採用 **Sidecar 模式** 部署 Filebeat，直接讀取 `/var/log/kong` 下的 access/error log 並轉發至 Elasticsearch，建立 `kong-logs-YYYY.MM.DD` 索引。
+這段配置讓我們能取得更完整的來源 IP 資訊，精準分析流量來源與使用行為，對業務決策提供了關鍵數據。同時，我們採用 **Sidecar 模式** 部署 Filebeat，直接讀取 `/var/log/kong` 下的 access/error log 並轉發至 Elasticsearch，建立 `kong-logs-YYYY.MM.DD` 索引。
 ![log-sever](log-server.png)
 
 
