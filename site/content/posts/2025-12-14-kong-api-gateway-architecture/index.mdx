@@ -175,6 +175,9 @@ custom_fields_by_lua = {
 
 
 ### 服務可用性監控 (Uptime Kuma Clustering)
+
+**Uptime Kuma** 是一款開源的自架式監控工具，類似於 Uptime Robot，但可以完全部署在自己的伺服器上。它提供了直覺的 Web UI，支援多種監控類型（HTTP、TCP、Ping、DNS 等），並能透過 Telegram、Slack、Email 等管道發送告警通知。對於需要監控大量內部服務且不想依賴外部 SaaS 的團隊來說，是個很好的選擇。
+
 為了克服原生 Uptime Kuma 在大量監控下的效能瓶頸（約 800 支 API），我們將架構進行了改造：
 * **自動化擴充 (RESTful API Extension)**：由於原生的 Uptime Kuma 缺乏對外的 API 介面，為了實現「服務一上線即監控」的自動化目標，我們自行擴充了 RESTful API 功能，讓 CI/CD Pipeline 能在部署時自動註冊監控項目，無須人工介入。
 * **Database 抽離**：將預設的 SQLite 替換為 **MariaDB**，並獨立部署為 `kuma-mariadb` 服務，支援更高的併發讀寫。
