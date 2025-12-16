@@ -46,6 +46,8 @@ author: "Mark Ku"
 
 在評估階段，我們需要一個能夠處理高並發請求、支援豐富插件且能與 Kubernetes 原生整合的解決方案，最終我們選用了 **Kong API Gateway** 搭配 **Redis** 與 **PostgreSQL** 作為核心架構。
 
+### 效能
+依據官方的[測試報告](https://developer.konghq.com/gateway/performance/benchmarks/)Kong Gateway 在單機 16 核心的資源下，能夠穩定處理 10 萬級別的 RPS，且即便在 HTTPS 加密與多重插件邏輯處理下，仍能保持 毫秒級 (Single-digit ms) 的極低延遲，適合對效能有嚴苛要求的微服務架構。
 
 
 根據我們的架構規劃：
