@@ -36,6 +36,7 @@ author: "Mark Ku"
 
 根據我們的架構規劃：
 * **流量入口**：所有的外部請求（Request）都由 Kong 統一接管。
+![kong](kong.png)
 * **狀態管理**：使用 **Redis** 處理 Kong 的 Cache 與 Rate Limiting 狀態。
 * **配置儲存**：使用 PostgreSQL 儲存路由與插件配置，確保資料持久化。
 * **GitOps 流程**：透過 GitLab CI/CD 與 ArgoCD 將設定檔同步至 K8s 環境。
@@ -43,7 +44,7 @@ author: "Mark Ku"
 
 
 ### 基礎設施環境 (Infrastructure)
-這次的架構驗證環境我們選擇部署於 **Google Cloud Platform (GCP)** 的虛擬機器 (VM) 上，自行架設 **Kubernetes Cluster** 進行測試。這讓我們能更彈性地模擬地端機房的網路限制與資源調度情境。
+這次的架構驗證環境我們選擇部署於 **Google Cloud Platform (GCP)** 的虛擬機器 (VM) 上，使用 **RKE（Rancher Kubernetes Engine）** 自行架設 **Kubernetes Cluster** 進行測試。RKE 是 Rancher 推出的 Kubernetes 安裝與管理工具，主打快速、標準化地在現有主機上部署 Kubernetes 叢集，這讓我們能更彈性地模擬地端機房的網路限制與資源調度情境。
 
 ### 自動化部署策略 (Helm & Helmfile)
 我們採用 **Helmfile** 來管理多個 Helm Releases（包含 Kong, Redis, Postgres 等）。為了讓架構更穩健並符合資安要求，我們採取了**狀態分離**的部署策略：
