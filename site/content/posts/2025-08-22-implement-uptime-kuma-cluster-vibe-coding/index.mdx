@@ -17,13 +17,13 @@ Uptime Kuma 本來就很好用，但如果你要監控超過 1000 個以上的 A
 ## 為什麼要搞集群？
 
 先講需求。
-Uptime Kuma 是開源監控軟體，[之前我已經分享過怎麼改成用 MariaDB 當後端](https://blog.markkulab.net/uptime-kuma-mariadb-restful-api/)。
-Database 抽離：將預設的 SQLite 替換為 MariaDB，並獨立部署為 kuma-mariadb 服務，支援更高的併發讀寫。
-但是當監控超過 1000 個 API 之後，效能就會掉很快。實際測試下來，數量一多就卡到不行。
+Uptime Kuma 是開源監控軟體，[之前我已經分享過怎麼改成用 MariaDB 當後端](https://blog.markkulab.net/uptime-kuma-mariadb-restful-api/)。我們將預設的 SQLite 替換為 MariaDB，並獨立部署為 `kuma-mariadb` 服務，以支援更高的併發讀寫。
 
-這對需要提供 SLA 的服務超危險，因為只要監控斷掉或不準，就可能直接違約賠錢。
+然而，當監控規模超過 1000 個 API 之後，效能就會明顯下降。實際測試下來，數量一多就開始卡頓。此外，開源的 Uptime Kuma 不支援 RESTful API，且對於需要實現「API 自動化上架即監控」的場景來說非常不方便。為了減少額外容器的部署成本，我們自行擴充了 RESTful API 功能，直接整合到 Uptime Kuma 中。
 
-所以如果規模要衝到 4000 個 API，單機肯定不夠了，這時候就要往 **Cluster 架構** 走，確保：
+且因為我們的需求，對需要依據服務水準 (SLA) 付費的服務來說非常危險，因為只要監控斷掉，就可能直接違約賠錢，這個時候就能證明當下是正常的狀態。
+
+因為我們部徶系統的需求有4000隻API ，所以單個Uptime kuma 肯定不夠了，這時候就要往 **Cluster 架構** 走，確保：
 
 * **容錯 / 自動移轉**：節點掛掉也能自動切換，不怕中斷
 * **負載分散**：多台一起跑，效能更穩
