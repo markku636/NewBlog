@@ -47,6 +47,19 @@ Uptime Kuma 是開源監控軟體，[之前我已經分享過怎麼改成用 Mar
 
 用 **Nginx / OpenResty + Lua (`health_check.lua`)** 做節點健康檢查：
 
+#### Nginx Job 機制
+
+OpenResty 提供了強大的定時任務機制，可以輕鬆利用 **`ngx.timer.at()`** 來實作週期性的健康檢查：
+
+* **`init_worker_by_lua_block`**：在每個 worker 進程啟動時執行，初始化健康檢查的定時器
+* **`ngx.timer.at(delay, callback)`**：創建一個一次性定時器，在指定延遲後執行回調函數
+* **遞迴定時器**：在 `health_check_worker` 回調函數中，執行完健康檢查後再次調用 `ngx.timer.at()`，形成週期性循環
+* **避免重複執行**：使用 `ngx.shared.DICT` 或標記變數確保每個 worker 只啟動一個健康檢查任務
+
+這樣的設計讓健康檢查完全在 Nginx worker 內部運行，不需要額外的外部進程或 cron job，既高效又可靠。
+
+#### 健康檢查流程
+
 * 由 OpenResty 的 worker 週期性呼叫 `health_check_worker`，固定間隔執行 `run_health_check`
 * 針對每個節點呼叫 `/api/v1/health` 進行 HTTP 健康檢查
 * 連續多次失敗 → 將該節點在 DB `node` 表中的狀態改成 `offline`
