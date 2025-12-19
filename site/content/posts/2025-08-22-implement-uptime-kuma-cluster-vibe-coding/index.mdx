@@ -18,6 +18,7 @@ Uptime Kuma 本來就很好用，但如果你要監控超過 1000 個以上的 A
 
 先講需求。
 Uptime Kuma 是開源監控軟體，[之前我已經分享過怎麼改成用 MariaDB 當後端](https://blog.markkulab.net/uptime-kuma-mariadb-restful-api/)。
+Database 抽離：將預設的 SQLite 替換為 MariaDB，並獨立部署為 kuma-mariadb 服務，支援更高的併發讀寫。
 但是當監控超過 1000 個 API 之後，效能就會掉很快。實際測試下來，數量一多就卡到不行。
 
 這對需要提供 SLA 的服務超危險，因為只要監控斷掉或不準，就可能直接違約賠錢。
@@ -31,7 +32,8 @@ Uptime Kuma 是開源監控軟體，[之前我已經分享過怎麼改成用 Mar
 
 ## 拆解需求，整理思路，請用 Vibe Coding 規劃及實作
 
-用 Vibe Coding 的精神，把需求拆細，然後一段一段做：
+用 Vibe Coding 的精神，把需求拆細，然後一段一段做，通常較大複雜的專案，會請AI 撰寫計劃或指引，在不斷覆盤 AI 寫的計畫，最後在請AI 執行
+
 
 ### 1. 分片 (Sharding) 支援
 
@@ -72,7 +74,9 @@ Uptime Kuma 是開源監控軟體，[之前我已經分享過怎麼改成用 Mar
 * 確保不會重複執行，避免資料衝突
 * 也提供 **手動復原**，讓管理員自己決定要不要搬回去
 
-### 5. API 擴充
+### 5.Restful API 擴充
+
+自動化擴充 (RESTful API Extension)：由於原生的 Uptime Kuma 缺乏對外的 API 介面，為了實現「服務一上線即監控」的自動化目標，我們自行擴充了 RESTful API 功能，讓日後上架API 時，自動監控。
 
 Uptime Kuma 其實內建不少邏輯，只是沒開放 API，都是透過Web socket 去調用，既然知道這些，我們可以請AI把 Service 暴露成 API，讓自動化更方便。
 
@@ -186,6 +190,9 @@ ngx.balancer.set_current_peer("uptime-kuma-node2", 3001)
 
 [Uptime Kuma Cluster GitHub 相關程式碼](https://github.com/markku636/uptime-kuma-cluster)
 
+
+## 心得
+AI 時代雖然生產力增加了10倍，雖然不用手敲程式碼，但事後要維護這些程式碼，感覺都不熟悉，最後都還是得有人去維護程式碼。
 
 ## 延伸資源
 * [Uptime Kuma 官方文件](https://github.com/louislam/uptime-kuma)
