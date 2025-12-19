@@ -43,21 +43,25 @@ Uptime Kuma 是開源監控軟體，[之前我已經分享過怎麼改成用 Mar
 
 ### 2. 健康檢查 (Health Check)
 
-用 **Nginx / OpenResty** 做節點健康檢查：
+用 **Nginx / OpenResty + Lua (`health_check.lua`)** 做節點健康檢查：
 
-* 每 60 秒檢查一次
-* 如果連續 3 次失敗 → 判定節點掛掉，狀態改成 `offline`
+* 由 OpenResty 的 worker 週期性呼叫 `health_check_worker`，固定間隔執行 `run_health_check`
+* 針對每個節點呼叫 `/api/v1/health` 進行 HTTP 健康檢查
+* 連續多次失敗 → 將該節點在 DB `node` 表中的狀態改成 `offline`
+* 連續多次成功 → 將 `node.status` 更新回 `online`，並啟動「監控還原」流程
 
 ### 3. 容錯移轉 (Failover)
 
-節點掛了，監控任務要自動轉移：
+節點掛了，監控任務要自動轉移，這一塊由 `health_check.lua` 搭配資料庫完成：
 
-* 在 DB 加上 `default_node_id` 跟 `assign_node` 欄位
-* 掛掉時 → 平均分配監控器到其他節點
-* 新邏輯：
-
-  * 節點優先跑自己 `assign_node` 的監控器
-  * 有 `assign_node` 就不用管 `default_node_id`
+* 在 DB 加上專門的 `node` 表與與節點相關欄位，紀錄每個節點的 `status`、`last_seen`
+* 監控資料表 `monitor` 會記錄每個監控目前的 `node_id`（以及必要時的 `assigned_node`）
+* 當某個節點連續數次健康檢查失敗：
+  * health_check 會把該節點標記為 `offline`
+  * 呼叫 `redistribute_monitors_from_node(node_id)`，把原本由這個節點負責的監控平均分配到其他 `online` 節點上
+* 當節點恢復健康（連續幾次檢查成功）：
+  * health_check 會把節點標記為 `online`
+  * 呼叫 `revert_monitors_to_node(node_id)`，把先前自動轉移出去的監控搬回原節點，避免長期失衡
 
 ### 4. 節點復原 (Recovery)
 
@@ -78,11 +82,11 @@ Uptime Kuma 其實內建不少邏輯，只是沒開放 API，都是透過Web soc
 ```
 系統架構圖
 
-                              ┌─────────────────┐
-                              │   OpenResty     │
-                              │   (Nginx+Lua)   │
-                              │   智能負載平衡    │
-                              └─────────┬───────┘
+                              ┌────────────────────────────┐
+                              │   OpenResty (Nginx + Lua)  │
+                              │  ─ 負載平衡 (monitor_router) │
+                              │  ─ 健康檢查 (health_check)   │
+                              └─────────┬──────────────────┘
                                         │
                      ┌──────────────────┼────────────────────┐
                      │                  │                    │
@@ -102,52 +106,74 @@ Uptime Kuma 其實內建不少邏輯，只是沒開放 API，都是透過Web soc
                               └───────────────────┘
 ```
 
+這裡有幾個重點元件：
+
+- **OpenResty / Nginx**：只在 `nginx.conf` 裡定義一個虛擬的 `upstream uptime_kuma_cluster`，實際的節點選擇交給 Lua。
+- **`monitor_router.lua`**：在 `balancer_by_lua_block` 中被呼叫，提供 `pick_node_for_request()`，依據每個節點目前「正在執行的監控數量」動態挑選最空閒的節點，並透過 `ngx.balancer.set_current_peer()` 導流到對應的 `uptime-kuma-nodeX` 容器。
+- **`health_check.lua`**：定期掃描各節點健康狀態，更新 DB `node` 表，並在節點故障/恢復時觸發監控任務的自動移轉與還原。
+
 ## 流程圖
 
+### 1. 負載平衡與路由流程（monitor_router.lua）
+
 ```
-流程圖
-                  ┌───────────────────┐
-                  │   Nginx 健康檢查   │
-                  │ (每 60 秒檢查一次) │
-                  └─────────┬─────────┘
-                            │
-                ┌───────────▼───────────┐
-                │ 節點是否連續失敗 3 次? │
-                └───────┬─────┬─────────┘
-                        │否   │是
-                        │     │
-                ┌───────▼     ▼──────────┐
-                │   狀態維持 online       │
-                └────────────────────────┘
-                              │
-                  ┌───────────▼───────────┐
-                  │ 狀態更新為 offline     │
-                  └───────────┬───────────┘
-                              │
-               ┌──────────────▼──────────────┐
-               │ 移轉監控器到其他節點 (平均分配)│
-               └──────────────┬──────────────┘
-                              │
-                 ┌────────────▼────────────┐
-                 │ 其他節點繼續跑監控任務    │
-                 └────────────┬────────────┘
-                              │
-        ┌─────────────────────▼─────────────────────┐
-        │ 節點恢復 (狀態 online)?                   │
-        └───────────┬───────────────┬──────────────┘
-                    │否              │是
-                    │                │
-        ┌───────────▼───────┐        │
-        │   節點維持 offline │        │
-        └───────────────────┘        │
-                                      │
-                     ┌────────────────▼────────────────┐
-                     │  監控器搬回原始節點 (避免重複跑)│
-                     └────────────────┬────────────────┘
-                                      │
-                      ┌───────────────▼───────────────┐
-                      │   系統恢復正常，持續健康檢查    │
-                      └───────────────────────────────┘
+請求流程
+
+Client Request
+      │
+      ▼
+Nginx / OpenResty
+  (location /, /api/, /socket.io/ → proxy_pass 到 uptime_kuma_cluster)
+      │
+      ▼
+balancer_by_lua_block
+  呼叫 monitor_router.pick_node_for_request()
+      │
+      ▼
+查詢 DB：
+  SELECT n.node_id, COUNT(m.id) AS monitor_count
+  FROM node n
+  LEFT JOIN monitor m ON m.node_id = n.node_id AND m.active = 1
+  WHERE n.status = 'online'
+  GROUP BY n.node_id
+  ORDER BY monitor_count ASC, node_id ASC
+      │
+      ▼
+選出監控數量最少的 online 節點 (例如 node2)
+      │
+      ▼
+組合 upstream：uptime-kuma-node2:3001
+      │
+      ▼
+ngx.balancer.set_current_peer("uptime-kuma-node2", 3001)
+      │
+      ▼
+請求實際被轉發到對應的 Uptime Kuma 節點處理
+```
+
+### 2. 健康檢查與 Failover / Recovery 流程（health_check.lua）
+
+```
+健康檢查與自動移轉流程
+
+健康檢查 worker 週期性執行 run_health_check()
+      │
+      ▼
+查詢 DB 取得所有節點 (node 表)
+      │
+      ▼
+逐一對每個節點呼叫 /api/v1/health
+      │
+      ├── 健康：更新 node.status = 'online'，重置失敗次數；連續多次成功時觸發 revert_monitors_to_node(node_id)
+      │
+      └── 失敗：累積失敗次數；達到門檻時將 node.status = 'offline'，並觸發
+                 redistribute_monitors_from_node(node_id)，把監控平均分配到其他 online 節點
+      │
+      ▼
+健康狀態與統計資訊寫入 DB + ngx.shared.health_checker
+      │
+      ▼
+透過 /health、/api/health-status、/lb/health、/lb/capacity 等 API 對外暴露目前整體狀態
 ```
 
 ## 成果展示
