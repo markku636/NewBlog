@@ -19,11 +19,15 @@ Uptime Kuma 本來就很好用，但如果你要監控超過 1000 個以上的 A
 先講需求。
 Uptime Kuma 是開源監控軟體，[之前我已經分享過怎麼改成用 MariaDB 當後端](https://blog.markkulab.net/uptime-kuma-mariadb-restful-api/)。我們將預設的 SQLite 替換為 MariaDB，並獨立部署為 `kuma-mariadb` 服務，以支援更高的併發讀寫。
 
-然而，當監控規模超過 1000 個 API 之後，效能就會明顯下降。實際測試下來，數量一多就開始卡頓。此外，開源的 Uptime Kuma 不支援 RESTful API，且對於需要實現「API 自動化上架即監控」的場景來說非常不方便。為了減少額外容器的部署成本，我們自行擴充了 RESTful API 功能，直接整合到 Uptime Kuma 中。
+然而，當監控規模超過 1000 個 API 之後，效能就會明顯下降，實際測試下來數量一多就開始卡頓。
 
-且因為我們的需求，對需要依據服務水準 (SLA) 付費的服務來說非常危險，因為只要監控斷掉，就可能直接違約賠錢，這個時候就能證明當下是正常的狀態。
+再加上我們部門系統的需求有將近 4000 支 API，單個 Uptime Kuma 肯定不夠了。
 
-因為我們部徶系統的需求有4000隻API ，所以單個Uptime kuma 肯定不夠了，這時候就要往 **Cluster 架構** 走，確保：
+對需要依據服務水準 (SLA) 付費的服務來說，一旦監控斷掉，就可能直接被判定為違約賠錢，因此監控平台本身也必須保持高可用。
+
+另外，開源的 Uptime Kuma 不支援 RESTful API，對於需要實現「API 自動化上架即監控」的場景來說非常不方便。為了減少額外容器的部署成本，我們自行擴充了 RESTful API 功能，直接整合到 Uptime Kuma 中。
+
+基於以上這些需求與限制，我們自然就要往 **Cluster 架構** 走，確保：
 
 * **容錯 / 自動移轉**：節點掛掉也能自動切換，不怕中斷
 * **負載分散**：多台一起跑，效能更穩
@@ -203,6 +207,54 @@ ngx.balancer.set_current_peer("uptime-kuma-node2", 3001)
 
 [Uptime Kuma Cluster GitHub 相關程式碼](https://github.com/markku636/uptime-kuma-cluster)
 
+
+## 常見問題與解決方案
+
+### 錯誤：API disabled in the context of balancer_by_lua*
+
+如果遇到以下錯誤：
+
+```
+failed to run balancer_by_lua*: /usr/local/openresty/site/lualib/resty/mysql.lua:1105: API disabled in the context of balancer_by_lua*
+```
+
+**問題原因：**
+
+在 `balancer_by_lua*` 階段，OpenResty 不允許執行阻塞性的 TCP 操作（如資料庫連接）。如果 `monitor_router.lua` 的 `pick_node_for_request()` 函數直接在此階段查詢資料庫，就會觸發此錯誤。
+
+**解決方案：**
+
+使用 `ngx.shared.DICT` 快取機制，將節點選擇邏輯改為：
+
+1. **在 `init_worker_by_lua_block` 或定時器中更新快取**：定期查詢資料庫，將節點資訊與監控數量寫入 `ngx.shared.DICT`
+2. **在 `balancer_by_lua_block` 中只讀取快取**：從共享字典中讀取節點資訊，不進行資料庫查詢
+
+範例實作思路：
+
+```lua
+-- 在 nginx.conf 中定義共享字典
+lua_shared_dict node_cache 10m;
+
+-- 在 init_worker_by_lua_block 或定時器中更新快取
+local function update_node_cache()
+    local db = db_connect()  -- 在允許的階段連接資料庫
+    local nodes = query_nodes_from_db(db)
+    local cache = ngx.shared.node_cache
+    for _, node in ipairs(nodes) do
+        cache:set("node:" .. node.node_id, json.encode(node), 30)  -- 30秒過期
+    end
+end
+
+-- 在 balancer_by_lua_block 中只讀取快取
+local function pick_node_for_request()
+    local cache = ngx.shared.node_cache
+    local nodes = {}
+    -- 從快取讀取節點資訊，不連接資料庫
+    -- ...
+end
+```
+
+這樣可以避免在 `balancer_by_lua*` 階段進行阻塞操作，同時保持節點選擇的即時性。
 
 ## 心得
 AI 時代雖然讓生產力可能提升了5~10 倍，不用再手敲程式碼，但事後維護時卻發現對程式碼的熟悉度不足。這讓我深刻體會到，無論工具如何進化，最終還是需要有人真正理解並維護這些程式碼，技術深度與理解力仍然是不可或缺的。
