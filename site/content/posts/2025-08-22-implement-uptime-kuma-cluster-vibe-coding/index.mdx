@@ -207,55 +207,6 @@ ngx.balancer.set_current_peer("uptime-kuma-node2", 3001)
 
 [Uptime Kuma Cluster GitHub 相關程式碼](https://github.com/markku636/uptime-kuma-cluster)
 
-
-## 常見問題與解決方案
-
-### 錯誤：API disabled in the context of balancer_by_lua*
-
-如果遇到以下錯誤：
-
-```
-failed to run balancer_by_lua*: /usr/local/openresty/site/lualib/resty/mysql.lua:1105: API disabled in the context of balancer_by_lua*
-```
-
-**問題原因：**
-
-在 `balancer_by_lua*` 階段，OpenResty 不允許執行阻塞性的 TCP 操作（如資料庫連接）。如果 `monitor_router.lua` 的 `pick_node_for_request()` 函數直接在此階段查詢資料庫，就會觸發此錯誤。
-
-**解決方案：**
-
-使用 `ngx.shared.DICT` 快取機制，將節點選擇邏輯改為：
-
-1. **在 `init_worker_by_lua_block` 或定時器中更新快取**：定期查詢資料庫，將節點資訊與監控數量寫入 `ngx.shared.DICT`
-2. **在 `balancer_by_lua_block` 中只讀取快取**：從共享字典中讀取節點資訊，不進行資料庫查詢
-
-範例實作思路：
-
-```lua
--- 在 nginx.conf 中定義共享字典
-lua_shared_dict node_cache 10m;
-
--- 在 init_worker_by_lua_block 或定時器中更新快取
-local function update_node_cache()
-    local db = db_connect()  -- 在允許的階段連接資料庫
-    local nodes = query_nodes_from_db(db)
-    local cache = ngx.shared.node_cache
-    for _, node in ipairs(nodes) do
-        cache:set("node:" .. node.node_id, json.encode(node), 30)  -- 30秒過期
-    end
-end
-
--- 在 balancer_by_lua_block 中只讀取快取
-local function pick_node_for_request()
-    local cache = ngx.shared.node_cache
-    local nodes = {}
-    -- 從快取讀取節點資訊，不連接資料庫
-    -- ...
-end
-```
-
-這樣可以避免在 `balancer_by_lua*` 階段進行阻塞操作，同時保持節點選擇的即時性。
-
 ## 心得
 AI 時代雖然讓生產力可能提升了5~10 倍，不用再手敲程式碼，但事後維護時卻發現對程式碼的熟悉度不足。這讓我深刻體會到，無論工具如何進化，最終還是需要有人真正理解並維護這些程式碼，技術深度與理解力仍然是不可或缺的。
 
