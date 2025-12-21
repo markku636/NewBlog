@@ -12,9 +12,9 @@ slug: implement-uptime-kuma-cluster-vibe-coding
 
 ## 前言
 
-Uptime Kuma 本來就很好用，但如果你要監控超過 1000 個以上的 API，單個實體運行，其實會開始卡卡的。這篇我想用 **Vibe Coding** 的方式，帶大家一步步把 Uptime Kuma 升級成支援 **分片 (Sharding)** 跟 **Cluster** 的版本，還會加上 API 讓它更方便自動化。
+Uptime Kuma 是一個開源監控軟體，本來就很好用，但如果你要監控超過 1000 個以上的 API，單個實體運行，其實會開始卡卡的。這篇我想用 **Vibe Coding** 的方式，帶大家一步步把 Uptime Kuma 升級成支援 **分片 (Sharding)** 跟 **Cluster** 的版本，還會加上 API 讓它更方便自動化。
 
-## 為什麼要搞集群？
+## 為什麼要搞叢集(Cluster)？
 
 先講需求。
 Uptime Kuma 是開源監控軟體，[之前我已經分享過怎麼改成用 MariaDB 當後端](https://blog.markkulab.net/uptime-kuma-mariadb-restful-api/)。我們將預設的 SQLite 替換為 MariaDB，並獨立部署為 `kuma-mariadb` 服務，以支援更高的併發讀寫。
@@ -97,6 +97,9 @@ OpenResty 提供了強大的定時任務機制，可以輕鬆利用 **`ngx.timer
 
 Uptime Kuma 其實內建不少邏輯，只是沒開放 API，都是透過Web socket 去調用，既然知道這些，我們可以請AI把 Service 暴露成 API，讓自動化更方便。
 
+### 6. OpenResty 統一入口與負載平衡
+
+為了讓外部只面對單一入口、內部由多個 Kuma 節點分擔流量，我們以 OpenResty 作為統一代理與路由層。此入口會依節點的健康與負載狀態動態選擇目標節點，同時承載即時通訊、API 與靜態內容的代理。當某節點故障時自動避讓、恢復後回流，確保整體具備擴展性與容錯能力。
 
 ## 系統架構圖
 
