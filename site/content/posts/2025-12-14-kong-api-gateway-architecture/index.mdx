@@ -122,6 +122,19 @@ author: "Mark Ku"
 * 建立了 `backend_service`, `mobile_app` 等 Consumers。
 * 將 Consumer 加入特定群組 (如 `business-tier-gold`)。
 
+### 2.5 定義務上架自動化的流程：基於 Swagger (OAS) 的 URL Sync 模式
+
+在解決了核心的路由與權限配置後，下一個挑戰是如何讓眾多子系統快速且標準化地上架。為了避免人工手讀 Swagger 文件再手動 Key 設定所造成的失誤，我們設計了一套 **URL Sync 模式**。
+
+這套機制的核心在於「規格即時同步」，系統不透過人工上傳檔案，而是直接讀取子系統提供的 **Swagger / OpenAPI Specification (OAS) URL**。
+
+我們的自動化上架流程包含四個關鍵步驟：
+
+- 規範讀取 (Swagger Sync)：管理員只需設定子系統的 Swagger/OAS URL，系統便會自動抓取最新的 API 規格。
+- Kong 轉換 (Spec to Config)：系統解析 Swagger 內容後，自動在 Kong 內建立對應的 Route 與 Plugin，確保 Gateway 的路由規則與 Swagger 文件定義完全一致。
+- 自動監控：上架的同時，系統會自動觸發 Uptime Kuma 建立健康檢查機制（Health Check），實現「服務一上線即監控」的目標。
+- 對外發布：完成上述配置後，服務即正式上線並透過 Gateway 進行代理。
+
 ## 3. 打造全方位的監控體系 (Observability)
 
 完善的監控是 Gateway 穩定運行的基石。這半年我們投入了大量心力整合 **ELK Stack** 與 **Prometheus** 生態系，實現從「日誌查詢」到「指標儀表板」的全方位可觀測性。
