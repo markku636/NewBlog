@@ -46,9 +46,6 @@ author: "Mark Ku"
 
 在評估階段，我們需要一個能夠處理高並發請求、支援豐富插件且能與 Kubernetes 原生整合的解決方案，最終我們選用了 **Kong API Gateway** 搭配 **Redis** 與 **PostgreSQL** 作為核心架構。
 
-### 效能
-依據官方的[測試報告](https://developer.konghq.com/gateway/performance/benchmarks/)Kong Gateway 在單機 16 核心的資源下，能夠穩定處理 10 萬級別的 RPS，且即便在 HTTPS 加密與多重插件邏輯處理下，仍能保持 毫秒級 (Single-digit ms) 的極低延遲，適合對效能有嚴苛要求的微服務架構。
-
 
 根據我們的架構規劃：
 * **流量入口**：所有的外部請求（Request）都由 Kong 統一接管。
@@ -68,6 +65,9 @@ author: "Mark Ku"
 *   **Stateless 服務自動化**：Application 層級的元件（如 Kong Gateway, Kuma）完全交由 GitOps 自動同步。
 *   **Stateful 與機敏資料手動化**：考量到資料安全性與持久化需求，**Secret (敏感資訊)** 與 **PersistentVolume (PV/PVC)** 均從 Helm Chart 中抽離。這些資源由維運人員**手動部署** (Manual Apply)，確保不會因為 CI/CD pipeline 的誤操作導致資料遺失或金鑰外洩。
 
+### 效能
+依據官方的[測試報告](https://developer.konghq.com/gateway/performance/benchmarks/)Kong Gateway 在單機 16 核心的資源下，能夠穩定處理 10 萬級別的 RPS，且即便在 HTTPS 加密與多重插件邏輯處理下，仍能保持 毫秒級 (Single-digit ms) 的極低延遲，適合對效能有嚴苛要求的微服務架構。
+
 ## 2. API 管理機制的實作 (API Management)
 
 進行 API Gateway 架構驗證的首要目標，是將既有的子系統 API 納入統一管理。
@@ -78,6 +78,7 @@ author: "Mark Ku"
 *   **Gateway Services**：統一定義後端服務的轉發目標，涵蓋多種 API 服務協定。
 *   **突破插件限制 (Plugin Limitation)**：由於 Kong 的機制限制單一路由無法重複掛載相同類型的插件（例如無法對同一 Route 同時設定兩組不同的 Rate Limiting 規則），我們採用 **拆分路由 (Route Splitting)** 的策略來解決。針對同一個 Backend Service，依據 URL 特徵拆分出多個 Route，以便分別掛載針對性的流量控制插件，實現更細粒度的管理。
 
+    為實作差異化限流，我們採用 Route Splitting 策略。
     **舉例說明**：假設後端有一個電商服務 `ecommerce-service`，我們可以依據 Route Prefix 拆分成多條路由：
 
     | Route Name | Path Prefix | Rate Limit | 用途 |
@@ -101,6 +102,16 @@ author: "Mark Ku"
 - 不選 HMAC：必須實作簽章/時戳與加解密，跨語言 SDK 維護成本高。
 - 選 Key Auth：低門檻（Header 直接帶金鑰）、高相容（常見工具與框架原生支援）、可疊加安全（IP 白名單、ACL、Rate Limiting）。
 
+### 使用者呼叫網路服務流程
+
+以下以使用者呼叫流程，概述 Gateway 的實際運作步驟：
+
+1. 發起請求：使用者攜帶 API Key 呼叫平台。
+2. 認證與授權（Kong）：驗證 Key 的有效性及權限。
+3. 流量控制（Rate Limit）：檢查是否超過方案額度。
+4. 服務代理：轉發請求至後端子系統
+5. 記錄與回傳：非同步寫入 Log，並回傳資料。
+
 ### 分級流量控制 (Tiered Rate Limiting)
 為了合理分配運算資源，我們的流量分流策略如下：
 
@@ -122,7 +133,7 @@ author: "Mark Ku"
 * 建立了 `backend_service`, `mobile_app` 等 Consumers。
 * 將 Consumer 加入特定群組 (如 `business-tier-gold`)。
 
-### 2.5 定義務上架自動化的流程：基於 Swagger (OAS) 的 URL Sync 模式
+### 自動化上架流程（基於 Swagger 的 URL Sync）
 
 在解決了核心的路由與權限配置後，下一個挑戰是如何讓眾多子系統快速且標準化地上架。為了避免人工手讀 Swagger 文件再手動 Key 設定所造成的失誤，我們設計了一套 **URL Sync 模式**。
 
