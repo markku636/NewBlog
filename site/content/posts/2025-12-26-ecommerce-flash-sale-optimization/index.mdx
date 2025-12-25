@@ -1,0 +1,473 @@
+---
+featured: true
+title: 電商閃購搶購系統設計：樂觀鎖、Redis 原子性、佇列完整解決方案
+date: 2025-12-26 10:00:00 +0800
+thumbnail: ecommerce-flash-sale-optimization.png
+category: Backend
+tags: ['ecommerce', 'flash sale', 'optimistic lock', 'redis', 'queue', 'high concurrency', 'inventory']
+description: 用淺顯易懂的方式解說電商搶購系統的三大核心技術：樂觀鎖控制庫存、Redis 原子性保證資料一致性、佇列處理高併發，讓你快速理解高並發系統設計。
+author: Mark Ku
+slug: ecommerce-flash-sale-optimization
+---
+
+## 前言
+
+研究一下電商的搶購系統，怎麼設計，這篇文章用 **最白話的方式** 講解三個核心技術：
+
+1. **樂觀鎖** - 怎麼防止超賣
+2. **Redis 原子性** - 怎麼確保不會重複扣款  
+3. **佇列** - 怎麼削峰填谷，不讓服務器累趴
+
+可以先把三個角色想成：
+
+- Redis：衝在第一線，用記憶體超快扣庫存，負責「撐壓」。
+- Queue 佇列：API 同步把請求丟進佇列，使用者先拿到「排隊中」，後面由背景 worker 非同步慢慢處理。
+- 資料庫：當「正本」和記帳本，只負責資料正確和存好，不負責硬撐流量。
+
+---
+
+## 懶人包：一句話版本
+
+- 想要**不超賣**：用「樂觀鎖 + 版本號」去更新庫存。
+- 想要**撐高併發**：前面加 Redis，用記憶體原子扣庫存。
+- 想要**系統撐久一點**：再加 Queue 佇列，先排隊再慢慢處理。
+
+## 問題：為什麼會超賣？
+
+假設只剩 1 件商品，有 2 個人同時搶購。
+
+```
+時間    user1                 user2
+t1      查庫存:1件            
+t2      確認下單              查庫存:1件
+t3      扣庫存 → 0 件         確認下單
+t4                            扣庫存 → -1 件 ❌ 超賣！
+```
+
+**根本原因**：讀和寫之間的間隙，允許多人同時操作同一件商品。
+
+---
+
+## 方案 1：樂觀鎖（Optimistic Lock）
+
+### 核心概念
+
+**樂觀鎖**的想法很簡單：我不鎖住數據，而是在提交時檢查「期間有沒有人改過」。
+
+```
+1. 讀取商品資訊 (quantity=1, version=5)
+2. 計算扣款後的數量
+3. 更新時檢查：version 還是 5 嗎？
+   - 是 → 更新成功
+   - 否 → 代表有人改過，重試
+```
+
+### 實作範例
+
+**資料庫設計：**
+
+```sql
+CREATE TABLE products (
+  id INT PRIMARY KEY,
+  name VARCHAR(100),
+  quantity INT,
+  version INT  -- 版本號，每次更新 +1
+);
+```
+
+**購買邏輯（C# 範例，簡化版）：**
+
+```csharp
+public string PurchaseWithOptimisticLock(int productId, IDbConnection connection)
+{
+    // Step 1: 讀取當前庫存和版本
+    const string selectSql = @"SELECT Id, Quantity, Version FROM Products WHERE Id = @Id";
+
+    var product = connection.QuerySingle<Product>(selectSql, new { Id = productId });
+
+    var currentVersion = product.Version;
+    var currentQty = product.Quantity;
+
+    // Step 2: 檢查庫存是否足夠
+    if (currentQty <= 0)
+    {
+        return "已售完";
+    }
+
+    // Step 3: 嘗試更新（樂觀鎖檢查）
+    const string updateSql = @"UPDATE Products 
+SET Quantity = Quantity - 1, Version = Version + 1 
+WHERE Id = @Id AND Version = @Version";
+
+    var affectedRows = connection.Execute(updateSql, new
+    {
+        Id = productId,
+        Version = currentVersion
+    });
+
+    // Step 4: 檢查更新是否成功
+    if (affectedRows == 0)
+    {
+        // Version 不符 → 代表有人搶先更新了，請使用者重試
+        return "購買失敗，請重試";
+    }
+
+    // 成功！
+    return "購買成功";
+}
+
+public class Product
+{
+    public int Id { get; set; }
+    public int Quantity { get; set; }
+    public int Version { get; set; }
+}
+```
+
+### 優缺點
+
+✅ **優點**：
+- 簡單易懂，不需要鎖表
+- 不會造成死鎖
+- 高並發下性能好
+
+❌ **缺點**：
+- 如果衝突多，會頻繁重試
+- 需要客戶端重試邏輯
+
+### 單靠資料庫樂觀鎖會遇到什麼問題？
+
+- **壓力都集中在資料庫**：每次搶購都要查詢 + 更新，連線數、IO、鎖競爭都會撐很大。
+- **熱點 Row 變成瓶頸**：大家都搶同一個商品，等於都在搶同一行紀錄的資源。
+- **大量重試很傷效能**：版本衝突就要重讀 + 重試，高併發時容易「大家都在重試，誰也買不到」。
+- **不容易做削峰**：前面就算有 CDN / 反向代理，最後還是一次全壓到 DB。
+
+---
+
+## 方案 2：Redis 原子性（Atomic Operation）
+
+樂觀鎖要多次查詢和更新，Redis 的方式是：**一次操作搞定，保證不被打斷**。
+
+### 核心概念
+
+Redis 是單線程，指令執行不會被中斷。
+
+```
+User1              User2              Redis
+減庫存             減庫存              庫存 = 1
+─────────────────────────────────────────
+  ├─ 執行 DECR       
+  │                                   庫存 = 0
+  │                 ├─ 執行 DECR
+  │                 │                庫存 = -1
+  └─ 返回 0 ✓       └─ 返回 -1 ❌
+```
+
+### 為什麼 Redis 可以做到原子性？
+
+- 單線程模型：同一時間**只會執行一個指令**，不會被別的指令打斷。
+- 指令序列化：所有請求排隊，依序執行，不會出現「兩個人同時改同一個值」。
+- Lua 腳本：一段腳本在 Redis 裡視為**一個原子操作**，要嘛全部成功，要嘛全部失敗。
+
+### Lua 原子性是什麼？
+
+用白話講，Lua 腳本就是把「一串 Redis 指令」包成**一顆不可拆的膠囊**：
+
+- 腳本裡可以先 `GET` 再 `DECR`，中間不會被別人的指令插隊。
+- Redis 只會在「整段腳本跑完」之後，才處理下一個請求。
+- 所以外面看起來，就像只送了一個「大指令」進去，要嘛全部成功、要嘛全部失敗。
+
+這就是所謂的 **Lua 原子性**：把多個步驟綁在一起，一次保證完成，不會出現「扣了一半就被人插隊」的狀況。
+
+**雖然執行腳本時會 block 其他請求**，但因為 Redis 都是**記憶體操作**，整段腳本通常不到 1 毫秒就跑完，所以實務上影響非常小。
+
+對比資料庫的樂觀鎖：
+
+- DB 需要「先查再改」，中間還要經過應用程式與網路延遲。
+- 這段空窗期內，其他交易也可以讀到舊資料，造成版本衝突、頻繁重試。
+- Redis 把「檢查 + 扣庫存」包成一個不可分割的步驟，天生就減少衝突機會。
+
+> 大概的時間感：在同機房環境下，Redis 一次 `DECR` 或一段簡單 Lua 腳本，常見延遲大約是 **小於 1 毫秒** 等級；而一次資料庫「查 + 改」交易，加上網路與磁碟 IO，常常會來到 **幾毫秒 ~ 數十毫秒**（例如 5 ~ 30 毫秒），這也是為什麼搶購場景更傾向用 Redis 當前線閘門。
+
+### 實作範例
+
+**初始化庫存：**
+
+```bash
+# 設定商品 123 的庫存為 100
+SET product:123:qty 100
+```
+
+**減少庫存（Lua 腳本保證原子性）：**
+
+```lua
+-- redis_script.lua
+local key = KEYS[1]
+local qty = redis.call('GET', key)
+
+if not qty or tonumber(qty) <= 0 then
+  return 0  -- 已售完
+end
+
+redis.call('DECR', key)
+return 1  -- 成功
+```
+
+**後端程式碼：**
+
+```javascript
+// Node.js + ioredis
+const redis = require('ioredis');
+const client = new redis();
+
+async function purchaseWithRedis(productId, quantity = 1) {
+  const key = `product:${productId}:qty`;
+  
+  // 使用 DECR 自動減庫存（原子操作）
+  const remaining = await client.decr(key);
+  
+  if (remaining < 0) {
+    // 庫存不足，還原
+    await client.incr(key);
+    return false;
+  }
+  
+  return true;  // 成功
+}
+```
+
+### 優缺點
+
+✅ **優點**：
+- 超快速（記憶體操作）
+- 天然原子性，不需要重試
+- 適合庫存、計數器等場景
+
+❌ **缺點**：
+- 只能存在 Redis，資料有遺失風險
+- 需要持久化配置（RDB、AOF）
+- 庫存同步回主資料庫有延遲
+
+---
+
+## 方案 3：Queue 佇列削峰（Queue-Based Load Shedding）
+
+洪峰來臨時，與其讓所有請求同時進來把伺服器壓爆，不如先丟進 Queue 佇列排隊慢慢處理。
+
+> 心智模型可以這樣想：
+> - 前端 API：**同步** 把這次購買請求「寫進佇列」，很快回應「排隊中」。
+> - 後端 worker：在背景 **非同步** 把佇列裡的請求一個一個拿出來，扣庫存、建訂單、刷卡。
+
+### 核心概念
+
+```
+使用者         佇列服務           庫存檢查          付款
+├─ 同步：加入佇列 ──→ 
+├─ 排隊等待
+├─ 輪到你
+└─ 非同步：扣款、確認 ──→ 減庫存 ──→ 成功返回
+```
+
+流量從 **尖峰** 變成 **平緩**。
+
+### 實作範例
+
+**使用 RabbitMQ / Kafka 或 Redis Queue：**
+
+```javascript
+// 1. 使用者點購買 → 加入佇列
+const queue = require('bull');
+const purchaseQueue = new queue('purchases', {
+  redis: { host: '127.0.0.1', port: 6379 }
+});
+
+app.post('/purchase', async (req, res) => {
+  const { productId, userId } = req.body;
+  
+  // 直接返回，交給佇列處理
+  await purchaseQueue.add({ productId, userId });
+  
+  res.json({ 
+    status: '排隊中',
+    position: await purchaseQueue.count()
+  });
+});
+
+// 2. 佇列背景處理
+purchaseQueue.process(async (job) => {
+  const { productId, userId } = job.data;
+  
+  // 真正執行購買邏輯
+  const success = await deductInventory(productId);
+  
+  if (success) {
+    await processPayment(userId, productId);
+    await sendConfirmationEmail(userId);
+    return { status: 'success' };
+  } else {
+    throw new Error('庫存不足');
+  }
+});
+
+// 3. 使用者查詢訂單狀態
+app.get('/order/:orderId', async (req, res) => {
+  const job = await purchaseQueue.getJob(req.params.orderId);
+  
+  res.json({
+    status: job.progress(),  // 進度
+    isCompleted: job.isCompleted(),
+    result: job.returnvalue
+  });
+});
+```
+
+### 優缺點
+
+✅ **優點**：
+- 削峰填谷，服務器壓力均勻
+- 自動重試，容錯性好
+- 使用者體驗穩定
+
+❌ **缺點**：
+- 使用者需要等待
+- 佇列本身需要可靠存儲
+- 複雜度增加
+
+---
+
+## 整合方案：三層防守
+
+實務上，通常三個技術都用上，形成 **多層防禦**：
+
+```
+┌─────────────────────────────────────┐
+│  使用者請求                          │
+└──────────────┬──────────────────────┘
+               │
+        ┌──────▼─────────┐
+        │  佇列削峰       │  防止雪崩
+        │  (限流)        │
+        └──────┬─────────┘
+               │
+        ┌──────▼─────────────────┐
+        │  Redis 原子扣庫存      │  快速、可靠
+        │  DECR / Lua Script    │
+        └──────┬─────────────────┘
+               │
+        ┌──────▼─────────────────┐
+        │  樂觀鎖同步到 DB       │  持久化
+        │  (最終一致性)         │
+        └──────┬─────────────────┘
+               │
+        ┌──────▼──────────┐
+        │  訂單、支付流程  │
+        │  (異步處理)     │
+        └─────────────────┘
+```
+
+      「樂觀鎖同步到 DB」可以這樣實作：
+
+      1. 資料庫的 `products` 表保留 `quantity` + `version` 欄位。
+      2. 佇列消費者在 **Redis 扣庫存成功之後**，再從 DB 讀取該商品當前 `version`。
+      3. 以樂觀鎖更新：`UPDATE ... SET quantity = quantity - 1, version = version + 1 WHERE id = ? AND version = ?`。
+      4. 若 `affectedRows = 0`，代表版本被別人更新過，可以：
+         - 重試幾次；或
+         - 記錄成待對帳資料，之後用批次任務修正。
+
+      這樣 Redis 只負責「前線搶購速度」，DB 則負責「最終正本」，兩者透過樂觀鎖維持最終一致性。
+
+    換句話說，在這個架構裡：
+
+    - **資料庫只負責「資料正確、記錄完整」**（正本、對帳、報表）。
+    - **不要把「撐高併發」丟給資料庫**，那是 Redis + Queue 要扛的事。
+
+**具體流程：**
+
+```javascript
+async function purchaseFlow(userId, productId) {
+  // 1. 佇列排隊
+  const jobId = await purchaseQueue.add({ userId, productId });
+  
+  // 佇列內部邏輯
+  return {
+    status: '處理中',
+    jobId: jobId
+  };
+}
+
+// 佇列背景處理函數
+purchaseQueue.process(async (job) => {
+  const { userId, productId } = job.data;
+  
+  // 2. Redis 快速扣庫存
+  const redisKey = `product:${productId}:qty`;
+  const remaining = await redis.decr(redisKey);
+  
+  if (remaining < 0) {
+    await redis.incr(redisKey);  // 還原
+    throw new Error('庫存不足');
+  }
+  
+  // 3. 樂觀鎖更新 DB（最終一致）
+  const updated = await db.execute(
+    `UPDATE products 
+     SET quantity = quantity - 1, version = version + 1
+     WHERE id = ? AND version = ?`,
+    [productId, job.data.version]
+  );
+  
+  if (updated.affectedRows === 0) {
+    // DB 版本衝突，重試
+    await redis.incr(redisKey);
+    throw new Error('版本衝突，請重試');
+  }
+  
+  // 4. 異步處理支付
+  await processPaymentAsync(userId, productId);
+  
+  return { success: true, orderId: generateOrderId() };
+});
+```
+
+---
+
+## 實戰檢查清單
+
+搭建搶購系統時，別忘了：
+
+### 庫存管理
+- [ ] Redis 設定持久化（RDB 或 AOF）
+- [ ] 定期同步 Redis 庫存到 DB
+- [ ] 賣完後立即停止入隊
+
+### 佇列設定
+- [ ] 佇列長度上限（防止記憶體爆炸）
+- [ ] 失敗重試機制
+- [ ] 佇列監控告警
+
+### 資料一致性
+- [ ] 定期對帳：Redis 庫存 vs DB 庫存
+- [ ] 樂觀鎖重試邏輯
+- [ ] 異常補償（如退貨流程）
+
+### 使用者體驗
+- [ ] 佇列排位提示
+- [ ] 訂單狀態查詢 API
+- [ ] 失敗時的補償方案
+
+---
+
+## 總結
+
+| 技術 | 用途 | 優點 | 缺點 |
+|------|------|------|------|
+| **樂觀鎖** | 版本檢查，防止超賣 | 簡單、高效 | 衝突時需重試 |
+| **Redis 原子性** | 快速扣庫存 | 超快、原子 | 需持久化、有延遲 |
+| **佇列** | 削峰填谷、限流 | 穩定、容錯 | 使用者等待 |
+
+**最佳實踐**：三招合用
+1. 佇列先把請求排隊
+2. Redis 快速扣庫存
+3. DB 樂觀鎖持久化
+
+這樣就能撐過任何規模的搶購活動！🚀
