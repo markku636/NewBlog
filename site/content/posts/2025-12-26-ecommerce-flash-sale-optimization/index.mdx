@@ -42,7 +42,138 @@ t4                            扣庫存 → -1 件 ❌ 超賣！
 
 ---
 
-## 方案 1：樂觀鎖（Optimistic Lock）
+## 方案 1：悲觀鎖（Pessimistic Lock）
+
+在講樂觀鎖之前，先快速補一下「悲觀鎖」這個經典做法，很多舊系統或金流相關系統都還是用這一套。
+
+### 核心概念
+
+所謂 **悲觀鎖**，就是「我先假設一定會衝突，所以乾脆一開始就鎖起來」。
+
+簡化流程會像這樣：
+
+1. 開啟交易（`BEGIN TRANSACTION`）。
+2. `SELECT ... FOR UPDATE` 把那筆商品資料鎖起來（別人只能等你用完）。
+3. 檢查庫存是否足夠，如果足夠就更新庫存。
+4. `COMMIT` 提交交易，釋放鎖。
+
+只要你還沒 `COMMIT / ROLLBACK`，其他人就算查同一筆資料也會被「卡住」等你處理完，天生不會超賣，但換來的是「大家都在排隊等資料庫」。
+
+### SQL 範例（以 MySQL 為例）
+
+```sql
+-- 1. 開啟交易
+BEGIN;
+
+-- 2. 讀取並鎖住指定商品的那一列資料
+SELECT id, quantity
+FROM products
+WHERE id = 123
+FOR UPDATE;
+
+-- 3. 檢查庫存是否足夠
+--   （這段通常在應用程式內判斷）
+
+-- 4. 足夠的話，扣庫存
+UPDATE products
+SET quantity = quantity - 1
+WHERE id = 123;
+
+-- 5. 提交交易
+COMMIT;
+```
+
+這裡的關鍵是 `FOR UPDATE`：
+
+- 第一個先拿到鎖的交易可以繼續往下跑；
+- 之後來的人會在 `SELECT ... FOR UPDATE` 那行被卡住，一直等到前一個交易 `COMMIT / ROLLBACK` 釋放鎖。
+
+### C# + Dapper 範例（簡化版）
+
+```csharp
+public async Task<GeneralResult> PurchaseWithPessimisticLock(
+  int productId,
+  IDbConnection connection,
+  IDbTransaction transaction)
+{
+  // Step 1: 先在同一個 Transaction 裡鎖住這筆資料
+  const string selectSql = @"SELECT Id, Quantity
+FROM Products
+WHERE Id = @Id
+FOR UPDATE";
+
+  var product = await connection.QuerySingleAsync<Product>(
+    selectSql,
+    new { Id = productId },
+    transaction
+  );
+
+  if (product.Quantity <= 0)
+  {
+    return new GeneralResult
+    {
+      Success = false,
+      Message = "已售完"
+    };
+  }
+
+  // Step 2: 直接在同一個交易裡扣庫存
+  const string updateSql = @"UPDATE Products
+SET Quantity = Quantity - 1
+WHERE Id = @Id";
+
+  var affectedRows = await connection.ExecuteAsync(
+    updateSql,
+    new { Id = productId },
+    transaction
+  );
+
+  if (affectedRows == 0)
+  {
+    return new GeneralResult
+    {
+      Success = false,
+      Message = "購買失敗"
+    };
+  }
+
+  return new GeneralResult
+  {
+    Success = true,
+    Message = "購買成功（悲觀鎖）"
+  };
+}
+```
+
+> 注意：上面的程式碼假設交易 (`transaction`) 是在外層開好並且控制 `Commit / Rollback`，例如：
+>
+> ```csharp
+> using (var transaction = connection.BeginTransaction())
+> {
+>   var result = await PurchaseWithPessimisticLock(productId, connection, transaction);
+>
+>   if (result.Success)
+>     transaction.Commit();
+>   else
+>     transaction.Rollback();
+> }
+> ```
+
+### 悲觀鎖的優缺點
+
+- **優點**：
+  - 寫法直覺，「先鎖再改」，不容易超賣；
+  - 很適合「真的不能有任何衝突」或「交易金額很大」的情境。
+- **缺點**：
+  - 高併發時，大量交易都在等鎖，延遲飆高；
+  - 鎖住的是資料庫 row / page，所有壓力都集中在 DB；
+  - 鎖用得不好可能產生死鎖（Deadlock），需要小心順序與 timeout 設定。
+
+所以在一般高併發搶購系統裡，悲觀鎖通常不會當成第一選擇，而是「你真的很在意資料不能有一絲誤差」的補充手段；多數情況會改用「樂觀鎖 + Redis + Queue」這種比較能撐流量的組合。
+
+---
+
+## 方案 2：樂觀鎖（Optimistic Lock）
 
 ### 核心概念
 
@@ -148,7 +279,7 @@ public class GeneralResult
 
 ---
 
-## 方案 2：Redis 原子性（Atomic Operation）
+## 方案 3：Redis 原子性（Atomic Operation）
 
 先簡單解釋一下「原子性」：可以把它想成一個動作要嘛整個做完、要嘛完全沒發生，中間不會卡在「做到一半」的奇怪狀態。  
 
@@ -237,7 +368,7 @@ Redis 最大的優點就是快，所有東西都在記憶體裡，指令又是�
 
 ---
 
-## 方案 3：Queue 佇列削峰（Queue-Based Load Shedding）
+## 方案 4：Queue 佇列削峰（Queue-Based Load Shedding）
 
 洪峰來臨時，與其讓所有請求同時進來把伺服器壓爆，不如先丟進 Queue 佇列排隊慢慢處理。
 
