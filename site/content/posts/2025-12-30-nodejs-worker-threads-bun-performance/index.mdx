@@ -204,4 +204,4 @@ if (cluster.isMaster) {
 | Worker Threads | CPU bound 重計算 | 不阻塞主執行緒、可利用多核心 | 需要處理資料序列化 |
 | Cluster | 多請求 Web 服務 | 多 process 分散負載、容錯性高 | 狀態需共用儲存 |
 
-如果你現在也在幫 Uptime Kuma 或其他 Node.js 監控系統加上負載平衡 / Failover，又剛好卡在老機器跑不動，可以試試以上方法。
+如果你現在也在幫其他 Node.js 處理效能問題，又剛好卡在老機器跑不動，可以試試以上方法。
