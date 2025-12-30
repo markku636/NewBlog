@@ -1,0 +1,316 @@
+---
+featured: true
+title: 解決 Node.js 單執行緒效能瓶頸：Worker Threads、Cluster 與 Bun 實戰
+date: 2025-12-30 01:01:01 +0800
+thumbnail: nodejs-worker-threads.jpg
+category: DevOps
+tags: ['Uptime Kuma', 'Node.js', 'Bun', 'Worker Threads', 'Cluster', 'Performance', 'Monitoring']
+description: 在擴充 Uptime Kuma 負載平衡與 Failover 功能時，踩到 Node.js 單執行緒瓶頸，透過 Worker Threads、Cluster 與 Bun 把多核心效能真正吃滿。
+author: Mark Ku
+slug: 2025/12/30/nodejs-worker-threads-bun-performance
+---
+
+## 前言
+
+在幫 **Uptime Kuma** 擴充負載平衡（Load Balancing）與節點切換（Failover）功能的過程中，我意外踩到了一個很實際的效能瓶頸：
+
+同一套程式，在家裡的機器可以穩穩跑 **1000 個監控**，但是放到一台 **13 年前的測試機** 上時，大概 **單一節點跑到 800 個監控就開始頓、反應變慢**。
+
+這也逼得我回頭重新檢查：到底是我寫壞，還是 Node.js 天生的限制？
+
+最後結論是：**兩者都有關係**——一部分是設計可以再切得更細，一部分是 **Node.js 單執行緒的特性** 本來就很容易在這種高頻重計算的情境下卡住。
+
+---
+
+## 為什麼 800 個監控就開始頓？
+
+Uptime Kuma 本身就是一個高頻輪詢（polling）的系統：每個監控 item 都要定期發出請求、判斷成功或失敗、更新狀態，現在又多了一層：
+
+- 根據多個節點的健康度做 **負載平衡**（例如加權輪詢、最少連線數）
+- 當主要節點掛掉時做 **Failover**，把流量切到備援節點
+- 這些邏輯又會 **隨著監控數量成倍增加** 被重複執行
+
+在新一點的 CPU 上，這些重計算還撐得住；但在那台 13 年前的測試機上，**大約 800 個監控** 時，以下現象開始出現：
+
+- 後台 UI 操作有明顯「卡一下」的感覺
+- 定時任務排程延遲，比原本設定的時間晚觸發
+- 整體 CPU 使用率接近單核心吃滿，但其他核心卻閒著
+
+這個「一顆核心滿載、其他核心在發呆」的畫面，直接指向一件事：**Node.js 的單執行緒模型，已經成為瓶頸。**
+
+---
+很多人聽到「Node.js 是單執行緒」時，直覺會以為它一次只能用到一顆 CPU。其實比較正確的說法是：
+
+- 跑 JavaScript 的主執行緒（event loop）只有一條
+- 當 Node.js 要做讀寫檔案、連線網路、查 DNS 這種 I/O 工作時，底層的 libuv 會偷偷開好幾條背景小線（thread pool），幫你同時處理很多 I/O，主線上的 JavaScript 就不用一個一個傻傻等，可以先去忙別的事。
+- 所以只要是「等 I/O」為主的工作（API 呼叫、DB 查詢），Node.js 通常都能跑得很順
+
+問題出在：**但當監控數量很多、輪詢頻率又很高時**，就會出現一堆「需要重複計算」的邏輯一起擠在同一條 event loop 上。這些計算又不是在等 I/O，而是實打實吃 CPU，久了自然就變成效能瓶頸。
+
+結果你會看到這種畫面：
+
+> 雖然機器有 4 核、8 核，但主程式「同一時間」只能吃到其中一顆核心。
+
+要把多核心真的吃滿，就必須把這些「重計算」從主執行緒搬出去，交給別的執行緒或別的 process 處理——這時才會輪到 **Worker Threads、Cluster**，甚至 **Bun** 這些工具出場。
+
+---
+
+## 解法一：降低輪詢頻率（調整 interval）
+
+在高頻輪詢的架構裡，很多「重計算」其實是被輪詢驅動的。直接降低輪詢頻率（interval）可以讓 CPU bound 的邏輯觸發次數下降，進而讓 event loop 壓力減輕。
+
+### 建議做法
+
+- 重要度分級：核心監控維持較短 interval，一般監控拉長。
+- 動態 interval：依健康度、延遲或穩定度自動調整；穩定時拉長、異常時縮短。
+- 加入 jitter：同一分鐘內隨機偏移觸發時間，避免「同時瞬間」大量計算擠爆主執行緒。
+- 後端節流：將批次重計算合併、降頻；避免每次事件都全量重算。
+
+### 取捨
+
+- 反應時間可能變慢，短暫故障較不敏感；可用「異常期縮短 interval」補足。
+- 整體 CPU 壓力與排程延遲會改善，是低風險、低成本的調校方向。
+
+---
+
+## 解法二：改成多節點（水平擴充 Uptime Kuma）
+
+當單機資源有限時，將監控分散到多台節點是更穩健的做法。每個節點只負責一部分監控，狀態透過共用儲存（DB/Redis）統一，前面可加反向代理或任務分配層。
+
+參考：我對多節點/Cluster 的思路與做法整理在這篇文章，可作為延伸閱讀：[Uptime Kuma Cluster 實作筆記](https://blog.markkulab.net/implement-uptime-kuma-cluster-vibe-coding/)
+
+### 實作要點
+
+- 共用儲存：資料庫/Redis 作為單一事實來源，避免節點只放記憶體狀態。
+- 任務分片：用標籤、哈希或佇列將監控分配到不同節點；避免重複監控。
+- 健康監測與接手：節點故障時，任務能被其他節點自動接手（Failover）。
+- 可觀測性：集中化日誌、指標與告警，利於維運與問題定位。
+
+### 效果
+
+- 單機壓力顯著降低，整體吞吐與可用性提升。
+- 故障隔離更好，節點出問題不會拖垮整體服務。
+
+---
+
+## 解法三：把重計算丟給 Worker Threads
+
+> 註：此段為我目前的研究紀錄，尚未在專案中完成實作；內容著重思路與示意，非落地方案。
+
+我研究的做法是 **針對「重計算」本身下手**，把最吃 CPU 的那一塊抽出去，丟給 `worker_threads` 處理。
+
+### 適合丟給 Worker Threads 的東西
+
+- 根據監控結果重新計算各節點的 **權重與健康度**
+- 執行 **複雜的規則判斷**（例如多條件 failover 策略）
+- 對大量監控做 **批次分析 / 排序 / 統計**
+
+概念上就是：主執行緒負責：
+
+- 接收監控結果
+- 排隊 / 分派任務給 worker
+- 接收 worker 算完的結果，更新狀態
+
+而真正重的邏輯，搬去 worker 檔案裡去跑。
+
+### 程式範例
+
+一個簡化版的程式骨架大概像這樣（示意，不是完整程式）：
+
+```javascript
+// main.js
+const { Worker } = require("worker_threads");
+
+function recalcLoadBalancing(monitors) {
+  return new Promise((resolve, reject) => {
+    const worker = new Worker("./recalc-worker.js", {
+      workerData: { monitors },
+    });
+
+    worker.on("message", (result) => resolve(result));
+    worker.on("error", reject);
+    worker.on("exit", (code) => {
+      if (code !== 0) reject(new Error(`Worker exited: ${code}`));
+    });
+  });
+}
+```
+
+```javascript
+// recalc-worker.js
+const { parentPort, workerData } = require("worker_threads");
+
+function heavyRecalc(monitors) {
+  // 在這裡做複雜、吃 CPU 的演算法
+  // 回傳新的節點權重 / 排序結果等等
+  return { /* ... */ };
+}
+
+const result = heavyRecalc(workerData.monitors);
+parentPort.postMessage(result);
+```
+
+這樣一來：
+
+- 主執行緒不再被「一次算 800 個監控的負載」卡死
+- 即使在老舊 CPU 上，UI 頓的感覺會明顯改善
+- 要多吃幾顆核心，只要開多幾個 worker 就好（當然要控制數量）
+
+---
+
+## 解法四：Cluster / 多個 Node process 吃滿多核心
+
+> 註：此段為研究方向與可行性分析，尚未實作於現有服務。
+
+如果你的服務本身是 **多使用者、多請求的 Web API**，除了把重計算抽出去，其實也可以再用 **Cluster / 多 process** 來分散負載。
+
+概念類似：
+
+- 用 `cluster` 或 PM2 把同一個 Node.js 應用跑成多個 process
+- 例如一台 4 核 CPU，就開 4 個 worker process
+- 前面再用一層反向代理（Nginx / HAProxy / Traefik）做負載平衡
+
+### Cluster 範例
+
+```javascript
+const cluster = require("cluster");
+const os = require("os");
+
+if (cluster.isMaster) {
+  const numCPUs = os.cpus().length;
+  console.log(`Master process ${process.pid} is running`);
+  console.log(`Forking ${numCPUs} workers...`);
+
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+
+  cluster.on("exit", (worker, code, signal) => {
+    console.log(`Worker ${worker.process.pid} died, restarting...`);
+    cluster.fork();
+  });
+} else {
+  // Worker process - 執行實際的應用邏輯
+  require("./app.js");
+  console.log(`Worker ${process.pid} started`);
+}
+```
+
+### 注意事項
+
+在 Uptime Kuma 的場景裡比較要小心的是：
+
+- 監控資料、狀態儲存要寫在 **共用的資料庫 / Redis**，不能只放在記憶體
+- 如果是負載平衡 / Failover 的邏輯，最好 **抽象成「服務」**，讓每個 process 都能一致取得結果
+
+這一層做完之後，效果大概是：
+
+- 同一台老機器，**不再只有一顆核心滿載**，而是平均分攤到多個核心
+- 當某個 process 有問題，其他 process 還可以撐著，整體可用性提高
+
+---
+
+## 解法五：引入 Bun 作為高效能 Runtime
+
+> 註：以下內容為研究與試驗思路，尚未在現有系統中正式導入。
+
+除了 Node.js 範圍內的調校（例如 Worker Threads / Cluster），我研究的方向是：**在新的元件上嘗試引入 Bun**。
+
+### Bun 是什麼？
+
+Bun 本質上是一個 **高速的 JavaScript Runtime**，特色大概有：
+
+- JIT / runtime 設計偏向高效能，啟動速度跟執行速度都很快
+- 內建打包器、測試工具、套件管理（`bun install`）等等
+- 對 Node.js API 有一定程度的相容，但不是 100%（這點要特別注意）
+
+### 我的使用策略
+
+我對 Bun 的使用策略不是直接把整個 Uptime Kuma 丟上去跑，而是先把 **「新寫的、可獨立出來的計算或腳本」** 搬過去：
+
+- 某些定期執行的統計 / 報表產生腳本
+- 比較重的批次分析 job
+- 部分可以透過 HTTP / Message Queue 跟主系統溝通的「側車服務」（sidecar）
+
+### Bun 程式範例
+
+```typescript
+// bun-worker.ts
+type Monitor = { id: number; status: "up" | "down"; latency: number };
+
+function recalcWeights(monitors: Monitor[]) {
+  // 這裡照樣是吃 CPU 的計算
+  return monitors.map((m) => ({
+    id: m.id,
+    weight: m.status === "up" ? 1 / (m.latency + 1) : 0,
+  }));
+}
+
+const monitors = JSON.parse(await Bun.file("monitors.json").text());
+const result = recalcWeights(monitors);
+await Bun.write("weights.json", JSON.stringify(result));
+console.log("Recalc done in Bun");
+```
+
+執行：
+
+```bash
+bun run bun-worker.ts
+```
+
+在同樣的硬體上，這種 **純計算 + 檔案 I/O** 的腳本，用 Bun 跑起來的體感會比 Node.js 更輕更快。
+
+### 為什麼不是直接把 Uptime Kuma 全部搬到 Bun？
+
+目前（寫文當下），Bun 對 Node.js 的相容性已經不錯，但：
+
+- 還是有部分內建模組或第三方套件不完全相容
+- Uptime Kuma 的核心程式碼 + 依賴，是以 Node.js 生態為主寫的
+
+所以比較務實的作法是：
+
+- **核心服務**：仍然跑在 Node.js 上（穩定性與相容性優先）
+- **新開發、可獨立的 worker / job / sidecar**：優先考慮用 Bun 實作
+- 未來若官方或社群有更完整的 Bun 支援，再評估整體搬遷
+
+---
+
+## 整體調校後的心得
+
+經過這波調校之後，整體的感覺大概是這樣：
+
+- 在我家的機器上，**1000 個監控依然穩定**
+- 在那台 13 年前的測試機上，**800 個監控不再卡到 UI 明顯頓**，CPU 的使用也分散到多顆核心
+- 重計算搬到 Worker Threads / Bun 之後，主執行緒的 event loop 明顯變得「清爽」
+
+---
+
+## 總結
+
+| 方案 | 適用場景 | 優點 | 缺點 |
+|------|----------|------|------|
+| 降低輪詢頻率（interval） | 高頻輪詢導致壓力 | 減少重計算次數、降低主迴圈負載 | 反應時間變慢、可能漏短暫故障 |
+| 多節點（水平擴充） | 單機資源有限、需要擴展 | 分散負載、故障隔離、易於橫向擴張 | 跨節點同步與配置複雜度提高 |
+| Worker Threads | CPU bound 重計算 | 不阻塞主執行緒、可利用多核心 | 需要處理資料序列化 |
+| Cluster | 多請求 Web 服務 | 多 process 分散負載、容錯性高 | 狀態需共用儲存 |
+| Bun | 新腳本、獨立服務 | 執行速度快、啟動快 | 相容性還不是 100% |
+
+### 重點回顧
+
+1. **先釐清瓶頸是 I/O 還是 CPU**
+   - I/O bound：Node.js 單執行緒優勢很大
+   - CPU bound：一定要想辦法「丟出去」，不然 event loop 遲早被打爆
+
+2. **把重計算抽象成服務 / 任務**
+   - 不要把所有東西都堆在同一支程式裡
+   - worker、cluster、sidecar 都是好選項
+
+3. **善用多核心，不要浪費硬體**
+   - Worker Threads / Cluster 可以把計算分攤到多顆 CPU
+   - 老硬體特別吃這一招，因為單核性能差，但多核加總還可以
+
+4. **Bun 適合作為「新腳本、新服務」的起點**
+   - 不一定要一次把舊系統全部搬過去
+   - 先從可以獨立出來的部分開始，用實際數據說話
+
+如果你現在也在幫 Uptime Kuma 或其他 Node.js 監控系統加上負載平衡 / Failover，又剛好卡在老機器跑不動，可以從這三個方向開始檢查，也許你會跟我一樣，發現原來只是「少利用了幾顆核心」，把它們真正用起來之後，整個系統又重新順起來了。😄
