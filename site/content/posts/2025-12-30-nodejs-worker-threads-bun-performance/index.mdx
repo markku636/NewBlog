@@ -1,6 +1,6 @@
 ---
 featured: true
-title: 解決 Node.js 單執行緒效能瓶頸：Worker Threads、Cluster 與 Bun 實戰
+title: 解決 Node.js 單執行緒效能瓶頸的幾種實戰解法
 date: 2025-12-30 01:01:01 +0800
 thumbnail: nodejs-worker-threads.jpg
 category: DevOps
@@ -26,10 +26,6 @@ slug: 2025/12/30/nodejs-worker-threads-bun-performance
 
 Uptime Kuma 本身就是一個高頻輪詢（polling）的系統：每個監控 item 都要定期發出請求、判斷成功或失敗、更新狀態，現在又多了一層：
 
-- 根據多個節點的健康度做 **負載平衡**（例如加權輪詢、最少連線數）
-- 當主要節點掛掉時做 **Failover**，把流量切到備援節點
-- 這些邏輯又會 **隨著監控數量成倍增加** 被重複執行
-
 在新一點的 CPU 上，這些重計算還撐得住；但在那台 13 年前的測試機上，**大約 800 個監控** 時，以下現象開始出現：
 
 - 後台 UI 操作有明顯「卡一下」的感覺
@@ -43,7 +39,6 @@ Uptime Kuma 本身就是一個高頻輪詢（polling）的系統：每個監控 
 
 - 跑 JavaScript 的主執行緒（event loop）只有一條
 - 當 Node.js 要做讀寫檔案、連線網路、查 DNS 這種 I/O 工作時，底層的 libuv 會偷偷開好幾條背景小線（thread pool），幫你同時處理很多 I/O，主線上的 JavaScript 就不用一個一個傻傻等，可以先去忙別的事。
-- 所以只要是「等 I/O」為主的工作（API 呼叫、DB 查詢），Node.js 通常都能跑得很順
 
 問題出在：**但當監控數量很多、輪詢頻率又很高時**，就會出現一堆「需要重複計算」的邏輯一起擠在同一條 event loop 上。這些計算又不是在等 I/O，而是實打實吃 CPU，久了自然就變成效能瓶頸。
 
@@ -54,6 +49,8 @@ Uptime Kuma 本身就是一個高頻輪詢（polling）的系統：每個監控 
 要把多核心真的吃滿，就必須把這些「重計算」從主執行緒搬出去，交給別的執行緒或別的 process 處理——這時才會輪到 **Worker Threads、Cluster**，甚至 **Bun** 這些工具出場。
 
 ---
+
+在不升級單核 CPU 的前提下，我這邊整理出幾種實際可以落地的解法：
 
 ## 解法一：降低輪詢頻率（調整 interval）
 
