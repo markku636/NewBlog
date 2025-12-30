@@ -103,7 +103,7 @@ Uptime Kuma 本身就是一個高頻輪詢（polling）的系統：每個監控 
 
 Bun 本質上是一個 **高速的 JavaScript Runtime**，特色大概有：
 
-- JIT / runtime 設計偏向高效能，啟動速度跟執行速度都很快
+- JIT / runtime 設計偏向高效能，對啟動與執行效率都有優化
 - 內建打包器、測試工具、套件管理（`bun install`）等等
 - 對 Node.js API 有一定程度的相容，但不是 100%（這點要特別注意）
 
@@ -141,7 +141,11 @@ console.log("Recalc done in Bun");
 bun run bun-worker.ts
 ```
 
-在同樣的硬體上，這種 **純計算 + 檔案 I/O** 的腳本，用 Bun 跑起來的體感會比 Node.js 更輕更快。
+在同樣的硬體上，這種 **純計算 + 檔案 I/O** 的腳本，用 Bun 跑起來的體感會比 Node.js 更輕、更快。
+
+實際把同一支腳本分別用 Node.js 和 Bun 跑過幾輪後，可以明顯感覺到啟動時間縮短、整體反應也更順，只是目前還沒做嚴謹的壓力測試，之後會再找時間把 QPS、延遲等指標量化出來。
+
+同事也提醒我，其實可以把這類腳本直接當成 **跑在 Bun runtime 上的獨立服務**，例如把某些 worker 或 batch job 拆出來用 Bun 啟動，再透過 HTTP 或 Message Queue 跟主系統交換資料，先把重計算搬到 Bun 上跑，主系統仍維持在穩定的 Node.js runtime。
 
 ### 為什麼不是直接把 Uptime Kuma 全部搬到 Bun？
 
