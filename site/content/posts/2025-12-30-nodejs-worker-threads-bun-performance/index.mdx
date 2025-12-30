@@ -12,7 +12,7 @@ slug: 2025/12/30/nodejs-worker-threads-bun-performance
 
 ## 前言
 
-在幫 **Uptime Kuma** 擴充負載平衡（Load Balancing）與節點切換（Failover）功能的過程中，我意外踩到了一個很實際的效能瓶頸：
+在幫 **Uptime Kuma** 擴充負載平衡（Load Balancing）與節點切換（Failover）功能的過程中，我意外踩到了一個Node.Js的效能瓶頸：
 
 同一套程式，在家裡的機器可以穩穩跑 **1000 個監控**，但是放到一台 **13 年前的測試機** 上時，大概 **單一節點跑到 800 個監控就開始頓、反應變慢**。
 
