@@ -79,70 +79,12 @@ Uptime Kuma 本身就是一個高頻輪詢（polling）的系統：每個監控 
 
 ## 解法三：引入 Bun 作為高效能 Runtime
 
-> 註：以下內容為研究與試驗思路，尚未在現有系統中正式導入。
-
-除了 Node.js 範圍內的調校（例如 Worker Threads / Cluster），我研究的方向是：**在新的元件上嘗試引入 Bun**。
-
 ### Bun 是什麼？
-
-Bun 本質上是一個 **高速的 JavaScript Runtime**，特色大概有：
+在和同事討論 Uptime Kuma 的時候，他建議我可以試試 Bun，所以我就順勢往下研究了一下。Bun 本質上是一個主打高效能的 JavaScript Runtime，特色大致有：
 
 - JIT / runtime 設計偏向高效能，對啟動與執行效率都有優化
 - 內建打包器、測試工具、套件管理（`bun install`）等等
 - 對 Node.js API 有一定程度的相容，但不是 100%（這點要特別注意）
-
-### 我的使用策略
-
-我對 Bun 的使用策略不是直接把整個 Uptime Kuma 丟上去跑，而是先把 **「新寫的、可獨立出來的計算或腳本」** 搬過去：
-
-- 某些定期執行的統計 / 報表產生腳本
-- 比較重的批次分析 job
-- 部分可以透過 HTTP / Message Queue 跟主系統溝通的「側車服務」（sidecar）
-
-### Bun 程式範例
-
-```typescript
-// bun-worker.ts
-type Monitor = { id: number; status: "up" | "down"; latency: number };
-
-function recalcWeights(monitors: Monitor[]) {
-  // 這裡照樣是吃 CPU 的計算
-  return monitors.map((m) => ({
-    id: m.id,
-    weight: m.status === "up" ? 1 / (m.latency + 1) : 0,
-  }));
-}
-
-const monitors = JSON.parse(await Bun.file("monitors.json").text());
-const result = recalcWeights(monitors);
-await Bun.write("weights.json", JSON.stringify(result));
-console.log("Recalc done in Bun");
-```
-
-執行：
-
-```bash
-bun run bun-worker.ts
-```
-
-在同樣的硬體上，這種 **純計算 + 檔案 I/O** 的腳本，用 Bun 跑起來的體感會比 Node.js 更輕、更快。
-
-實際把同一支腳本分別用 Node.js 和 Bun 跑過幾輪後，可以明顯感覺到啟動時間縮短、整體反應也更順，只是目前還沒做嚴謹的壓力測試，之後會再找時間把 QPS、延遲等指標量化出來。
-
-同事也提醒我，其實可以把這類腳本直接當成 **跑在 Bun runtime 上的獨立服務**，例如把某些 worker 或 batch job 拆出來用 Bun 啟動，再透過 HTTP 或 Message Queue 跟主系統交換資料，先把重計算搬到 Bun 上跑，主系統仍維持在穩定的 Node.js runtime。
-
-### 為什麼不是直接把 Uptime Kuma 全部搬到 Bun？
-
-目前（寫文當下），Bun 對 Node.js 的相容性已經不錯，但：
-
-- 還是有部分內建模組或第三方套件不完全相容
-- Uptime Kuma 的核心程式碼 + 依賴，是以 Node.js 生態為主寫的
-
-所以比較務實的作法是：
-
-- **核心服務**：仍然跑在 Node.js 上（穩定性與相容性優先）
-- **新開發、可獨立的 worker / job / sidecar**：優先考慮用 Bun 實作
-- 未來若官方或社群有更完整的 Bun 支援，再評估整體搬遷
 
 ---
 
