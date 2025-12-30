@@ -52,7 +52,10 @@ Uptime Kuma 本身就是一個高頻輪詢（polling）的系統：每個監控 
 
 ## 解法一：降低輪詢頻率（調整 interval）
 
+
 在高頻輪詢的架構裡，很多「重計算」其實是被輪詢驅動的。直接降低輪詢頻率（interval）可以讓 CPU bound 的邏輯觸發次數下降，進而讓 event loop 壓力減輕。
+
+
 ---
 
 ## 解法二：改成多節點（水平擴充 Uptime Kuma）
