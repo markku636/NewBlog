@@ -35,7 +35,7 @@ Uptime Kuma 本身就是一個高頻輪詢（polling）的系統：每個監控 
 
 JavaScript 本身是單執行緒，所有同步程式碼都必須依序在 call stack 中執行，一旦在主執行緒裡執行了耗時的同步工作（例如大量計算或死迴圈），整個執行緒就會被 block，其他任務完全無法插隊。  
 
-相對地，像 setTimeout、HTTP 請求這類需要等待的操作，並不會直接佔用 call stack。執行環境會先將它們交給底層 API（或 libuv）處理，等任務完成後，再把對應的 callback 放進佇列中，等待 event loop 在 call stack 空閒時依序取回並執行。  
+相對地，像 setTimeout、HTTP 請求這類需要等待的操作，並不會直接佔用 call stack。執行環境會先將它們交給底層 API（libuv）處理，等任務完成後，再把對應的 callback 放進佇列中，等待 event loop 在 call stack 空閒時依序取回並執行。  
 
 正因如此，event loop 讓 JavaScript 即使只有一條主執行緒，也能透過非同步機制同時安排大量 I/O 工作，而不會因為等待外部資源就讓整個程式停擺。  
 
