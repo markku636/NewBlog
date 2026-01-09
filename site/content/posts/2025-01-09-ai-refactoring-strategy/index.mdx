@@ -94,7 +94,7 @@ slug: ai-refactoring-strategy
 
 當大多數程式碼是由 AI 產生時，團隊對系統細節的熟悉度通常不會太高。這時就得靠**錯誤狀態碼**和**埋好的 log**當成定位的錨點，來快速縮小問題範圍。
 
-- 主動監控（定期發送 request）：`uptime-kuma`
+- 主動監控（定期發送 request或監控網站服務）：`uptime-kuma`
 - 被動監控（有人使用，發現壞了或慢了）：`Prometheus + Grafana` 或利用`Jaeger`來監控自定義指標
 
 至少要有幾個即時觀測指標：
