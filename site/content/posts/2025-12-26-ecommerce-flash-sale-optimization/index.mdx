@@ -1,6 +1,6 @@
 ---
 featured: true
-title: 電商閃購搶購系統設計：樂觀鎖、Redis 原子性、佇列完整解決方案
+title: 電商閃購搶購系統設計：樂觀鎖、悲觀鎖、Redis 原子性、佇列完整解決方案
 date: 2025-12-26 10:00:00 +0800
 thumbnail: ecommerce-flash-sale-optimization.png
 category: Backend
@@ -359,6 +359,8 @@ async function purchaseWithRedis(productId, quantity = 1) {
 ### 優缺點
 
 Redis 最大的優點就是快，所有東西都在記憶體裡，指令又是原子執行，很適合拿來當庫存、計數器這種「數字型」的前線閘門，大多數情況也不太需要重試。缺點是，資料本身只存在 Redis，如果持久化沒設好，斷電或異常時有遺失風險，而且最後還是得同步回主資料庫，中間會有一點點時間差，要用對場景。
+
+補充：在 .NET 環境若需要在多個應用實例間協調臨界區段（分散式鎖），可考慮採用基於 Redlock 演算法的套件「RedLock.net」，用 Redis 來實作分散式鎖，避免重入與超賣等併發問題。
 
 ---
 
