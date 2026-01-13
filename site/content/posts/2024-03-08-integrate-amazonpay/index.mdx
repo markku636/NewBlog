@@ -252,7 +252,7 @@ export default function TestAmaonPay() {
 
        var client = InitiateClient();
        var request = new CreateCheckoutSessionRequest(
-           checkoutReviewReturnUrl: AppSettingsConstVars.FontendUrl + returnUrl + (isChangePayment ? $"/payments?id={ChangePaymentReferID}" : ""),
+           checkoutReviewReturnUrl: AppSettingsConstVars.FrontendUrl + returnUrl + (isChangePayment ? $"/payments?id={ChangePaymentReferID}" : ""),
            storeId: GeneralPaymentConfig.StoreID
        );
        request.PaymentDetails.CanHandlePendingAuthorization = false;
@@ -370,7 +370,7 @@ private Tuple<string, string> ParseName(string Name)
           returnUrl = "/en/test-payment/?isComplete=true";
        }
 
-       request.WebCheckoutDetails.CheckoutResultReturnUrl = AppSettingsConstVars.FontendUrl + returnUrl;
+       request.WebCheckoutDetails.CheckoutResultReturnUrl = AppSettingsConstVars.FrontendUrl + returnUrl;
 
        var currencyCode = (Currency)Enum.Parse(typeof(Currency), HardCodeKey.BasedCurrency);
 
