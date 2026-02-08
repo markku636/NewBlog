@@ -184,10 +184,7 @@ const AI助手設定 = `
 
 ## 為什麼選 Next.js 來開發？
 
-開發這套系統時，我選了 **Next.js** 這個網頁開發框架。用白話說，它就像是一個「全能工具箱」，可以同時處理：
-
-- **使用者看到的畫面**（前端）
-- **背後處理資料的邏輯**（後端）
+開發這套系統時，我選了 **Next.js** 這個網頁全端開發框架 (React + Node )
 
 ### 好處 1：所有程式碼放在一起
 
@@ -234,7 +231,10 @@ const 結果 = await AI助手.invoke({ input: '列出付費用戶' });
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 ```
 
-## 花小錢買現成模板，省大時間
+P.S. Next.js 採用的是 request-based 的生命週期，每次請求都是獨立執行，因此不適合用來處理長時間的 Job 或大量、複雜的運算任務，這類需求建議交由 Background Worker / Job Queue 來負責。
+以避免影響請求效能與整體系統穩定性。
+
+## 另外，花小錢買現成模板，省大時間
 
 為了加速開發，我買了一個現成的後台模板（[Isomorphic](https://themeforest.net/item/isomorphic-react-redux-admin-dashboard/20262330)），價格約 **台幣 800 元**。
 
