@@ -30,8 +30,8 @@ const Posts = ({ data: { paginatedPosts = {} }, ...props }) => {
   return (
     <Layout {...props}>
       <Seo
-        title='Mark.Ku - 擁有豐富網站開發經驗，直播系統、POS系統、電子商務、平台網站、SEO，專業的網站開發鐵三工程師。'
-        description='Hi, I’m Mark.Ku. 我是一位網頁軟體工程師，我是一位網頁軟體工程師，8年以上豐富網站開發經驗，開發過各種網站，直播系統、POS系統、電子商務、平台網站、SEO、金流串接、Infra 出身，近8年都從事軟體開發，帶過幾次團隊，目前專注於北美及德國市場電商網站開發團隊。'        
+        title='Mark.Ku - 擁有豐富網站開發經驗，直播系統、POS系統、電子商務、平台網站、SEO，專業的軟體開發鐵三工程師。'
+        description='Mark Ku 是一位深耕軟體開發 10 年的解決方案架構師。專長涵蓋跨國電商（北美、德國）、直播系統設計、POS 系統、SEO 優化及金流整合。從 Infra 底層到應用層，具備多次帶隊與大規模團隊協作經驗，提供企業級的高可用性架構設計。'
       />
       <Hero sx={{ bg: `contentBg` }}>
         <HeroComponent {...props} />

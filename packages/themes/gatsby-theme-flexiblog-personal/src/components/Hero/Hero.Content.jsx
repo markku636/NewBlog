@@ -36,7 +36,7 @@ export default () => {
         Software Solution Architecture
       </Heading>
       <Heading variant='h3' sx={styles.specialty}>
-        擁有豐富網站開發經驗，直播系統、POS系統、電子商務、平台網站、SEO，專業的網站開發鐵三工程師。
+        十年磨一劍的資深開發者，專精於大規模平台架構與複雜系統設計，從即時直播技術到電商 POS 生態系，橫跨 Web 開發、SEO 與系統架構，致力於建構高性能、高可擴展性的軟體方案。
       </Heading>
 
       {/* <Box variant='buttons.group'>
