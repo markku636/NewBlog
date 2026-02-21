@@ -33,7 +33,7 @@ export default () => {
         Hi, I'm <Text sx={styles.author}>Mark Ku</Text>.
       </Heading>
       <Heading variant='h1' sx={styles.occupation}>
-        Software Developer
+        Software Solution Architecture
       </Heading>
       <Heading variant='h3' sx={styles.specialty}>
         擁有豐富網站開發經驗，直播系統、POS系統、電子商務、平台網站、SEO，專業的網站開發鐵三工程師。
