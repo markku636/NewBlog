@@ -114,6 +114,73 @@ author: Mark Ku
 - 有限制/風險提醒（PS）
 - 文字可掃描：善用小標題與條列
 
+## 封面圖自動產生（Vertex AI）
+
+撰寫文章時，可使用 Google Vertex AI 自動產生封面圖（thumbnail），流程如下：
+
+### 前置條件
+
+- Vertex AI Service Account JSON（由使用者提供或存於環境變數）
+- Service Account 需有 `Vertex AI User` 角色
+- 專案需啟用 Vertex AI API
+
+### 認證流程
+
+使用 Service Account JSON 透過 JWT 取得 Access Token：
+
+```javascript
+// 1. 用 Service Account 的 private_key 簽署 JWT
+const header = base64url({ alg: 'RS256', typ: 'JWT' });
+const payload = base64url({
+  iss: serviceAccount.client_email,
+  scope: 'https://www.googleapis.com/auth/cloud-platform',
+  aud: 'https://oauth2.googleapis.com/token',
+  iat: now, exp: now + 3600
+});
+const jwt = header + '.' + payload + '.' + sign(header + '.' + payload);
+
+// 2. 用 JWT 交換 Access Token
+POST https://oauth2.googleapis.com/token
+  grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
+  assertion={jwt}
+```
+
+### 可用模型（依優先順序）
+
+| 模型 | API 方法 | 說明 |
+| ---- | -------- | ---- |
+| `imagen-3.0-generate-002` | `predict` | Imagen 3（推薦，穩定） |
+| `gemini-2.0-flash-exp` | `generateContent` | Gemini 2.0 圖片生成 |
+
+### 產生流程
+
+1. **組合 Prompt**：根據文章標題、摘要、關鍵字，組合成圖片描述 prompt
+   - 固定要求：正方形（1:1）、無文字、現代科技風格
+   - 範例：`"A square cover image for a tech blog about [主題]. Modern workspace, blue-purple tones, no text."`
+
+2. **呼叫 Vertex AI**（以 `imagen-3.0-generate-002` 為例）：
+
+```bash
+curl -s "https://us-central1-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/us-central1/publishers/google/models/imagen-3.0-generate-002:predict" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "instances": [{"prompt": "你的 prompt"}],
+    "parameters": {"sampleCount": 1, "aspectRatio": "1:1", "safetySetting": "block_few"}
+  }'
+```
+
+3. **解析回應**：回應中 `predictions[0].bytesBase64Encoded` 為 base64 圖片
+4. **儲存圖片**：解碼 base64，存為 `.png` 到文章目錄
+5. **檔名規則**：封面圖檔名必須與 frontmatter 的 `thumbnail` 欄位一致（含副檔名）
+
+### 注意事項
+
+- Service Account JSON 含敏感金鑰，不可 commit 到 repo
+- 圖片風格建議：藍紫色調、科技感、乾淨簡潔、無文字
+- 若 API 不可用，可沿用現有圖片或請使用者手動提供
+- Vertex AI 不受 Gemini API Free Tier 限制，依 GCP 計費
+
 ## 範例指令（你可以照這種方式回應我）
 ### 範例 1：把筆記變文章
 我說：
